@@ -90,6 +90,21 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
 
+   public function getOperator(
+      $employeeNumber)
+   {
+      $operator = NULL;
+
+      $result = $this->query("SELECT * FROM Operator WHERE EmployeeNumber=" . $employeeNumber . ";");
+
+      if ($row = $result->fetch_assoc())
+      {
+         $operator = $row;
+      }
+
+      return ($operator);
+   }
+
    public function getTimeCards(
       $employeeId,
       $startDate,
@@ -97,10 +112,27 @@ class PPTPDatabase extends MySqlDatabase
    {
    }
 
+   public function newTimeCard(
+      $timeCard)
+   {
+      echo 'newTimeCard';
+
+      $query =
+         "INSERT INTO TimeCard " .
+         "(EmployeeNumber, Date, JobNumber, WCNumber, OPPNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
+         "VALUES " .
+         "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->oppNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
+
+      echo '<br>' . $query . '<br>';
+
+      $result = $this->query($query);
+   }
+
    public function updateTimeCard(
       $id,
       $timeCard)
    {
+      echo 'updateTimeCard';
    }
 }
 

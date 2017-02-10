@@ -6,12 +6,14 @@
 
 require 'database.php';
 
-function editNewPage()
+function selectActionPage()
 {
    echo
 <<<HEREDOC
-   <button type="button" onclick="location.href='timeCard.php?action=';">View/Edit Time Card</button>
-   <button type="button" onclick="location.href='timeCard.php?action=select_operator';">New Time Card</button>
+   <form action="timeCard.php" method="POST">
+      <button type="submit" name="action" value="edit_time_card">View/Edit Time Card</button>
+      <button type="submit" name="action" value="select_operator">New Time Card</button>
+   </form>
 HEREDOC;
 }
 
@@ -25,34 +27,57 @@ function selectOperatorPage()
    {
       $result = $database->getOperators();
 
+      echo '<form action="timeCard.php" method="POST">';
+      echo '<input type="hidden" name="action" value="new_time_card"/>';
+
       // output data of each row
       while($row = $result->fetch_assoc())
       {
          $name = $row["FirstName"] . $row["LastName"];
 
-         echo
-<<<HEREDOC
-         <button type="button" onclick="location.href='timeCard.php?action=new_time_card';">$name</button>
-HEREDOC;
+         $employeeNumber = $row["EmployeeNumber"];
+
+         echo "<button type=\"submit\" name=\"employeeNumber\" value=\"$employeeNumber\">$name</button>";
       }
+
+      echo '</form>';
    }
 }
 
 function newTimeCardPage()
 {
+   $employeeNumber = $_POST['employeeNumber'];
+   $name = NULL;
+
+   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+
+   $database->connect();
+
+   if ($database->isConnected())
+   {
+      if ($operator = $database->getOperator($employeeNumber))
+      {
+         $name = $operator["FirstName"] . " " . $operator["LastName"];
+      }
+   }
+
    echo
 <<<HEREDOC
-   <form action="action_page.php">
+   <form action="timeCard.php" method="POST">
+
+     <input type="hidden" name="action" value="update_time_card"/>
+     <input type="hidden" name="employeeNumber" value="$employeeNumber">
+
      Date:<br>
      <input id="date-input" type="date" name="date">
      <br>
 
      Name:<br>
-     <input type="text" name="name" disabled>
+     <input type="text" name="name" value="$name" disabled>
      <br>
 
      Employee #:<br>
-     <input type="text" name="employeeNumber" value="" disabled>
+     <input type="text" value="$employeeNumber" disabled>
      <br>
 
      Job #:<br>
@@ -68,11 +93,11 @@ function newTimeCardPage()
      <br>
 
      Setup time:<br>
-     <input name="setupTime" type="time" min="0:00" max="100:59">
+     <input name="setupTime" type="number" min="1" max="8">
      <br>
 
      Run time:<br>
-     <input name="runTime" type="time" min="0:00" max="100:59">
+     <input name="runTime" type="number" min="1" max="8">
      <br>
 
      Pan count:<br>
@@ -80,7 +105,7 @@ function newTimeCardPage()
      <br>
 
      Good part count:<br>
-     <input type="number" name="goodCount" min="1" max="10000">
+     <input type="number" name="partsCount" min="1" max="10000">
      <br>
 
      Scrap part count:<br>
@@ -118,12 +143,66 @@ function newTimeCardPage()
 HEREDOC;
 }
 
+function updateTimeCardPage()
+{
+   $success = false;
+
+   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+
+   $database->connect();
+
+   if ($database->isConnected())
+   {
+      $timeCard = new stdClass();
+
+      $timeCard->date = $_POST['date'];
+      $timeCard->employeeNumber = $_POST['employeeNumber'];
+      $timeCard->jobNumber = $_POST['jobNumber'];
+      $timeCard->wcNumber = $_POST['wcNumber'];
+      $timeCard->oppNumber = $_POST['oppNumber'];
+      $timeCard->setupTime = $_POST['setupTime'];
+      $timeCard->runTime = $_POST['runTime'];
+      $timeCard->panCount = $_POST['panCount'];
+      $timeCard->partsCount = $_POST['partsCount'];
+      $timeCard->scrapCount = $_POST['scrapCount'];
+      $timeCard->comments = $_POST['comments'];
+
+      if (isset($_POST['timeCardId']))
+      {
+         $database->updateTimeCard($_POST['timeCardId'], $timeCard);
+      }
+      else
+      {
+         $database->newTimeCard($timeCard);
+      }
+
+      $success = true;
+   }
+
+   if ($success)
+   {
+      echo 'Successful operation.<br>';
+   }
+   else
+   {
+      echo 'Unsuccessful operation.<br>';
+   }
+
+   echo '<button type="button" onclick="location.href=\'pptpTools.php\';">Time Cards</button>';
+}
+
 function editTimeCardPage()
 {
    echo "editTimeCardPage";
 }
 
-switch ($_GET['action'])
+$action = 'select_action';
+if (isset($_POST['action']))
+{
+   $action = $_POST['action'];
+}
+
+switch ($action)
 {
    case 'edit_new':
    {
@@ -145,12 +224,20 @@ switch ($_GET['action'])
 
    case 'edit_time_card':
    {
-      deleteTimeCardPage();
+      editTimeCardPage();
       break;
    }
 
+   case 'update_time_card':
+   {
+      updateTimeCardPage();
+      break;
+   }
+
+   case 'select_action':
    default:
    {
+      selectActionPage();
       break;
    }
 }
