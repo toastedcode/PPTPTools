@@ -105,11 +105,29 @@ class PPTPDatabase extends MySqlDatabase
       return ($operator);
    }
 
+   public function getWorkCenters()
+   {
+      $result = $this->query("SELECT * FROM WorkCenter");
+
+      return ($result);
+   }
+
    public function getTimeCards(
-      $employeeId,
+      $employeeNumber,
       $startDate,
       $endDate)
    {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $result = $this->query("SELECT * FROM TimeCard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "';");
+      }
+      else
+      {
+         $result = $this->query("SELECT * FROM TimeCard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "';");
+      }
+
+      return ($result);
    }
 
    public function newTimeCard(
@@ -119,9 +137,9 @@ class PPTPDatabase extends MySqlDatabase
 
       $query =
          "INSERT INTO TimeCard " .
-         "(EmployeeNumber, Date, JobNumber, WCNumber, OPPNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
+         "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
-         "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->oppNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
+         "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
 
       echo '<br>' . $query . '<br>';
 

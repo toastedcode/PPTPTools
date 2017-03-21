@@ -1,0 +1,21 @@
+ <html>
+    <head>
+    <script src='jquery-3.1.1.min.js'></script>
+    <script>
+$('#mybutt').click(function() {
+    $('#' + inFocus).val('the text you want to insert....');
+});
+    </script>
+    </head>
+    <body>
+    <button id='mybutt' class='mybutt'>button1</button>
+    <button id='b2' class='buttonClick'>button2</button>
+    <button id='b3' class='buttonClick'>button3</button>
+    <button id='b4' class='buttonClick'>button4</button>
+    <button id='b5' class='buttonClick'>button5</button><br />
+    Textbox1: <textarea cols="50" rows="10" id="txt1" class='textFocus'></textarea><br />
+    Textbox2: <textarea cols="50" rows="10" id="txt2" class='textFocus'></textarea><br />
+    Textbox3: <textarea cols="50" rows="10" id="txt3" class='textFocus'></textarea>
+
+    </body>
+    </html>
