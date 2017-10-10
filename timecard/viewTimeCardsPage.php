@@ -87,6 +87,7 @@ HEREDOC;
       }
       
       echo "</table>";
+      echo "<input type=\"button\" value=\"Menu\" onclick=\"location.href='../pptptools.php'\"/>";
       echo "<input type=\"button\" value=\"New Timecard\" onclick=\"onNewTimeCard()\"/>";
    }
 }

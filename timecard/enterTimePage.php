@@ -2,33 +2,41 @@
 
 function enterTimePage($timeCardInfo)
 {
+   $setupTimeHour= $timeCardInfo->setupTimeHour;
+   $setupTimeHour= $timeCardInfo->setupTimeMinute;
+   $runTimeHour= $timeCardInfo->runTimeHour;
+   $setupTimeMinute= $timeCardInfo->setupTimeMinute;
+   
    echo
    <<<HEREDOC
+   <script src="timeCard.js"></script>
+   
    <form action="timeCard.php" method="POST">
    
-      <input type="hidden" name="view" value="enter_part_count"/>';
-      <input type="hidden" name="action" value="update_time_card_info"/>';
+      <input type="hidden" name="action" value="update_time_card_info"/>
       
       Setup time (hours):<br>
       <button type="button" onclick="changeSetupTimeHour(-1)">-</button>
-      <input id="setupTimeHour-input" name="setupTimeHour" type="number" min="0" max="10" value="0">
+      <input id="setupTimeHour-input" name="setupTimeHour" type="number" min="0" max="10" value="$setupTimeHour">
       <button type="button" onclick="changeSetupTimeHour(1)">+</button>
       <button type="button" onclick="changeSetupTimeMinute(-15)">-</button>
-      <input id="setupTimeMinute-input" name="setupTimeMinute" type="number" min="0" max="45" value="0">
+      <input id="setupTimeMinute-input" name="setupTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
       <button type="button" onclick="changeSetupTimeMinute(15)"/>+</button>
       <br>
       
       Run time (hours):<br>
       <button type="button" onclick="changeRunTimeHour(-1)">-</button>
-      <input id="runTimeHour-input" name="runTimeHour" type="number" min="1" max="10" value="0">
+      <input id="runTimeHour-input" name="runTimeHour" type="number" min="0" max="10" value="$runTimeHour">
       <button type="button" onclick="changeRunTimeHour(1)">+</button>
       <button type="button" onclick="changeRunTimeMinute(-15)">-</button>
-      <input id="runTimeMinute-input" name="runTimeMinute" type="number" min="0" max="45" value="0">
+      <input id="runTimeMinute-input" name="runTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
       <button type="button" onclick="changeRunTimeMinute(15)">+</button>
       <br>
       
       <br><br>
-      <input type="submit" value="Submit">
+      <button type="button" onclick="onCancel()">Cancel</button>
+      <button type="submit" name="view" value="select_job">Back</button>
+      <button type="submit" name="view" value="enter_part_count">Next</button>
 
    </form>
    

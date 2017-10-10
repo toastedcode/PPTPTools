@@ -11,8 +11,9 @@ function selectOperatorPage($timeCardInfo)
     {
         $result = $database->getOperators();
         
+        echo '<script src="timeCard.js"></script>';
+        
         echo '<form action="timeCard.php" method="POST">';
-        echo '<input type="hidden" name="view" value="select_work_center"/>';
         echo '<input type="hidden" name="action" value="update_time_card_info"/>';
         
         // output data of each row
@@ -27,7 +28,9 @@ function selectOperatorPage($timeCardInfo)
             echo "<input type=\"radio\" name=\"employeeNumber\" value=\"$employeeNumber\"$checked/>$name";
         }
         
-        echo "<button type=\"submit\">Next</button>";
+        echo "<br/>";
+        echo "<button type=\"button\" onclick=\"onCancel()\">Cancel</button>";
+        echo "<button type=\"submit\" name=\"view\" value=\"select_work_center\">Next</button>";
         
         echo '</form>';
     }

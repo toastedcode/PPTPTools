@@ -74,13 +74,17 @@ function getView()
 
 function processAction($action)
 {
-   echo $action;
-   
    switch ($action)
    {
       case 'update_time_card_info':
       {
          updateTimeCardInfo();
+         break;
+      }
+      
+      case 'cancel_time_card':
+      {
+         unset($_SESSION["timeCardInfo"]);
          break;
       }
       
@@ -116,7 +120,6 @@ function processAction($action)
 
 function processView($view)
 {
-   echo $view;
    switch ($view)
    {  
       case 'select_operator':
@@ -151,7 +154,18 @@ function processView($view)
       
       case 'view_time_card':
       {
-         viewTimeCardPage($_SESSION['timeCardInfo']);
+         $timeCardInfo = new TimeCardInfo();
+         
+         if (isset($_POST['timeCardId']))
+         {
+            $timeCardInfo = getTimeCardInfo($_POST['timeCardId']);
+         }
+         else
+         {
+            $timeCardInfo = $_SESSION['timeCardInfo'];
+         }
+         
+         viewTimeCardPage($timeCardInfo);
          break;
       }
       
@@ -233,6 +247,39 @@ function updateTimeCardInfo()
    }
 }
 
+function getTimeCardInfo($timeCardId)
+{
+   $timeCardInfo = new TimeCardInfo();
+   
+   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+   
+   $database->connect();
+   
+   if ($database->isConnected())
+   {
+      $result = $database->getTimeCard($timeCardId);
+      
+      $timeCard = $result->fetch_assoc();
+      
+      $timeCardInfo = new TimeCardInfo();
+      $timeCardInfo->timeCardId = $timeCard['TimeCard_ID'];
+      $timeCardInfo->date = $timeCard['Date'];
+      $timeCardInfo->employeeNumber = $timeCard['EmployeeNumber'];
+      $timeCardInfo->jobNumber = $timeCard['JobNumber'];
+      $timeCardInfo->wcNumber = $timeCard['WCNumber'];
+      $timeCardInfo->setupTimeHour = round($timeCard['SetupTime'] / 60);
+      $timeCardInfo->setupTimeMinute = round($timeCard['SetupTime'] % 60);
+      $timeCardInfo->runTimeHour = round($timeCard['RunTime'] / 60);
+      $timeCardInfo->runTimeMinute = round($timeCard['RunTime'] % 60);
+      $timeCardInfo->panCount = $timeCard['PanCount'];
+      $timeCardInfo->partsCount = $timeCard['PartsCount'];
+      $timeCardInfo->scrapCount = $timeCard['ScrapCount'];
+      $timeCardInfo->comments = $timeCard['Comments'];
+   }
+   
+   return ($timeCardInfo);
+}
+
 function deleteTimeCard($timeCardId)
 {
    $result = false;
@@ -301,97 +348,6 @@ processAction(getAction());
 echo "<a href=\"../pptpTools.php?action=logout\">Logout</a><br/>";
 
 processView(getView());
-
-/*
-// Update the timeCardInfo object with any new data from a PUT request.
-updateTimeCardInfo();
-
-// Retrieve the timeCardInfo object out of the $_SESSION store.
-$timeCardInfo = $_SESSION['timeCardInfo'];
-
-// Retrieve the action and view.
-$action = getAction();
-$view = getView();
-
-switch ($action)
-{
-   case 'select_action':
-   {
-      selectActionPage();
-      break;
-   }
-
-   case 'select_operator':
-   {
-      selectOperatorPage($timeCardInfo);
-      break;
-   }
-
-   case 'select_work_center':
-   {
-      selectWorkCenterPage($timeCardInfo);
-      break;
-   }
-
-   case 'select_job':
-   {
-      selectJobPage($timeCardInfo);
-      break;
-   }
-
-   case 'enter_time':
-   {
-      enterTimePage($timeCardInfo);
-      break;
-   }
-
-   case 'enter_part_count':
-   {
-      enterPartCountPage($timeCardInfo);
-      break;
-   }
-
-   case 'new_time_card':
-   {
-      newTimeCardPage($timeCardInfo);
-      break;
-   }
-
-   case 'edit_time_card':
-   {
-      editTimeCardPage($_POST['timeCardId']);
-      break;
-   }
-
-   case 'update_time_card':
-   {
-      updateTimeCardPage($timeCardInfo);
-      break;
-   }
-   
-   case 'view_time_cards':
-   {
-      viewTimeCardsPage();
-      break;
-   }
-   
-   case 'delete_time_card':
-   {
-      $timeCardId = $_POST['timeCardId'];
-      
-      deleteTimeCard($timeCardId);
-      
-      viewTimeCardsPage();
-   }
-
-   case 'select_action':
-   default:
-   {
-      selectActionPage();
-      break;
-   }
-}
-*/
 
 ?>
 

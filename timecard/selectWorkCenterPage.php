@@ -11,8 +11,9 @@ function selectWorkCenterPage($timeCardInfo)
    {
       $result = $database->getWorkCenters();
       
+      echo '<script src="timeCard.js"></script>';
+      
       echo '<form action="timeCard.php" method="POST">';
-      echo '<input type="hidden" name="view" value="select_job"/>';
       echo '<input type="hidden" name="action" value="update_time_card_info"/>';
       
       // output data of each row
@@ -25,7 +26,9 @@ function selectWorkCenterPage($timeCardInfo)
          echo "<input type=\"radio\" name=\"wcNumber\" value=\"$wcNumber\"$checked/>$wcNumber";
       }
       
-      echo "<button type=\"submit\">Next</button>";
+      echo "<button type=\"button\" onclick=\"onCancel()\">Cancel</button>";
+      echo "<button type=\"submit\" name=\"view\" value=\"select_operator\">Back</button>";
+      echo "<button type=\"submit\" name=\"view\" value=\"select_job\">Next</button>";
       
       echo '</form>';
    }
