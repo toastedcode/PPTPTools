@@ -111,6 +111,16 @@ class PPTPDatabase extends MySqlDatabase
 
       return ($result);
    }
+   
+   public function getTimeCard(
+      $timeCardId)
+   {
+      $query = "SELECT * FROM TimeCard WHERE TimeCard_Id = $timeCardId";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
 
    public function getTimeCards(
       $employeeNumber,
@@ -144,13 +154,43 @@ class PPTPDatabase extends MySqlDatabase
       echo '<br>' . $query . '<br>';
 
       $result = $this->query($query);
+      
+      return ($result);
    }
 
    public function updateTimeCard(
       $id,
       $timeCard)
    {
-      echo 'updateTimeCard';
+      $query =
+      "UPDATE TimeCard " .
+      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$timeCard->date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
+      "WHERE TimeCard_Id = $id;";
+      
+      echo '<br>' . $query . '<br>';
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteTimeCard(
+      $timeCardId)
+   {
+      $query = "DELETE FROM TimeCard WHERE TimeCard_Id = $timeCardId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getUser($username)
+   {
+      $query = "SELECT * FROM User WHERE Username = \"$username\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
    }
 }
 

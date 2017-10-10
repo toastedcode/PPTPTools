@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+</head>
+
+<body>
+
+<?php
+
+require_once '../database.php';
+require_once 'keypad.php';
+require 'selectActionPage.php';
+require 'selectOperatorPage.php';
+require 'selectWorkCenterPage.php';
+require 'selectJobPage.php';
+require 'enterTimePage.php';
+require 'enterPartCountPage.php';
+//require 'newTimeCardPage.php';
+//require 'updateTimeCardPage.php';
+require 'viewTimeCardPage.php';
+require 'viewTimeCardsPage.php';
+//require 'editTimeCardPage.php';
+
+class TimeCardInfo
+{
+    public $timeCardId;
+    public $date;
+    public $employeeNumber;
+    public $jobNumber;
+    public $wcNumber;
+    public $setupTimeHour = 0;
+    public $setupTimeMinute = 0;
+    public $runTimeHour = 0;
+    public $runTimeMinute = 0;
+    public $panCount = 0;
+    public $partsCount = 0;
+    public $scrapCount = 0;
+    public $comments;
+}
+
+function getAction()
+{
+   $action = '';
+   
+   if (isset($_POST['action']))
+   {
+      $action = $_POST['action'];
+   }
+   else if (isset($_GET['action']))
+   {
+      $action = $_GET['action'];
+   }
+   
+   return ($action);
+}
+
+function getView()
+{
+   $view = '';
+   
+   if (isset($_POST['view']))
+   {
+      $view = $_POST['view'];
+   }
+   else if (isset($_GET['view']))
+   {
+      $view = $_GET['view'];
+   }
+   
+   return ($view);
+}
+
+function processAction($action)
+{
+   echo $action;
+   
+   switch ($action)
+   {
+      case 'update_time_card_info':
+      {
+         updateTimeCardInfo();
+         break;
+      }
+      
+      case 'new_time_card':
+      {
+         $_SESSION["timeCardInfo"] = new TimeCardInfo();
+         break;
+      }
+      
+      case 'add_time_card':
+      case 'update_time_card':
+      {
+         updateTimeCardInfo();
+         
+         updateTimeCard($_SESSION['timeCardInfo']);
+         
+         $_SESSION["timeCardInfo"] = new TimeCardInfo();
+         break;
+      }
+      
+      case 'delete_time_card':
+      {
+         deleteTimeCard($_POST['timeCardId']);
+         break;
+      }
+      
+      default:
+      {
+         // Unhandled action.
+      }
+   }
+}
+
+function processView($view)
+{
+   echo $view;
+   switch ($view)
+   {  
+      case 'select_operator':
+      {
+         selectOperatorPage($_SESSION['timeCardInfo']);
+         break;
+      }
+         
+      case 'select_work_center':
+      {
+         selectWorkCenterPage($_SESSION['timeCardInfo']);
+         break;
+      }
+         
+      case 'select_job':
+      {
+         selectJobPage($_SESSION['timeCardInfo']);
+         break;
+      }
+         
+      case 'enter_time':
+      {
+         enterTimePage($_SESSION['timeCardInfo']);
+         break;
+      }
+         
+      case 'enter_part_count':
+      {
+         enterPartCountPage($_SESSION['timeCardInfo']);
+         break;
+      }
+      
+      case 'view_time_card':
+      {
+         viewTimeCardPage($_SESSION['timeCardInfo']);
+         break;
+      }
+      
+      case 'view_time_cards':
+      default:
+      {
+         viewTimeCardsPage();
+         break;
+      }
+   }
+}
+
+function updateTimeCardInfo()
+{
+   if (isset($_POST['timeCardId']))
+   {
+      $_SESSION["timeCardInfo"]->timeCardId = $_POST['timeCardId'];
+   }
+   
+   if (isset($_POST['date']))
+   {
+      $_SESSION["timeCardInfo"]->date = $_POST['date'];
+   }
+   
+   if (isset($_POST['employeeNumber']))
+   {
+      echo "SESSION is " . (isset($_SESSION) ? "" : "not") . "set";
+      $_SESSION["timeCardInfo"]->employeeNumber = $_POST['employeeNumber'];
+   }
+   
+   if (isset($_POST['jobNumber']))
+   {
+      $_SESSION["timeCardInfo"]->jobNumber = $_POST['jobNumber'];
+   }
+   
+   if (isset($_POST['wcNumber']))
+   {
+      $_SESSION["timeCardInfo"]->wcNumber = $_POST['wcNumber'];
+   }
+   
+   if (isset($_POST['setupTimeHour']))
+   {
+      $_SESSION["timeCardInfo"]->setupTimeHour = $_POST['setupTimeHour'];
+   }
+   
+   if (isset($_POST['setupTimeMinute']))
+   {
+      $_SESSION["timeCardInfo"]->setupTimeMinute = $_POST['setupTimeMinute'];
+   }
+   
+   if (isset($_POST['runTimeHour']))
+   {
+      $_SESSION["timeCardInfo"]->runTimeHour = $_POST['runTimeHour'];
+   }
+   
+   if (isset($_POST['runTimeMinute']))
+   {
+      $_SESSION["timeCardInfo"]->runTimeMinute = $_POST['runTimeMinute'];
+   }
+   
+   if (isset($_POST['panCount']))
+   {
+      $_SESSION["timeCardInfo"]->panCount = $_POST['panCount'];
+   }
+   
+   if (isset($_POST['partsCount']))
+   {
+      $_SESSION["timeCardInfo"]->partsCount = $_POST['partsCount'];
+   }
+   
+   if (isset($_POST['scrapCount']))
+   {
+      $_SESSION["timeCardInfo"]->scrapCount = $_POST['scrapCount'];
+   }
+   
+   if (isset($_POST['comments']))
+   {
+      $_SESSION["timeCardInfo"]->comments = $_POST['comments'];
+   }
+}
+
+function deleteTimeCard($timeCardId)
+{
+   $result = false;
+   
+   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+   
+   $database->connect();
+   
+   if ($database->isConnected())
+   {
+      $result = $database->deleteTimeCard($timeCardId);
+   }
+   
+   return ($result);
+}
+
+function updateTimeCard($timeCardInfo)
+{
+   $success = false;
+   
+   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+   
+   $database->connect();
+   
+   if ($database->isConnected())
+   {
+      $setupTime = (($timeCardInfo->setupTimeHour * 60) + $timeCardInfo->setupTimeMinute);
+      $runTime = (($timeCardInfo->runTimeHour * 60) + $timeCardInfo->runTimeMinute);
+      
+      $timeCard = new stdClass();
+      
+      $timeCard->date = $timeCardInfo->date;
+      $timeCard->employeeNumber = $timeCardInfo->employeeNumber;
+      $timeCard->jobNumber = $timeCardInfo->jobNumber;
+      $timeCard->wcNumber = $timeCardInfo->wcNumber;
+      $timeCard->setupTime = $setupTime;
+      $timeCard->runTime = $runTime;
+      $timeCard->panCount = $timeCardInfo->panCount;
+      $timeCard->partsCount = $timeCardInfo->partsCount;
+      $timeCard->scrapCount = $timeCardInfo->scrapCount;
+      $timeCard->comments = $timeCardInfo->comments;
+      
+      if ($timeCardInfo->timeCardId != 0)
+      {
+         $database->updateTimeCard($timeCardInfo->timeCardId, $timeCard);
+      }
+      else
+      {
+         $database->newTimeCard($timeCard);
+      }
+      
+      $success = true;
+   }
+   
+   return ($success);
+}
+
+
+// *****************************************************************************
+//                                  BEGIN
+
+session_start();
+
+processAction(getAction());
+
+echo "<a href=\"../pptpTools.php?action=logout\">Logout</a><br/>";
+
+processView(getView());
+
+/*
+// Update the timeCardInfo object with any new data from a PUT request.
+updateTimeCardInfo();
+
+// Retrieve the timeCardInfo object out of the $_SESSION store.
+$timeCardInfo = $_SESSION['timeCardInfo'];
+
+// Retrieve the action and view.
+$action = getAction();
+$view = getView();
+
+switch ($action)
+{
+   case 'select_action':
+   {
+      selectActionPage();
+      break;
+   }
+
+   case 'select_operator':
+   {
+      selectOperatorPage($timeCardInfo);
+      break;
+   }
+
+   case 'select_work_center':
+   {
+      selectWorkCenterPage($timeCardInfo);
+      break;
+   }
+
+   case 'select_job':
+   {
+      selectJobPage($timeCardInfo);
+      break;
+   }
+
+   case 'enter_time':
+   {
+      enterTimePage($timeCardInfo);
+      break;
+   }
+
+   case 'enter_part_count':
+   {
+      enterPartCountPage($timeCardInfo);
+      break;
+   }
+
+   case 'new_time_card':
+   {
+      newTimeCardPage($timeCardInfo);
+      break;
+   }
+
+   case 'edit_time_card':
+   {
+      editTimeCardPage($_POST['timeCardId']);
+      break;
+   }
+
+   case 'update_time_card':
+   {
+      updateTimeCardPage($timeCardInfo);
+      break;
+   }
+   
+   case 'view_time_cards':
+   {
+      viewTimeCardsPage();
+      break;
+   }
+   
+   case 'delete_time_card':
+   {
+      $timeCardId = $_POST['timeCardId'];
+      
+      deleteTimeCard($timeCardId);
+      
+      viewTimeCardsPage();
+   }
+
+   case 'select_action':
+   default:
+   {
+      selectActionPage();
+      break;
+   }
+}
+*/
+
+?>
+
+</body>
+</html>

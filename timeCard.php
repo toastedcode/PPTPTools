@@ -494,6 +494,14 @@ HEREDOC;
    }
 }
 
+function updateSession()
+{
+    if (isset($_POST['action']))
+    {
+        $_SESSION["timeCard"].employeeNumber = $_POST['employeeNumber'];
+    }
+}
+
 $action = 'select_action';
 if (isset($_POST['action']))
 {
