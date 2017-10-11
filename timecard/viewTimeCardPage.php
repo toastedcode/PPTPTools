@@ -21,7 +21,7 @@ function viewTimeCardPage($timeCardInfo)
    <<<HEREDOC
    <script src="timeCard.js"></script>
 
-   <form action="timeCard.php" method="POST">
+   <form id="timeCardForm" action="timeCard.php" method="POST">
    
      <input type="hidden" name="action" value="update_time_card"/>
      <input type="hidden" name="date" value="$date">
@@ -72,10 +72,12 @@ function viewTimeCardPage($timeCardInfo)
       <input type="text" name="comments" value="$timeCardInfo->comments">
       <br>
       
-      <br><br>
-      <button type="submit" name="view" value="enter_part_count">Back</button>
-      <button type="submit" name="view" value="view_time_cards">Save</button>
-      <button type="button" onclick="onCancel()">Cancel</button>
+      <br>
+
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info')">Back</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'save_time_card')">Save</button>
+
    </form>
 HEREDOC;
 }

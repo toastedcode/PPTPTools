@@ -4,7 +4,7 @@ function enterPartCountPage($timeCardInfo)
 {
    $panCount = $timeCardInfo->panCount;
    $partsCount = $timeCardInfo->partsCount;
-   $scrapCount = $timeCardInfo->partsCount;
+   $scrapCount = $timeCardInfo->scrapCount;
    
    echo "<body onload=initKeypad()>";
    
@@ -12,10 +12,8 @@ function enterPartCountPage($timeCardInfo)
    <<<HEREDOC
    <script src="timeCard.js"></script>
 
-   <form action="timeCard.php" method="POST">
+   <form id="timeCardForm" action="timeCard.php" method="POST">
    
-      <input type="hidden" name="action" value="update_time_card_info"/>
-      
       Pan count:<br>
       <input type="number" id="panCount-input" name="panCount" class="keypadInputCapable" min="1" max="30" value="$panCount">
       <br>
@@ -29,9 +27,9 @@ function enterPartCountPage($timeCardInfo)
       <br>
       
       <br><br>
-      <button type="button" onclick="onCancel()">Cancel</button>
-      <button type="submit" name="view" value="enter_time">Back</button>
-      <button type="submit" name="view" value="view_time_card">Next</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'enter_time', 'update_time_card_info')">Back</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_card', 'update_time_card_info')">Next</button>
 
    </form>
    <br><br>

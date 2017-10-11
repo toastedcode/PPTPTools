@@ -12,17 +12,15 @@ function selectJobPage($timeCardInfo)
 <<<HEREDOC
    <script src="timeCard.js"></script>
 
-   <form action="timeCard.php" method="POST">
-   
-      <input type="hidden" name="view" value="enter_time"/>
-      <input type="hidden" name="action" value="update_time_card_info"/>
+   <form id="timeCardForm" action="timeCard.php" method="POST">
    
       Job #:
       <input type="text" id="jobNumber-input" name="jobNumber" class="keypadInputCapable" value="$jobNumber">
 
-      <button type="button" onclick="onCancel()">Cancel</button>
-      <button type="submit" name="view" value="select_work_center">Back</button>
-      <button type="submit" name="view" value="enter_time">Next</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info')">Back</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'enter_time', 'update_time_card_info')">Next</button>
+
    </form>
 
    <script>document.getElementById("jobNumber-input").focus();</script>

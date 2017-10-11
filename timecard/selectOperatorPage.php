@@ -13,8 +13,7 @@ function selectOperatorPage($timeCardInfo)
         
         echo '<script src="timeCard.js"></script>';
         
-        echo '<form action="timeCard.php" method="POST">';
-        echo '<input type="hidden" name="action" value="update_time_card_info"/>';
+        echo '<form id="timeCardForm" action="timeCard.php" method="POST">';
         
         // output data of each row
         while($row = $result->fetch_assoc())
@@ -27,12 +26,16 @@ function selectOperatorPage($timeCardInfo)
             
             echo "<input type=\"radio\" name=\"employeeNumber\" value=\"$employeeNumber\"$checked/>$name";
         }
-        
-        echo "<br/>";
-        echo "<button type=\"button\" onclick=\"onCancel()\">Cancel</button>";
-        echo "<button type=\"submit\" name=\"view\" value=\"select_work_center\">Next</button>";
-        
-        echo '</form>';
+
+        echo
+<<<HEREDOC
+        <br/>
+
+        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
+        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info')">Next</button>
+
+        </form>
+HEREDOC;
     }
 }
 ?>

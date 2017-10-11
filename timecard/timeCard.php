@@ -95,7 +95,7 @@ function processAction($action)
       }
       
       case 'add_time_card':
-      case 'update_time_card':
+      case 'save_time_card':
       {
          updateTimeCardInfo();
          
@@ -192,7 +192,6 @@ function updateTimeCardInfo()
    
    if (isset($_POST['employeeNumber']))
    {
-      echo "SESSION is " . (isset($_SESSION) ? "" : "not") . "set";
       $_SESSION["timeCardInfo"]->employeeNumber = $_POST['employeeNumber'];
    }
    

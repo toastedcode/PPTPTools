@@ -13,8 +13,7 @@ function selectWorkCenterPage($timeCardInfo)
       
       echo '<script src="timeCard.js"></script>';
       
-      echo '<form action="timeCard.php" method="POST">';
-      echo '<input type="hidden" name="action" value="update_time_card_info"/>';
+      echo '<form id="timeCardForm" action="timeCard.php" method="POST">';
       
       // output data of each row
       while($row = $result->fetch_assoc())
@@ -26,11 +25,16 @@ function selectWorkCenterPage($timeCardInfo)
          echo "<input type=\"radio\" name=\"wcNumber\" value=\"$wcNumber\"$checked/>$wcNumber";
       }
       
-      echo "<button type=\"button\" onclick=\"onCancel()\">Cancel</button>";
-      echo "<button type=\"submit\" name=\"view\" value=\"select_operator\">Back</button>";
-      echo "<button type=\"submit\" name=\"view\" value=\"select_job\">Next</button>";
-      
-      echo '</form>';
+      echo
+      <<<HEREDOC
+        <br/>
+        
+        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
+        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_operator', 'update_time_card_info')">Back</button>
+        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info')">Next</button>
+        
+        </form>
+HEREDOC;
    }
 }
 ?>

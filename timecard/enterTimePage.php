@@ -3,18 +3,16 @@
 function enterTimePage($timeCardInfo)
 {
    $setupTimeHour= $timeCardInfo->setupTimeHour;
-   $setupTimeHour= $timeCardInfo->setupTimeMinute;
-   $runTimeHour= $timeCardInfo->runTimeHour;
    $setupTimeMinute= $timeCardInfo->setupTimeMinute;
+   $runTimeHour= $timeCardInfo->runTimeHour;
+   $runTimeMinute= $timeCardInfo->runTimeMinute;
    
    echo
    <<<HEREDOC
    <script src="timeCard.js"></script>
    
-   <form action="timeCard.php" method="POST">
+   <form id="timeCardForm" action="timeCard.php" method="POST">
    
-      <input type="hidden" name="action" value="update_time_card_info"/>
-      
       Setup time (hours):<br>
       <button type="button" onclick="changeSetupTimeHour(-1)">-</button>
       <input id="setupTimeHour-input" name="setupTimeHour" type="number" min="0" max="10" value="$setupTimeHour">
@@ -34,9 +32,9 @@ function enterTimePage($timeCardInfo)
       <br>
       
       <br><br>
-      <button type="button" onclick="onCancel()">Cancel</button>
-      <button type="submit" name="view" value="select_job">Back</button>
-      <button type="submit" name="view" value="enter_part_count">Next</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info')">Back</button>
+      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info')">Next</button>
 
    </form>
    
