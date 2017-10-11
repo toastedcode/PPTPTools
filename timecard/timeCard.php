@@ -91,6 +91,7 @@ function processAction($action)
       case 'new_time_card':
       {
          $_SESSION["timeCardInfo"] = new TimeCardInfo();
+         $_SESSION["date"] = date('Y-m-d');
          break;
       }
       
@@ -165,7 +166,13 @@ function processView($view)
             $timeCardInfo = $_SESSION['timeCardInfo'];
          }
          
-         viewTimeCardPage($timeCardInfo);
+         viewTimeCardPage($timeCardInfo, true);  // read only
+         break;
+      }
+      
+      case 'edit_time_card':
+      {
+         viewTimeCardPage($_SESSION['timeCardInfo'], false);  // editable
          break;
       }
       
