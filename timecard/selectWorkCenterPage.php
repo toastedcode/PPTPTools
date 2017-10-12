@@ -30,8 +30,8 @@ function selectWorkCenterPage($timeCardInfo)
         <br/>
         
         <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
-        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_operator', 'update_time_card_info')">Back</button>
-        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info')">Next</button>
+        <button type="button" onclick="if (validateWorkCenter()){submitForm('timeCardForm', 'timeCard.php', 'select_operator', 'update_time_card_info');};">Back</button>
+        <button type="button" onclick="if (validateWorkCenter()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};">Next</button>
         
         </form>
 HEREDOC;

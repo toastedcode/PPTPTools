@@ -25,11 +25,10 @@ function loginPage()
 <<<HEREDOC
    <form action="pptpTools.php" method="POST">
       <input type="hidden" name="action" value="login">
-      Login
       <br>
       Username:<input type="text" name="username" value="$username"><br>
       Password:<input type="password" name="password" value="$password"><br>
-      <input type="submit" value="Submit">
+      <input type="submit" value="Login">
    </form>
 
 HEREDOC;

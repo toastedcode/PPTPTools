@@ -129,3 +129,114 @@ function submitForm(form, page, view, action)
    
    form.submit();
 }
+
+function validateOperator()
+{
+   radioButtons = document.getElementsByName("employeeNumber"); 
+   
+   var valid = false;
+   
+   for (var i = 0; i < radioButtons.length; i++)
+   {
+      valid |= radioButtons[i].checked;
+   }
+   
+   if (!valid)
+   {
+      alert("Please select an operator.")
+   }
+   
+   return (valid);
+}
+
+function validateWorkCenter()
+{
+   radioButtons = document.getElementsByName("wcNumber"); 
+   
+   var valid = false;
+   
+   for (var i = 0; i < radioButtons.length; i++)
+   {
+      valid |= radioButtons[i].checked;
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a work center.")
+   }
+   
+   return (valid);
+}
+
+function validateJob()
+{
+   var valid = false;
+
+   value = document.getElementById("jobNumber-input").value;
+   
+   valid = !((value == null) || (value == "") || isNaN(value));
+   
+   if (!valid)
+   {
+      alert("Please enter a valid job number.")
+   }
+   
+   return (valid);
+}
+
+function validateTime()
+{
+   var valid = false;
+   
+   hours = document.getElementById("setupTimeHour-input").value;
+   minutes = document.getElementById("setupTimeMinute-input").value;
+   
+   valid = !((hours == 0) && (minutes == 0));
+   
+   if (!valid)
+   {
+      alert("Please enter a valid setup time.")
+   }
+   else
+   {
+      hours = document.getElementById("runTimeHour-input").value;
+      minutes = document.getElementById("runTimeMinute-input").value;
+      
+      valid = !((hours == 0) && (minutes == 0));
+   
+      if (!valid)
+      {
+         alert("Please enter a valid run time.")
+      }
+   }
+   
+   return (valid);
+}
+
+function validatePartCount()
+{
+   var valid = false;
+
+   value = document.getElementById("panCount-input").value;
+   
+   valid = !((value == null) || (value == "") || (value == 0));
+   
+   if (!valid)
+   {
+      alert("Please enter a valid pan count.")
+   }
+   else
+   {
+      value = document.getElementById("partsCount-input").value + 
+              document.getElementById("scrapCount-input").value;
+      
+      valid = (value > 0);
+      
+      if (!valid)
+      {
+         alert("Please enter a valid parts count.")
+      }
+   }
+
+   return (valid);
+}

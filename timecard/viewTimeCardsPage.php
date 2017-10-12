@@ -1,9 +1,45 @@
 <?php
+
+class Filter
+{
+   public $employeeNumber = 0;
+   public $startDate;
+   public $endDate;
+   
+   function __construct()
+   {
+      $this->startDate = date('Y-m-d');
+      $this->endDate = date('Y-m-d');
+   }
+}
+
+function getFilter()
+{
+   $filter = isset($_SESSION['filter']) ? $_SESSION['filter'] : new Filter();
+   
+   if (isset($_POST['startDate']))
+   {
+      $filter->startDate = $_POST['startDate'];
+   }
+   
+   if (isset($_POST['endDate']))
+   {
+      $filter->endDate = $_POST['endDate'];
+   }
+   
+   if (isset($_POST["employeeNumber"]))
+   {
+      $filter->employeeNumber = $_POST['employeeNumber'];
+   }
+   
+   $_SESSION['filter'] = $filter;
+   
+   return ($filter);
+}
+
 function viewTimeCardsPage()
 {
-   $employeeNumber = isset($_POST['employeeNumber']) ? $_POST['employeeNumber'] : 0;
-   $startDate = isset($_POST['startDate']) ? $_POST['startDate'] : date('Y-m-d');
-   $endDate = isset($_POST['endDate']) ? $_POST['endDate'] : date('Y-m-d');
+   $filter = getFilter();
    
    $database = new PPTPDatabase("localhost", "root", "", "pptp");
    
@@ -13,11 +49,11 @@ function viewTimeCardsPage()
    {
       $result = $database->getOperators();
       
-      $selected = ($employeeNumber == 0) ? "selected" : "";
+      $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       $options = "<option $selected value=0>All</option>";
       while($row = $result->fetch_assoc())
       {
-         $selected = ($row["EmployeeNumber"] == $employeeNumber) ? "selected" : "";
+         $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
          $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
       }
       
@@ -29,14 +65,14 @@ function viewTimeCardsPage()
          Employee:
          <select id="employeeNumberInput" name="employeeNumber">$options</select>
          Start Date:
-         <input type="date" id="startDateInput" name="startDate" value="$startDate">
+         <input type="date" id="startDateInput" name="startDate" value="$filter->startDate">
          End Date:
-         <input type="date" id="endDateInput" name="endDate" value="$endDate">
+         <input type="date" id="endDateInput" name="endDate" value="$filter->endDate">
          <input type="submit" value="Filter">
       </form>
 HEREDOC;
       
-      $result = $database->getTimeCards($employeeNumber, $startDate, $endDate);
+      $result = $database->getTimeCards($filter->employeeNumber, $filter->startDate, $filter->endDate);
       
       echo "<table>";
       
