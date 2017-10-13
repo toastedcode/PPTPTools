@@ -1,30 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <!--  Material Design Lite -->
-   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-</head>
-<body>
-
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-  <header class="mdl-layout__header">
-    <div class="mdl-layout__header-row">
-      <!-- Title -->
-      <span class="mdl-layout-title">Pittsburgh Precision Tools</span>
-      <!-- Add spacer, to align navigation to the right -->
-      <div class="mdl-layout-spacer"></div>
-      <!-- Navigation. We hide it in small screens. -->
-      <nav class="mdl-navigation">
-         <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
-      </nav>
-    </div>
-  </header>
-
-   <main class="mdl-layout__content">
-   <div class="page-content">
-
 <?php
 
 require_once 'database.php';
@@ -46,6 +19,32 @@ function loginPage()
 
    echo
 <<<HEREDOC
+
+<!-- Wide card with share menu button -->
+<style>
+.demo-card-wide.mdl-card {
+  width: 512px;
+  margin: auto;
+}
+.demo-card-wide > .mdl-card__title {
+  color: #fff;
+  height: 176px;
+  background: url('./images/splash_00.png') center / cover;
+}
+.demo-card-wide > .mdl-card__menu {
+  color: #fff;
+}
+</style>
+
+   <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+     <div class="mdl-card__title">
+       <h2 class="mdl-card__title-text">Welcome</h2>
+     </div>
+     <div class="mdl-card__supporting-text">
+       Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+       Mauris sagittis pellentesque lacus eleifend lacinia...
+     </div>
+     <div class="mdl-card__actions mdl-card--border">
    <form action="pptpTools.php" method="POST">
       <input type="hidden" name="action" value="login">
       <br>
@@ -54,12 +53,14 @@ function loginPage()
          <label class="mdl-textfield__label" for="username_input">Username</label>
       </div>
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="password_input" class="mdl-textfield__input" type="text" name="password" value="$password">
+         <input id="password_input" class="mdl-textfield__input" type="password" name="password" value="$password">
          <label class="mdl-textfield__label" for="password_input">Password</label>
       </div>
+      <br/>
       <button class="mdl-button mdl-js-button mdl-button--raised">Login</button>
    </form>
-
+     </div>
+   </div>
 HEREDOC;
 }
 
@@ -67,10 +68,28 @@ function selectActionPage()
 {
    echo
 <<<HEREDOC
-   <button type="button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">Time Cards</button>
-   <button type="button" onclick="location.href='panTickets.html';">Pan Tickets</button>
-   <button type="button" onclick="location.href='partsWasher.html';">Parts Washer Log</button>
-   <button type="button" onclick="location.href='productionSummary';">Production Summary</button>
+   <!-- Wide card with share menu button -->
+   <style>
+   .select-action-card {
+     width: 512px;
+     margin: auto;
+   }
+   .select-action-card > .mdl-card__title {
+     height: 176px;
+   }
+   </style>
+
+   <div class="select-action-card mdl-card mdl-shadow--2dp">
+     <div class="mdl-card__title">
+       <h2 class="mdl-card__title-text">Select an action</h2>
+     </div>
+     <div>
+        <button type="button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">Time Cards</button>
+        <button type="button" onclick="location.href='panTickets.html';">Pan Tickets</button>
+        <button type="button" onclick="location.href='partsWasher.html';">Parts Washer Log</button>
+        <button type="button" onclick="location.href='productionSummary';">Production Summary</button>
+     <div>
+   </div>
 HEREDOC;
 }
 
@@ -114,6 +133,36 @@ function logout()
    unset($_SESSION['username']);
 }
 
+function pageHeader()
+{
+   echo
+   <<<HEREDOC
+   <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row">
+         <!-- Title -->
+         <span class="mdl-layout-title">Pittsburgh Precision Tools</span>
+         <!-- Add spacer, to align navigation to the right -->
+         <div class="mdl-layout-spacer"></div>
+HEREDOC;
+   
+   if (isLoggedIn())
+   {
+      echo
+      <<<HEREDOC
+      <!-- Navigation.-->
+      <nav class="mdl-navigation">
+         <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
+      </nav>
+HEREDOC;
+   }
+   
+   echo
+   <<<HEREDOC
+      </div>
+   </header>
+HEREDOC;
+}
+
 // *****************************************************************************
 //                                  BEGIN
 
@@ -149,6 +198,30 @@ switch ($action)
    }
 }
 
+echo 
+<<<HEREDOC
+<!DOCTYPE html>
+<html>
+
+<head>
+   <!--  Material Design Lite -->
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</head>
+
+<body>
+   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+HEREDOC;
+
+pageHeader();
+
+echo
+<<<HEREDOC
+   <main class="mdl-layout__content">
+      <div class="page-content">
+HEREDOC;
+
 if (isLoggedIn())
 {
    selectActionPage();
@@ -158,9 +231,14 @@ else
    loginPage();
 }
 
-?>
+echo
+<<<HEREDOC
+      </div>
+   </main>
 </div>
-</main>
-</div>
+
 </body>
+
 </html>
+HEREDOC;
+?>
