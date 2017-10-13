@@ -143,15 +143,11 @@ class PPTPDatabase extends MySqlDatabase
    public function newTimeCard(
       $timeCard)
    {
-      echo 'newTimeCard';
-
       $query =
          "INSERT INTO TimeCard " .
          "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
          "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
-
-      echo '<br>' . $query . '<br>';
 
       $result = $this->query($query);
       
@@ -166,9 +162,7 @@ class PPTPDatabase extends MySqlDatabase
       "UPDATE TimeCard " .
       "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$timeCard->date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
       "WHERE TimeCard_Id = $id;";
-      
-      echo '<br>' . $query . '<br>';
-      
+     
       $result = $this->query($query);
       
       return ($result);

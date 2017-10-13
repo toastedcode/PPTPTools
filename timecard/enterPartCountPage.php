@@ -27,9 +27,6 @@ function enterPartCountPage($timeCardInfo)
       <br>
       
       <br><br>
-      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
-      <button type="button" onclick="if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_time', 'update_time_card_info');};">Back</button>
-      <button type="button" onclick="if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'edit_time_card', 'update_time_card_info');};">Next</button>
 
    </form>
    <br><br>
@@ -37,6 +34,10 @@ function enterPartCountPage($timeCardInfo)
 HEREDOC;
    
    insertKeypad();
+   
+   cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+   backButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_time', 'update_time_card_info');};");
+   nextButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'edit_time_card', 'update_time_card_info');};");
    
    echo "</body>";
 }

@@ -10,10 +10,12 @@ function selectOperatorPage($timeCardInfo)
     if ($database->isConnected())
     {
         $result = $database->getOperators();
-        
-        echo '<script src="timeCard.js"></script>';
-        
-        echo '<form id="timeCardForm" action="timeCard.php" method="POST">';
+
+        echo
+<<<HEREDOC
+        <script src="timeCard.js"></script>
+        <form id="timeCardForm" action="timeCard.php" method="POST">
+HEREDOC;
         
         // output data of each row
         while($row = $result->fetch_assoc())
@@ -30,12 +32,11 @@ function selectOperatorPage($timeCardInfo)
         echo
 <<<HEREDOC
         <br/>
-
-        <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
-        <button type="button" onclick="if (validateOperator()) {submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info');};">Next</button>
-
         </form>
 HEREDOC;
+
+        cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+        nextButton("if (validateOperator()) {submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info');};");
     }
 }
 ?>

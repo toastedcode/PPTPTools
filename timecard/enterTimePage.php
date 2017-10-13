@@ -30,11 +30,8 @@ function enterTimePage($timeCardInfo)
       <input id="runTimeMinute-input" name="runTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
       <button type="button" onclick="changeRunTimeMinute(15)">+</button>
       <br>
-      
-      <br><br>
-      <button type="button" onclick="submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')">Cancel</button>
-      <button type="button" onclick="if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};">Back</button>
-      <button type="button" onclick="if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info');};">Next</button>
+
+      <br>
 
    </form>
    
@@ -84,6 +81,11 @@ function enterTimePage($timeCardInfo)
       }
    </script>
 HEREDOC;
+
+   cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+   backButton("if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};");
+   nextButton("if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info');};");
+   
 }
    
 ?>

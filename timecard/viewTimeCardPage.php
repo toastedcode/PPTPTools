@@ -83,24 +83,24 @@ function viewTimeCardPage($timeCardInfo, $readOnly = true)
       
       <br>
 HEREDOC;
-
+   
    if (!$readOnly)
    {
-      echo "<button type=\"button\" onclick=\"submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')\">Cancel</button>";
+      navButton("Cancel", "submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
    }
    
    if ($isNewTimeCard)
    {
-      echo "<button type=\"button\" onclick=\"submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info')\">Back</button>";
+      backButton("submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info');");
    }
    
    if ($readOnly)
    {
-      echo "<button type=\"button\" onclick=\"submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')\">Ok</button>";
+      navButton("Ok", "submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')\">Ok</button>");
    }
    else
    {
-      echo "<button type=\"button\" onclick=\"submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'save_time_card')\">Save</button>";
+      highlightNavButton("Save", "submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'save_time_card');");
    }
 
    echo "</form>";

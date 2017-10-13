@@ -19,7 +19,7 @@
             <div class="mdl-layout-spacer"></div>
             <!-- Navigation. We hide it in small screens. -->
             <nav class="mdl-navigation">
-               <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
+               <a class="mdl-navigation__link" href="../pptpTools.php?action=logout">Logout</a>
             </nav>
          </div>
       </header>
@@ -363,6 +363,55 @@ function updateTimeCard($timeCardInfo)
    return ($success);
 }
 
+function navButton($text, $onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised" onclick="$onClick">
+      $text
+   </button>
+HEREDOC;
+}
+   
+function highlightNavButton($text, $onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="$onClick">
+      $text
+   </button>
+HEREDOC;
+}
+
+function cancelButton($onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised" onclick="$onClick">
+      Cancel
+   </button>
+HEREDOC;
+}
+   
+function backButton($onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised" onclick="$onClick">
+      <i class="material-icons">arrow_back</i>
+   </button>
+HEREDOC;
+}
+
+function nextButton($onClick)
+{
+   echo
+<<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="$onClick">
+      <i class="material-icons">arrow_forward</i>
+   </button>
+HEREDOC;
+}
 
 // *****************************************************************************
 //                                  BEGIN
