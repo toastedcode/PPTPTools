@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html>
+<head>
+   <!--  Material Design Lite -->
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</head>
 <body>
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <!-- Title -->
+      <span class="mdl-layout-title">Pittsburgh Precision Tools</span>
+      <!-- Add spacer, to align navigation to the right -->
+      <div class="mdl-layout-spacer"></div>
+      <!-- Navigation. We hide it in small screens. -->
+      <nav class="mdl-navigation">
+         <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+   <main class="mdl-layout__content">
+   <div class="page-content">
 
 <?php
 
@@ -26,9 +49,15 @@ function loginPage()
    <form action="pptpTools.php" method="POST">
       <input type="hidden" name="action" value="login">
       <br>
-      Username:<input type="text" name="username" value="$username"><br>
-      Password:<input type="password" name="password" value="$password"><br>
-      <input type="submit" value="Login">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="username_input" class="mdl-textfield__input" type="text" name="username" value="$username">
+         <label class="mdl-textfield__label" for="username_input">Username</label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="password_input" class="mdl-textfield__input" type="text" name="password" value="$password">
+         <label class="mdl-textfield__label" for="password_input">Password</label>
+      </div>
+      <button class="mdl-button mdl-js-button mdl-button--raised">Login</button>
    </form>
 
 HEREDOC;
@@ -38,7 +67,6 @@ function selectActionPage()
 {
    echo
 <<<HEREDOC
-   <a href="pptpTools.php?action=logout">Logout</a>
    <button type="button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">Time Cards</button>
    <button type="button" onclick="location.href='panTickets.html';">Pan Tickets</button>
    <button type="button" onclick="location.href='partsWasher.html';">Parts Washer Log</button>
@@ -86,6 +114,9 @@ function logout()
    unset($_SESSION['username']);
 }
 
+// *****************************************************************************
+//                                  BEGIN
+
 session_start();
 
 $action = '';
@@ -128,5 +159,8 @@ else
 }
 
 ?>
+</div>
+</main>
+</div>
 </body>
 </html>

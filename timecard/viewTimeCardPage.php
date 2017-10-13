@@ -36,7 +36,7 @@ function viewTimeCardPage($timeCardInfo, $readOnly = true)
    <form id="timeCardForm" action="timeCard.php" method="POST">
      
       Date:<br>
-      <input type="date" value="$date" disabled>
+      <input type="date" value="$timeCardInfo->date" disabled>
       <br>
      
       Name:<br>

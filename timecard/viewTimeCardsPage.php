@@ -68,29 +68,28 @@ function viewTimeCardsPage()
          <input type="date" id="startDateInput" name="startDate" value="$filter->startDate">
          End Date:
          <input type="date" id="endDateInput" name="endDate" value="$filter->endDate">
-         <input type="submit" value="Filter">
+         <button class="mdl-button mdl-js-button mdl-button--raised">Filter</button>
       </form>
 HEREDOC;
       
       $result = $database->getTimeCards($filter->employeeNumber, $filter->startDate, $filter->endDate);
       
-      echo "<table>";
-      
       // Table header
       echo
 <<<HEREDOC
+      <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
       <tr>
-         <td>Date</td>
-         <td>Name</td>
-         <td>Employee #</td>
-         <td>Work Center #</td>
-         <td>Job #</td>
-         <td>Setup Time</td>
-         <td>Run Time</td>
-         <td>Pan Count</td>
-         <td>Parts Count</td>
-         <td>Scrap Count</td>
-      <tr>
+         <th class="mdl-data-table__cell--non-numeric">Date</th>
+         <th class="mdl-data-table__cell--non-numeric">Name</th>
+         <th class="mdl-data-table__cell--non-numeric">Employee #</th>
+         <th class="mdl-data-table__cell--non-numeric">Work Center #</th>
+         <th class="mdl-data-table__cell--non-numeric">Job #</th>
+         <th class="mdl-data-table__cell--non-numeric">Setup Time</th>
+         <th class="mdl-data-table__cell--non-numeric">Run Time</th>
+         <th class="mdl-data-table__cell--non-numeric">Pan Count</th>
+         <th class="mdl-data-table__cell--non-numeric">Parts Count</th>
+         <th class="mdl-data-table__cell--non-numeric">Scrap Count</th>
+      </tr>
 HEREDOC;
       
       // output data of each row
@@ -116,15 +115,30 @@ HEREDOC;
             <td>{$row['PanCount']}</td>
             <td>{$row['PartsCount']}</td>
             <td>{$row['ScrapCount']}</td>
-            <td><img src="../images/edit_small.png" onclick="onEdit($timeCardId)"/></td>
-            <td><img src="../images/clear_small.png" onclick="onDelete($timeCardId)"/></td>
-         <tr>
+            <td>
+               <!--button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="onEdit($timeCardId)"-->
+                  <i class="material-icons" onclick="onEdit($timeCardId)">mode_edit</i>
+               </button>
+            </td>
+            <td>
+               <i class="material-icons" onclick="onDelete($timeCardId)">delete</i>
+            </td>
+         </tr>
 HEREDOC;
       }
       
-      echo "</table>";
-      echo "<input type=\"button\" value=\"Menu\" onclick=\"location.href='../pptptools.php'\"/>";
-      echo "<input type=\"button\" value=\"New Timecard\" onclick=\"onNewTimeCard()\"/>";
+      echo
+<<<HEREDOC
+      </table>
+      <!--input type="button" value="Menu" onclick="location.href='../pptptools.php'"/-->
+      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="location.href='../pptptools.php'">
+         <i class="material-icons">home</i>
+      </button>
+      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="onNewTimeCard()">
+         <i class="material-icons">add</i>
+      </button>
+      <!--echo "<input type=\"button\" value=\"New Timecard\" onclick=\"onNewTimeCard()\"/-->
+HEREDOC;
    }
 }
 ?>

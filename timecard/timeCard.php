@@ -2,10 +2,30 @@
 <html>
 
 <head>
-<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+   <!--  Material Design Lite -->
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </head>
 
 <body>
+
+   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+         <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">Time Cards</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation">
+               <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
+            </nav>
+         </div>
+      </header>
+
+      <main class="mdl-layout__content">
+         <div class="page-content">
 
 <?php
 
@@ -34,9 +54,9 @@ class TimeCardInfo
     public $setupTimeMinute = 0;
     public $runTimeHour = 0;
     public $runTimeMinute = 0;
-    public $panCount = 0;
-    public $partsCount = 0;
-    public $scrapCount = 0;
+    public $panCount;
+    public $partsCount;
+    public $scrapCount;
     public $comments;
 }
 
@@ -91,7 +111,7 @@ function processAction($action)
       case 'new_time_card':
       {
          $_SESSION["timeCardInfo"] = new TimeCardInfo();
-         $_SESSION["date"] = date('Y-m-d');
+         $_SESSION["timeCardInfo"]->date = date('Y-m-d');
          break;
       }
       
@@ -351,11 +371,13 @@ session_start();
 
 processAction(getAction());
 
-echo "<a href=\"../pptpTools.php?action=logout\">Logout</a><br/>";
-
 processView(getView());
 
 ?>
 
+         </div>
+      </main>
+   </div>
 </body>
+
 </html>
