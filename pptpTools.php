@@ -29,37 +29,48 @@ function loginPage()
 .demo-card-wide > .mdl-card__title {
   color: #fff;
   height: 176px;
-  background: url('./images/splash_00.png') center / cover;
+  background: url('./images/parts.jpg') center / cover;
 }
 .demo-card-wide > .mdl-card__menu {
   color: #fff;
 }
+
+.login-form {
+   margin-left: 50px;
+   margin-bottom: 10px;
+}
 </style>
 
    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
-     <div class="mdl-card__title">
-       <h2 class="mdl-card__title-text">Welcome</h2>
-     </div>
-     <div class="mdl-card__supporting-text">
-       Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-       Mauris sagittis pellentesque lacus eleifend lacinia...
-     </div>
-     <div class="mdl-card__actions mdl-card--border">
-   <form action="pptpTools.php" method="POST">
-      <input type="hidden" name="action" value="login">
-      <br>
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="username_input" class="mdl-textfield__input" type="text" name="username" value="$username">
-         <label class="mdl-textfield__label" for="username_input">Username</label>
+      <div class="mdl-card__title">
+         <!--h2 class="mdl-card__title-text">Welcome</h2-->
       </div>
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="password_input" class="mdl-textfield__input" type="password" name="password" value="$password">
-         <label class="mdl-textfield__label" for="password_input">Password</label>
+      <div class="mdl-card__supporting-text">
+         <b>Pittsburgh Precision Tools</b> is an online production monitoring toolkit that brings
+         together a suite of data entry and analysis software, giving you a clear window into your shops 
+         daily operations. 
+         <br/>
+         <br/>
+         Please login to get started.
       </div>
-      <br/>
-      <button class="mdl-button mdl-js-button mdl-button--raised">Login</button>
-   </form>
-     </div>
+      <div class="mdl-card__actions mdl-card--border">
+         <div class="login-form">
+         <form action="pptpTools.php" method="POST">
+            <input type="hidden" name="action" value="login">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+               <input id="username_input" class="mdl-textfield__input" type="text" name="username" value="$username">
+               <label class="mdl-textfield__label" for="username_input">Username</label>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+               <input id="password_input" class="mdl-textfield__input" type="password" name="password" value="$password">
+               <label class="mdl-textfield__label" for="password_input">Password</label>
+            </div>
+            <div>
+               <button class="mdl-button mdl-js-button mdl-button--raised">Login</button>
+            </div>
+          </form>
+          </div>
+      </div>
    </div>
 HEREDOC;
 }
@@ -70,24 +81,94 @@ function selectActionPage()
 <<<HEREDOC
    <!-- Wide card with share menu button -->
    <style>
+
+   .select-action-card > .mdl-card__title {
+     color: #fff;
+     height: 176px;
+     background: url('./images/parts2.jpg') center / cover;
+   }
+
    .select-action-card {
-     width: 512px;
+     width: 1000px;
      margin: auto;
    }
    .select-action-card > .mdl-card__title {
      height: 176px;
    }
+
+   button {
+     display: inline-block;
+     margin: 0 10px 0 0;
+     padding: 15px 45px;
+     width: 200px;
+     height: 200px;
+     font-size: 18px;
+     line-height: 1.8;
+     appearance: none;
+     box-shadow: none;
+     border-radius: 0;
+   }
+
+   .actionButton {
+      color: #fff;
+      background-color: #6496c8;
+      text-shadow: -1px 1px #417cb8;
+      border: none;
+   }
+
+   .actionButton:hover {
+      background-color: #346392;
+      text-shadow: -1px 1px #27496d;
+   }
+
+   .actionButton:active {
+      background-color: #27496d;
+      text-shadow: -1px 1px #193047;
+   }
+
+   .action-button-icon {
+      font-size: 80px;
+   }
+
+   .button-container {
+      padding-top: 25px;
+      padding-right: 50px;
+      padding-bottom: 50px;
+      padding-left: 25px;
+   }
+
    </style>
 
    <div class="select-action-card mdl-card mdl-shadow--2dp">
      <div class="mdl-card__title">
        <h2 class="mdl-card__title-text">Select an action</h2>
      </div>
-     <div>
-        <button type="button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">Time Cards</button>
-        <button type="button" onclick="location.href='panTickets.html';">Pan Tickets</button>
-        <button type="button" onclick="location.href='partsWasher.html';">Parts Washer Log</button>
-        <button type="button" onclick="location.href='productionSummary';">Production Summary</button>
+      <div class="mdl-card__supporting-text">
+         Select a task to work on. 
+      </div>
+     <div class="button-container">
+        <button type="button" class="actionButton" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
+           <i class="material-icons action-button-icon">schedule</i>
+           <br/>
+           Time Cards
+           <br/><br/>
+        </button>
+        <button type="button" class="actionButton" onclick="location.href='panTickets.html';">
+           <i class="material-icons action-button-icon">receipt</i>
+           <br/>
+           Pan Tickets
+           <br/><br/>
+        </button>
+        <button type="button" class="actionButton" onclick="location.href='partsWasher.html';">
+           <i class="material-icons action-button-icon">opacity</i>
+           <br/>
+           Parts Washer Log
+        </button>
+        <button type="button" class="actionButton" onclick="location.href='productionSummary';">
+           <i class="material-icons action-button-icon">show_chart</i>
+           <br/>
+           Production Summary
+        </button>
      <div>
    </div>
 HEREDOC;
@@ -137,6 +218,11 @@ function pageHeader()
 {
    echo
    <<<HEREDOC
+   <style>
+      .mdl-layout__header {
+         margin-bottom: 100px;
+      }
+   </style>
    <header class="mdl-layout__header">
       <div class="mdl-layout__header-row">
          <!-- Title -->
@@ -198,6 +284,8 @@ switch ($action)
    }
 }
 
+$background = isLoggedIn() ? "" : "./images/PPTPFloor.jpg";
+
 echo 
 <<<HEREDOC
 <!DOCTYPE html>
@@ -208,6 +296,12 @@ echo
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+   <style>
+      .mdl-layout {
+         background: url('$background') center / cover;
+      }
+   </style>
 </head>
 
 <body>

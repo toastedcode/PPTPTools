@@ -10,6 +10,23 @@
 
 <body>
 
+   <style>
+      .mdl-layout {
+         background: #eee;
+      }
+      .mdl-layout__header {
+         margin-bottom: 50px;
+      }
+      
+      .pptpNavButton {
+         height: auto;
+         font-size: 25px;
+         padding: 20px 20px;
+         margin-right: 20px;
+         width: 150px;
+      }
+   </style>
+
    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="mdl-layout__header">
          <div class="mdl-layout__header-row">
@@ -367,7 +384,7 @@ function navButton($text, $onClick)
 {
    echo
    <<<HEREDOC
-   <button class="mdl-button mdl-js-button mdl-button--raised" onclick="$onClick">
+   <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton" onclick="$onClick">
       $text
    </button>
 HEREDOC;
@@ -377,7 +394,7 @@ function highlightNavButton($text, $onClick)
 {
    echo
    <<<HEREDOC
-   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="$onClick">
+   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored pptpNavButton" onclick="$onClick">
       $text
    </button>
 HEREDOC;
@@ -387,7 +404,7 @@ function cancelButton($onClick)
 {
    echo
    <<<HEREDOC
-   <button class="mdl-button mdl-js-button mdl-button--raised" onclick="$onClick">
+   <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton" onclick="$onClick">
       Cancel
    </button>
 HEREDOC;
@@ -397,7 +414,7 @@ function backButton($onClick)
 {
    echo
    <<<HEREDOC
-   <button class="mdl-button mdl-js-button mdl-button--raised" onclick="$onClick">
+   <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton" onclick="$onClick">
       <i class="material-icons">arrow_back</i>
    </button>
 HEREDOC;
@@ -407,7 +424,7 @@ function nextButton($onClick)
 {
    echo
 <<<HEREDOC
-   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="$onClick">
+   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored pptpNavButton" onclick="$onClick">
       <i class="material-icons">arrow_forward</i>
    </button>
 HEREDOC;

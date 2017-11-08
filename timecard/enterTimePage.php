@@ -10,25 +10,53 @@ function enterTimePage($timeCardInfo)
    echo
    <<<HEREDOC
    <script src="timeCard.js"></script>
+
+   <style>
+   .largeTextInput {
+      font-size: 40px;
+   }
+
+   .adjustTimeButton {
+      border-radius: 8px;
+      width: 50px;
+      height: 50px;
+   }
+   </style>
    
    <form id="timeCardForm" action="timeCard.php" method="POST">
    
       Setup time (hours):<br>
-      <button type="button" onclick="changeSetupTimeHour(-1)">-</button>
-      <input id="setupTimeHour-input" name="setupTimeHour" type="number" min="0" max="10" value="$setupTimeHour">
-      <button type="button" onclick="changeSetupTimeHour(1)">+</button>
-      <button type="button" onclick="changeSetupTimeMinute(-15)">-</button>
-      <input id="setupTimeMinute-input" name="setupTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
-      <button type="button" onclick="changeSetupTimeMinute(15)"/>+</button>
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeSetupTimeHour(-1)">
+         <i class="material-icons">remove</i>
+      </button>
+      <input id="setupTimeHour-input" class="largeTextInput" name="setupTimeHour" type="number" min="0" max="10" value="$setupTimeHour">
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeSetupTimeHour(1)">
+         <i class="material-icons">add</i>
+      </button>      
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeSetupTimeMinute(-15)">
+         <i class="material-icons">remove</i>
+      </button>
+      <input id="setupTimeMinute-input" class="largeTextInput" name="setupTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeSetupTimeMinute(15)">
+         <i class="material-icons">add</i>
+      </button>
       <br>
       
       Run time (hours):<br>
-      <button type="button" onclick="changeRunTimeHour(-1)">-</button>
-      <input id="runTimeHour-input" name="runTimeHour" type="number" min="0" max="10" value="$runTimeHour">
-      <button type="button" onclick="changeRunTimeHour(1)">+</button>
-      <button type="button" onclick="changeRunTimeMinute(-15)">-</button>
-      <input id="runTimeMinute-input" name="runTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
-      <button type="button" onclick="changeRunTimeMinute(15)">+</button>
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeRunTimeHour(-1)">
+         <i class="material-icons">remove</i>
+      </button>
+      <input id="runTimeHour-input" class="largeTextInput" name="runTimeHour" type="number" min="0" max="10" value="$runTimeHour">
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeRunTimeHour(1)">
+         <i class="material-icons">add</i>
+      </button>
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeRunTimeMinute(-15)">
+         <i class="material-icons">remove</i>
+      </button>
+      <input id="runTimeMinute-input" class="largeTextInput" name="runTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
+      <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjustTimeButton" onclick="changeRunTimeMinute(15)">
+         <i class="material-icons">add</i>
+      </button>
       <br>
 
       <br>
