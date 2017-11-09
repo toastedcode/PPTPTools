@@ -47,7 +47,7 @@ function loginPage()
       </div>
       <div class="mdl-card__supporting-text">
          <b>Pittsburgh Precision Tools</b> is an online production monitoring toolkit that brings
-         together a suite of data entry and analysis software, giving you a clear window into your shops 
+         together a suite of data entry and analysis software, giving you a clear window into your shop's 
          daily operations. 
          <br/>
          <br/>
@@ -132,9 +132,10 @@ function selectActionPage()
 
    .button-container {
       padding-top: 25px;
-      padding-right: 50px;
-      padding-bottom: 50px;
+      padding-right: 25px;
+      padding-bottom: 25px;
       padding-left: 25px;
+      margin: auto;
    }
 
    </style>
@@ -284,7 +285,7 @@ switch ($action)
    }
 }
 
-$background = isLoggedIn() ? "" : "./images/PPTPFloor.jpg";
+$background = isLoggedIn() ? "#eee" : "url('./images/PPTPFloor.jpg') center / cover";
 
 echo 
 <<<HEREDOC
@@ -299,7 +300,7 @@ echo
 
    <style>
       .mdl-layout {
-         background: url('$background') center / cover;
+         background: $background;
       }
    </style>
 </head>

@@ -15,7 +15,44 @@ function selectJobPage($timeCardInfo)
    .largeTextInput {
       font-size: 40px;
    }
+
+   .select-operator-card {
+      width: 80%;
+      height: 700px;
+      margin: auto;
+      padding: 10px;
+   }
+
+   .nav-div {
+      padding-top: 30px;
+      margin: auto;
+   }
+
+   .inner-div {
+      margin: auto;
+      padding: 20px 20px 20px 20px;
+      display: table;
+   }
+
+   .input-div {
+      display: table-cell;
+      vertical-align: middle;
+      padding-right: 50px;
+
+   }
+
+   .keypad-div {
+      display: table-cell;
+      vertical-align: middle;
+      padding-left: 50px;
+   }
    </style>
+
+   <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+   <div class="inner-div">
+
+   <div class="input-div">
 
    <form id="timeCardForm" action="timeCard.php" method="POST">
    
@@ -34,14 +71,25 @@ function selectJobPage($timeCardInfo)
 
    </form>
 
+   </div>
+
    <script>document.getElementById("jobNumber-input").focus();</script>
 HEREDOC;
    
+   echo "<div class=\"keypad-div\">";
    insertKeypad();
+   echo "</div>";  // keypad-div
+   
+   echo "</div>";  // inner-div
+   
+   echo "<div class=\"nav-div\">";
    
    cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
    backButton("if (validateJob()){submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info');};");
    nextButton("if (validateJob()){submitForm('timeCardForm', 'timeCard.php', 'enter_time', 'update_time_card_info');};");
+   
+   echo "</div>";
+   echo "</div>";
    
    echo "</body>";
 }

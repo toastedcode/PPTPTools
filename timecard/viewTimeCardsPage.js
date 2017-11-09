@@ -78,3 +78,14 @@ function onNewTimeCard()
    document.body.appendChild(form);
    form.submit();  	
 }
+
+function doPageNav(page)
+{
+   form = document.getElementById("timeCardForm");
+   input = document.createElement('input');
+   input.setAttribute('name', 'page');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', page);
+   form.appendChild(input);
+   form.submit();
+}

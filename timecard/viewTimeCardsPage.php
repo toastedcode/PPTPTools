@@ -2,11 +2,42 @@
 
 require_once '../database.php';
 
+class PageNav
+{
+   public static function render($numPages, $currentPage, $maxRenderedPages)
+   {
+      echo "<div class=\"table-nav-div\">";
+      if ($currentPage > 0)
+      {
+         $previousPage= $currentPage - 1;
+         echo "<span class=\"table-nav-span\"><a href=\"#\" onclick=\"doPageNav($previousPage)\">Previous</a></span>";
+      }
+      
+      $firstPage = ($currentPage < $maxRenderedPages / 2) ? 0 : ($currentPage -  ($maxRenderedPages / 2));
+      $lastPage = ($numPages < $maxRenderedPages) ? ($firstPage + $numPages) : ($firstPage + $maxRenderedPages);
+      
+      for ($i = $firstPage; $i < $lastPage; $i++)
+      {
+         $page = $i + 1;
+         echo "<span class=\"table-nav-number-span\"><a href=\"#\" onclick=\"doPageNav($i)\">$page</a></span>";
+      }
+      
+      if ($currentPage < ($numPages - 1))
+      {
+         $nextPage = $currentPage + 1;
+         echo "<span class=\"table-nav-span\"><a href=\"#\" onclick=\"doPageNav($nextPage);\">Next</a></span>";
+      }
+      echo "</div>";
+   }
+}
+
 class Filter
 {
    public $employeeNumber = 0;
    public $startDate;
    public $endDate;
+   public $page = -1;
+   public $itemsPerPage = 0;
    
    function __construct()
    {
@@ -34,6 +65,8 @@ HEREDOC;
          </table>
       </div>
 HEREDOC;
+
+      PageNav::render(3, $filter->page, 10);  // TODO $numberOfPages, $maxRenderedPages
    }
       
    private static function getTableData($filter)
@@ -99,36 +132,43 @@ HEREDOC;
       echo "<tbody>";
       
       // Output data of each row
+      $rowIndex = 0;
       while ($row = $tableData->fetch_assoc())
       {
-         $timeCardId = $row['TimeCard_ID'];
-         
-         $operator = TimeCardTable::getOperator($row['EmployeeNumber']);
-         $name = $operator["FirstName"] . " " . $operator["LastName"];
-         $setupTime = round($row['SetupTime'] / 60) . ":" . ($row['SetupTime'] % 60);
-         $runTime = round($row['RunTime'] / 60) . ":" . ($row['RunTime'] % 60);
-         
-         echo
+         if (($filter->page == -1) || 
+             (floor($rowIndex/ $filter->itemsPerPage) == $filter->page))
+         {
+            $timeCardId = $row['TimeCard_ID'];
+            
+            $operator = TimeCardTable::getOperator($row['EmployeeNumber']);
+            $name = $operator["FirstName"] . " " . $operator["LastName"];
+            $setupTime = round($row['SetupTime'] / 60) . ":" . ($row['SetupTime'] % 60);
+            $runTime = round($row['RunTime'] / 60) . ":" . ($row['RunTime'] % 60);
+            
+            echo
 <<<HEREDOC
-         <tr>
-            <td>{$row['Date']}</td>
-            <td>$name</td>
-            <td>{$row['EmployeeNumber']}</td>
-            <td>{$row['WCNumber']}</td>
-            <td>{$row['JobNumber']}</td>
-            <td>$setupTime</td>
-            <td>$runTime</td>
-            <td>{$row['PanCount']}</td>
-            <td>{$row['PartsCount']}</td>
-            <td>{$row['ScrapCount']}</td>
-            <td>
-               <i class="material-icons" onclick="onEdit($timeCardId)">mode_edit</i>
-            </td>
-            <td>
-               <i class="material-icons" onclick="onDelete($timeCardId)">delete</i>
-            </td>
-         </tr>
+            <tr>
+               <td>{$row['Date']}</td>
+               <td>$name</td>
+               <td>{$row['EmployeeNumber']}</td>
+               <td>{$row['WCNumber']}</td>
+               <td>{$row['JobNumber']}</td>
+               <td>$setupTime</td>
+               <td>$runTime</td>
+               <td>{$row['PanCount']}</td>
+               <td>{$row['PartsCount']}</td>
+               <td>{$row['ScrapCount']}</td>
+               <td>
+                  <i class="material-icons" onclick="onEdit($timeCardId)">mode_edit</i>
+               </td>
+               <td>
+                  <i class="material-icons" onclick="onDelete($timeCardId)">delete</i>
+               </td>
+            </tr>
 HEREDOC;
+         }
+
+         $rowIndex++;
       }
          
       echo "</tbody>";
@@ -152,6 +192,15 @@ function getFilter()
    if (isset($_POST["employeeNumber"]))
    {
       $filter->employeeNumber = $_POST['employeeNumber'];
+   }
+
+   if (isset($_POST["page"]))
+   {
+      $filter->page = $_POST["page"]; 
+   }
+   else
+   {
+      $filter->page = 0;
    }
    
    $_SESSION['filter'] = $filter;
@@ -178,12 +227,14 @@ function getOperators()
 function viewTimeCardsPage()
 {
    $filter = getFilter();
+   $filter->itemsPerPage = 5;
+
    $operators = getOperators();
    
    $selected = ($filter->employeeNumber == 0) ? "selected" : "";
    
    $options = "<option $selected value=0>All</option>";
-   while($row = $operators->fetch_assoc())
+   while ($row = $operators->fetch_assoc())
    {
       $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
       $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
@@ -194,22 +245,65 @@ function viewTimeCardsPage()
       <style>
          .view-time-cards-card {
             width: 80%;
+            height: 700px;
             margin: auto;
             padding: 10px;
          }
          
          .view-time-cards-table-container {
-            height: 500px;
             margin: auto;
+            padding: 20px;
          }
          
          .filter-container {
             margin: auto;
          }
+
+         .table-nav-div {
+            display: inline;
+            margin: auto;
+         }
+
+         .table-nav-span {
+            padding: 20px;
+         }
+
+         .table-nav-number-span {
+            padding: 5px;
+         }
+
+         a {
+            color: #1E7EC8;
+            text-decoration: none; // changed from text-decoration:underline
+         }
+
+         a:hover {
+            text-decoration: underline;
+         }
+
+         .nav-div {
+            padding-top: 30px;
+            margin: auto;
+         }
+
+         .wide-nav-button {
+            width:250px;
+         }
+
+         .inner-div {
+            margin: auto;
+            padding: 20px 20px 20px 20px;
+            display: table;
+         }
+
       </style>
 
       <script src="viewTimeCardsPage.js"></script>
+
       <div class="mdl-card mdl-shadow--2dp view-time-cards-card">
+
+      <div class="inner-div">
+
       <div class="filter-container">
       <form id="timeCardForm" action="timeCard.php" method="POST">
          <input type="hidden" name="view" value="view_time_cards"/>
@@ -225,155 +319,27 @@ function viewTimeCardsPage()
          <button class="mdl-button mdl-js-button mdl-button--raised">Filter</button>
       </form>
       </div>
-      <br/>
+
 HEREDOC;
 
    TimeCardTable::render($filter);
    
    echo
 <<<HEREDOC
-      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="location.href='../pptptools.php'">
-         <i class="material-icons">home</i>
+      </div>
+
+      <div class="nav-div">
+
+      <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton wide-nav-button" onclick="location.href='../pptptools.php'">
+         Main Menu
       </button>
-      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="onNewTimeCard()">
-         <i class="material-icons">add</i>
+
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored pptpNavButton wide-nav-button" onclick="onNewTimeCard()">
+         New Time Card
       </button>
+
+      </div>
       </div>
 HEREDOC;
 }
-
-/*
-function viewTimeCardsPage()
-{
-   $filter = getFilter();
-   
-   $database = new PPTPDatabase("localhost", "root", "", "pptp");
-   
-   $database->connect();
-   
-   if ($database->isConnected())
-   {
-      $result = $database->getOperators();
-      
-      $selected = ($filter->employeeNumber == 0) ? "selected" : "";
-      $options = "<option $selected value=0>All</option>";
-      while($row = $result->fetch_assoc())
-      {
-         $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
-      }
-      
-      echo
-<<<HEREDOC
-      <style>
-         .view-time-cards-card {
-            width: 80%;
-            margin: auto;
-            padding: 10px;
-         }
-
-         .view-time-cards-table-container {
-            overflow-y : scroll;
-            height : 500px;
-            margin: auto;
-         }
-
-         .filter-container {
-            margin: auto;
-         }
-      </style>
-
-      <script src="viewTimeCardsPage.js"></script>
-      <div class="mdl-card mdl-shadow--2dp view-time-cards-card">
-      <div class="filter-container">
-      <form id="timeCardForm" action="timeCard.php" method="POST">
-         <input type="hidden" name="view" value="view_time_cards"/>
-         Employee:
-         <select id="employeeNumberInput" name="employeeNumber">$options</select>
-         &nbsp
-         Start Date:
-         <input type="date" id="startDateInput" name="startDate" value="$filter->startDate">
-         &nbsp
-         End Date:
-         <input type="date" id="endDateInput" name="endDate" value="$filter->endDate">
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised">Filter</button>
-      </form>
-      </div>
-      <br/>
-HEREDOC;
-      
-      $result = $database->getTimeCards($filter->employeeNumber, $filter->startDate, $filter->endDate);
-      
-      // Table header
-      echo
-<<<HEREDOC
-      <div class="view-time-cards-table-container">
-      <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-      <tr>
-         <th class="mdl-data-table__cell--non-numeric">Date</th>
-         <th class="mdl-data-table__cell--non-numeric">Name</th>
-         <th class="mdl-data-table__cell--non-numeric">Employee #</th>
-         <th class="mdl-data-table__cell--non-numeric">Work Center #</th>
-         <th class="mdl-data-table__cell--non-numeric">Job #</th>
-         <th class="mdl-data-table__cell--non-numeric">Setup Time</th>
-         <th class="mdl-data-table__cell--non-numeric">Run Time</th>
-         <th class="mdl-data-table__cell--non-numeric">Pan Count</th>
-         <th class="mdl-data-table__cell--non-numeric">Parts Count</th>
-         <th class="mdl-data-table__cell--non-numeric">Scrap Count</th>
-         <th class="mdl-data-table__cell--non-numeric"></th>
-         <th class="mdl-data-table__cell--non-numeric"></th>
-      </tr>
-HEREDOC;
-      
-      // output data of each row
-      while($row = $result->fetch_assoc())
-      {
-         $timeCardId = $row['TimeCard_ID'];
-         
-         $operator = $database->getOperator($row['EmployeeNumber']);
-         $name = $operator["FirstName"] . " " . $operator["LastName"];
-         $setupTime = round($row['SetupTime'] / 60) . ":" . ($row['SetupTime'] % 60);
-         $runTime = round($row['RunTime'] / 60) . ":" . ($row['RunTime'] % 60);
-         
-         echo
-<<<HEREDOC
-         <tr>
-            <td>{$row['Date']}</td>
-            <td>$name</td>
-            <td>{$row['EmployeeNumber']}</td>
-            <td>{$row['WCNumber']}</td>
-            <td>{$row['JobNumber']}</td>
-            <td>$setupTime</td>
-            <td>$runTime</td>
-            <td>{$row['PanCount']}</td>
-            <td>{$row['PartsCount']}</td>
-            <td>{$row['ScrapCount']}</td>
-            <td>
-               <i class="material-icons" onclick="onEdit($timeCardId)">mode_edit</i>
-            </td>
-            <td>
-               <i class="material-icons" onclick="onDelete($timeCardId)">delete</i>
-            </td>
-         </tr>
-HEREDOC;
-      }
-      
-      echo
-<<<HEREDOC
-      </table>
-      </div>
-      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="location.href='../pptptools.php'">
-         <i class="material-icons">home</i>
-      </button>
-      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="onNewTimeCard()">
-         <i class="material-icons">add</i>
-      </button>
-      </div>
-HEREDOC;
-   }
-}
-*/
-
-//viewTimeCardsPage();
 ?>

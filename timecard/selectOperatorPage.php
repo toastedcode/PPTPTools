@@ -64,7 +64,7 @@ function selectOperatorPage($timeCardInfo)
             display: table;
             margin: 20px 20px 0 0;
             padding: 5px 5px;
-            width: 250px;
+            width: 270px;
             height: 75px;
             font-size: 24px;
             line-height: 1.8;
@@ -93,12 +93,20 @@ function selectOperatorPage($timeCardInfo)
 
          .select-operator-card {
             width: 80%;
+            height: 700px;
             margin: auto;
             padding: 10px;
          }
+
          .nav-div {
             padding-top: 30px;
             margin: auto;
+         }
+
+         .inner-div {
+            margin: auto;
+            padding: 20px 20px 20px 20px;
+            display: table;
          }
          </style>
 
@@ -106,13 +114,15 @@ function selectOperatorPage($timeCardInfo)
 
         <div class="mdl-card mdl-shadow--2dp select-operator-card">
 
+        <div class="inner-div">
+
         <form id="timeCardForm" action="timeCard.php" method="POST">
 HEREDOC;
         
         // output data of each row
         while($row = $result->fetch_assoc())
         {
-            $name = $row["FirstName"] . $row["LastName"];
+            $name = $row["FirstName"] . " " . $row["LastName"];
             
             $employeeNumber = $row["EmployeeNumber"];
             
@@ -124,11 +134,15 @@ HEREDOC;
         echo
 <<<HEREDOC
         </form>
+
+        </div>
 HEREDOC;
 
         echo "<div class=\"nav-div\">";
+        
         cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
         nextButton("if (validateOperator()) {submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info');};");
+       
         echo "</div>";
         echo "</div>";
     }

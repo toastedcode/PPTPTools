@@ -21,7 +21,39 @@ function enterTimePage($timeCardInfo)
       width: 50px;
       height: 50px;
    }
+   
+   .select-operator-card {
+      width: 80%;
+      height: 700px;
+      margin: auto;
+      padding: 10px;
+   }
+
+   .nav-div {
+      padding-top: 30px;
+      margin: auto;
+   }
+
+   .inner-div {
+      margin: auto;
+      padding: 20px 20px 20px 20px;
+      display: table;
+   }
+
+   .input-div {
+      #display: inline-block;
+      display: table-cell;
+      vertical-align: middle;
+      padding-right: 50px;
+
+   }
    </style>
+
+   <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+   <div class="inner-div">
+
+   <div class="input-div">
    
    <form id="timeCardForm" action="timeCard.php" method="POST">
    
@@ -62,6 +94,10 @@ function enterTimePage($timeCardInfo)
       <br>
 
    </form>
+
+   </div>
+
+   </div>
    
    <script>
       function changeSetupTimeHour(delta)
@@ -110,9 +146,14 @@ function enterTimePage($timeCardInfo)
    </script>
 HEREDOC;
 
+   echo "<div class=\"nav-div\">";
+   
    cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
    backButton("if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};");
    nextButton("if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info');};");
+   
+   echo "</div>";
+   echo "</div>";
    
 }
    

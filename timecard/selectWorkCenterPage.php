@@ -27,7 +27,7 @@ function selectWorkCenterPage($timeCardInfo)
             display: table;
             margin: 20px 20px 0 0;
             padding: 5px 5px;
-            width: 250px;
+            width: 150px;
             height: 75px;
             font-size: 24px;
             line-height: 1.8;
@@ -51,11 +51,38 @@ function selectWorkCenterPage($timeCardInfo)
          }
          
          .button-icon {
-            font-size: 80px;
+            font-size: 50px;
+         }
+
+         .select-operator-card {
+            width: 80%;
+            height: 700px;
+            margin: auto;
+            padding: 10px;
+         }
+
+         .nav-div {
+            padding-top: 30px;
+            margin: auto;
+         }
+
+         .inner-div {
+            margin: auto;
+            padding: 20px 20px 20px 20px;
+            display: table;
+         }
+
+         .inner-inner-div {
+            display: table-cell;
          }
          </style>
          
-        <script src="timeCard.js"></script>
+      <script src="timeCard.js"></script>
+
+      <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+      <div class="inner-div">
+
       <form id="timeCardForm" action="timeCard.php" method="POST">
 HEREDOC;
 
@@ -70,11 +97,11 @@ HEREDOC;
          <<<HEREDOC
          <input type="radio" id="$wcNumber" class="operator-input" name="wcNumber" value="$wcNumber" $checked/>
          <label for="$wcNumber">
-      <div type="button" class="operator-select-button">
-         <i class="material-icons button-icon">build</i>
-         <div style="display: table-cell; vertical-align: middle;">$wcNumber</div>
-      </div>
-   </label>
+            <div type="button" class="operator-select-button">
+               <i class="material-icons button-icon">build</i>
+               <div style="display: table-cell; vertical-align: middle;">$wcNumber</div>
+            </div>
+         </label>
 HEREDOC;
       }
       
@@ -82,11 +109,18 @@ HEREDOC;
 <<<HEREDOC
         <br/>
         </form>
+
+        </div>
 HEREDOC;
 
+      echo "<div class=\"nav-div\">";
+      
       cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
       backButton("if (validateWorkCenter()){submitForm('timeCardForm', 'timeCard.php', 'select_operator', 'update_time_card_info');};");
       nextButton("if (validateWorkCenter()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};");
+      
+      echo "</div>";
+      echo "</div>";
    }
 }
 ?>
