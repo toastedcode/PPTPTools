@@ -27,8 +27,8 @@ function selectWorkCenterPage($timeCardInfo)
             display: table;
             margin: 20px 20px 0 0;
             padding: 5px 5px;
-            width: 150px;
-            height: 75px;
+            width: 125px;
+            height: 20px;
             font-size: 24px;
             line-height: 1.8;
             appearance: none;
@@ -51,18 +51,17 @@ function selectWorkCenterPage($timeCardInfo)
          }
          
          .button-icon {
-            font-size: 50px;
+            font-size: 30px;
          }
 
          .select-operator-card {
             width: 80%;
-            height: 700px;
+            height: 600px;
             margin: auto;
             padding: 10px;
          }
 
          .nav-div {
-            padding-top: 30px;
             margin: auto;
          }
 

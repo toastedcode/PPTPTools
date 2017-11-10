@@ -64,9 +64,9 @@ function selectOperatorPage($timeCardInfo)
             display: table;
             margin: 20px 20px 0 0;
             padding: 5px 5px;
-            width: 270px;
-            height: 75px;
-            font-size: 24px;
+            width: 200px;
+            height: 30px;
+            font-size: 18px;
             line-height: 1.8;
             appearance: none;
             box-shadow: none;
@@ -88,18 +88,17 @@ function selectOperatorPage($timeCardInfo)
          }
          
          .button-icon {
-            font-size: 80px;
+            font-size: 50px;
          }
 
          .select-operator-card {
             width: 80%;
-            height: 700px;
+            height: 600px;
             margin: auto;
             padding: 10px;
          }
 
          .nav-div {
-            padding-top: 30px;
             margin: auto;
          }
 

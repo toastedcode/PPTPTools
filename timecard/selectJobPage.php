@@ -18,13 +18,12 @@ function selectJobPage($timeCardInfo)
 
    .select-operator-card {
       width: 80%;
-      height: 700px;
+      height: 600px;
       margin: auto;
       padding: 10px;
    }
 
    .nav-div {
-      padding-top: 30px;
       margin: auto;
    }
 

@@ -6,28 +6,31 @@ class PageNav
 {
    public static function render($numPages, $currentPage, $maxRenderedPages)
    {
-      echo "<div class=\"table-nav-div\">";
-      if ($currentPage > 0)
+      if ($numPages > 1)
       {
-         $previousPage= $currentPage - 1;
-         echo "<span class=\"table-nav-span\"><a href=\"#\" onclick=\"doPageNav($previousPage)\">Previous</a></span>";
+         echo "<div class=\"table-nav-div\">";
+         if ($currentPage > 0)
+         {
+            $previousPage= $currentPage - 1;
+            echo "<span class=\"table-nav-span\"><a href=\"#\" onclick=\"doPageNav($previousPage)\">Previous</a></span>";
+         }
+         
+         $firstPage = ($currentPage < $maxRenderedPages / 2) ? 0 : ($currentPage -  ($maxRenderedPages / 2));
+         $lastPage = ($numPages < $maxRenderedPages) ? ($firstPage + $numPages) : ($firstPage + $maxRenderedPages);
+         
+         for ($i = $firstPage; $i < $lastPage; $i++)
+         {
+            $page = $i + 1;
+            echo "<span class=\"table-nav-number-span\"><a href=\"#\" onclick=\"doPageNav($i)\">$page</a></span>";
+         }
+         
+         if ($currentPage < ($numPages - 1))
+         {
+            $nextPage = $currentPage + 1;
+            echo "<span class=\"table-nav-span\"><a href=\"#\" onclick=\"doPageNav($nextPage);\">Next</a></span>";
+         }
+         echo "</div>";
       }
-      
-      $firstPage = ($currentPage < $maxRenderedPages / 2) ? 0 : ($currentPage -  ($maxRenderedPages / 2));
-      $lastPage = ($numPages < $maxRenderedPages) ? ($firstPage + $numPages) : ($firstPage + $maxRenderedPages);
-      
-      for ($i = $firstPage; $i < $lastPage; $i++)
-      {
-         $page = $i + 1;
-         echo "<span class=\"table-nav-number-span\"><a href=\"#\" onclick=\"doPageNav($i)\">$page</a></span>";
-      }
-      
-      if ($currentPage < ($numPages - 1))
-      {
-         $nextPage = $currentPage + 1;
-         echo "<span class=\"table-nav-span\"><a href=\"#\" onclick=\"doPageNav($nextPage);\">Next</a></span>";
-      }
-      echo "</div>";
    }
 }
 
@@ -53,7 +56,7 @@ class TimeCardTable
       echo
 <<<HEREDOC
       <div class="view-time-cards-table-container">
-         <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp scrollable-table">
+         <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
 HEREDOC;
       
       TimeCardTable::tableHeader();
@@ -66,7 +69,10 @@ HEREDOC;
       </div>
 HEREDOC;
 
-      PageNav::render(3, $filter->page, 10);  // TODO $numberOfPages, $maxRenderedPages
+      $tableData = TimeCardTable::getTableData($filter);
+      $numPages = ceil(mysqli_num_rows($tableData) / $filter->itemsPerPage);
+      
+      PageNav::render($numPages, $filter->page, 10);  // TODO $numberOfPages, $maxRenderedPages
    }
       
    private static function getTableData($filter)
@@ -113,11 +119,11 @@ HEREDOC;
          <th class="mdl-data-table__cell--non-numeric">Employee #</th>
          <th class="mdl-data-table__cell--non-numeric">Work Center #</th>
          <th class="mdl-data-table__cell--non-numeric">Job #</th>
-         <th class="mdl-data-table__cell--non-numeric">Setup Time</th>
-         <th class="mdl-data-table__cell--non-numeric">Run Time</th>
-         <th class="mdl-data-table__cell--non-numeric">Pan Count</th>
-         <th class="mdl-data-table__cell--non-numeric">Parts Count</th>
-         <th class="mdl-data-table__cell--non-numeric">Scrap Count</th>
+         <th class="mdl-data-table__cell--non-numeric largeTableOnly">Setup Time</th>
+         <th class="mdl-data-table__cell--non-numeric largeTableOnly">Run Time</th>
+         <th class="mdl-data-table__cell--non-numeric largeTableOnly">Pan Count</th>
+         <th class="mdl-data-table__cell--non-numeric largeTableOnly">Parts Count</th>
+         <th class="mdl-data-table__cell--non-numeric largeTableOnly">Scrap Count</th>
          <th class="mdl-data-table__cell--non-numeric"></th>
          <th class="mdl-data-table__cell--non-numeric"></th>
       </tr>
@@ -153,11 +159,11 @@ HEREDOC;
                <td>{$row['EmployeeNumber']}</td>
                <td>{$row['WCNumber']}</td>
                <td>{$row['JobNumber']}</td>
-               <td>$setupTime</td>
-               <td>$runTime</td>
-               <td>{$row['PanCount']}</td>
-               <td>{$row['PartsCount']}</td>
-               <td>{$row['ScrapCount']}</td>
+               <td class="largeTableOnly">$setupTime</td>
+               <td class="largeTableOnly">$runTime</td>
+               <td class="largeTableOnly">{$row['PanCount']}</td>
+               <td class="largeTableOnly">{$row['PartsCount']}</td>
+               <td class="largeTableOnly">{$row['ScrapCount']}</td>
                <td>
                   <i class="material-icons" onclick="onEdit($timeCardId)">mode_edit</i>
                </td>
@@ -245,7 +251,7 @@ function viewTimeCardsPage()
       <style>
          .view-time-cards-card {
             width: 80%;
-            height: 700px;
+            height: 600px;
             margin: auto;
             padding: 10px;
          }
@@ -257,10 +263,11 @@ function viewTimeCardsPage()
          
          .filter-container {
             margin: auto;
+            display: table;
          }
 
          .table-nav-div {
-            display: inline;
+            display: table;
             margin: auto;
          }
 
@@ -282,7 +289,6 @@ function viewTimeCardsPage()
          }
 
          .nav-div {
-            padding-top: 30px;
             margin: auto;
          }
 
@@ -294,6 +300,10 @@ function viewTimeCardsPage()
             margin: auto;
             padding: 20px 20px 20px 20px;
             display: table;
+         }
+
+         .largeTableOnly {
+            display: none;
          }
 
       </style>
