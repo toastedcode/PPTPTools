@@ -15,7 +15,7 @@
          background: #eee;
       }
       .mdl-layout__header {
-         margin-bottom: 50px;
+         margin-bottom: 25px;
       }
       
       .pptpNavButton {

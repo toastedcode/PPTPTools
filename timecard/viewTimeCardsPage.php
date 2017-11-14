@@ -251,9 +251,8 @@ function viewTimeCardsPage()
       <style>
          .view-time-cards-card {
             width: 80%;
-            height: 600px;
+            height: 625px;
             margin: auto;
-            padding: 10px;
          }
          
          .view-time-cards-table-container {
@@ -306,11 +305,20 @@ function viewTimeCardsPage()
             display: none;
          }
 
+         .mdl-card__title {
+           height: 50px;
+           background: #f4b942;
+         }
+
       </style>
 
       <script src="viewTimeCardsPage.js"></script>
 
       <div class="mdl-card mdl-shadow--2dp view-time-cards-card">
+
+      <div class="mdl-card__title">
+         <h6 class="mdl-card__title-text">View Time Cards</h6>
+      </div>
 
       <div class="inner-div">
 

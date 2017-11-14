@@ -6,23 +6,6 @@ function operator($employeeNumber, $name, $isChecked)
    $checked = $isChecked ? "checked" : "";
    
    $id = "list-option-" + $employeeNumber;
-   
-   /*
-   echo
-<<<HEREDOC
-   <li class="mdl-list__item">
-      <span class="mdl-list__item-primary-content">
-         <i class="material-icons  mdl-list__item-avatar">person</i>
-         $name
-      </span>
-      <span class="mdl-list__item-secondary-action">
-         <label class="demo-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect" for="$id">
-            <input type="radio" id="$id" class="mdl-radio__button" name="employeeNumber" value="$employeeNumber" $checked/>
-         </label>
-      </span>
-   </li>
-HEREDOC;
-   */
 
    echo
 <<<HEREDOC
@@ -34,8 +17,6 @@ HEREDOC;
       </div>
    </label>
 HEREDOC;
-
-   
 }
 
 function selectOperatorPage($timeCardInfo)
@@ -93,9 +74,8 @@ function selectOperatorPage($timeCardInfo)
 
          .select-operator-card {
             width: 80%;
-            height: 600px;
+            height: 625px;
             margin: auto;
-            padding: 10px;
          }
 
          .nav-div {
@@ -107,11 +87,20 @@ function selectOperatorPage($timeCardInfo)
             padding: 20px 20px 20px 20px;
             display: table;
          }
+
+         .mdl-card__title {
+           height: 50px;
+           background: #f4b942;
+         }
          </style>
 
         <script src="timeCard.js"></script>
 
         <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+         <div class="mdl-card__title">
+            <h6 class="mdl-card__title-text">Select operator</h6>
+         </div>
 
         <div class="inner-div">
 

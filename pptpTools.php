@@ -142,7 +142,7 @@ function selectActionPage()
 
    <div class="select-action-card mdl-card mdl-shadow--2dp">
      <div class="mdl-card__title">
-       <h2 class="mdl-card__title-text">Select an action</h2>
+       <!--h2 class="mdl-card__title-text">Select an action</h2-->
      </div>
       <div class="mdl-card__supporting-text">
          Select a task to work on. 
