@@ -19,9 +19,8 @@ function enterPartCountPage($timeCardInfo)
 
    .select-operator-card {
       width: 80%;
-      height: 600px;
+      height: 625px;
       margin: auto;
-      padding: 10px;
    }
 
    .nav-div {
@@ -48,9 +47,18 @@ function enterPartCountPage($timeCardInfo)
       vertical-align: middle;
       padding-left: 50px;
    }
+
+   .mdl-card__title {
+     height: 50px;
+     background: #f4b942;
+   }
    </style>
 
    <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+   <div class="mdl-card__title">
+      <span class="mdl-card__title-text">Enter part counts</span>
+   </div>
 
    <div class="inner-div">
 

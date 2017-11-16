@@ -24,9 +24,8 @@ function enterTimePage($timeCardInfo)
    
    .select-operator-card {
       width: 80%;
-      height: 600px;
+      height: 625px;
       margin: auto;
-      padding: 10px;
    }
 
    .nav-div {
@@ -44,11 +43,19 @@ function enterTimePage($timeCardInfo)
       display: table-cell;
       vertical-align: middle;
       padding-right: 50px;
+   }
 
+   .mdl-card__title {
+     height: 50px;
+     background: #f4b942;
    }
    </style>
 
    <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+   <div class="mdl-card__title">
+      <span class="mdl-card__title-text">Enter time</span>
+   </div>
 
    <div class="inner-div">
 

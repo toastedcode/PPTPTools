@@ -189,6 +189,10 @@ function getFilter()
    {
       $filter->startDate = $_POST['startDate'];
    }
+   else
+   {
+      // TODO: Yesterday!
+   }
    
    if (isset($_POST['endDate']))
    {

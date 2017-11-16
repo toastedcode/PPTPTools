@@ -56,9 +56,8 @@ function selectWorkCenterPage($timeCardInfo)
 
          .select-operator-card {
             width: 80%;
-            height: 600px;
+            height: 625px;
             margin: auto;
-            padding: 10px;
          }
 
          .nav-div {
@@ -74,11 +73,20 @@ function selectWorkCenterPage($timeCardInfo)
          .inner-inner-div {
             display: table-cell;
          }
+
+         .mdl-card__title {
+           height: 50px;
+           background: #f4b942;
+         }
          </style>
          
       <script src="timeCard.js"></script>
 
       <div class="mdl-card mdl-shadow--2dp select-operator-card">
+
+      <div class="mdl-card__title">
+         <span class="mdl-card__title-text">Select work center</span>
+      </div>
 
       <div class="inner-div">
 
