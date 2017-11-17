@@ -5,27 +5,11 @@
    <!--  Material Design Lite -->
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+   <link rel="stylesheet" type="text/css" href="timeCard.css"/>
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </head>
 
 <body>
-
-   <style>
-      .mdl-layout {
-         background: #eee;
-      }
-      .mdl-layout__header {
-         margin-bottom: 25px;
-      }
-      
-      .pptpNavButton {
-         height: auto;
-         font-size: 25px;
-         padding: 20px 20px;
-         margin-right: 20px;
-         width: 150px;
-      }
-   </style>
 
    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="mdl-layout__header">

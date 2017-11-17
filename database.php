@@ -85,7 +85,7 @@ class PPTPDatabase extends MySqlDatabase
 {
    public function getOperators()
    {
-      $result = $this->query("SELECT * FROM Operator");
+      $result = $this->query("SELECT * FROM Operator ORDER BY LastName ASC");
 
       return ($result);
    }
@@ -107,7 +107,7 @@ class PPTPDatabase extends MySqlDatabase
 
    public function getWorkCenters()
    {
-      $result = $this->query("SELECT * FROM WorkCenter");
+      $result = $this->query("SELECT * FROM WorkCenter ORDER BY WCNumber ASC");
 
       return ($result);
    }
@@ -130,11 +130,11 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $result = $this->query("SELECT * FROM TimeCard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "';");
+         $result = $this->query("SELECT * FROM TimeCard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC;");
       }
       else
       {
-         $result = $this->query("SELECT * FROM TimeCard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "';");
+         $result = $this->query("SELECT * FROM TimeCard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC;");
       }
 
       return ($result);

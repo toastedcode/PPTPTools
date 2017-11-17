@@ -71,27 +71,6 @@ function selectOperatorPage($timeCardInfo)
          .button-icon {
             font-size: 50px;
          }
-
-         .select-operator-card {
-            width: 80%;
-            height: 625px;
-            margin: auto;
-         }
-
-         .nav-div {
-            margin: auto;
-         }
-
-         .inner-div {
-            margin: auto;
-            padding: 20px 20px 20px 20px;
-            display: table;
-         }
-
-         .mdl-card__title {
-           height: 50px;
-           background: #f4b942;
-         }
          </style>
 
         <script src="timeCard.js"></script>

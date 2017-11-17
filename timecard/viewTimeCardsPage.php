@@ -191,7 +191,7 @@ function getFilter()
    }
    else
    {
-      // TODO: Yesterday!
+      $filter->startDate = date('Y-m-d', strtotime(' -1 day'));
    }
    
    if (isset($_POST['endDate']))
@@ -252,69 +252,6 @@ function viewTimeCardsPage()
    
    echo
 <<<HEREDOC
-      <style>
-         .view-time-cards-card {
-            width: 80%;
-            height: 625px;
-            margin: auto;
-         }
-         
-         .view-time-cards-table-container {
-            margin: auto;
-            padding: 20px;
-         }
-         
-         .filter-container {
-            margin: auto;
-            display: table;
-         }
-
-         .table-nav-div {
-            display: table;
-            margin: auto;
-         }
-
-         .table-nav-span {
-            padding: 20px;
-         }
-
-         .table-nav-number-span {
-            padding: 5px;
-         }
-
-         a {
-            color: #1E7EC8;
-            text-decoration: none; // changed from text-decoration:underline
-         }
-
-         a:hover {
-            text-decoration: underline;
-         }
-
-         .nav-div {
-            margin: auto;
-         }
-
-         .wide-nav-button {
-            width:250px;
-         }
-
-         .inner-div {
-            margin: auto;
-            padding: 20px 20px 20px 20px;
-            display: table;
-         }
-
-         .largeTableOnly {
-            display: none;
-         }
-
-         .mdl-card__title {
-           height: 50px;
-           background: #f4b942;
-         }
-
-      </style>
 
       <script src="viewTimeCardsPage.js"></script>
 

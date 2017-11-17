@@ -12,32 +12,6 @@ function enterTimePage($timeCardInfo)
    <script src="timeCard.js"></script>
 
    <style>
-   .largeTextInput {
-      font-size: 40px;
-   }
-
-   .adjustTimeButton {
-      border-radius: 8px;
-      width: 50px;
-      height: 50px;
-   }
-   
-   .select-operator-card {
-      width: 80%;
-      height: 625px;
-      margin: auto;
-   }
-
-   .nav-div {
-      margin: auto;
-   }
-
-   .inner-div {
-      margin: auto;
-      padding: 20px 20px 20px 20px;
-      display: table;
-   }
-
    .input-div {
       #display: inline-block;
       display: table-cell;
@@ -45,9 +19,10 @@ function enterTimePage($timeCardInfo)
       padding-right: 50px;
    }
 
-   .mdl-card__title {
-     height: 50px;
-     background: #f4b942;
+   .adjustTimeButton {
+      border-radius: 8px;
+      width: 50px;
+      height: 50px;
    }
    </style>
 

@@ -16,22 +16,6 @@ function selectJobPage($timeCardInfo)
       font-size: 40px;
    }
 
-   .select-operator-card {
-      width: 80%;
-      height: 625px;
-      margin: auto;
-   }
-
-   .nav-div {
-      margin: auto;
-   }
-
-   .inner-div {
-      margin: auto;
-      padding: 20px 20px 20px 20px;
-      display: table;
-   }
-
    .input-div {
       display: table-cell;
       vertical-align: middle;
@@ -43,11 +27,6 @@ function selectJobPage($timeCardInfo)
       display: table-cell;
       vertical-align: middle;
       padding-left: 50px;
-   }
-
-   .mdl-card__title {
-     height: 50px;
-     background: #f4b942;
    }
    </style>
 
