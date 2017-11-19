@@ -1,0 +1,90 @@
+@CHARSET "ISO-8859-1";
+
+.header-div {
+	padding-top: 30px;
+	padding-left: 50px;
+	background: #fefefe;
+}
+
+.login-div {
+   padding: 10px 10px 10px 10px;
+   background: #3B5998;
+   height: 50px;
+}
+
+.page-title {
+	font-size: 40px;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   color: #3B5998;
+   margin-left: 30px;
+}
+
+.login-title {
+   font-size: 30px;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   color: #FEFEFE;
+   margin-left: 30px;
+}
+
+.select-user-button {
+    background-color: #fefefe;
+    color: 3B5998;
+    padding: 16px;
+    font-size: 16px;
+    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+    border: none;
+    cursor: pointer;
+    width: 175px;
+}
+
+.select-user-dropdown {
+    position: relative;
+    display: inline-block;
+    float: right;
+    margin-right: 50px;
+}
+
+.select-user-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 175px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.select-user-dropdown:hover .select-user-dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+
+.user-div {
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   color: #3B5998;	
+}
+
+.user-div:hover {
+	background: #95b3f2;
+	color: #fefefe;
+}
+
+body {
+	background: #cad2fa;
+	margin: 0px;
+}
+
+.login-page-body {
+   width: 30%;
+   padding: 30px;	
+   font-size: 25px;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   color: #3B5998;
+   line-height: 40px;
+}
+
+.cheese-board-div {
+	
+}

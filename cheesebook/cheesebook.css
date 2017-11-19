@@ -1,0 +1,18 @@
+@CHARSET "ISO-8859-1";
+
+body {
+	background: #cad2fa;
+	margin: 0px;
+}
+
+.horizontal-flex {
+	display: flex;
+	flex-direction: row;
+	align-items:center; /*align center, vertically */
+}
+
+.vertical-flex {
+   display: flex;
+   flex-direction: column;
+   justify-content: center; /*align center, horizontally */
+}
