@@ -85,18 +85,15 @@ HEREDOC;
             Connect with friends and get all the latest news on cheese, cheese boards, cheese pairings, and all other cheese related happenings.
          </div>
          <div style="display: flex; flex-grow:2; justify-content:center; padding-top:30px;">
-            <div style="display:flex; flex-direction:column; background:#fefefe; justify-content:center; width:400px; box-shadow:5px 5px 3px #888888;">
+            <div class="vertical-flex cheese-board-div">
                <img width="400" src="./images/board.jpg"/>
-               <div style="padding-left:20px;">
+               <div style="padding:0px 10px 10px 10px;">
                   <h1>Lunchtime Charcuterie Board</h1>
-                  <div style="padding-bottom:20px;">Join us for ...</div>
-                  <div style="padding-bottom:20px;">
-                     <list>
-                        <li>item</li>
-                        <li>item</li>
-                        <li>item</li>
-                        <li>item</li>
-                     </list>
+                  <div style="padding-bottom:20px; font-weight:bold; font-size:20px;">Friday Dec. 15 @ 12pm</div>
+                  <div style="padding-bottom:20px;">Join us for a tour-de-tastebud!  Bring an artisan cheese or a cured/smoked meat to share with your Compunetix lunchtime friends.</div>
+                  <div class="horizontal-flex">
+                     <img width="30" src="./images/cheddar-small.png"/>
+                     <div style="padding-left:10px; color:#3B5998; font-weight:bold;">Interested in going? Give this event some cheddar on Cheesebook!</div>
                   </div>
                </div>
             </div>
@@ -111,8 +108,30 @@ HEREDOC;
 <html>
 
 <head>
+   <!--  Favicon, generated at  https://www.favicon-generator.org/ -->
+   <link rel="apple-touch-icon" sizes="57x57" href="./images/favicon/apple-icon-57x57.png">
+   <link rel="apple-touch-icon" sizes="60x60" href="./images/favicon//apple-icon-60x60.png">
+   <link rel="apple-touch-icon" sizes="72x72" href="./images/favicon//apple-icon-72x72.png">
+   <link rel="apple-touch-icon" sizes="76x76" href="./images/favicon//apple-icon-76x76.png">
+   <link rel="apple-touch-icon" sizes="114x114" href="./images/favicon//apple-icon-114x114.png">
+   <link rel="apple-touch-icon" sizes="120x120" href="./images/favicon//apple-icon-120x120.png">
+   <link rel="apple-touch-icon" sizes="144x144" href="./images/favicon//apple-icon-144x144.png">
+   <link rel="apple-touch-icon" sizes="152x152" href="./images/favicon//apple-icon-152x152.png">
+   <link rel="apple-touch-icon" sizes="180x180" href="./images/favicon//apple-icon-180x180.png">
+   <link rel="icon" type="image/png" sizes="192x192"  href="./images/favicon//android-icon-192x192.png">
+   <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon//favicon-32x32.png">
+   <link rel="icon" type="image/png" sizes="96x96" href="./images/favicon//favicon-96x96.png">
+   <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon//favicon-16x16.png">
+   <link rel="manifest" href="./images/favicon//manifest.json">
+   <meta name="msapplication-TileColor" content="#ffffff">
+   <meta name="msapplication-TileImage" content="./images/favicon//ms-icon-144x144.png">
+   <meta name="theme-color" content="#ffffff">
+   
    <link rel="stylesheet" type="text/css" href="cheesebook.css"/>
    <link rel="stylesheet" type="text/css" href="login.css"/>
+   
+   <!--  Google fonts -->
+   <link href="https://fonts.googleapis.com/css?family=Shrikhand" rel="stylesheet">
 </head>
 
 <body>
