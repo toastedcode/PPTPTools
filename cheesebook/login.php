@@ -58,14 +58,17 @@ HEREDOC;
             $userId= $row["id"];
             $userName= $row["firstName"] . " " . $row["lastName"];
             $imageFile = $row["imageFile"];
-            
-            echo
+          
+            if ($userId != 99)
+            {
+               echo
 <<<HEREDOC
-            <div class="user-div" onclick="location.href='content.php?userId=$userId'">
-               <img width="50" height="50" src="./images/$imageFile"/>
-               <span>$userName</span>
-            </div>
+               <div class="user-div" onclick="location.href='content.php?userId=$userId'">
+                  <img width="50" height="50" src="./images/$imageFile"/>
+                  <span>$userName</span>
+               </div>
 HEREDOC;
+            }
          }
 
          echo

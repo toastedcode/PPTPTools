@@ -70,7 +70,20 @@ function getLikeText($postId)
             
             $likeText .= getUserName($userId);
          }
-         // Jason Tost, Michael Crowe, and 3 others.
+         // Jason Tost and Michael Crowe
+         else if ($likeCount == 2)
+         {
+            $row = mysqli_fetch_assoc($likes);
+            $userId = $row["userId"];
+            
+            $likeText .= getUserName($userId) . " and ";
+            
+            $row = mysqli_fetch_assoc($likes);
+            $userId = $row["userId"];
+            
+            $likeText .= getUserName($userId);
+         }
+         // Jason Tost, Michael Crowe, and 1 other
          else
          {
             $row = mysqli_fetch_assoc($likes);
@@ -81,7 +94,9 @@ function getLikeText($postId)
             $row = mysqli_fetch_assoc($likes);
             $userId = $row["userId"];
             
-            $likeText .= getUserName($userId) . ", and " . $likeCount . " others.";
+            $other = ($likeCount == 3) ? "other" : "others";
+            
+            $likeText .= getUserName($userId) . ", and " . ($likeCount - 2) . " " . $other;
          }
       }
    }
@@ -169,7 +184,7 @@ HEREDOC;
             $commentsDivs
             <div class="horizontal-flex comment-div">
                <div style="margin:5px"><img width="30" src="./images/$userImage"/></div>
-               <input class="comment-input" type="text" id="comment-$postId-input" placeholder="Leave a comment." onkeypress="if (checkEnter(event) == true) comment($userId, $postId, 'comment-$postId-input')"/>
+               <input class="comment-input" type="text" id="comment-$postId-input" placeholder="Lay down some gouda." onkeypress="if (checkEnter(event) == true) comment($userId, $postId, 'comment-$postId-input')"/>
             </div>
          </div>
 HEREDOC;
