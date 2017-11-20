@@ -49,7 +49,7 @@
 }
 
 .post-div {
-	background: #fefefe;
+	background: #ffffff;
 	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 	padding: 10px;
 	width: 700px;
@@ -103,4 +103,35 @@
 	border-style: dotted;
 	margin-top: 10px;
 	margin-bottom: 5px;
+}
+
+.like-div {
+	background: #ffffff;
+	padding: 5px;
+	margin-top: 5px;
+	border-style: solid none none none;
+	border-color: #e3e3e3;
+	border-width: 1px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.like-div a {
+   color: #5f656e;
+   text-decoration: none; /* changed from text-decoration:underline */
+}
+
+.like-div a:hover {
+   text-decoration: underline;
+}
+
+.like-count-div {
+	color: #3658b2;
+	background: #f6f7f9;
+	padding: 5px;
+   margin-top: 5px;
+   border-style: solid none none none;
+   border-color: #e3e3e3;
+   border-width: 1px;
+   font-size: 14px;
 }

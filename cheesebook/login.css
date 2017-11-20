@@ -64,6 +64,7 @@
 .user-div {
    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
    color: #3B5998;	
+   cursor: pointer;
 }
 
 .user-div:hover {

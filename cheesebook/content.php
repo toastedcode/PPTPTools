@@ -1,5 +1,6 @@
 <?php
 require_once 'database.php';
+require_once 'post.php';
 
 class ContentPage
 {
@@ -8,7 +9,7 @@ class ContentPage
       ContentPage::renderHeader();
       ContentPage::renderBody();
    }
-   
+  
    private static function renderHeader()
    {
       $userId = $_GET["userId"];
@@ -87,9 +88,20 @@ HEREDOC;
 
       ContentPage::renderNewPost();
       
-      // get posts
+      $database = new CheeseBookDatabase("localhost", "root", "", "cheesebook");
       
-      ContentPage::renderPost();
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $posts = $database->getPosts();
+         
+         while ($row = $posts->fetch_assoc())
+         {
+            $postId = $row['id'];
+            echo getPostHtml($postId);
+         }
+      }
 
       echo
 <<<HEREDOC
@@ -110,42 +122,22 @@ HEREDOC;
          $row = $database->getUser($userId);
          $imageFile = $row["imageFile"];
          
+         // TODO: Check out this when you want to make the text input area grow.
+         
          echo
 <<<HEREDOC
-         <div class="post-div vertical-flex">
+         <div class="post-div vertical-flex" id="new-post-div">
             <div class="horizontal-flex">
                <div style="margin:5px"><img width="50" src="./images/$imageFile"/></div>
-               <input class="new-post-input" type="text" id="new-post-input" value="What's on your mind?"/>
+               <input class="new-post-input" type="text" id="new-post-input" placeholder="What's your cheese?"/>
             </div>
             <hr>
             <div class="horizontal-flex" style="justify-content:flex-end;">
-               <button class="post-button" onclick="post()">Post</button>
+               <button class="post-button" onclick="post('$userId', 'new-post-input')">Post</button>
             </div>
          </div>
 HEREDOC;
       }
-   }
-   
-   private static function renderPost()
-   {
-      $userName = "Chris Detar";
-      $imageFile = "chrisdetar.jpg";
-      $date = "3 hours ago";
-      $content = "Can't wait to eat some of 'dat cheese!";
-            
-      echo
-<<<HEREDOC
-      <div class="post-div vertical-flex">
-         <div class="horizontal-flex">
-            <div style="margin:5px"><img width="50" src="./images/$imageFile"/></div>
-            <div class="vertical-flex">
-               <span class="post-author">$userName</span>
-               <span class="post-date">$date</span>
-            </div>
-         </div>
-         <div class="vertical-flex">$content</div>
-      </div>
-HEREDOC;
    }
 }
 ?>
@@ -156,6 +148,7 @@ HEREDOC;
 <head>
    <link rel="stylesheet" type="text/css" href="cheesebook.css"/>
    <link rel="stylesheet" type="text/css" href="content.css"/>
+   <script src="content.js"></script>
 </head>
 
 <body>

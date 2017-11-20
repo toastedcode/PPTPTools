@@ -54,7 +54,12 @@ class MySqlDatabase implements Database
    {
       return ($this->isConnected);
    }
-
+   
+   public function escapeString($string)
+   {
+      return (mysqli_real_escape_string($this->connection, $string));
+   }
+   
    public function query(
       $query)
    {
@@ -67,6 +72,8 @@ class MySqlDatabase implements Database
 
       return ($result);
    }
+   
+   protected $connection;
 
    private $server = "";
 
@@ -75,8 +82,6 @@ class MySqlDatabase implements Database
    private $password = "";
 
    private $database = "";
-
-   private $connection;
 
    private $isConnected = false;
 }
@@ -107,25 +112,75 @@ class CheeseBookDatabase extends MySqlDatabase
 
    public function getPosts()
    {
-      $result = $this->query("SELECT * FROM Post ORDER BY DateTime ASC");
+      $result = $this->query("SELECT * FROM Post ORDER BY DateTime DESC");
 
       return ($result);
    }
+   
+   public function getPost(
+      $postId)
+   {
+      $post = NULL;
+      
+      $result = $this->query("SELECT * FROM post WHERE id=" . $postId . ";");
+      
+      if ($row = $result->fetch_assoc())
+      {
+         $post = $row;
+      }
+      
+      return ($post);
+   }
 
    public function addPost(
-      $dateTime,
-      $user,
+      $userId,
       $content)
    {
-      $query =
-         "INSERT INTO Post " .
-         "(DateTime, User, Content) " .
-         "VALUES " .
-         "('$dateTime', '$user', '$content');";
+      $result = NULL;
+      
+      $query = sprintf(
+         "INSERT INTO post (dateTime, userId, content) VALUES (now(), '%s', '%s');",
+         $userId,
+         $this->escapeString($content));
 
-      $result = $this->query($query);
+      if ($this->query($query))
+      {
+         $result = $this->getPost($this->connection->insert_id);
+      }
       
       return ($result);
+   }
+   
+   public function addLike(
+      $userId,
+      $postId)
+   {
+      $result = NULL;
+      
+      $query = sprintf("INSERT INTO cheddar (userId, postId) VALUES (%d, %d);",
+                       $userId,
+                       $postId);
+      
+      if ($this->query($query))
+      {
+         $result = $this->getPost($this->connection->insert_id);
+      }
+      
+      return ($result);
+   }
+   
+   public function getLikes($postId)
+   {
+      $result = $this->query("SELECT * FROM cheddar WHERE postId=" . $postId . ";");
+      
+      return ($result);
+   }
+   
+   public function isLiked($userId, $postId)
+   {
+      $result = $this->query("SELECT * FROM cheddar WHERE postId=" . $postId . " AND userId=" . $userId . ";");
+      
+      return (mysqli_num_rows($result) != 0);
    }
 }
 
