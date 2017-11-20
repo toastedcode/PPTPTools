@@ -90,7 +90,7 @@ class CheeseBookDatabase extends MySqlDatabase
 {
    public function getUsers()
    {
-      $result = $this->query("SELECT * FROM User ORDER BY LastName ASC");
+      $result = $this->query("SELECT * FROM User ORDER BY FirstName ASC");
 
       return ($result);
    }
@@ -149,6 +149,50 @@ class CheeseBookDatabase extends MySqlDatabase
       }
       
       return ($result);
+   }
+   
+   public function addComment(
+         $userId,
+         $postId,
+         $content)
+   {
+      $result = NULL;
+      
+      $query = sprintf(
+            "INSERT INTO comment (dateTime, userId, postId, content) VALUES (now(), '%s', '%s', '%s');",
+            $userId,
+            $postId,
+            $this->escapeString($content));
+      
+      if ($this->query($query))
+      {
+         $result = $this->getComment($this->connection->insert_id);
+      }
+      
+      return ($result);
+   }
+   
+   public function getComments(
+      $postId)
+   {
+      $result = $this->query("SELECT * FROM comment WHERE postId=" . $postId . " ORDER BY dateTime ASC");
+      
+      return ($result);
+   }
+   
+   public function getComment(
+      $commentId)
+   {
+      $comment = NULL;
+      
+      $result = $this->query("SELECT * FROM comment WHERE id=" . $commentId . ";");
+      
+      if ($row = $result->fetch_assoc())
+      {
+         $comment = $row;
+      }
+      
+      return ($comment);
    }
    
    public function addLike(
