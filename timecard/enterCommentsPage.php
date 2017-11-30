@@ -5,7 +5,9 @@ class CommentsPage
 {
    public static function getHtml()
    {
-      $comments = "Test";
+      $comments = CommentsPage::getComments();
+      
+      $navBar = CommentsPage::getNavBar();
       
       $html =  
 <<<HEREDOC
@@ -20,13 +22,9 @@ class CommentsPage
          </form>
    
       </div>
-      <?php
-      Navigation::start();
-      Navigation::cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      Navigation::backButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_parts_count', 'update_time_card_info');};");
-      Navigation::nextButton("submitForm('timeCardForm', 'timeCard.php', 'edit_time_card', 'update_time_card_info');");
-      Navigation::end();
-      ?>   
+
+      $navBar
+ 
    </div>
 HEREDOC;
 
@@ -48,6 +46,19 @@ HEREDOC;
       }
       
       return ($comments);
+   }
+   
+   private static function getNavBar()
+   {
+      $navBar = new Navigation();
+      
+      $navBar->start();
+      $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+      $navBar->backButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_parts_count', 'update_time_card_info');};");
+      $navBar->nextButton("submitForm('timeCardForm', 'timeCard.php', 'edit_time_card', 'update_time_card_info');");
+      $navBar->end();
+      
+      return ($navBar->getHtml());
    }
 }
 ?>

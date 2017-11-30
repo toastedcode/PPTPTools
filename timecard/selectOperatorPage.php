@@ -1,26 +1,82 @@
 <?php
-require_once '../../database.php';
+require_once '../database.php';
 
-function operator($employeeNumber, $name, $isChecked)
+class SelectOperator
 {
-   $checked = $isChecked ? "checked" : "";
-   
-   $id = "list-option-" + $employeeNumber;
-
-   echo
+   public static function getHtml()
+   {
+      $html = "";
+      
+      $navBar = SelectOperator::navBar();
+      
+      $html =
 <<<HEREDOC
-   <input type="radio" id="$id" class="operator-input" name="employeeNumber" value="$employeeNumber" $checked/>
-   <label for="$id">
-      <div type="button" class="operator-select-button">
-         <i class="material-icons button-icon">person</i>
-         <div style="display: table-cell; vertical-align: middle;">$name</div>
+      <div class="flex-vertical card-div">
+         <div class="card-header-div">Select Operator</div>
+         <div class="flex-horizontal content-div">
+           
+         </div>
+         
+         $navBar
+         
       </div>
-   </label>
 HEREDOC;
+      
+      return ($html);
+   }
+   
+   public static function render()
+   {
+      echo (SelectOperator::getHtml());
+   }
+   
+   private static function getTimeCardInfo()
+   {
+      $timeCardInfo = new TimeCardInfo();
+      
+      if (isset($_SESSION['timeCardInfo']))
+      {
+         $timeCardInfo = $_SESSION['timeCardInfo'];
+      }
+      
+      return ($timeCardInfo);
+   }
+   
+   private static function operator($employeeNumber, $name, $isChecked)
+   {
+      $html = "";
+      
+      $checked = $isChecked ? "checked" : "";
+      
+      $id = "list-option-" + $employeeNumber;
+      
+      $html =
+<<<HEREDOC
+      <input type="radio" id="$id" class="operator-input" name="employeeNumber" value="$employeeNumber" $checked/>
+      <label for="$id">
+         <div type="button" class="operator-select-button">
+            <i class="material-icons button-icon">person</i>
+            <div style="display: table-cell; vertical-align: middle;">$name</div>
+         </div>
+      </label>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   private static function navBar()
+   {
+      $navBar = new Navigation();
+      
+      $navBar->start();
+      $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+      $navBar->nextButton("if (validateOperator()) {submitForm('timeCardForm', 'timeCard.php', 'select_work_center', 'update_time_card_info');};");
+      $navBar->end();
+      
+      return ($navBar->getHtml());
+   }
 }
-
-function selectOperatorPage($timeCardInfo)
-{
+   /*
     $database = new PPTPDatabase("localhost", "root", "", "pptp");
     
     $database->connect();
@@ -114,4 +170,5 @@ HEREDOC;
         echo "</div>";
     }
 }
+*/
 ?>

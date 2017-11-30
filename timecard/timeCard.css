@@ -65,6 +65,8 @@ body {
 
 .content-div {
    flex-grow: 1;
+   padding-top: 20px;
+   height:400px
 }
 
 .nav-div {
@@ -98,10 +100,26 @@ body {
    color: #ffffff;
 }
 
+.nav-button-wide {
+	width: 250px;
+}
+
 .comments-input {
    width:500px;
    rows: 10;
    
    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
    font-size: 16px;
+}
+
+.table-nav-div {
+   padding-top: 20px;
+}
+
+.table-nav-span {
+   padding: 20px;
+}
+
+.table-nav-number-span {
+   padding: 5px;
 }

@@ -2,12 +2,13 @@
 
 require_once '../database.php';
 require_once 'keypad.php';
+require_once 'header.php';
 require 'selectOperatorPage.php';
 //require 'selectWorkCenterPage.php';
 //require 'selectJobPage.php';
 //require 'enterTimePage.php';
 //require 'enterPartCountPage.php';
-//require 'enterCommentsPage.php';
+require 'enterCommentsPage.php';
 //require 'viewTimeCardPage.php';
 require 'viewTimeCardsPage.php';
 
@@ -113,7 +114,7 @@ function processView($view)
    {  
       case 'select_operator':
       {
-         selectOperatorPage($_SESSION['timeCardInfo']);
+         SelectOperator::render();
          break;
       }
          
@@ -173,7 +174,8 @@ function processView($view)
       case 'view_time_cards':
       default:
       {
-         viewTimeCardsPage();
+         ViewTimeCards::render();
+         //CommentsPage::render();
          break;
       }
    }
@@ -338,8 +340,7 @@ function updateTimeCard($timeCardInfo)
 }
 ?>
 
-// *****************************************************************************
-//                                  BEGIN
+<!-- ********************************** BEGIN ********************************************* -->
 
 <?php 
 session_start();
@@ -352,7 +353,7 @@ processAction(getAction());
 <link rel="stylesheet" type="text/css" href="flex.css"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-<link rel="stylesheet" type="text/css" href="timeCard2.css"/>
+<link rel="stylesheet" type="text/css" href="timeCard.css"/>
 
 <script src="timeCard.js"></script>
 </head>
