@@ -1,14 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+   <!--  Material Design Lite -->
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
+   <link rel="stylesheet" type="text/css" href="timeCard.css"/>
+   
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="timeCard.js"></script>
+</head>
+
+<body>
+
+   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+         <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">Time Cards</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation">
+               <a class="mdl-navigation__link" href="../pptpTools.php?action=logout">Logout</a>
+            </nav>
+         </div>
+      </header>
+
+      <main class="mdl-layout__content">
+         <div class="page-content">
+
 <?php
 
-require_once '../database.php';
+require_once '../../database.php';
 require_once 'keypad.php';
+require 'selectActionPage.php';
 require 'selectOperatorPage.php';
-//require 'selectWorkCenterPage.php';
-//require 'selectJobPage.php';
-//require 'enterTimePage.php';
-//require 'enterPartCountPage.php';
+require 'selectWorkCenterPage.php';
+require 'selectJobPage.php';
+require 'enterTimePage.php';
+require 'enterPartCountPage.php';
 //require 'enterCommentsPage.php';
-//require 'viewTimeCardPage.php';
+require 'viewTimeCardPage.php';
 require 'viewTimeCardsPage.php';
 
 class TimeCardInfo
@@ -138,12 +171,6 @@ function processView($view)
       case 'enter_part_count':
       {
          enterPartCountPage($_SESSION['timeCardInfo']);
-         break;
-      }
-      
-      case 'enter_comments':
-      {
-         CommentsPage::render();
          break;
       }
       
@@ -336,36 +363,71 @@ function updateTimeCard($timeCardInfo)
    
    return ($success);
 }
-?>
+
+function navButton($text, $onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton" onclick="$onClick">
+      $text
+   </button>
+HEREDOC;
+}
+   
+function highlightNavButton($text, $onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored pptpNavButton" onclick="$onClick">
+      $text
+   </button>
+HEREDOC;
+}
+
+function cancelButton($onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton" onclick="$onClick">
+      Cancel
+   </button>
+HEREDOC;
+}
+   
+function backButton($onClick)
+{
+   echo
+   <<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised pptpNavButton" onclick="$onClick">
+      <i class="material-icons">arrow_back</i>
+   </button>
+HEREDOC;
+}
+
+function nextButton($onClick)
+{
+   echo
+<<<HEREDOC
+   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored pptpNavButton" onclick="$onClick">
+      <i class="material-icons">arrow_forward</i>
+   </button>
+HEREDOC;
+}
 
 // *****************************************************************************
 //                                  BEGIN
 
-<?php 
 session_start();
 
 processAction(getAction());
+
+processView(getView());
+
 ?>
 
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="flex.css"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-<link rel="stylesheet" type="text/css" href="timeCard2.css"/>
-
-<script src="timeCard.js"></script>
-</head>
-
-<body>
-
-<?php Header::render("Time Cards"); ?>
-
-<div class="flex-horizontal" style="height: 700px;">
-
-   <?php processView(getView())?>
-
-</div>
-
+         </div>
+      </main>
+   </div>
 </body>
+
 </html>

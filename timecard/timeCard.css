@@ -1,94 +1,107 @@
 @CHARSET "ISO-8859-1";
 
-.mdl-layout {
+body {
+   margin: 0px;
+   font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
    background: #eee;
 }
 
-.mdl-layout__header {
-   margin-bottom: 25px;
+.header-div {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   align-items: center;
+   
+   height: 50px;
+   
+   background: #484fb0;
+   
+   padding-left: 50px;
+   padding-right: 50px;
 }
 
-.pptpNavButton {
-   height: auto;
+.page-title {
    font-size: 25px;
-   padding: 20px 20px;
-   margin-right: 20px;
-   width: 150px;
+   color: #ffffff;
 }
 
-.view-time-cards-card {
-   width: 80%;
-   height: 625px;
-   margin: auto;
+.nav-link {
+   font-size: 14px;
+   color: #ffffff;
+   text-decoration: none; /* changed from text-decoration:underline */
 }
 
-.view-time-cards-table-container {
-   margin: auto;
-   padding: 20px;
-}
-
-.filter-container {
-   margin: auto;
-   display: table;
-}
-
-.table-nav-div {
-   display: table;
-   margin: auto;
-}
-
-.table-nav-span {
-   padding: 20px;
-}
-
-.table-nav-number-span {
-   padding: 5px;
-}
-
-a {
-   color: #1E7EC8;
-   text-decoration: none; // changed from text-decoration:underline
-}
-
-a:hover {
+.nav-link:hover {
    text-decoration: underline;
 }
 
-.nav-div {
-   margin: auto;
-}
+.card-div {
+   justify-content: flex-start;
 
-.wide-nav-button {
-   width:250px;
-}
-
-.select-operator-card {
+   background: #ffffff;
+   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+   align-items: stretch;
+   
    width: 80%;
    height: 625px;
-   margin: auto;
+   
+   padding-bottom: 20px;
 }
 
-.inner-div {
-   margin: auto;
-   display: table;
+.card-header-div {
+   display: flex;
+   flex-direction: row;
+   justify-content: flex-start;
+   align-items: center;
+   
+   background: #f2b955;
+   font-size: 16px;
+   color: #ffffff;
+   
    padding-left: 20px;
-   padding-right: 20px; 
+   
+   height: 50px;
 }
 
-.largeTableOnly {
-   display: none;
+.content-div {
+   flex-grow: 1;
 }
 
-.mdl-card__title {
-  height: 50px;
-  background: #f4b942;
+.nav-div {
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   align-items: center;
 }
 
-.mdl-card__title-text {
-  color: #424242;
-  font-size: 18px;
+.nav-button {
+   border-width: 0;
+   outline: none;
+   box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+   background-color: #ebebeb;
+   
+   color: #000000;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   font-size: 25px;
+   
+   height: auto;
+   width: 150px;
+
+   padding: 20px 20px;
+   
+   margin-right: 20px;
+   margin-left: 20px;
 }
 
-.largeTextInput {
-   font-size: 40px;
+ .nav-button-highlight {
+   background-color: #484fb0;
+   color: #ffffff;
+}
+
+.comments-input {
+   width:500px;
+   rows: 10;
+   
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   font-size: 16px;
 }
