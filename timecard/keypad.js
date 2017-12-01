@@ -1,6 +1,5 @@
 function initKeypad()
 {
-	
    var keys = document.getElementsByClassName('keypadKey');
    for (var i = 0; i < keys.length; i++)
    {

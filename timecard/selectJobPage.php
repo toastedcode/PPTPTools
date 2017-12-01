@@ -7,8 +7,10 @@ class SelectJob
    {
       $html = "";
       
-      $keypad = Keypad::getHtml();
+      $jobInput = SelectJob::jobInput();
       
+      $keypad = Keypad::getHtml();
+            
       $navBar = SelectJob::navBar();
       
       $html =
@@ -17,12 +19,22 @@ class SelectJob
       <div class="flex-vertical card-div">
          <div class="card-header-div">Enter Job</div>
          <div class="flex-horizontal content-div">
-            $keypad
+
+            <div class="flex-horizontal" style="flex-grow: 1">$jobInput</div>
+            
+            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+            <script type="text/javascript">initKeypad()</script>
+
          </div>
          
          $navBar
          
       </div>
+
+      <script type="text/javascript">
+         initKeypad();
+         document.getElementById("jobNumber-input").focus();
+      </script>
 HEREDOC;
       
       return ($html);
@@ -31,6 +43,21 @@ HEREDOC;
    public static function render()
    {
       echo (SelectJob::getHtml());
+   }
+   
+   private static function jobInput()
+   {
+      $jobNumber = SelectJob::getJobNumber();
+      
+      $html = 
+<<<HEREDOC
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="jobNumber-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="jobNumber" value="$jobNumber">
+         <label class="mdl-textfield__label" for="password_input">Job #</label>
+      </div>
+HEREDOC;
+
+      return ($html);
    }
    
    private static function navBar()

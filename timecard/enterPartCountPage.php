@@ -7,6 +7,10 @@ class EnterPartCount
    {
       $html = "";
       
+      $partCountInput = EnterPartCount::partCountInput();
+      
+      $keypad = Keypad::getHtml();
+      
       $navBar = EnterPartCount::navBar();
       
       $html =
@@ -16,11 +20,20 @@ class EnterPartCount
          <div class="card-header-div">Enter Part Count</div>
          <div class="flex-horizontal content-div">
 
+            <div class="flex-vertical" style="justify-content: space-evenly; flex-grow: 1">$partCountInput</div>
+            
+            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+
          </div>
          
          $navBar
          
       </div>
+
+      <script type="text/javascript">
+         initKeypad();
+         document.getElementById("panCount-input").focus();
+      </script>
 HEREDOC;
       
       return ($html);
@@ -31,14 +44,46 @@ HEREDOC;
       echo (EnterPartCount::getHtml());
    }
    
+   private static function partCountInput()
+   {
+      $timeCardInfo = EnterPartCount::getTimeCardInfo();
+      
+      $panCount = $timeCardInfo->panCount;
+      $partsCount = $timeCardInfo->partsCount;
+      $scrapCount = $timeCardInfo->scrapCount;
+      
+      $html =
+<<<HEREDOC
+      <!-- Pan count -->
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="panCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="panCount" value="$panCount">
+         <label class="mdl-textfield__label" for="panCount-input">Pan count</label>
+      </div>
+
+      <!-- Parts count -->
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="partsCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="partsCount" value="$partsCount">
+         <label class="mdl-textfield__label" for="partsCount-input">Good part count</label>
+      </div>
+
+      <!-- Scrap count -->
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="scrapCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="scrapCount" min="0" max="10000" value="$scrapCount">
+         <label class="mdl-textfield__label" for="scrapCount-input">Scrap part count</label>
+      </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
    private static function navBar()
    {
       $navBar = new Navigation();
       
       $navBar->start();
       $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("if (validateJob()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};");
-      $navBar->nextButton("if (validateJob()){submitForm('timeCardForm', 'timeCard.php', 'enter_part_counts', 'update_time_card_info');};");
+      $navBar->backButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_time', 'update_time_card_info');};");
+      $navBar->nextButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_comments', 'update_time_card_info');};");
       $navBar->end();
       
       return ($navBar->getHtml());

@@ -9,15 +9,14 @@ class CommentsPage
       
       $navBar = CommentsPage::navBar();
       
-      $html =  
+      $html =
 <<<HEREDOC
       <form id="timeCardForm" action="timeCard.php" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Add Comments</div>
          <div class="flex-horizontal content-div" style="height:400px;">
             
-            <textarea class="comments-input" type="text" name="comments" rows="10" placeholder="Enter comments ..." form="timeCardForm" value="$comments"></textarea>
-   
+            <textarea form="timeCardForm" class="comments-input" type="text" name="comments" rows="10" placeholder="Enter comments ...">$comments</textarea>
       
          </div>
    
@@ -52,7 +51,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("submitForm('timeCardForm', 'timeCard.php', 'enter_parts_count', 'update_time_card_info');");
+      $navBar->backButton("submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info');");
       $navBar->nextButton("submitForm('timeCardForm', 'timeCard.php', 'edit_time_card', 'update_time_card_info');");
       $navBar->end();
       

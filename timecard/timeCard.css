@@ -174,3 +174,12 @@ input:checked + label > div  {
    font-size: 50px;
 }
 
+.large-text-input {
+   font-size: 40px;
+}
+
+.adjust-time-button {
+	margin-left:10px;
+	margin-right:10px;
+}
+

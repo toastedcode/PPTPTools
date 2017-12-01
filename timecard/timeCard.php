@@ -175,7 +175,6 @@ function processView($view)
       default:
       {
          ViewTimeCards::render();
-         //CommentsPage::render();
          break;
       }
    }
@@ -355,6 +354,7 @@ processAction(getAction());
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="timeCard.css"/>
 
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script src="timeCard.js"></script>
 </head>
 

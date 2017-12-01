@@ -170,7 +170,6 @@ function validateWorkCenter()
 
 function validateJob()
 {
-   return true;  // TODO: Remove!
    var valid = false;
 
    value = document.getElementById("jobNumber-input").value;
@@ -187,8 +186,6 @@ function validateJob()
 
 function validateTime()
 {
-   return true;  // TODO: Remove!
-
    var valid = false;
    
    hours = document.getElementById("setupTimeHour-input").value;
@@ -242,4 +239,48 @@ function validatePartCount()
    }
 
    return (valid);
+}
+
+function changeSetupTimeHour(delta)
+{
+   var field = document.querySelector('#setupTimeHour-input');
+   var newValue = parseInt(field.value, 10) + delta;
+   
+   // Constrain values.
+   newValue = Math.max(0, Math.min(newValue, 10));
+   
+   field.value = newValue;
+}
+
+function changeSetupTimeMinute(delta)
+{
+   var field = document.querySelector('#setupTimeMinute-input');
+   var newValue = parseInt(field.value, 10) + delta;
+   
+   // Constrain values.
+   newValue = Math.max(0, Math.min(newValue, 45));
+   
+   field.value = newValue;
+}
+
+function changeRunTimeHour(delta)
+{
+   var field = document.querySelector('#runTimeHour-input');
+   var newValue = parseInt(field.value, 10) + delta;
+   
+   // Constrain values.
+   newValue = Math.max(0, Math.min(newValue, 10));
+   
+   field.value = newValue;
+}
+
+function changeRunTimeMinute(delta)
+{
+   var field = document.querySelector('#runTimeMinute-input');
+   var newValue = parseInt(field.value, 10) + delta;
+   
+   // Constrain values.
+   newValue = Math.max(0, Math.min(newValue, 45));
+   
+   field.value = newValue;
 }
