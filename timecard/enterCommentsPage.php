@@ -7,25 +7,23 @@ class CommentsPage
    {
       $comments = CommentsPage::getComments();
       
-      $navBar = CommentsPage::getNavBar();
+      $navBar = CommentsPage::navBar();
       
       $html =  
 <<<HEREDOC
-   <div class="flex-vertical card-div">
-      <div class="card-header-div">Add Comments</div>
-      <div class="flex-horizontal content-div" style="height:400px;">
-      
-         <form id="timeCardForm" action="timeCard.php" method="POST">
-         
-            <textarea class="comments-input" type="text" name="comments" rows="10" placeholder="Enter comments ..." form-id="timeCardForm" value="$comments"></textarea>
-     
-         </form>
+      <form id="timeCardForm" action="timeCard.php" method="POST"></form>
+      <div class="flex-vertical card-div">
+         <div class="card-header-div">Add Comments</div>
+         <div class="flex-horizontal content-div" style="height:400px;">
+            
+            <textarea class="comments-input" type="text" name="comments" rows="10" placeholder="Enter comments ..." form="timeCardForm" value="$comments"></textarea>
    
+      
+         </div>
+   
+         $navBar
+    
       </div>
-
-      $navBar
- 
-   </div>
 HEREDOC;
 
       return ($html);
@@ -48,13 +46,13 @@ HEREDOC;
       return ($comments);
    }
    
-   private static function getNavBar()
+   private static function navBar()
    {
       $navBar = new Navigation();
       
       $navBar->start();
       $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_parts_count', 'update_time_card_info');};");
+      $navBar->backButton("submitForm('timeCardForm', 'timeCard.php', 'enter_parts_count', 'update_time_card_info');");
       $navBar->nextButton("submitForm('timeCardForm', 'timeCard.php', 'edit_time_card', 'update_time_card_info');");
       $navBar->end();
       

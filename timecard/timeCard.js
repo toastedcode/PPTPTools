@@ -100,7 +100,7 @@ function onCancel()
 
 function submitForm(form, page, view, action)
 {
-   // alert(form + ", " + page + ", " + view + ", " + action);
+   //alert(form + ", " + page + ", " + view + ", " + action);
    
    if (!form)
    {
@@ -170,6 +170,7 @@ function validateWorkCenter()
 
 function validateJob()
 {
+   return true;  // TODO: Remove!
    var valid = false;
 
    value = document.getElementById("jobNumber-input").value;
@@ -186,6 +187,8 @@ function validateJob()
 
 function validateTime()
 {
+   return true;  // TODO: Remove!
+
    var valid = false;
    
    hours = document.getElementById("setupTimeHour-input").value;

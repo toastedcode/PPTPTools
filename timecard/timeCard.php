@@ -4,10 +4,10 @@ require_once '../database.php';
 require_once 'keypad.php';
 require_once 'header.php';
 require 'selectOperatorPage.php';
-//require 'selectWorkCenterPage.php';
-//require 'selectJobPage.php';
-//require 'enterTimePage.php';
-//require 'enterPartCountPage.php';
+require 'selectWorkCenterPage.php';
+require 'selectJobPage.php';
+require 'enterTimePage.php';
+require 'enterPartCountPage.php';
 require 'enterCommentsPage.php';
 //require 'viewTimeCardPage.php';
 require 'viewTimeCardsPage.php';
@@ -120,25 +120,25 @@ function processView($view)
          
       case 'select_work_center':
       {
-         selectWorkCenterPage($_SESSION['timeCardInfo']);
+         SelectWorkCenter::render();
          break;
       }
          
       case 'select_job':
       {
-         selectJobPage($_SESSION['timeCardInfo']);
+         SelectJob::render();
          break;
       }
          
       case 'enter_time':
       {
-         enterTimePage($_SESSION['timeCardInfo']);
+         EnterTime::render();
          break;
       }
          
       case 'enter_part_count':
       {
-         enterPartCountPage($_SESSION['timeCardInfo']);
+         EnterPartCount::render();
          break;
       }
       
