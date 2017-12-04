@@ -9,7 +9,7 @@ require 'selectJobPage.php';
 require 'enterTimePage.php';
 require 'enterPartCountPage.php';
 require 'enterCommentsPage.php';
-//require 'viewTimeCardPage.php';
+require 'viewTimeCardPage.php';
 require 'viewTimeCardsPage.php';
 
 class TimeCardInfo
@@ -150,24 +150,13 @@ function processView($view)
       
       case 'view_time_card':
       {
-         $timeCardInfo = new TimeCardInfo();
-         
-         if (isset($_POST['timeCardId']))
-         {
-            $timeCardInfo = getTimeCardInfo($_POST['timeCardId']);
-         }
-         else
-         {
-            $timeCardInfo = $_SESSION['timeCardInfo'];
-         }
-         
-         viewTimeCardPage($timeCardInfo, true);  // read only
+         ViewTimeCard::render();
          break;
       }
       
       case 'edit_time_card':
       {
-         viewTimeCardPage($_SESSION['timeCardInfo'], false);  // editable
+         ViewTimeCard::render();  // TODO: editable
          break;
       }
       
