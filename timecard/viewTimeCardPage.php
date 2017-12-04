@@ -20,21 +20,48 @@ class ViewTimeCard
       
       $html =
 <<<HEREDOC
+      <style>
+         .label-div {
+            width: 100px;
+         }
+
+         .section-header-div {
+            align-self: center;
+         }
+      </style>
+
       <form id="timeCardForm" action="timeCard.php" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">View Time Card</div>
-         <div class="flex-vertical content-div" style="justify-content: space-evenly">
+         <!--
+         <div class="flex-vertical content-div" style="justify-content: space-evenly;">
             <div class="flex-horizontal">
                <div>Time Card</div>
                $dateDiv
             </div>
             <div class="flex-horizontal">
-               <div class="flex-vertical" style="justify-content: space-evenly">
+               <div class="flex-vertical" style="justify-content: space-evenly; align-items: flex-start;  margin-right: 20px;">
                   $operatorDiv
                   $jobDiv
                </div>
-               <div class="flex-vertical" style="justify-content: space-evenly">
+               <div class="flex-vertical" style="justify-content: space-evenly; align-items: flex-start; margin-left: 20px;">
                   $timeDiv
+                  $partsDiv
+               </div>
+            </div>
+            $commentsDiv
+         </div>
+         -->
+
+         <div class="flex-vertical content-div" style="justify-content: space-evenly;">
+            <div class="flex-horizontal">
+               <div>Time Card</div>
+               $dateDiv
+            </div>
+                  $operatorDiv
+                  $timeDiv
+               </div>
+                  $jobDiv
                   $partsDiv
                </div>
             </div>
@@ -74,14 +101,14 @@ HEREDOC;
       
       $html = 
 <<<HEREDOC
-      <div class="flex-vertical">
-         <div>Operator</div>
+      <div class="flex-vertical" style="align-items: flex-start;">
+         <div class="section-header-div">Operator</div>
          <div class="flex-horizontal">
-            Name
+            <div class="label-div">Name</div>
             <input type="text" class="medium-text-input" name="name" style="width:300px;" value="$name" disabled>
          </div>
          <div class="flex-horizontal">
-            Employee #
+            <div class="label-div">Employee #</div>
             <input type="text" class="medium-text-input" name="name" style="width:100px;" value="$timeCardInfo->employeeNumber" disabled>
          </div>
       </div>
@@ -94,14 +121,14 @@ HEREDOC;
    {
       $html =
 <<<HEREDOC
-      <div class="flex-vertical">
-         <div>Job</div>
+      <div class="flex-vertical" style="align-items: flex-start;">
+         <div class="section-header-div">Job</div>
          <div class="flex-horizontal">
-            Job #
+            <div class="label-div">Job #</div>
             <input type="text" class="medium-text-input" name="name" style="width:150px;" value="$timeCardInfo->jobNumber">
          </div>
          <div class="flex-horizontal">
-            Work center #
+            <div class="label-div">Work center #</div>
             <input type="text" class="medium-text-input" name="name" style="width:150px;" value="$timeCardInfo->wcNumber">
          </div>
       </div>
@@ -115,14 +142,14 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="flex-vertical">
-         <div>Time</div>
+         <div class="section-header-div">Time</div>
          <div class="flex-horizontal">
-            Setup time
+            <div class="label-div">Setup time</div>
             <input type="number" class="medium-text-input" min="0" max="10" style="width:50px;" value="$timeCardInfo->setupTimeHour">
             <input type="number" class="medium-text-input" min="0" max="45" style="width:50px;" value="$timeCardInfo->setupTimeMinute">
          </div>
          <div class="flex-horizontal">
-            Run time
+            <div class="label-div">Run time</div>
             <input type="number" class="medium-text-input" min="0" max="10" style="width:50px;" value="$timeCardInfo->runTimeHour">
             <input type="number" class="medium-text-input" min="0" max="45" style="width:50px;" value="$timeCardInfo->runTimeMinute">
          </div>
@@ -137,17 +164,17 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="flex-vertical">
-         <div>Part Counts</div>
+         <div class="section-header-div">Part Counts</div>
          <div class="flex-horizontal">
-            Pan count
+            <div class="label-div">Pan count</div>
             <input type="text" class="medium-text-input" name="name" style="width:100px;" value="$timeCardInfo->panCount">
          </div>
          <div class="flex-horizontal">
-            Good count
+            <div class="label-div">Good count</div>
             <input type="text" class="medium-text-input" name="name" style="width:100px;" value="$timeCardInfo->partsCount">
          </div>
          <div class="flex-horizontal">
-            Scrap count
+            <div class="label-div">Scrap count</div>
             <input type="text" class="medium-text-input" name="name" style="width:100px;" value="$timeCardInfo->scrapCount">
          </div>
       </div>
