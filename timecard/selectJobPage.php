@@ -53,7 +53,7 @@ HEREDOC;
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
          <input id="jobNumber-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="jobNumber" value="$jobNumber">
-         <label class="mdl-textfield__label" for="password_input">Job #</label>
+         <label class="mdl-textfield__label" for="jobNumber-input">Job #</label>
       </div>
 HEREDOC;
 

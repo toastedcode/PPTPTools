@@ -101,7 +101,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(-15)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeMinute-input" form="timeCardForm" class="large-text-input" name="runTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
+                  <input id="runTimeMinute-input" form="timeCardForm" class="large-text-input" name="runTimeMinute" type="number" min="0" max="45" value="$runTimeMinute">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(15)">
                      <i class="material-icons">add</i>
                   </button>

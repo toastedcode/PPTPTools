@@ -163,10 +163,10 @@ HEREDOC;
                <td class="largeTableOnly">{$row['PartsCount']}</td>
                <td class="largeTableOnly">{$row['ScrapCount']}</td>
                <td>
-                  <i class="material-icons" onclick="onEdit($timeCardId)">mode_edit</i>
+                  <i class="material-icons table-function-button" onclick="onEdit($timeCardId)">mode_edit</i>
                </td>
                <td>
-                  <i class="material-icons" onclick="onDelete($timeCardId)">delete</i>
+                  <i class="material-icons table-function-button" onclick="onDelete($timeCardId)">delete</i>
                </td>
             </tr>
 HEREDOC;

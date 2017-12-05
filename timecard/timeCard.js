@@ -60,6 +60,21 @@ function onEdit(timeCardId)
    form.submit();  	
 }
 
+function onPrint(timeCardId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'printTimeCardPage.php');
+   form.setAttribute("target", "_blank");
+   input = document.createElement('input');
+   input.setAttribute('name', 'timeCardId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', timeCardId);
+   form.appendChild(input);
+   document.body.appendChild(form);
+   form.submit();    
+}
+
 function onNewTimeCard()
 {
    form = document.createElement('form');

@@ -82,6 +82,8 @@ body {
    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
    background-color: #ebebeb;
    
+   cursor: pointer;
+   
    color: #000000;
    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
    font-size: 25px;
@@ -122,6 +124,10 @@ body {
 
 .table-nav-number-span {
    padding: 5px;
+}
+
+.table-function-button {
+	cursor: pointer;
 }
 
 .operator-input
@@ -186,4 +192,53 @@ input:checked + label > div  {
 	margin-left:10px;
 	margin-right:10px;
 }
+	
+/* viewTimeCardPage.php */	
+	
+.label-div {
+   width: 100px;
+}
 
+.section-header-div {
+   align-self: center;
+}
+
+.time-card-table-row {
+   margin-bottom: 5px;
+}
+
+.time-card-table-col {
+   flex-basis: 50%; 
+   align-items: flex-start;
+}
+
+.time-card-div {
+   width:700px;
+   align-items: stretch;
+}
+
+.time-card-div h1 {
+   font-weight:bold;
+   font-size: 40px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div h2 {
+   font-weight:bold;
+   font-size: 18px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div h3 {
+   font-weight:bold;
+   font-size: 14px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div .comments-input {
+   width:700px;
+   rows: 10;
+}

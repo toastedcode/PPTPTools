@@ -85,5 +85,15 @@ HEREDOC;
 HEREDOC;
    }
       
+   public function printButton($onClick)
+   {
+      $this->html .=
+      <<<HEREDOC
+      <button class="nav-button" onclick="$onClick">
+         <i class="material-icons">print</i>
+      </button>
+HEREDOC;
+   }
+      
    private $html = "";
 }

@@ -130,11 +130,11 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $result = $this->query("SELECT * FROM TimeCard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC;");
+         $result = $this->query("SELECT * FROM TimeCard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
       }
       else
       {
-         $result = $this->query("SELECT * FROM TimeCard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC;");
+         $result = $this->query("SELECT * FROM TimeCard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
       }
 
       return ($result);
