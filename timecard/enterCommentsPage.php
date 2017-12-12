@@ -16,7 +16,7 @@ class CommentsPage
          <div class="card-header-div">Add Comments</div>
          <div class="flex-horizontal content-div" style="height:400px;">
             
-            <textarea form="timeCardForm" class="comments-input" type="text" name="comments" rows="10" placeholder="Enter comments ...">$comments</textarea>
+            <textarea form="timeCardForm" class="comments-input" type="text" name="comments" rows="10" maxlength="256" placeholder="Enter comments ...">$comments</textarea>
       
          </div>
    

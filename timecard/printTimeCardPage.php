@@ -4,19 +4,19 @@ require_once 'viewTimeCardPage.php';
 
 class PrintTimeCard extends ViewTimeCard
 {
-   public static function getHtml()
+   public static function getHtml($readOnly)
    {
       $html = "";
       
       $timeCardInfo = ViewTimeCard::getTimeCardInfo();
       
       $titleDiv = ViewTimeCard::titleDiv();
-      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo);
+      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo, $readOnly);
       $operatorDiv = ViewTimeCard::operatorDiv($timeCardInfo);
-      $jobDiv = ViewTimeCard::jobDiv($timeCardInfo);
-      $timeDiv = ViewTimeCard::timeDiv($timeCardInfo);
-      $partsDiv = ViewTimeCard::partsDiv($timeCardInfo);
-      $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo);
+      $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, $readOnly);
+      $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, $readOnly);
+      $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
+      $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
       
       $html =
 <<<HEREDOC
@@ -42,9 +42,9 @@ HEREDOC;
       return ($html);
    }
    
-   public static function render()
+   public static function render($readOnly)
    {
-      echo (PrintTimeCard::getHtml());
+      echo (PrintTimeCard::getHtml($readOnly));
    }
 }
 ?>
@@ -64,7 +64,7 @@ HEREDOC;
 
 <body>
 
-<?php PrintTimeCard::render(); ?>
+<?php PrintTimeCard::render($readOnly = false); ?>
 
 </body>
 

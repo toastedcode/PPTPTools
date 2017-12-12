@@ -1,6 +1,7 @@
 <?php
 
 require_once 'database.php';
+require_once 'authentication.php';
 
 function loginPage()
 {
@@ -175,50 +176,21 @@ function selectActionPage()
 HEREDOC;
 }
 
-function isLoggedIn()
-{
-   return isset($_SESSION['username']);
-}
 
 function login($username, $password)
 {
-   $database = new PPTPDatabase("localhost", "root", "", "pptp");
-
-   $database->connect();
-
-   if ($database->isConnected())
-   {
-      $result = $database->getUser($username);
-
-      $row = $result->fetch_assoc();
-      if ($row)
-      {
-      	if ($password == $row['Password'])
-      	{
-      	   // Correct password.
-      	   $_SESSION['username'] = $username;
-      	}
-      	else
-      	{
-      	   // Incorrect password.
-      	}
-      }
-      else
-      {
-         // Invalid username.
-      }
-   }
+   $result = Authentication::authenticate($username, $password);
 }
 
 function logout()
 {
-   unset($_SESSION['username']);
+   Authentication::deauthenticate();
 }
 
 function pageHeader()
 {
    echo
-   <<<HEREDOC
+<<<HEREDOC
    <style>
       .mdl-layout__header {
          margin-bottom: 100px;
@@ -232,13 +204,22 @@ function pageHeader()
          <div class="mdl-layout-spacer"></div>
 HEREDOC;
    
-   if (isLoggedIn())
+   if (Authentication::isAuthenticated())
    {
+      $authenticatedUser = Authentication::getAuthenticatedUser();
+      
       echo
-      <<<HEREDOC
+<<<HEREDOC
       <!-- Navigation.-->
       <nav class="mdl-navigation">
+
+         <div style="display:flex; flex-direction:row;">
+            <i class="material-icons button-icon">person</i>
+            <div>&nbsp $authenticatedUser &nbsp | &nbsp</div>
+         </div>
+
          <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
+
       </nav>
 HEREDOC;
    }
@@ -285,7 +266,7 @@ switch ($action)
    }
 }
 
-$background = isLoggedIn() ? "#eee" : "url('./images/PPTPFloor.jpg') center / cover";
+$background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFloor.jpg') center / cover";
 
 echo 
 <<<HEREDOC
@@ -293,6 +274,9 @@ echo
 <html>
 
 <head>
+
+   <link rel="stylesheet" type="text/css" href="flex.css"/>
+
    <!--  Material Design Lite -->
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
@@ -317,7 +301,7 @@ echo
       <div class="page-content">
 HEREDOC;
 
-if (isLoggedIn())
+if (Authentication::isAuthenticated())
 {
    selectActionPage();
 }

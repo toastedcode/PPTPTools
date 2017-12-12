@@ -52,7 +52,7 @@ class TimeCardTable
    {
       $result = null;
       
-      $database = new PPTPDatabase("localhost", "root", "", "pptp");
+      $database = new PPTPDatabase();
       
       $database->connect();
       
@@ -68,7 +68,7 @@ class TimeCardTable
    {
       $operator = null;
       
-      $database = new PPTPDatabase("localhost", "root", "", "pptp");
+      $database = new PPTPDatabase();
       
       $database->connect();
       
@@ -146,8 +146,24 @@ HEREDOC;
             
             $operator = TimeCardTable::getOperator($row['EmployeeNumber']);
             $name = $operator["FirstName"] . " " . $operator["LastName"];
-            $setupTime = round($row['SetupTime'] / 60) . ":" . ($row['SetupTime'] % 60);
-            $runTime = round($row['RunTime'] / 60) . ":" . ($row['RunTime'] % 60);
+            $setupTime = round($row['SetupTime'] / 60) . ":" . sprintf("%02d", ($row['SetupTime'] % 60));
+            $runTime = round($row['RunTime'] / 60) . ":" . sprintf("%02d", ($row['RunTime'] % 60));
+            
+            $viewEditIcon = "";
+            $deleteIcon = "";
+            if (Authentication::getPermissions() < Permissions::ADMIN)
+            {
+               $viewEditIcon = 
+                  "<i class=\"material-icons table-function-button\" onclick=\"onViewTimeCard($timeCardId)\">visibility</i>";
+            }
+            else
+            {
+               $viewEditIcon =
+                  "<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard($timeCardId)\">mode_edit</i>";
+               
+               $deleteIcon = 
+                  "<i class=\"material-icons table-function-button\" onclick=\"onDeleteTimeCard($timeCardId)\">delete</i>";
+            }
             
             $html .=
 <<<HEREDOC
@@ -163,10 +179,10 @@ HEREDOC;
                <td class="largeTableOnly">{$row['PartsCount']}</td>
                <td class="largeTableOnly">{$row['ScrapCount']}</td>
                <td>
-                  <i class="material-icons table-function-button" onclick="onEdit($timeCardId)">mode_edit</i>
+                  $viewEditIcon
                </td>
                <td>
-                  <i class="material-icons table-function-button" onclick="onDelete($timeCardId)">delete</i>
+                  $deleteIcon
                </td>
             </tr>
 HEREDOC;
@@ -206,8 +222,9 @@ HEREDOC;
          
          for ($i = $firstPage; $i < $lastPage; $i++)
          {
+            $isCurrentPage = ($i == $currentPage) ? "table-nav-selected-page" : "";
             $page = $i + 1;
-            $html .= "<span class=\"table-nav-number-span\"><a href=\"#\" onclick=\"doPageNav($i)\">$page</a></span>";
+            $html .= "<span class=\"table-nav-number-span\"><a class=\"$isCurrentPage\" href=\"#\" onclick=\"doPageNav($i)\">$page</a></span>";
          }
          
          if ($currentPage < ($numPages - 1))
@@ -292,6 +309,12 @@ HEREDOC;
          <input type="date" id="endDateInput" name="endDate" value="$filter->endDate">
          &nbsp
          <button class="mdl-button mdl-js-button mdl-button--raised">Filter</button>
+         &nbsp | &nbsp 
+         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterToday()">Today</button>
+         &nbsp
+         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterYesterday()">Yesterday</button>
+         &nbsp
+         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterThisWeek()">This Week</button>
       </form>
       </div>
 HEREDOC;
@@ -315,7 +338,7 @@ HEREDOC;
    {
       $operators = null;
       
-      $database = new PPTPDatabase("localhost", "root", "", "pptp");
+      $database = new PPTPDatabase();
       
       $database->connect();
       
@@ -329,15 +352,21 @@ HEREDOC;
    
    private static function getFilter()
    {
-      $filter = isset($_SESSION['filter']) ? $_SESSION['filter'] : new Filter();
+      $filter = null;
+      
+      if (isset($_SESSION['filter']))
+      {
+         $filter = $_SESSION['filter'];
+      }
+      else 
+      {
+         $filter = new Filter();
+         $filter->startDate = date('Y-m-d', strtotime(' -1 day'));
+      }
       
       if (isset($_POST['startDate']))
       {
          $filter->startDate = $_POST['startDate'];
-      }
-      else
-      {
-         $filter->startDate = date('Y-m-d', strtotime(' -1 day'));
       }
       
       if (isset($_POST['endDate']))

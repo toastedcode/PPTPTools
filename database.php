@@ -83,6 +83,16 @@ class MySqlDatabase implements Database
 
 class PPTPDatabase extends MySqlDatabase
 {
+   public $SERVER = "localhost";
+   public $USER = "root";
+   public $PASSWORD = "";
+   public $DATABASE = "pptp";
+   
+   public function __construct()
+   {
+      parent::__construct($this->SERVER, $this->USER, $this->PASSWORD, $this->DATABASE);
+   }
+   
    public function getOperators()
    {
       $result = $this->query("SELECT * FROM Operator ORDER BY LastName ASC");

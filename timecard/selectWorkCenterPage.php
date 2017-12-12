@@ -39,7 +39,7 @@ HEREDOC;
       
       $selectedWorkCenter = SelectWorkCenter::getWorkCenter();
       
-      $database = new PPTPDatabase("localhost", "root", "", "pptp");
+      $database = new PPTPDatabase();
       
       $database->connect();
       

@@ -25,6 +25,11 @@ body {
    color: #ffffff;
 }
 
+.nav-username {
+   font-size: 14px;
+   color: #ffffff;
+}
+
 .nav-link {
    font-size: 14px;
    color: #ffffff;
@@ -124,6 +129,10 @@ body {
 
 .table-nav-number-span {
    padding: 5px;
+}
+
+.table-nav-selected-page {
+	font-weight: bold;
 }
 
 .table-function-button {

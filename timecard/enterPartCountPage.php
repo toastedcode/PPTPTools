@@ -33,6 +33,14 @@ class EnterPartCount
       <script type="text/javascript">
          initKeypad();
          document.getElementById("panCount-input").focus();
+
+         var panCountValidator = new IntValidator("panCount-input", 1, 1, 4, false);
+         var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
+         var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
+
+         panCountValidator.init();
+         partsCountValidator.init();
+         scrapCountValidator.init();
       </script>
 HEREDOC;
       
@@ -56,19 +64,19 @@ HEREDOC;
 <<<HEREDOC
       <!-- Pan count -->
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="panCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="panCount" value="$panCount">
+         <input id="panCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="panCount" oninput="this.validator.validate()" value="$panCount">
          <label class="mdl-textfield__label" for="panCount-input">Pan count</label>
       </div>
 
       <!-- Parts count -->
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="partsCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="partsCount" value="$partsCount">
+         <input id="partsCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="partsCount" oninput="this.validator.validate()" value="$partsCount">
          <label class="mdl-textfield__label" for="partsCount-input">Good part count</label>
       </div>
 
       <!-- Scrap count -->
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="scrapCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="scrapCount" min="0" max="10000" value="$scrapCount">
+         <input id="scrapCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="scrapCount" oninput="this.validator.validate()" value="$scrapCount">
          <label class="mdl-textfield__label" for="scrapCount-input">Scrap part count</label>
       </div>
 HEREDOC;

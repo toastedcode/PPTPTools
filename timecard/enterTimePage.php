@@ -23,6 +23,18 @@ class EnterTime
          $navBar
          
       </div>
+
+      <script>
+         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
+         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
+         var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
+         var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
+
+         setupTimeHourValidator.init();
+         setupTimeMinuteValidator.init();
+         runTimeHourValidator.init();
+         runTimeMinuteValidator.init();
+      </script>
 HEREDOC;
       
       return ($html);
@@ -55,7 +67,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(-1)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="setupTimeHour-input" form="timeCardForm" class="large-text-input" name="setupTimeHour" type="number" min="0" max="10" value="$setupTimeHour">
+                  <input id="setupTimeHour-input" form="timeCardForm" class="large-text-input" name="setupTimeHour" type="number" oninput="this.validator.validate()" value="$setupTimeHour">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(1)">
                      <i class="material-icons">add</i>
                   </button> 
@@ -68,7 +80,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(-15)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="setupTimeMinute-input" form="timeCardForm" class="large-text-input" name="setupTimeMinute" type="number" min="0" max="45" value="$setupTimeMinute">
+                  <input id="setupTimeMinute-input" form="timeCardForm" class="large-text-input" name="setupTimeMinute" type="number" oninput="this.validator.validate()" value="$setupTimeMinute">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(15)">
                      <i class="material-icons">add</i>
                   </button>
@@ -88,7 +100,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeHour(-1)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeHour-input" form="timeCardForm" class="large-text-input" name="runTimeHour" type="number" min="0" max="10" value="$runTimeHour">
+                  <input id="runTimeHour-input" form="timeCardForm" class="large-text-input" name="runTimeHour" type="number" oninput="this.validator.validate()" value="$runTimeHour">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeHour(1)">
                      <i class="material-icons">add</i>
                   </button>
@@ -101,7 +113,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(-15)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeMinute-input" form="timeCardForm" class="large-text-input" name="runTimeMinute" type="number" min="0" max="45" value="$runTimeMinute">
+                  <input id="runTimeMinute-input" form="timeCardForm" class="large-text-input" name="runTimeMinute" type="number" oninput="this.validator.validate()" value="$runTimeMinute">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(15)">
                      <i class="material-icons">add</i>
                   </button>

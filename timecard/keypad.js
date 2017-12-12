@@ -37,10 +37,15 @@ function onKeypadPressed(key)
 	      {
 	         ae.value = ae.value.substr(0, (ae.value.length - 1))
 	      }
-	      else
+	      else if ((typeof ae.maxLength === "undefined") || (ae.value.length < ae.maxLength))
 	      {
 	         ae.value += keyValue;
 	      }
+	      
+         if (!(typeof ae.validator === "undefined"))
+         {
+            ae.validator.validate();
+         }
 	   }
    }
 }

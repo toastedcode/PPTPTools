@@ -1,47 +1,50 @@
-function onDelete(timeCardId)
+function onDeleteTimeCard(timeCardId)
 {
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'timeCard.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'delete_time_card');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'timeCardId');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', timeCardId);
-   form.appendChild(input);
-   
-   employeeNumber = document.getElementById('employeeNumberInput').value;
-   input = document.createElement('input');
-   input.setAttribute('name', 'employeeNumber');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', employeeNumber);
-   form.appendChild(input);
-   
-   startDate = document.getElementById('startDateInput').value;
-   input = document.createElement('input');
-   input.setAttribute('name', 'startDate');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', startDate);
-   form.appendChild(input);
-   
-   endDate = document.getElementById('endDateInput').value;
-   input = document.createElement('input');
-   input.setAttribute('name', 'endDate');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', endDate);
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();   
+   if (confirm("Are you sure you want to delete this time card?"))
+   {
+      form = document.createElement('form');
+      form.setAttribute('method', 'POST');
+      form.setAttribute('action', 'timeCard.php');
+      
+      input = document.createElement('input');
+      input.setAttribute('name', 'action');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', 'delete_time_card');
+      form.appendChild(input);
+      
+      input = document.createElement('input');
+      input.setAttribute('name', 'timeCardId');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', timeCardId);
+      form.appendChild(input);
+      
+      employeeNumber = document.getElementById('employeeNumberInput').value;
+      input = document.createElement('input');
+      input.setAttribute('name', 'employeeNumber');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', employeeNumber);
+      form.appendChild(input);
+      
+      startDate = document.getElementById('startDateInput').value;
+      input = document.createElement('input');
+      input.setAttribute('name', 'startDate');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', startDate);
+      form.appendChild(input);
+      
+      endDate = document.getElementById('endDateInput').value;
+      input = document.createElement('input');
+      input.setAttribute('name', 'endDate');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', endDate);
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      form.submit();
+   }
 }
 
-function onEdit(timeCardId)
+function onViewTimeCard(timeCardId)
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
@@ -56,11 +59,37 @@ function onEdit(timeCardId)
    input.setAttribute('type', 'hidden');
    input.setAttribute('value', timeCardId);
    form.appendChild(input);
+   
    document.body.appendChild(form);
-   form.submit();  	
+   form.submit();
 }
 
-function onPrint(timeCardId)
+function onEditTimeCard(timeCardId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'timeCard.php');
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'edit_time_card');
+   form.appendChild(input);
+   input = document.createElement('input');
+   input.setAttribute('name', 'action');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'edit_time_card');
+   form.appendChild(input);
+   input = document.createElement('input');
+   input.setAttribute('name', 'timeCardId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', timeCardId);
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();
+}
+
+function onPrintTimeCard(timeCardId)
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
@@ -71,6 +100,7 @@ function onPrint(timeCardId)
    input.setAttribute('type', 'hidden');
    input.setAttribute('value', timeCardId);
    form.appendChild(input);
+   
    document.body.appendChild(form);
    form.submit();    
 }
@@ -90,6 +120,7 @@ function onNewTimeCard()
    input.setAttribute('type', 'hidden');
    input.setAttribute('value', 'new_time_card');
    form.appendChild(input);
+   
    document.body.appendChild(form);
    form.submit();  	
 }
@@ -109,6 +140,7 @@ function onCancel()
    input.setAttribute('type', 'hidden');
    input.setAttribute('value', 'cancel_time_card');
    form.appendChild(input);
+   
    document.body.appendChild(form);
    form.submit();  	
 }
@@ -185,15 +217,15 @@ function validateWorkCenter()
 
 function validateJob()
 {
-   var valid = false;
+   valid = false;
 
-   value = document.getElementById("jobNumber-input").value;
-   
-   valid = !((value == null) || (value == "") || isNaN(value));
-   
-   if (!valid)
+   if (!(document.getElementById("jobNumber-input").validator.validate()))
    {
-      alert("Please enter a valid job number.")
+      alert("Please enter a valid job number.")      
+   }
+   else
+   {
+      valid = true;
    }
    
    return (valid);
@@ -203,26 +235,19 @@ function validateTime()
 {
    var valid = false;
    
-   hours = document.getElementById("setupTimeHour-input").value;
-   minutes = document.getElementById("setupTimeMinute-input").value;
-   
-   valid = !((hours == 0) && (minutes == 0));
-   
-   if (!valid)
+   if (!(document.getElementById("setupTimeHour-input").validator.validate() &&
+         document.getElementById("setupTimeMinute-input").validator.validate()))
    {
       alert("Please enter a valid setup time.")
    }
+   else if (!(document.getElementById("runTimeHour-input").validator.validate() &&
+              document.getElementById("runTimeMinute-input").validator.validate()))
+   {
+      alert("Please enter a valid run time.")      
+   }
    else
    {
-      hours = document.getElementById("runTimeHour-input").value;
-      minutes = document.getElementById("runTimeMinute-input").value;
-      
-      valid = !((hours == 0) && (minutes == 0));
-   
-      if (!valid)
-      {
-         alert("Please enter a valid run time.")
-      }
+      valid = true;
    }
    
    return (valid);
@@ -232,28 +257,41 @@ function validatePartCount()
 {
    var valid = false;
 
-   value = document.getElementById("panCount-input").value;
-   
-   valid = !((value == null) || (value == "") || (value == 0));
-   
-   if (!valid)
+   if (!(document.getElementById("panCount-input").validator.validate()))
    {
       alert("Please enter a valid pan count.")
    }
    else
    {
-      value = document.getElementById("partsCount-input").value + 
-              document.getElementById("scrapCount-input").value;
+      partsCountInput = document.getElementById("partsCount-input");
+      scrapCountInput = document.getElementById("scrapCount-input");
       
-      valid = (value > 0);
+      totalCount = parseInt(partsCountInput.value) + parseInt(scrapCountInput.value);
       
-      if (!valid)
+      if (!partsCountInput.validator.validate())
       {
-         alert("Please enter a valid parts count.")
+         alert("Please enter a valid good parts count.");
+      }
+      else if (!scrapCountInput.validator.validate())
+      {
+         alert("Please enter a valid scrap count.");
+      }
+      else if (totalCount == 0)
+      {
+         alert("Please enter some part counts.");
+      }
+      else
+      {
+         valid = true;
       }
    }
 
    return (valid);
+}
+
+function validateCard()
+{
+   return (validateJob() && validateTime() && validatePartCount());
 }
 
 function changeSetupTimeHour(delta)
@@ -298,4 +336,61 @@ function changeRunTimeMinute(delta)
    newValue = Math.max(0, Math.min(newValue, 45));
    
    field.value = newValue;
+}
+
+function filterToday()
+{
+   var startDateInput = document.querySelector('#startDateInput');
+   var endDateInput = document.querySelector('#endDateInput');
+   
+   if ((startDateInput != null) && (endDateInput != null))
+   {
+      var today = new Date();
+      
+      startDateInput.value = formattedDate(today); 
+      endDateInput.value = formattedDate(today);
+   }
+}
+
+function filterYesterday()
+{
+   var startDateInput = document.querySelector('#startDateInput');
+   var endDateInput = document.querySelector('#endDateInput');
+   
+   if ((startDateInput != null) && (endDateInput != null))
+   {
+      var yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      startDateInput.value = formattedDate(yesterday); 
+      endDateInput.value = formattedDate(yesterday);
+   }
+}
+
+function filterThisWeek()
+{
+   var startDateInput = document.querySelector('#startDateInput');
+   var endDateInput = document.querySelector('#endDateInput');
+   
+   if ((startDateInput != null) && (endDateInput != null))
+   {
+      var today = new Date();
+      var startOfWeek = new Date();
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      
+      startDateInput.value = formattedDate(startOfWeek); 
+      endDateInput.value = formattedDate(today);
+   }
+}
+
+function formattedDate(date)
+{
+   // Convert to Y-M-D format, per HTML5 Date control.
+   // https://stackoverflow.com/questions/12346381/set-date-in-input-type-date
+   var day = ("0" + date.getDate()).slice(-2);
+   var month = ("0" + (date.getMonth() + 1)).slice(-2);
+   
+   var formattedDate = date.getFullYear() + "-" + (month) + "-" + (day);
+
+   return (formattedDate);
 }

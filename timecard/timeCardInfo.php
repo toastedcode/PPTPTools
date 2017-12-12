@@ -20,7 +20,7 @@ function getTimeCardInfo($timeCardId)
 {
    $timeCardInfo = new TimeCardInfo();
    
-   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+   $database = new PPTPDatabase();
    
    $database->connect();
    

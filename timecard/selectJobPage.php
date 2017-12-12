@@ -34,6 +34,9 @@ class SelectJob
       <script type="text/javascript">
          initKeypad();
          document.getElementById("jobNumber-input").focus();
+
+         var jobValidator = new IntValidator("jobNumber-input", 5, 1, 10000, false);
+         jobValidator.init();
       </script>
 HEREDOC;
       
@@ -52,7 +55,7 @@ HEREDOC;
       $html = 
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="jobNumber-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="jobNumber" value="$jobNumber">
+         <input id="jobNumber-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="jobNumber" oninput="this.validator.validate()" value="$jobNumber">
          <label class="mdl-textfield__label" for="jobNumber-input">Job #</label>
       </div>
 HEREDOC;

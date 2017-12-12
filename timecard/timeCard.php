@@ -1,6 +1,7 @@
 <?php
 
 require_once '../database.php';
+require_once '../authentication.php';
 require_once 'keypad.php';
 require_once 'header.php';
 require_once 'timeCardInfo.php';
@@ -68,7 +69,15 @@ function processAction($action)
          break;
       }
       
-      case 'add_time_card':
+      case 'edit_time_card':
+      {
+         if (isset($_POST['timeCardId']))
+         {
+            $_SESSION["timeCardInfo"] = getTimeCardInfo($_POST['timeCardId']);
+         }
+         break;
+      }
+      
       case 'save_time_card':
       {
          updateTimeCardInfo();
@@ -134,13 +143,13 @@ function processView($view)
       
       case 'view_time_card':
       {
-         ViewTimeCard::render();
+         ViewTimeCard::render($readOnly = true);
          break;
       }
       
       case 'edit_time_card':
       {
-         ViewTimeCard::render();  // TODO: editable
+         ViewTimeCard::render($readOnly = false);
          break;
       }
       
@@ -192,6 +201,7 @@ function updateTimeCardInfo()
    
    if (isset($_POST['runTimeHour']))
    {
+      echo "runTimeHour: " . $_POST['runTimeHour'];
       $_SESSION["timeCardInfo"]->runTimeHour = $_POST['runTimeHour'];
    }
    
@@ -241,7 +251,7 @@ function updateTimeCard($timeCardInfo)
 {
    $success = false;
    
-   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+   $database = new PPTPDatabase();
    
    $database->connect();
    
@@ -284,6 +294,12 @@ function updateTimeCard($timeCardInfo)
 <?php 
 session_start();
 
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../pptpTools.php');
+   exit;
+}
+
 processAction(getAction());
 ?>
 
@@ -296,6 +312,7 @@ processAction(getAction());
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script src="timeCard.js"></script>
+<script src="../validate.js"></script>
 </head>
 
 <body>
