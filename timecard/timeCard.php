@@ -201,7 +201,6 @@ function updateTimeCardInfo()
    
    if (isset($_POST['runTimeHour']))
    {
-      echo "runTimeHour: " . $_POST['runTimeHour'];
       $_SESSION["timeCardInfo"]->runTimeHour = $_POST['runTimeHour'];
    }
    
