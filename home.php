@@ -56,7 +56,7 @@ function loginPage()
       </div>
       <div class="mdl-card__actions mdl-card--border">
          <div class="login-form">
-         <form action="pptpTools.php" method="POST">
+         <form method="POST">
             <input type="hidden" name="action" value="login">
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                <input id="username_input" class="mdl-textfield__input" type="text" name="username" value="$username">
@@ -208,6 +208,8 @@ HEREDOC;
    {
       $authenticatedUser = Authentication::getAuthenticatedUser();
       
+      $self = $_SERVER['PHP_SELF'];
+      
       echo
 <<<HEREDOC
       <!-- Navigation.-->
@@ -218,7 +220,7 @@ HEREDOC;
             <div>&nbsp $authenticatedUser &nbsp | &nbsp</div>
          </div>
 
-         <a class="mdl-navigation__link" href="pptpTools.php?action=logout">Logout</a>
+         <a class="mdl-navigation__link" href="$self?action=logout">Logout</a>
 
       </nav>
 HEREDOC;
