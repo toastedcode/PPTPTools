@@ -95,7 +95,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getOperators()
    {
-      $result = $this->query("SELECT * FROM Operator ORDER BY LastName ASC");
+      $result = $this->query("SELECT * FROM operator ORDER BY LastName ASC");
 
       return ($result);
    }
@@ -105,7 +105,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $operator = NULL;
 
-      $result = $this->query("SELECT * FROM Operator WHERE EmployeeNumber=" . $employeeNumber . ";");
+      $result = $this->query("SELECT * FROM operator WHERE EmployeeNumber=" . $employeeNumber . ";");
 
       if ($row = $result->fetch_assoc())
       {
@@ -117,7 +117,7 @@ class PPTPDatabase extends MySqlDatabase
 
    public function getWorkCenters()
    {
-      $result = $this->query("SELECT * FROM WorkCenter ORDER BY WCNumber ASC");
+      $result = $this->query("SELECT * FROM workcenter ORDER BY WCNumber ASC");
 
       return ($result);
    }
@@ -125,7 +125,7 @@ class PPTPDatabase extends MySqlDatabase
    public function getTimeCard(
       $timeCardId)
    {
-      $query = "SELECT * FROM TimeCard WHERE TimeCard_Id = $timeCardId";
+      $query = "SELECT * FROM timecard WHERE TimeCard_Id = $timeCardId";
       
       $result = $this->query($query);
       
@@ -140,11 +140,11 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $result = $this->query("SELECT * FROM TimeCard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $result = $this->query("SELECT * FROM timecard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
       }
       else
       {
-         $result = $this->query("SELECT * FROM TimeCard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $result = $this->query("SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
       }
 
       return ($result);
@@ -154,7 +154,7 @@ class PPTPDatabase extends MySqlDatabase
       $timeCard)
    {
       $query =
-         "INSERT INTO TimeCard " .
+         "INSERT INTO timecard " .
          "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
          "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
@@ -169,7 +169,7 @@ class PPTPDatabase extends MySqlDatabase
       $timeCard)
    {
       $query =
-      "UPDATE TimeCard " .
+      "UPDATE timecard " .
       "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$timeCard->date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
       "WHERE TimeCard_Id = $id;";
      
@@ -181,7 +181,7 @@ class PPTPDatabase extends MySqlDatabase
    public function deleteTimeCard(
       $timeCardId)
    {
-      $query = "DELETE FROM TimeCard WHERE TimeCard_Id = $timeCardId;";
+      $query = "DELETE FROM timecard WHERE TimeCard_Id = $timeCardId;";
       
       $result = $this->query($query);
       
@@ -190,7 +190,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUser($username)
    {
-      $query = "SELECT * FROM User WHERE Username = \"$username\";";
+      $query = "SELECT * FROM user WHERE Username = \"$username\";";
       
       $result = $this->query($query);
       
