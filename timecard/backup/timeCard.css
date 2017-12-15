@@ -1,0 +1,104 @@
+@CHARSET "ISO-8859-1";
+
+.mdl-layout {
+   background: #eee;
+}
+
+.mdl-layout__header {
+   margin-bottom: 25px;
+}
+
+.pptpNavButton {
+   height: auto;
+   font-size: 25px;
+   padding: 20px 20px;
+   margin-right: 20px;
+   width: 150px;
+}
+
+.view-time-cards-card {
+   width: 80%;
+   height: 625px;
+   margin: auto;
+}
+
+.view-time-cards-table-container {
+   margin: auto;
+   padding: 20px;
+}
+
+.filter-container {
+   margin: auto;
+   display: table;
+}
+
+.table-nav-div {
+   display: table;
+   margin: auto;
+}
+
+.table-nav-span {
+   padding: 20px;
+}
+
+.table-nav-number-span {
+   padding: 5px;
+}
+
+a {
+   color: #1E7EC8;
+   text-decoration: none; // changed from text-decoration:underline
+}
+
+a:hover {
+   text-decoration: underline;
+}
+
+.nav-div {
+   margin: auto;
+}
+
+.wide-nav-button {
+   width:250px;
+}
+
+.select-operator-card {
+   width: 80%;
+   height: 625px;
+   margin: auto;
+}
+
+.inner-div {
+   margin: auto;
+   display: table;
+   padding-left: 20px;
+   padding-right: 20px; 
+}
+
+.largeTableOnly {
+   display: none;
+}
+
+.mdl-card__title {
+  height: 50px;
+  background: #f4b942;
+}
+
+.mdl-card__title-text {
+  color: #424242;
+  font-size: 18px;
+}
+
+.largeTextInput {
+   font-size: 40px;
+}
+
+.input-div {
+   padding-right: 50px;
+}
+
+.adjustTimeButton {
+   border-radius: 8px;
+   width: 50px;
+   height: 50px;
+}

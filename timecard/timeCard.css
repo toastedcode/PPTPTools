@@ -1,0 +1,253 @@
+@CHARSET "ISO-8859-1";
+
+body {
+   margin: 0px;
+   font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+   background: #eee;
+}
+
+.header-div {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   align-items: center;
+   
+   height: 50px;
+   
+   background: #484fb0;
+   
+   padding-left: 50px;
+   padding-right: 50px;
+}
+
+.page-title {
+   font-size: 25px;
+   color: #ffffff;
+}
+
+.nav-username {
+   font-size: 14px;
+   color: #ffffff;
+}
+
+.nav-link {
+   font-size: 14px;
+   color: #ffffff;
+   text-decoration: none; /* changed from text-decoration:underline */
+}
+
+.nav-link:hover {
+   text-decoration: underline;
+}
+
+.card-div {
+   justify-content: flex-start;
+
+   background: #ffffff;
+   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+   align-items: stretch;
+   
+   width: 80%;
+   height: 625px;
+   
+   padding-bottom: 20px;
+}
+
+.card-header-div {
+   display: flex;
+   flex-direction: row;
+   justify-content: flex-start;
+   align-items: center;
+   
+   background: #f2b955;
+   font-size: 16px;
+   color: #ffffff;
+   
+   padding-left: 20px;
+   
+   height: 50px;
+}
+
+.content-div {
+   flex-grow: 1;
+   padding-top: 20px;
+   height:400px
+}
+
+.nav-div {
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   align-items: center;
+}
+
+.nav-button {
+   border-width: 0;
+   outline: none;
+   box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+   background-color: #ebebeb;
+   
+   cursor: pointer;
+   
+   color: #000000;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   font-size: 25px;
+   
+   height: auto;
+   width: 150px;
+
+   padding: 20px 20px;
+   
+   margin-right: 20px;
+   margin-left: 20px;
+}
+
+ .nav-button-highlight {
+   background-color: #484fb0;
+   color: #ffffff;
+}
+
+.nav-button-wide {
+	width: 250px;
+}
+
+.comments-input {
+   width:500px;
+   rows: 10;
+   
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   font-size: 16px;
+}
+
+.table-nav-div {
+   padding-top: 20px;
+}
+
+.table-nav-span {
+   padding: 20px;
+}
+
+.table-nav-number-span {
+   padding: 5px;
+}
+
+.table-nav-selected-page {
+	font-weight: bold;
+}
+
+.table-function-button {
+	cursor: pointer;
+}
+
+.operator-input
+{
+   visibility: hidden;
+   position: absolute;
+}
+
+.select-button {
+	display: flex;
+   flex-direction: row;
+   align-items: center;
+	
+   margin: 20px 20px 0 0;
+   padding: 5px 5px;
+
+   font-size: 18px;
+   color: #fff;
+   text-shadow: -1px 1px #417cb8;
+   
+   line-height: 1.8;
+   appearance: none;
+   box-shadow: none;
+   border-radius: 0;
+   background-color: #6496c8;
+   border: none;
+}
+
+.select-button:hover {
+   background-color: #346392;
+   text-shadow: -1px 1px #27496d;
+}
+
+.operator-select-button {
+   width: 180px;
+   height: 50px;
+}
+
+.wc-select-button {
+   width: 100px;
+   height: 50px;
+}
+
+input:checked + label > div  {
+   background-color: #27496d;
+   text-shadow: -1px 1px #193047;
+}
+
+.button-icon {
+   font-size: 50px;
+}
+
+.large-text-input {
+   font-size: 40px;
+}
+
+.medium-text-input {
+   font-size: 20px;
+}
+
+.adjust-time-button {
+	margin-left:10px;
+	margin-right:10px;
+}
+	
+/* viewTimeCardPage.php */	
+	
+.label-div {
+   width: 100px;
+}
+
+.section-header-div {
+   align-self: center;
+}
+
+.time-card-table-row {
+   margin-bottom: 5px;
+}
+
+.time-card-table-col {
+   flex-basis: 50%; 
+   align-items: flex-start;
+}
+
+.time-card-div {
+   width:700px;
+   align-items: stretch;
+}
+
+.time-card-div h1 {
+   font-weight:bold;
+   font-size: 40px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div h2 {
+   font-weight:bold;
+   font-size: 18px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div h3 {
+   font-weight:bold;
+   font-size: 14px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div .comments-input {
+   width:700px;
+   rows: 10;
+}

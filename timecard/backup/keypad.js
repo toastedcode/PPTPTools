@@ -1,5 +1,6 @@
 function initKeypad()
 {
+	
    var keys = document.getElementsByClassName('keypadKey');
    for (var i = 0; i < keys.length; i++)
    {
@@ -12,17 +13,11 @@ function initKeypad()
       };
 
       // Set onmousedown function to keep it from stealing focus when pressed.
-      key.onmousedown = function()
+      key.onmousedown = function(event)
       {
-         preventFocus();
+    	  event.preventDefault();
       }
    }
-}
-
-function preventFocus()
-{
-   var ae = document.activeElement;
-   setTimeout(function(){ ae.focus() }, 1);
 }
 
 function onKeypadPressed(key)
@@ -30,20 +25,23 @@ function onKeypadPressed(key)
    var keyValue = key.innerHTML;
 
    var ae = document.activeElement;
-
-   if (ae && ae.classList.contains("keypadInputCapable"))
+   
+   if (ae != null)
    {
-      if (keyValue == "Clr")
-      {
-         ae.value = "";
-      }
-      else if (keyValue == "Bksp")
-      {
-         ae.value = ae.value.substr(0, (ae.value.length - 1))
-      }
-      else
-      {
-         ae.value += keyValue;
-      }
+	   if (ae && ae.classList.contains("keypadInputCapable"))
+	   {
+	      if (keyValue == "Clr")
+	      {
+	         ae.value = "";
+	      }
+	      else if (keyValue == "Bksp")
+	      {
+	         ae.value = ae.value.substr(0, (ae.value.length - 1))
+	      }
+	      else
+	      {
+	         ae.value += keyValue;
+	      }
+	   }
    }
 }
