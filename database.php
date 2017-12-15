@@ -197,6 +197,15 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getSensors()
+   {
+      $query = "SELECT * FROM sensor ORDER BY wcNumber ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function getSensor($sensorId)
    {
       $query = "SELECT * FROM sensor WHERE sensorId = \"$sensorId\";";

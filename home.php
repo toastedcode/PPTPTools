@@ -161,7 +161,7 @@ function selectActionPage()
            Pan Tickets
            <br/><br/>
         </button>
-        <button type="button" class="actionButton" onclick="location.href='partsWasher.html';">
+        <button type="button" class="actionButton" onclick="location.href='machineStatus/machineStatus.php?view=view_machine_status';">
            <i class="material-icons action-button-icon">opacity</i>
            <br/>
            Parts Washer Log

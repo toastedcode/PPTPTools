@@ -4,9 +4,8 @@
    
 .machine-status-div {
    width: 200px;
-   /*border-style: solid;
-   border-weight: 1px;
-   border-color: black;*/
+   margin-right: 50px;
+   
    align-items: stretch;
    
    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
@@ -14,8 +13,24 @@
 }
 
 .machine-status-header-div {
-   background: #5ac246;
+   background: grey;
    padding: 5px;
+}
+
+.unassigned .machine-status-header-div {
+   background: grey;
+}
+
+.disconnected .machine-status-header-div {
+   background: red;
+}
+
+.idle .machine-status-header-div {
+   background: orange;
+}
+
+.active .machine-status-header-div {
+   background: #5ac246;
 }
 
 .machine-status-body-div {

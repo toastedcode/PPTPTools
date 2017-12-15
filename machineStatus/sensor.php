@@ -47,6 +47,12 @@ if (isset($_GET["sensorId"]) && (isset($_GET["action"])))
          break;
       }
       
+      case "ping":
+      {
+         updatePartCount($sensorId, 0);
+         break;
+      }
+      
       case "reset":
       {
          resetPartCount($sensorId);

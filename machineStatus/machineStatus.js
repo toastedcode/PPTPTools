@@ -1,3 +1,30 @@
+function updateMachineStatus()
+{
+   requestURl = "viewMachineStatusPage.php?action=updateMachineStatus";
+   
+   var xhttp = new XMLHttpRequest();
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {
+         updateMachineStatusContainer(this.responseText);
+      }
+   };
+   xhttp.open("GET", requestURl, true);
+   xhttp.send();   
+}
+
+function updateMachineStatusContainer(innerHtml)
+{
+   container = document.getElementById("machine-status-container");
+   
+   if (container)
+   {
+      container.innerHTML = innerHtml;
+   }
+}
+
+/*
 function updateStatus(wcNumber)
 {
    requestURl = "retrieveStatus.php?wcNumber=" + wcNumber;
@@ -40,3 +67,4 @@ function updatePartCount(wcNumber, partCount)
       partCountDiv.innerHTML = machineStatus.partCount;
    }
 }
+*/
