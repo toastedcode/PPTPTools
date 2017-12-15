@@ -67,6 +67,7 @@ class MachineStatusIndicator
       if ($this->database->isConnected())
       {
          $status = strtolower(MachineStatus::toString($this->getStatus()));
+         $statusTime = $this->getStatusTime();
          $partCount = $this->getPartCount();
          $hourlyGraph = $this->getHourlyGraph();
          $startTime = "6am";
@@ -76,21 +77,28 @@ class MachineStatusIndicator
 <<<HEREDOC
          <div class="flex-vertical machine-status-div $status">
             <div class="flex-vertical machine-status-header-div">
-               <div class="flex-horizontal">$this->wcNumber</div>
-               <div class="flex-horizontal">$status</div>
+               <div class="flex-horizontal wc-text">$this->wcNumber</div>
+               <div id="status-time-$this->wcNumber class="flex-horizontal small-text">$statusTime</div>
             </div>
             <div class="flex-horizontal machine-status-body-div">
                <div class="flex-vertical machine-status-part-count-div">
-                  <div class="flex-horizontal">$partCount</div>
-                  <div class="flex-horizontal">Part Count</div>
+                  <div id="part-count-$this->wcNumber" class="flex-horizontal part-count-text">$partCount</div>
+                  <div class="flex-horizontal small-text">Part Count</div>
                </div>
             </div>
             $hourlyGraph
-            <div class="flex-horizontal machine-status-footer-div">
+            <div class="flex-horizontal machine-status-footer-div small-text">
                <div>$startTime</div>
                <div>$endTime</div>
             </div>               
          </div>
+
+         <script src="machineStatus.js"></script>
+         <script>
+            //var machineMonitor = new MachineMonitor($this->wcNumber);
+            //machineMonitor.onTimeout();
+           setInterval(function(){updateStatus($this->wcNumber);}, 1000);
+         </script>
 HEREDOC;
       }
       
@@ -162,49 +170,11 @@ HEREDOC;
 ?>
 
 <html>
-<style>
-   /* https://support.machinemetrics.com/hc/en-us/articles/115000488567-Real-time-Machine-Utilization-Dashboards-Utilization-Reporting*/
-   
-   .machine-status-div {
-      width: 200px;
-      border-style: solid;
-      border-weight: 1px;
-      border-color: black;
-      align-items: stretch;
-   }
-   
-   .machine-status-header-div {
-      background: #5ac246;
-   }
-   
-   .machine-status-body-div {
-      background: #00a600;
-      height: 200px;
-   }
-   
-   .machine-status-part-count-div {
-      background: #056300;
-      border-radius: 50%;
-      height: 100%;
-   }
-   
-   .machine-status-graph-div {
-      background: 5ac246;
-   }
-   
-   .graph-bar {
-      background: 056300;
-      width: 10px;
-   }
-   
-   .machine-status-footer-div {
-      background: #5ac246;
-   }
-   
-</style>
+
 <link rel="stylesheet" type="text/css" href="../flex.css"/>
+<link rel="stylesheet" type="text/css" href="machineStatus.css"/>
 
 <body>
-   <?php $indicator = new MachineStatusIndicator(101); echo ($indicator->render());?>
+   <?php $indicator = new MachineStatusIndicator(813); echo ($indicator->render());?>
 </body>
 </html>
