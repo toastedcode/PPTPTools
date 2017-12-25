@@ -49,7 +49,7 @@ HEREDOC;
    {
       $this->html .=
       <<<HEREDOC
-      <button class="nav-button nav-button-wide" onclick="location.href='../pptptools.php'">
+      <button class="nav-button nav-button-wide" onclick="location.href='../home.php'">
          Main Menu
       </button>
 HEREDOC;

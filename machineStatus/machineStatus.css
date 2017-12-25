@@ -1,0 +1,77 @@
+@CHARSET "ISO-8859-1";
+
+/* https://support.machinemetrics.com/hc/en-us/articles/115000488567-Real-time-Machine-Utilization-Dashboards-Utilization-Reporting */
+   
+.machine-status-div {
+   width: 200px;
+   margin-right: 50px;
+   
+   align-items: stretch;
+   
+   font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+   color: #ffffff;
+}
+
+.machine-status-header-div {
+   background: grey;
+   padding: 5px;
+}
+
+.unassigned .machine-status-header-div {
+   background: grey;
+}
+
+.disconnected .machine-status-header-div {
+   background: red;
+}
+
+.idle .machine-status-header-div {
+   background: orange;
+}
+
+.active .machine-status-header-div {
+   background: #5ac246;
+}
+
+.machine-status-body-div {
+   background: #00a600;
+   height: 200px;
+}
+
+.machine-status-part-count-div {
+   background: #056300;
+   border-radius: 50%;
+   height: 85%;
+   width: 85%;
+}
+
+.machine-status-graph-div {
+   background: #5ac246;
+   height: 100px;
+   align-items: flex-end;        /* bottom */
+   justify-content: flex-start;  /* left */
+}
+
+.graph-bar {
+   background: #056300;
+   width: 10px;
+   margin-left: 5px;
+}
+
+.machine-status-footer-div {
+   background: #00a827;
+   justify-content: space-between;
+   padding: 3px;
+}
+
+.wc-text {
+   font-size: 24px;	
+}
+
+.part-count-text {
+   font-size: 40px;  
+}   
+
+.small-text {
+   font-size: 14px;  
+}

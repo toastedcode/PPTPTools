@@ -3,7 +3,7 @@
 require_once '../database.php';
 require_once '../authentication.php';
 require_once 'keypad.php';
-require_once 'header.php';
+require_once '../header.php';
 require_once 'timeCardInfo.php';
 require 'selectOperatorPage.php';
 require 'selectWorkCenterPage.php';

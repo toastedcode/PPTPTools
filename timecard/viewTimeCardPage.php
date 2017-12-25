@@ -1,7 +1,7 @@
 <?php
 require_once '../database.php';
 require_once 'timeCardInfo.php';
-require_once 'navigation.php';
+require_once '../navigation.php';
 
 class ViewTimeCard
 {

@@ -196,6 +196,116 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function getSensors()
+   {
+      $query = "SELECT * FROM sensor ORDER BY wcNumber ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getSensor($sensorId)
+   {
+      $query = "SELECT * FROM sensor WHERE sensorId = \"$sensorId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getSensorForWorkcenter($wcNumber)
+   {
+      $query = "SELECT * FROM sensor WHERE wcNumber = \"$wcNumber\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartCounts($wcNumber, $startDate, $endDate)
+   {
+      
+   }
+   
+   public function getPartCountsByHour($wcNumber, $date)
+   {
+      
+   }
+   
+   public function getPartCountsByShift($wcNumber, $shift)
+   {
+      
+   }
+   
+   public function resetPartCounter($sensorId)
+   {
+      // Record last contact time.
+      $query = "UPDATE sensor SET lastContact = NOW() WHERE sensorId = \"$sensorId\";";
+      $this->query($query);
+      
+      // Record the reset time.
+      $query = "UPDATE sensor SET resetTime = NOW() WHERE sensorId = \"$sensorId\";";
+      $this->query($query);
+      
+      // Update counter count.
+      $query = "UPDATE sensor SET partCount = 0 WHERE sensorId = \"$sensorId\";";
+      $this->query($query);
+   }
+   
+   public function updatePartCount($sensorId, $partCount)
+   {
+      $this->checkForNewSensor($sensorId);
+      
+      // Record last contact time.
+      $query = "UPDATE sensor SET lastContact = NOW() WHERE sensorId = \"$sensorId\";";
+      $this->query($query);
+      
+      if ($partCount > 0)
+      {
+         // Record last part count time.
+         $query = "UPDATE sensor SET lastCount = NOW() WHERE sensorId = \"$sensorId\";";
+         $this->query($query);
+         
+         // Update counter count.
+         $query = "UPDATE sensor SET partCount = partCount + $partCount WHERE sensorId = \"$sensorId\";";
+         $this->query($query);
+
+         $this->updatePartCount_Hour($sensorId, $partCount);
+         $this->updatePartCount_Day($sensorId, $partCount);
+         $this->updatePartCount_Shift($sensorId, $partCount);
+      }
+   }
+      
+   private function checkForNewSensor($sensorId)
+   {
+      $result = $this->query("SELECT * FROM sensor WHERE sensorId = \"$sensorId\";");
+      
+      if (mysqli_num_rows($result) == 0)
+      {
+         $query = 
+         "INSERT INTO sensor " .
+         "(sensorId, lastContact, partCount, resetTime) " .
+         "VALUES (\"$sensorId\", NOW(), 0, NOW());";
+         
+         $this->query($query);
+      }
+   }
+   
+   private function updatePartCount_Hour($sensorId, $partCount)
+   {
+   }
+   
+   private function updatePartCount_Day($sensorId, $partCount)
+   {
+      
+   }
+   
+   private function updatePartCount_Shift($sensorId, $partCount)
+   {
+      
+   }
 }
 
 ?>
