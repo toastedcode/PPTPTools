@@ -66,8 +66,11 @@ class MachineStatusIndicator
       
       if ($this->database->isConnected())
       {
-         $status = strtolower(MachineStatus::toString($this->getStatus()));
-         $statusTime = $this->getStatusTime();
+         $this->getStatus($status, $uptime);
+         
+         $wcDescription = $this->wcNumber ? $this->wcNumber : "Unassigned";
+         $statusClass = strtolower(MachineStatus::toString($status));
+         $statusDescription = $this->getStatusDescription($status, $uptime);
          $partCount = $this->getPartCount();
          $hourlyGraph = $this->getHourlyGraph();
          $startTime = "6am";
@@ -75,10 +78,10 @@ class MachineStatusIndicator
          
          $html .=
          <<<HEREDOC
-         <div class="flex-vertical machine-status-div $status">
+         <div class="flex-vertical machine-status-div $statusClass">
             <div class="flex-vertical machine-status-header-div">
-               <div class="flex-horizontal wc-text">$this->wcNumber</div>
-               <div id="status-time-$this->wcNumber class="flex-horizontal small-text">$statusTime</div>
+               <div class="flex-horizontal wc-text">$wcDescription</div>
+               <div id="status-time-$this->wcNumber" class="flex-horizontal small-text">$statusDescription</div>
             </div>
             <div class="flex-horizontal machine-status-body-div">
                <div class="flex-vertical machine-status-part-count-div">
@@ -103,9 +106,10 @@ HEREDOC;
       echo ($this->getHtml());
    }
    
-   private function getStatus()
+   private function getStatus(&$status, &$uptime)
    {
       $status = MachineStatus::UNASSIGNED;
+      $uptime = 0;  // minutes
       
       if ($this->wcNumber != 0)
       {
@@ -119,27 +123,29 @@ HEREDOC;
             $lastCount = new DateTime($row["lastCount"], new DateTimeZone('America/New_York'));
             $now = new DateTime(null, new DateTimeZone('America/New_York'));
             
-            $countInterval = $now->diff($lastCount);
-            $contactInterval = $now->diff($lastContact);
+            $countInterval = $lastCount->diff($now);
+            $contactInterval = $lastContact->diff($now);
             
             if (($countInterval->d == 0) &&
                 ($countInterval->h == 0) &&
-                ($countInterval->i == 0))
+                ($countInterval->i == 0) &&
+                ($countInterval->s < 10))  // TODO: constant, better way
             {
-               if (($countInterval->d == 0) &&
-                   ($countInterval->h == 0) &&
-                   ($countInterval->i == 0) &&
-                   ($countInterval->s < 10))  // TODO: constant, better way
-               {
-                  $status = MachineStatus::ACTIVE; 
-               }
-               else if (($contactInterval->d == 0) &&
-                        ($contactInterval->h == 0) &&
-                        ($contactInterval->i == 0) &&
-                        ($contactInterval->s < 10))  // // TODO: constant, better way
-               {
-                  $status = MachineStatus::IDLE;
-               }
+               $status = MachineStatus::ACTIVE;
+               $uptime = $countInterval;
+            }
+            else if (($contactInterval->d == 0) &&
+                     ($contactInterval->h == 0) &&
+                     ($contactInterval->i == 0) &&
+                     ($contactInterval->s < 10))  // // TODO: constant, better way
+            {
+               $status = MachineStatus::IDLE;
+               $uptime = $countInterval;
+            }
+            else
+            {
+               $status = MachineStatus::DISCONNECTED;
+               $uptime = $contactInterval;
             }
          }
       }
@@ -147,11 +153,33 @@ HEREDOC;
       return ($status);
    }
    
-   private function getStatusTime()
+   private function getStatusDescription($status, $uptime)
    {
-      $statusTime = "49m - Active";  // TODO
+      $statusDescription = "";
       
-      return ($statusTime);
+      if ($status == MachineStatus::UNASSIGNED)
+      {
+         $statusDescription = MachineStatus::toString($status);
+      }
+      else
+      {
+         if ($uptime->d > 0)
+         {
+            $statusDescription = $uptime->d . "d " . $uptime->h . "h";
+         }
+         else if ($uptime->h > 0)
+         {
+            $statusDescription = $uptime->h . "h " . $uptime->i . "m";
+         }
+         else
+         {
+            $statusDescription = $uptime->i . "m ";
+         }
+            
+         $statusDescription .= " - " . MachineStatus::toString($status);
+      }
+      
+      return ($statusDescription);
    }
    
    private function getPartCount()
