@@ -1,0 +1,132 @@
+<head>
+   <link rel="stylesheet" type="text/css" href="../flex.css"/>
+   <script src="sensorSim.js"></script>
+   <style>
+      .content-div
+      {
+         height:100%;
+      }
+
+      .select-button {
+         border-width: 0;
+         outline: none;
+         box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+         background-color: #ebebeb;
+
+         cursor: pointer;
+
+         color: #ffffff;
+         font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+         font-size: 25px;
+
+         height: auto;
+         width: 150px;
+
+         padding: 20px 20px;
+
+         margin-right: 20px;
+         margin-left: 20px;
+      }
+
+      .player-one-button {
+         background-color: #FF4633;
+      }
+
+      .player-two-button {
+         background-color: #3361FF;
+      }
+
+      .player-three-button {
+         background-color: #DA33FF;
+      }
+
+      .back-button {
+         color: #000000;
+         background-color: #ebebeb;
+         width: 100px;
+         font-size: 15px;
+      }
+
+      .controller-div {
+         padding: 20px;
+         margin-bottom: 50px;
+      }
+
+      .dpad-button-spacer {
+         width: 100px;
+         height: 100px;
+      }
+
+      .dpad-button {
+         width: 100px;
+         height: 100px;
+
+         border-width: 0;
+         outline: none;
+         border-radius: 25px;
+         box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+         background-color: #3B5998;
+         color: #ecf0f1;
+         font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+      }
+
+      .dpad-button:active {
+         background-color: #3e8e41;
+         box-shadow: 0 5px #666;
+         transform: translateY(4px);
+      }
+
+      .button-icon {
+         font-size: 4vw;
+      }
+
+      .dpad-div {
+         flex-grow: 1;
+      }
+
+      .button-div {
+         flex-grow: 1;
+      }
+
+      .attack-button {
+         width: 100px;
+         height: 100px;
+
+         text-align: center;
+
+         font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+         color: #ecf0f1;
+
+         border-radius: 50%;
+         border-width: 0;
+         outline: none;
+         box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+         background-color: #3B5998;
+
+         font-size: 30px;
+      }
+
+      .attack-button:active {
+         background-color: #3e8e41;
+         box-shadow: 0 5px #666;
+         transform: translateY(4px);
+      }
+
+      .attack-button:after {
+        content: "";
+        display: block;
+        padding-bottom: 100%;
+      }
+   </style>
+</head>
+
+
+ <!--  Controller -->
+ <div class="flex-horizontal">
+ <input id="sensor-id-input" type="text" placeholder="Enter a sensor id" value="sensor1"/>
+ </div>
+ <div class="flex-horizontal controller-div">
+   <!-- Button 1 -->
+   <button id="slap-button" class="flex-horizontal attack-button" onclick="ping()">Ping</button>
+   <button id="slash-button" class="flex-horizontal attack-button" onclick="count(1)">Count</button>
+</div>
