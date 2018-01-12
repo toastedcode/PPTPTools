@@ -277,6 +277,36 @@ class PPTPDatabase extends MySqlDatabase
          $this->updatePartCount_Shift($sensorId, $partCount);
       }
    }
+   
+   public function getPanTicket(
+         $panTicketId)
+   {
+      $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panTicketId = $panTicketId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPanTickets(
+         $employeeNumber,
+         $startDate,
+         $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panticket.date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY panticket.date DESC, panTicketId DESC;";
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE EmployeeNumber=" . $employeeNumber . " AND panticket.date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY panticket.date DESC, panTicketId DESC;";
+         $result = $this->query($query);
+      }
+      
+      return ($result);
+   }
       
    private function checkForNewSensor($sensorId)
    {

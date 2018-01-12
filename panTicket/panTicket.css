@@ -251,3 +251,15 @@ input:checked + label > div  {
    width:700px;
    rows: 10;
 }
+
+.pan-tickets-div {
+	width: 400px;
+	height: 400px;
+	border-style:solid;
+	overflow: auto;
+	align-items: stretch;
+}
+
+.pan-ticket-div {
+   border-style:solid;
+}

@@ -1,12 +1,18 @@
 <?php
 class PanTicketInfo
 {
+   // Pan ticket info
    public $panTicketId;
    public $timeCardId;
    public $date;
    public $partNumber;
-   public $materialsNumber;
+   public $materialNumber;
    public $weight;
+   
+   // Time card info
+   public $employeeNumber;
+   public $jobNumber;
+   public $wcNumber;
 }
 
 function getPanTicketInfo($panTicketId)
@@ -23,12 +29,18 @@ function getPanTicketInfo($panTicketId)
       
       $panTicket = $result->fetch_assoc();
       
+      // Pan ticket info
       $panTicketInfo->panTicketId = $panTicket['panTicketId'];
       $panTicketInfo->timeCardId = $panTicket['timeCardId'];
       $panTicketInfo->date = $panTicket['date'];
       $panTicketInfo->partNumber = $panTicket['partNumber'];
-      $panTicketInfo->materialsNumber = $panTicket['materialsNumber'];
+      $panTicketInfo->materialNumber = $panTicket['materialNumber'];
       $panTicketInfo->weight = $panTicket['weight'];
+      
+      // Time card info
+      $panTicketInfo->employeeNumber = $panTicket['EmployeeNumber'];
+      $panTicketInfo->jobNumber = $panTicket['JobNumber'];
+      $panTicketInfo->wcNumber = $panTicket['WCNumber'];
    }
    
    return ($panTicketInfo);

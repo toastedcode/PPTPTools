@@ -252,8 +252,7 @@ class ViewPanTickets
       
       $filterDiv = ViewPanTickets::filterDiv($filter);
       
-      //$table = new TimeCardTable($filter);
-      $timeCardsTable = "TODO";  // $table->getHtml();
+      $panTicketsDiv = ViewPanTickets::panTicketsDiv($filter);
       
       $navBar = ViewPanTickets::navBar();
       
@@ -267,7 +266,7 @@ class ViewPanTickets
    
                $filterDiv
    
-               $timeCardsTable
+               $panTicketsDiv
          
          </div>
 
@@ -337,6 +336,69 @@ HEREDOC;
       return ($navBar->getHtml());
    }
    
+   private static function panTicketsDiv($filter)
+   {
+      $html = 
+<<<HEREDOC
+         <div class="flex-vertical pan-tickets-div">
+HEREDOC;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         // Increment the end date by a day to make it inclusive.
+         $endDate = new DateTime($filter->endDate);
+         $endDate->modify('+1 day');
+         $endDateString = $endDate->format('Y-m-d');
+         
+         $result = $database->getPanTickets($filter->employeeNumber, $filter->startDate, $endDateString);
+         
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $panTicketInfo = getPanTicketInfo($row["panTicketId"]);
+               
+               $html .= ViewPanTickets::panTicketDiv($panTicketInfo);
+            }
+         }
+      }
+      
+      $html .=
+<<<HEREDOC
+         </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   private static function panTicketDiv($panTicketInfo)
+   {
+      $operator = ViewPanTickets::getOperator($panTicketInfo->employeeNumber);
+      
+      $dateTime = new DateTime($panTicketInfo->date);
+      
+      $name = $operator["LastName"];
+      $dateTime = date_format(new DateTime($panTicketInfo->date), "m-d-Y H:i");
+      $jobNumber = $panTicketInfo->jobNumber;
+      $wcNumber = $panTicketInfo->wcNumber;
+      
+      $html =
+<<<HEREDOC
+         <div class="flex-vertical pan-ticket-div">
+            <div>$name</div>
+            <div>$dateTime</div>
+            <div>Job: $jobNumber</div>
+            <div>WC: $wcNumber</div>
+         </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
    private static function getOperators()
    {
       $operators = null;
@@ -351,6 +413,22 @@ HEREDOC;
       }
       
       return ($operators);
+   }
+   
+   private static function getOperator($employeeNumber)
+   {
+      $operator = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operator = $database->getOperator($employeeNumber);
+      }
+      
+      return ($operator);
    }
    
    private static function getFilter()
