@@ -307,6 +307,44 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function newPanTicket(
+         $panTicket)
+   {
+      $query =
+      "INSERT INTO panticket " .
+      "(date, timeCardId, partNumber, materialNumber) " .
+      "VALUES " .
+      "('$panTicket->date', '$panTicket->timeCardId', '$panTicket->partNumber', '$panTicket->materialNumber');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePanTicket(
+         $panTicketId,
+         $panTicket)
+   {
+      $query =
+      "UPDATE panticket " .
+      "SET date = $panTicket->date, timeCardId = \"$panTicket->timeCardId\", materialNumber = $panTicket->materialNumber " .
+      "WHERE TimeCard_Id = $panTicketId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePanTicket(
+         $panTicketId)
+   {
+      $query = "DELETE FROM panticket WHERE panTicketId = $panTicketId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
       
    private function checkForNewSensor($sensorId)
    {

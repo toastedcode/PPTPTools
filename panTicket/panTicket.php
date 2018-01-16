@@ -6,6 +6,7 @@ require_once '../header.php';
 require_once 'panTicketInfo.php';
 
 require 'viewPanTicketsPage.php';
+require 'viewPanTicketPage.php';
 require 'selectTimeCardPage.php';
 require 'selectPartNumberPage.php';
 require 'selectMaterialNumberPage.php';
@@ -69,7 +70,7 @@ function processAction($action)
       {
          if (isset($_POST['panTicketId']))
          {
-            $_SESSION["panTicketInfo"] = getTimeCardInfo($_POST['panTicketId']);
+            $_SESSION["panTicketInfo"] = getPanTicketInfo($_POST['panTicketId']);
          }
          break;
       }
@@ -86,7 +87,7 @@ function processAction($action)
       
       case 'delete_pan_ticket':
       {
-         deleteTimeCard($_POST['panTicketId']);
+         deletePanTicket($_POST['panTicketId']);
          break;
       }
       
@@ -183,7 +184,7 @@ function deletePanTicket($panTicketId)
    
    if ($database->isConnected())
    {
-      $result = $database->deletePanTicket(panTicketId);
+      $result = $database->deletePanTicket($panTicketId);
    }
    
    return ($result);

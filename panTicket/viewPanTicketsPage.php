@@ -340,7 +340,7 @@ HEREDOC;
    {
       $html = 
 <<<HEREDOC
-         <div class="flex-vertical pan-tickets-div">
+         <div class="pan-tickets-div">
 HEREDOC;
       
       $database = new PPTPDatabase();
