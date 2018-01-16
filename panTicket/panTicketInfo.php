@@ -13,6 +13,7 @@ class PanTicketInfo
    public $employeeNumber;
    public $jobNumber;
    public $wcNumber;
+   public $partsCount;
 }
 
 function getPanTicketInfo($panTicketId)
@@ -41,6 +42,7 @@ function getPanTicketInfo($panTicketId)
       $panTicketInfo->employeeNumber = $panTicket['EmployeeNumber'];
       $panTicketInfo->jobNumber = $panTicket['JobNumber'];
       $panTicketInfo->wcNumber = $panTicket['WCNumber'];
+      $panTicketInfo->partsCount = $panTicket['PartsCount'];
    }
    
    return ($panTicketInfo);

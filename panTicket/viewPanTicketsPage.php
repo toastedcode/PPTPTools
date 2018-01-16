@@ -382,17 +382,56 @@ HEREDOC;
       $dateTime = new DateTime($panTicketInfo->date);
       
       $name = $operator["LastName"];
-      $dateTime = date_format(new DateTime($panTicketInfo->date), "m-d-Y H:i");
+      $date = date_format(new DateTime($panTicketInfo->date), "m-d-Y");
+      $time = date_format(new DateTime($panTicketInfo->date), "H:i");
       $jobNumber = $panTicketInfo->jobNumber;
       $wcNumber = $panTicketInfo->wcNumber;
+      $weight = $panTicketInfo->weight ? $panTicketInfo->weight : "";
+      $weightLabel = $panTicketInfo->weight ? "LBS" : "unweighed";
+      
+      $viewEditIcon = "";
+      $deleteIcon = "";
+      if (Authentication::getPermissions() < Permissions::ADMIN)
+      {
+         $viewEditIcon =
+         "<i class=\"material-icons table-function-button\" onclick=\"onViewPanTicket($panTicketInfo->panTicketId)\">visibility</i>";
+      }
+      else
+      {
+         $viewEditIcon =
+         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditPanTicket($panTicketInfo->panTicketId)\">mode_edit</i>";
+         
+         $deleteIcon =
+         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeletePanTicket($panTicketInfo->panTicketId)\">delete</i>";
+      }
       
       $html =
 <<<HEREDOC
-         <div class="flex-vertical pan-ticket-div">
-            <div>$name</div>
-            <div>$dateTime</div>
-            <div>Job: $jobNumber</div>
-            <div>WC: $wcNumber</div>
+         <div class="flex-horizontal stretch pan-ticket-div">
+            <div style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-start;">
+               <div class="pan-ticket-name">$name</div>
+               <div>Job $jobNumber</div>
+               <div>Part $jobNumber</div>
+            </div>
+            <div class="flex-vertical" style="flex-grow: 1;">
+               <div class="flex-horizontal">
+                  <div class="pan-ticket-count">$panTicketInfo->partsCount</div>
+                  <div class="pan-ticket-count-label">&nbsp CT</div>
+               </div>
+               <div class="count-weight-divider"></div>
+               <div class="flex-horizontal">
+                  <div class="pan-ticket-weight">$weight</div>
+                  <div class="pan-ticket-weight-label">&nbsp $weightLabel</div>
+               </div>
+            </div>
+            <div class="flex-vertical" style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-end;">
+               <div>$date</div>
+               <div>$time</div>
+               <div class="flex-horizontal">
+                  $viewEditIcon
+                  $deleteIcon
+               </div>
+            </div>
          </div>
 HEREDOC;
       

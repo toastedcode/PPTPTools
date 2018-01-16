@@ -255,11 +255,52 @@ input:checked + label > div  {
 .pan-tickets-div {
 	width: 400px;
 	height: 400px;
-	border-style:solid;
-	overflow: auto;
+	overflow-y: scroll;
 	align-items: stretch;
 }
 
 .pan-ticket-div {
-   border-style:solid;
+   background: #7988c9;
+   margin-bottom: 5px;
+   height: 100px;
+   flex-shrink: 0;
+   
+   color: #ffffff;
+   padding: 5px 15px 5px 15px;
+}
+
+.pan-ticket-name {
+	font-size: 30px;
+}
+
+.pan-ticket-count {
+   font-size: 40px;
+   color: #101057;
+}
+
+.pan-ticket-count-label {
+   font-size: 18px;
+   color: #101057;
+}
+
+.pan-ticket-weight {
+   font-size: 40px;
+   color: #101057;
+}
+
+.pan-ticket-weight-label {
+   font-size: 18px;
+   color: #101057;
+}
+
+.count-weight-divider {
+	border-color: #101057;
+	border-bottom-style: solid;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	align-self: stretch;
+}
+
+.pan-ticket-function-button {
+	font-size: 30px;
 }
