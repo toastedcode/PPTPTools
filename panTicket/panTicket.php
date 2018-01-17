@@ -163,9 +163,9 @@ function updatePanTicketInfo()
       $_SESSION["panTicketInfo"]->partNumber = $_POST['partNumber'];
    }
    
-   if (isset($_POST['materialsNumber']))
+   if (isset($_POST['materialNumber']))
    {
-      $_SESSION["panTicketInfo"]->materialsNumber = $_POST['materialsNumber'];
+      $_SESSION["panTicketInfo"]->materialNumber = $_POST['materialNumber'];
    }
    
    if (isset($_POST['weight']))

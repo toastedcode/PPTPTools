@@ -34,8 +34,6 @@ class ViewPanTicket
             </div>
             <div class="flex-horizontal" style="align-items: flex-start;">
                $operatorDiv
-            </div>
-            <div class="flex-horizontal" style="align-items: flex-start;">
                $jobDiv
             </div>
          </div>

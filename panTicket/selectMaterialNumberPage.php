@@ -1,5 +1,6 @@
 <?php
 require_once '../database.php';
+require_once 'keypad.php';
 
 class SelectMaterialNumber
 {
@@ -7,22 +8,39 @@ class SelectMaterialNumber
    {
       $html = "";
       
-      $timeCards = "TODO";  // SelectMaterialNumber::timeCards();
+      $materialNumberInput = SelectMaterialNumber::materialNumberInput();
+      
+      $keypad = Keypad::getHtml();
       
       $navBar = SelectMaterialNumber::navBar();
       
       $html =
 <<<HEREDOC
-      <form id="panTicketForm" action="panTicket.php" method="POST"></form>
+      <form id="panTicketForm" action="timeCard.php" method="POST"></form>
       <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Material Number</div>
-         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
-            $timeCards
+         <div class="card-header-div">Enter Material Number</div>
+         <div class="flex-horizontal content-div">
+         
+            <div class="flex-horizontal" style="flex-grow: 1">$materialNumberInput</div>
+            
+            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+            <script type="text/javascript">initKeypad()</script>
+            
          </div>
-         $navBar         
+         
+         $navBar
+         
       </div>
-HEREDOC;
       
+      <script type="text/javascript">
+         initKeypad();
+         document.getElementById("material-number-input").focus();
+         
+         var validator = new IntValidator("material-number-input", 5, 1, 10000, false);
+         validator.init();
+      </script>
+HEREDOC;
+   
       return ($html);
    }
    
@@ -37,11 +55,26 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-      $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'select_part_number', 'update_time_card_info')");
-      $navBar->nextButton("submitForm('panTicketForm', 'panTicket.php', 'select_material_number', 'update_pan_ticket_info')");
+      $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'select_part_number', 'update_pan_ticket_info')");
+      $navBar->nextButton("submitForm('panTicketForm', 'panTicket.php', 'edit_pan_ticket', 'update_pan_ticket_info')");
       $navBar->end();
       
       return ($navBar->getHtml());
+   }
+
+   private static function materialNumberInput()
+   {
+      $materialNumber = SelectMaterialNumber::getMaterialNumber();
+      
+      $html = 
+<<<HEREDOC
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+         <input id="material-number-input" form="panTicketForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="materialNumber" oninput="this.validator.validate()" value="$materialNumber">
+         <label class="mdl-textfield__label" for="material-number-input">Heat #</label>
+      </div>
+HEREDOC;
+
+      return ($html);
    }
    
    private static function getMaterialNumber()

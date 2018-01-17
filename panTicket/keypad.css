@@ -1,0 +1,24 @@
+.keypad
+{
+   width: 319px;
+   height: 422px;
+   border: 1px black;
+   background-color: #777;
+   color: #444;
+}
+
+.keypadKey
+{
+   float: left;
+   width: 100px;
+   height: 100px;
+   text-align: center;
+   vertical-align: middle;
+   line-height: 100px;
+   font-family: 'Roboto', sans-serif;
+   color:       #fff;
+   font-size:   30px;
+   font-weight: bold;
+   border-style: solid;
+   border-color: #555;
+}
