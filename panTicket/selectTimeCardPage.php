@@ -47,6 +47,8 @@ HEREDOC;
       {
          $employeeNumber = SelectTimeCard::getEmployeeNumber();
          
+         $selectedTimeCardId = SelectTimeCard::getTimeCardId();
+         
          $result = $database->getIncompleteTimeCards($employeeNumber);
          
          if ($result)
@@ -55,7 +57,9 @@ HEREDOC;
             {
                $timeCardInfo = getTimeCardInfo($row["TimeCard_ID"]);
                
-               $html .= SelectTimeCard::timeCardDiv($timeCardInfo);
+               $isChecked = ($selectedTimeCardId == $timeCardInfo->timeCardId);
+               
+               $html .= SelectTimeCard::timeCardDiv($timeCardInfo, $isChecked);
             }
          }
       }
@@ -68,7 +72,7 @@ HEREDOC;
       return ($html);
    }
    
-   private static function timeCardDiv($timeCardInfo)
+   private static function timeCardDiv($timeCardInfo, $isChecked)
    {
       $operator = SelectTimeCard::getOperator($timeCardInfo->employeeNumber);
       
@@ -77,24 +81,31 @@ HEREDOC;
       $jobNumber = $timeCardInfo->jobNumber;
       $wcNumber = $timeCardInfo->wcNumber;
       
+      $id = "list-option-" + $timeCardInfo->timeCardId;
+      
+      $checked = $isChecked ? "checked" : "";
+      
       $html =
       <<<HEREDOC
-         <div class="flex-horizontal stretch pan-ticket-div">
-            <div style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-start;">
-               <div class="pan-ticket-name">$name</div>
-               <div>Job $jobNumber</div>
-               <div>WC $wcNumber</div>
-            </div>
-            <div class="flex-vertical" style="flex-grow: 1;">
-               <div class="flex-horizontal">
-                  <div class="pan-ticket-count">$timeCardInfo->partsCount</div>
-                  <div class="pan-ticket-count-label">&nbsp CT</div>
+         <input type="radio" form="panTicketForm" id="$id" class="operator-input" name="timeCardId" value="$timeCardInfo->timeCardId" $checked/>
+         <label for="$id">
+            <div class="flex-horizontal stretch pan-ticket-div">
+               <div style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-start;">
+                  <div class="pan-ticket-name">$name</div>
+                  <div>Job $jobNumber</div>
+                  <div>WC $wcNumber</div>
+               </div>
+               <div class="flex-vertical" style="flex-grow: 1;">
+                  <div class="flex-horizontal">
+                     <div class="pan-ticket-count">$timeCardInfo->partsCount</div>
+                     <div class="pan-ticket-count-label">&nbsp CT</div>
+                  </div>
+               </div>
+               <div class="flex-vertical" style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-end;">
+                  <div>$date</div>
                </div>
             </div>
-            <div class="flex-vertical" style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-end;">
-               <div>$date</div>
-            </div>
-         </div>
+         </label>
 HEREDOC;
       
       return ($html);

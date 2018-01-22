@@ -11,6 +11,14 @@ class ViewPanTicket
       
       $panTicketInfo = ViewPanTicket::getPanTicketInfo();
       
+      // Fill in some fields from the associated Time Card.
+      $timeCardInfo = getTimeCardInfo($panTicketInfo->timeCardId);
+      if ($timeCardInfo)
+      {
+         $panTicketInfo->jobNumber = $timeCardInfo->jobNumber;
+         $panTicketInfo->wcNumber = $timeCardInfo->wcNumber;
+      }
+      
       $titleDiv = ViewPanTicket::titleDiv();
       $dateDiv = ViewPanTicket::dateDiv($panTicketInfo, $readOnly);
       $operatorDiv = ViewPanTicket::operatorDiv($panTicketInfo);
@@ -44,23 +52,11 @@ class ViewPanTicket
       </div>
 
       <script>
-         var jobValidator = new IntValidator("jobNumber-input", 5, 1, 10000, false);
-         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
-         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
-         var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
-         var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
-         var panCountValidator = new IntValidator("panCount-input", 1, 1, 4, false);
-         var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
-         var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
+         var partNumberValidator = new IntValidator("partNumber-input", 5, 1, 10000, false);
+         var materialNumberValidator = new IntValidator("materialNumber-input", 5, 1, 10000, false);
 
-         jobValidator.init();
-         setupTimeHourValidator.init();
-         setupTimeMinuteValidator.init();
-         runTimeHourValidator.init();
-         runTimeMinuteValidator.init();
-         panCountValidator.init();
-         partsCountValidator.init();
-         scrapCountValidator.init();
+         partNumberValidator.init();
+         materialNumberValidator.init();
       </script>
 HEREDOC;
       
@@ -137,7 +133,7 @@ HEREDOC;
          <div class="section-header-div"><h2>Job</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input id="jobNumber-input" type="number" class="medium-text-input" form="panTicketForm" name="jobNumber" style="width:150px;" oninput="jobValidator.validate()" value="$panTicketInfo->jobNumber" disabled />
+            <input type="number" class="medium-text-input" style="width:150px;" oninput="jobValidator.validate()" value="$panTicketInfo->jobNumber" disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
@@ -145,11 +141,11 @@ HEREDOC;
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Part #</h3></div>
-            <input type="text" class="medium-text-input" style="width:150px;" value="$panTicketInfo->partNumber" $disabled />
+            <input id="partNumber-input" type="text" class="medium-text-input" form="panTicketForm" style="width:150px;" name="partNumber" value="$panTicketInfo->partNumber" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Heat #</h3></div>
-            <input type="text" class="medium-text-input" style="width:150px;" value="$panTicketInfo->materialNumber" $disabled />
+            <input id="materialNumber-input" type="text" class="medium-text-input" form="panTicketForm" style="width:150px;" name="materialNumber" value="$panTicketInfo->materialNumber" $disabled />
          </div>
       </div>
 HEREDOC;
@@ -170,7 +166,7 @@ HEREDOC;
          
          $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
          $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
+         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
       }
       else if ($readOnly == true)
       {
@@ -185,7 +181,7 @@ HEREDOC;
          // Editing a single time card selected from table of time cards.
          $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_time_card')");
          $navBar->printButton("onPrintPanTicket($panTicketInfo->panTicketId)");
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
+         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
       }
       
       $navBar->end();

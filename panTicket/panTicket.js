@@ -185,6 +185,43 @@ function validateOperator()
    return (valid);
 }
 
+function validatePartNumber()
+{
+   valid = false;
+
+   if (!(document.getElementById("partNumber-input").validator.validate()))
+   {
+      alert("Please enter a valid part number.")      
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);   
+}
+
+function validateMaterialNumber()
+{
+   valid = false;
+
+   if (!(document.getElementById("materialNumber-input").validator.validate()))
+   {
+      alert("Please enter a valid heat number.")      
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);    
+}
+
+function validatePanTicket()
+{
+   return (validatePartNumber() && validateMaterialNumber());
+}
+
 function filterToday()
 {
    var startDateInput = document.querySelector('#startDateInput');

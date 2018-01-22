@@ -63,7 +63,7 @@ function processAction($action)
       case 'new_pan_ticket':
       {
          $_SESSION["panTicketInfo"] = new PanTicketInfo();
-         $_SESSION["panTicketInfo"]->date = date('Y-m-d');
+         $_SESSION["panTicketInfo"]->date = date('Y-m-d h:m:i');
          break;
       }
       
@@ -217,7 +217,7 @@ function updatePanTicket($panTicketInfo)
       $panTicket->date = $panTicketInfo->date;
       $panTicket->timeCardId = $panTicketInfo->timeCardId;
       $panTicket->partNumber = $panTicketInfo->partNumber;
-      $panTicket->materialsNumber = $panTicketInfo->materialsNumber;
+      $panTicket->materialNumber = $panTicketInfo->materialNumber;
       $panTicket->weight = $panTicketInfo->weight;
       
       if ($panTicketInfo->panTicketId != 0)

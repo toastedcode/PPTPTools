@@ -185,6 +185,10 @@ class PPTPDatabase extends MySqlDatabase
       
       $result = $this->query($query);
       
+      $query = "DELETE FROM panticket WHERE timeCardId = $timeCardId;";
+      
+      $this->query($query);
+      
       return ($result);
    }
    
@@ -328,8 +332,10 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "UPDATE panticket " .
-      "SET date = $panTicket->date, timeCardId = \"$panTicket->timeCardId\", materialNumber = $panTicket->materialNumber " .
-      "WHERE TimeCard_Id = $panTicketId;";
+      "SET date = \"$panTicket->date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber " .
+      "WHERE panTicketId = $panTicketId;";
+      
+      echo $query;
       
       $result = $this->query($query);
       
