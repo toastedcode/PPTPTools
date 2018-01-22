@@ -7,9 +7,10 @@ require_once 'panTicketInfo.php';
 
 require 'viewPanTicketsPage.php';
 require 'viewPanTicketPage.php';
+require 'selectOperatorPage.php';
 require 'selectTimeCardPage.php';
-require 'selectPartNumberPage.php';
-require 'selectMaterialNumberPage.php';
+require 'enterPartNumberPage.php';
+require 'enterMaterialNumberPage.php';
 
 function getAction()
 {
@@ -102,21 +103,27 @@ function processView($view)
 {
    switch ($view)
    {  
+      case 'select_operator':
+      {
+         SelectOperator::render();
+         break;
+      }
+         
       case 'select_time_card':
       {
          SelectTimeCard::render();
          break;
       }
          
-      case 'select_part_number':
+      case 'enter_part_number':
       {
-         SelectPartNumber::render();
+         EnterPartNumber::render();
          break;
       }
       
-      case 'select_material_number':
+      case 'enter_material_number':
       {
-         SelectMaterialNumber::render();
+         EnterMaterialNumber::render();
          break;
       }
       
@@ -156,6 +163,11 @@ function updatePanTicketInfo()
    if (isset($_POST['date']))
    {
       $_SESSION["panTicketInfo"]->date = $_POST['date'];
+   }
+   
+   if (isset($_POST['employeeNumber']))
+   {
+      $_SESSION["panTicketInfo"]->employeeNumber = $_POST['employeeNumber'];
    }
    
    if (isset($_POST['partNumber']))

@@ -99,7 +99,7 @@ function onNewPanTicket()
    input = document.createElement('input');
    input.setAttribute('name', 'view');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'select_time_card');
+   input.setAttribute('value', 'select_operator');
    form.appendChild(input);
    
    input = document.createElement('input');
@@ -164,6 +164,25 @@ function submitForm(form, page, view, action)
    form.appendChild(input);
    
    form.submit();
+}
+
+function validateOperator()
+{
+   radioButtons = document.getElementsByName("employeeNumber"); 
+   
+   var valid = false;
+   
+   for (var i = 0; i < radioButtons.length; i++)
+   {
+      valid |= radioButtons[i].checked;
+   }
+   
+   if (!valid)
+   {
+      alert("Please select an operator.")
+   }
+   
+   return (valid);
 }
 
 function filterToday()

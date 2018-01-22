@@ -345,6 +345,15 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function getIncompleteTimeCards($employeeNumber)
+   {
+      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panTicket WHERE panticket.timeCardId = timecard.TimeCard_Id);";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
       
    private function checkForNewSensor($sensorId)
    {

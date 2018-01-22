@@ -163,9 +163,9 @@ HEREDOC;
          // Case 1
          // Viewing as last step of creating a new time card.
          
-         $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_time_card')");
-         $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_comments', 'update_pan_ticket_info');");
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_time_card');};", false);
+         $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
+         $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");
+         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
       }
       else if ($readOnly == true)
       {

@@ -2,17 +2,17 @@
 require_once '../database.php';
 require_once 'keypad.php';
 
-class SelectMaterialNumber
+class EnterMaterialNumber
 {
    public static function getHtml()
    {
       $html = "";
       
-      $materialNumberInput = SelectMaterialNumber::materialNumberInput();
+      $materialNumberInput = EnterMaterialNumber::materialNumberInput();
       
       $keypad = Keypad::getHtml();
       
-      $navBar = SelectMaterialNumber::navBar();
+      $navBar = EnterMaterialNumber::navBar();
       
       $html =
 <<<HEREDOC
@@ -46,7 +46,7 @@ HEREDOC;
    
    public static function render()
    {
-      echo (SelectMaterialNumber::getHtml());
+      echo (EnterMaterialNumber::getHtml());
    }
    
    private static function navBar()
@@ -55,7 +55,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-      $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'select_part_number', 'update_pan_ticket_info')");
+      $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_part_number', 'update_pan_ticket_info')");
       $navBar->nextButton("submitForm('panTicketForm', 'panTicket.php', 'edit_pan_ticket', 'update_pan_ticket_info')");
       $navBar->end();
       
@@ -64,7 +64,7 @@ HEREDOC;
 
    private static function materialNumberInput()
    {
-      $materialNumber = SelectMaterialNumber::getMaterialNumber();
+      $materialNumber = EnterMaterialNumber::getMaterialNumber();
       
       $html = 
 <<<HEREDOC
