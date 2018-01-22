@@ -86,14 +86,19 @@ HEREDOC;
    
    protected static function dateDiv($panTicketInfo, $readOnly)
    {
-      $disabled = ($readOnly) ? "disabled" : "";
+      $date = date_format(new DateTime($panTicketInfo->date), "Y-m-d");
+      $time = date_format(new DateTime($panTicketInfo->date), "h:m");
       
       $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Date</h3></div>
-            <input type="date" class="medium-text-input" form="panTicketForm" name="date" style="width:180px;" value="$panTicketInfo->date" $disabled />
+            <input type="date" class="medium-text-input" form="panTicketForm" name="date" style="width:180px;" value="$date" disabled />
+         </div>
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Time</h3></div>
+            <input type="time" class="medium-text-input" form="panTicketForm" name="time" style="width:180px;" value="$time" disabled />
          </div>
       </div>
 HEREDOC;
