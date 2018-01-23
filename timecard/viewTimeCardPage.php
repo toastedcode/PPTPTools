@@ -12,7 +12,7 @@ class ViewTimeCard
       $timeCardInfo = ViewTimeCard::getTimeCardInfo();
       
       $titleDiv = ViewTimeCard::titleDiv();
-      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo, $readOnly);
+      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo);
       $operatorDiv = ViewTimeCard::operatorDiv($timeCardInfo);
       $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, $readOnly);
       $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, $readOnly);
@@ -92,16 +92,16 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function dateDiv($timeCardInfo, $readOnly)
+   protected static function dateDiv($timeCardInfo)
    {
-      $disabled = ($readOnly) ? "disabled" : "";
+      $dateString = Time::toJavascriptDate($timeCardInfo->date);
       
       $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Date</h3></div>
-            <input type="date" class="medium-text-input" form="timeCardForm" name="date" style="width:180px;" value="$timeCardInfo->date" $disabled />
+            <input type="date" class="medium-text-input" style="width:180px;" value="$dateString" disabled/>
          </div>
       </div>
 HEREDOC;

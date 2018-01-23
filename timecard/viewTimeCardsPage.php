@@ -12,8 +12,8 @@ class Filter
    
    function __construct()
    {
-      $this->startDate = date('Y-m-d');
-      $this->endDate = date('Y-m-d');
+      $this->startDate = Time::now('Y-m-d');
+      $this->endDate = Time::now('Y-m-d');
    }
 }
 
@@ -22,8 +22,8 @@ class TimeCardTable
    public function __construct($filter)
    {
       $this->filter = $filter;
-      $this->startDate = date('Y-m-d');
-      $this->endDate = date('Y-m-d');
+      $this->startDate = Time::now('Y-m-d');
+      $this->endDate = Time::now('Y-m-d');
    }
    
    public function getHtml()
@@ -144,6 +144,8 @@ HEREDOC;
          {
             $timeCardId = $row['TimeCard_ID'];
             
+            $date = Time::fromMySqlDate($row['Date'], "m-d-Y");
+            
             $operator = TimeCardTable::getOperator($row['EmployeeNumber']);
             $name = $operator["FirstName"] . " " . $operator["LastName"];
             $setupTime = round($row['SetupTime'] / 60) . ":" . sprintf("%02d", ($row['SetupTime'] % 60));
@@ -168,7 +170,7 @@ HEREDOC;
             $html .=
 <<<HEREDOC
             <tr>
-               <td>{$row['Date']}</td>
+               <td>$date</td>
                <td>$name</td>
                <td>{$row['EmployeeNumber']}</td>
                <td>{$row['WCNumber']}</td>

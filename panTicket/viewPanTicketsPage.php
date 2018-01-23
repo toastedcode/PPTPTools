@@ -13,8 +13,8 @@ class Filter
    
    function __construct()
    {
-      $this->startDate = date('Y-m-d');
-      $this->endDate = date('Y-m-d');
+      $this->startDate = Time::now("Y-m-d");
+      $this->endDate = Time::now("Y-m-d");
    }
 }
 

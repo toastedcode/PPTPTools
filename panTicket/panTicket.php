@@ -63,7 +63,7 @@ function processAction($action)
       case 'new_pan_ticket':
       {
          $_SESSION["panTicketInfo"] = new PanTicketInfo();
-         $_SESSION["panTicketInfo"]->date = date('Y-m-d h:m:i');
+         $_SESSION["panTicketInfo"]->date = Time::now("Y-m-d h:i:s");
          break;
       }
       
@@ -162,7 +162,8 @@ function updatePanTicketInfo()
    
    if (isset($_POST['date']))
    {
-      $_SESSION["panTicketInfo"]->date = $_POST['date'];
+      $dateTime = new DateTime($_POST['date']);
+      $_SESSION["panTicketInfo"]->date = $dateTime->format("Y-m-d h:i:s");
    }
    
    if (isset($_POST['employeeNumber']))
@@ -239,6 +240,8 @@ function updatePanTicket($panTicketInfo)
 <!-- ********************************** BEGIN ********************************************* -->
 
 <?php 
+Time::init();
+
 session_start();
 
 if (!Authentication::isAuthenticated())

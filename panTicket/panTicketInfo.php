@@ -33,6 +33,7 @@ function getPanTicketInfo($panTicketId)
       // Pan ticket info
       $panTicketInfo->panTicketId = $panTicket['panTicketId'];
       $panTicketInfo->timeCardId = $panTicket['timeCardId'];
+      $panTicketInfo->date = Time::fromMySqlDate($panTicket['Date'], "Y-m-d h:i:s");
       $panTicketInfo->date = $panTicket['date'];
       $panTicketInfo->partNumber = $panTicket['partNumber'];
       $panTicketInfo->materialNumber = $panTicket['materialNumber'];

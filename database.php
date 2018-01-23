@@ -1,5 +1,7 @@
 <?php
 
+require_once 'time.php';
+
 interface Database
 {
    public function connect();
@@ -140,11 +142,11 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $result = $this->query("SELECT * FROM timecard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $result = $this->query("SELECT * FROM timecard WHERE Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;");
       }
       else
       {
-         $result = $this->query("SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $result = $this->query("SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;");
       }
 
       return ($result);
@@ -153,11 +155,13 @@ class PPTPDatabase extends MySqlDatabase
    public function newTimeCard(
       $timeCard)
    {
+      $date = Time::toMySqlDate($timeCard->date);
+      
       $query =
          "INSERT INTO timecard " .
          "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
-         "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
+         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
 
       $result = $this->query($query);
       
@@ -168,9 +172,11 @@ class PPTPDatabase extends MySqlDatabase
       $id,
       $timeCard)
    {
+      $date = Time::toMySqlDate($timeCard->date);
+      
       $query =
       "UPDATE timecard " .
-      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$timeCard->date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
+      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
       "WHERE TimeCard_Id = $id;";
      
       $result = $this->query($query);
@@ -300,12 +306,12 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panticket.date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY panticket.date DESC, panTicketId DESC;";
+         $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panticket.date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY panticket.date DESC, panTicketId DESC;";
          $result = $this->query($query);
       }
       else
       {
-         $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE EmployeeNumber=" . $employeeNumber . " AND panticket.date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY panticket.date DESC, panTicketId DESC;";
+         $query = "SELECT * FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE EmployeeNumber=" . $employeeNumber . " AND panticket.date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY panticket.date DESC, panTicketId DESC;";
          $result = $this->query($query);
       }
       
@@ -315,11 +321,13 @@ class PPTPDatabase extends MySqlDatabase
    public function newPanTicket(
          $panTicket)
    {
+      $date = Time::toMySqlDate($panTicket->date);
+      
       $query =
       "INSERT INTO panticket " .
       "(date, timeCardId, partNumber, materialNumber) " .
       "VALUES " .
-      "('$panTicket->date', '$panTicket->timeCardId', '$panTicket->partNumber', '$panTicket->materialNumber');";
+      "('$date', '$panTicket->timeCardId', '$panTicket->partNumber', '$panTicket->materialNumber');";
       
       $result = $this->query($query);
       
@@ -330,12 +338,12 @@ class PPTPDatabase extends MySqlDatabase
          $panTicketId,
          $panTicket)
    {
+      $date = Time::toMySqlDate($panTicket->date);
+      
       $query =
       "UPDATE panticket " .
-      "SET date = \"$panTicket->date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber " .
+      "SET date = \"$date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber " .
       "WHERE panTicketId = $panTicketId;";
-      
-      echo $query;
       
       $result = $this->query($query);
       

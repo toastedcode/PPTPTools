@@ -83,7 +83,7 @@ HEREDOC;
    protected static function dateDiv($panTicketInfo, $readOnly)
    {
       $date = date_format(new DateTime($panTicketInfo->date), "Y-m-d");
-      $time = date_format(new DateTime($panTicketInfo->date), "h:m");
+      $time = date_format(new DateTime($panTicketInfo->date), "h:i");
       
       $html =
 <<<HEREDOC
