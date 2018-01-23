@@ -30,8 +30,6 @@ function getPanTicketInfo($panTicketId)
       
       $panTicket = $result->fetch_assoc();
       
-      echo "getPanTicketInfo: before: " . $panTicket['Date'] . ", after: " . $panTicketInfo->date;
-      
       // Pan ticket info
       $panTicketInfo->panTicketId = $panTicket['panTicketId'];
       $panTicketInfo->timeCardId = $panTicket['timeCardId'];
