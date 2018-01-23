@@ -30,11 +30,12 @@ function getPanTicketInfo($panTicketId)
       
       $panTicket = $result->fetch_assoc();
       
+      echo "getPanTicketInfo: before: " . $panTicket['Date'] . ", after: " . $panTicketInfo->date;
+      
       // Pan ticket info
       $panTicketInfo->panTicketId = $panTicket['panTicketId'];
       $panTicketInfo->timeCardId = $panTicket['timeCardId'];
-      $panTicketInfo->date = Time::fromMySqlDate($panTicket['Date'], "Y-m-d h:i:s");
-      $panTicketInfo->date = $panTicket['date'];
+      $panTicketInfo->date = Time::fromMySqlDate($panTicket['panTicket_date'], "Y-m-d h:i:s");
       $panTicketInfo->partNumber = $panTicket['partNumber'];
       $panTicketInfo->materialNumber = $panTicket['materialNumber'];
       $panTicketInfo->weight = $panTicket['weight'];
