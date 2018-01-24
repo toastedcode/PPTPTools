@@ -1,26 +1,26 @@
 <?php
 require_once '../database.php';
 
-class EnterPartNumber
+class SelectPanTicket
 {
    public static function getHtml()
    {
       $html = "";
       
-      $partNumberInput = EnterPartNumber::partNumberInput();
+      $panTicketIdInput = SelectPanTicket::panTicketIdInput();
       
       $keypad = Keypad::getHtml();
       
-      $navBar = EnterPartNumber::navBar();
+      $navBar = SelectPanTicket::navBar();
       
       $html =
       <<<HEREDOC
       <form id="panTicketForm" action="panTicket.php" method="POST"></form>
       <div class="flex-vertical card-div">
-         <div class="card-header-div">Enter Part Number</div>
+         <div class="card-header-div">Select Pan Ticket</div>
          <div class="flex-horizontal content-div">
          
-            <div class="flex-horizontal" style="flex-grow: 1">$partNumberInput</div>
+            <div class="flex-horizontal" style="flex-grow: 1">$panTicketIdInput</div>
             
             <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
             <script type="text/javascript">initKeypad()</script>
@@ -33,9 +33,9 @@ class EnterPartNumber
       
       <script type="text/javascript">
          initKeypad();
-         document.getElementById("part-number-input").focus();
+         document.getElementById("pan-ticket-id-input").focus();
          
-         var validator = new IntValidator("part-number-input", 5, 1, 10000, false);
+         var validator = new IntValidator("pan-ticket-id-input", 5, 1, 10000, false);
          validator.init();
       </script>
 HEREDOC;
@@ -45,7 +45,7 @@ HEREDOC;
    
    public static function render()
    {
-      echo (EnterPartNumber::getHtml());
+      echo (SelectPanTicket::getHtml());
    }
    
    private static function navBar()
@@ -54,38 +54,37 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-      $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'select_time_card', 'update_time_card_info')");
-      $navBar->nextButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info')");
+      $navBar->nextButton("submitForm('panTicketForm', 'panTicket.php', 'enter_weight', 'edit_pan_ticket')");
       $navBar->end();
       
       return ($navBar->getHtml());
    }
    
-   private static function partNumberInput()
+   private static function panTicketIdInput()
    {
-      $partNumber = EnterPartNumber::getPartNumber();
+      $panTicketId = SelectPanTicket::getPanTicketId();
       
       $html =
       <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="part-number-input" form="panTicketForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="partNumber" oninput="this.validator.validate()" value="$partNumber">
-         <label class="mdl-textfield__label" for="part-number-input">Part #</label>
+         <input id="pan-ticket-id-input" form="panTicketForm" class="mdl-textfield__input keypadInputCapable large-text-input" name="panTicketId" oninput="this.validator.validate()" value="$panTicketId">
+         <label class="mdl-textfield__label" for="pan-ticket-id-input">Pan ticket #</label>
       </div>
 HEREDOC;
       
       return ($html);
    }
    
-   private static function getPartNumber()
+   private static function getPanTicketId()
    {
-      $partNumber = null;
+      $panTicketId = null;
       
-      if (isset($_SESSION['panTicketInfo']))
+      if (isset($_POST['panTicketId']))
       {
-         $partNumber = $_SESSION['panTicketInfo']->partNumber;
+         $panTicketId= $_POST['panTicketId'];
       }
       
-      return ($partNumber);
+      return ($panTicketId);
    }
 }
 ?>

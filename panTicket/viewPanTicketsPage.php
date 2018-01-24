@@ -107,6 +107,7 @@ HEREDOC;
       $navBar->start();
       $navBar->mainMenuButton();
       $navBar->highlightNavButton("New Pan Ticket", "onNewPanTicket()", true);
+      $navBar->highlightNavButton("Enter Weight", "onEnterWeight()", true);
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -125,12 +126,17 @@ HEREDOC;
       
       if ($database->isConnected())
       {
-         // Increment the end date by a day to make it inclusive.
-         $endDate = new DateTime($filter->endDate);
-         $endDate->modify('+1 day');
-         $endDateString = $endDate->format('Y-m-d');
+         // Start date.
+         $startDate = new DateTime($filter->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+         $startDateString = $startDate->format("Y-m-d");
          
-         $result = $database->getPanTickets($filter->employeeNumber, $filter->startDate, $endDateString);
+         // End date.
+         // Increment the end date by a day to make it inclusive.
+         $endDate = new DateTime($filter->endDate, new DateTimeZone('America/New_York'));
+         $endDate->modify('+1 day');
+         $endDateString = $endDate->format("Y-m-d");
+         
+         $result = $database->getPanTickets($filter->employeeNumber, $startDateString, $endDateString);
          
          if ($result)
          {
@@ -159,7 +165,7 @@ HEREDOC;
       
       $name = $operator["LastName"];
       $date = date_format(new DateTime($panTicketInfo->date), "m-d-Y");
-      $time = date_format(new DateTime($panTicketInfo->date), "H:i");
+      $time = date_format(new DateTime($panTicketInfo->date), "H:i A");
       $jobNumber = $panTicketInfo->jobNumber;
       $partNumber = $panTicketInfo->partNumber;
       $weight = $panTicketInfo->weight ? $panTicketInfo->weight : "";

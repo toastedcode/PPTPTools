@@ -65,7 +65,7 @@ function processAction($action)
       case 'new_time_card':
       {
          $_SESSION["timeCardInfo"] = new TimeCardInfo();
-         $_SESSION["timeCardInfo"]->date = Time::now("Y-m-d h:i:s");
+         $_SESSION["timeCardInfo"]->date = Time::now("Y-m-d h:i:s A");
          break;
       }
       

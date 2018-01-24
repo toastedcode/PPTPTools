@@ -16,7 +16,7 @@ class EnterMaterialNumber
       
       $html =
 <<<HEREDOC
-      <form id="panTicketForm" action="timeCard.php" method="POST"></form>
+      <form id="panTicketForm" action="panTicket.php" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Enter Material Number</div>
          <div class="flex-horizontal content-div">

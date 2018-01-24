@@ -163,6 +163,8 @@ class PPTPDatabase extends MySqlDatabase
          "VALUES " .
          "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
 
+      echo $query;
+      
       $result = $this->query($query);
       
       return ($result);
@@ -342,8 +344,10 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE panticket " .
-      "SET date = \"$date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber " .
+      "SET date = \"$date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber, weight = $panTicket->weight " .
       "WHERE panTicketId = $panTicketId;";
+      
+      echo $query;
       
       $result = $this->query($query);
       

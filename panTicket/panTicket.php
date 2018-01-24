@@ -11,6 +11,8 @@ require 'selectOperatorPage.php';
 require 'selectTimeCardPage.php';
 require 'enterPartNumberPage.php';
 require 'enterMaterialNumberPage.php';
+require 'selectPanTicketPage.php';
+require 'enterWeightPage.php';
 
 function getAction()
 {
@@ -63,7 +65,7 @@ function processAction($action)
       case 'new_pan_ticket':
       {
          $_SESSION["panTicketInfo"] = new PanTicketInfo();
-         $_SESSION["panTicketInfo"]->date = Time::now("Y-m-d h:i:s");
+         $_SESSION["panTicketInfo"]->date = Time::now("Y-m-d h:i:s A");
          break;
       }
       
@@ -129,13 +131,31 @@ function processView($view)
       
       case 'view_pan_ticket':
       {
-         ViewPanTicket::render($readOnly = true);
+         ViewPanTicket::render($view);
          break;
       }
       
+      case 'select_pan_ticket':
+      {
+         SelectPanTicket::render();
+         break;
+      }
+      
+      case 'enter_weight':
+         {
+            EnterWeight::render();
+            break;
+         }
+      
       case 'edit_pan_ticket':
       {
-         ViewPanTicket::render($readOnly = false);
+         ViewPanTicket::render($view);
+         break;
+      }
+      
+      case 'verify_weight':
+      {
+         ViewPanTicket::render($view);
          break;
       }
       

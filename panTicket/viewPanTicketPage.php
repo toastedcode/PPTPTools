@@ -5,11 +5,13 @@ require_once '../navigation.php';
 
 class ViewPanTicket
 {
-   public static function getHtml($readOnly)
+   public static function getHtml($view)
    {
       $html = "";
       
       $panTicketInfo = ViewPanTicket::getPanTicketInfo();
+      
+      $newPanTicket = ($panTicketInfo->panTicketId == 0);
       
       // Fill in some fields from the associated Time Card.
       $timeCardInfo = getTimeCardInfo($panTicketInfo->timeCardId);
@@ -20,11 +22,12 @@ class ViewPanTicket
       }
       
       $titleDiv = ViewPanTicket::titleDiv();
-      $dateDiv = ViewPanTicket::dateDiv($panTicketInfo, $readOnly);
+      $dateDiv = ViewPanTicket::dateDiv($panTicketInfo);
       $operatorDiv = ViewPanTicket::operatorDiv($panTicketInfo);
-      $jobDiv = ViewPanTicket::jobDiv($panTicketInfo, $readOnly);
+      $jobDiv = ViewPanTicket::jobDiv($panTicketInfo, ($view == "edit_pan_ticket"));
+      $weightDiv = ViewPanTicket::weightDiv($panTicketInfo, (($view == "verify_weight") || (($view == "edit_pan_ticket") && !$newPanTicket)));
       
-      $navBar = ViewPanTicket::navBar($panTicketInfo, $readOnly);
+      $navBar = ViewPanTicket::navBar($panTicketInfo, $view);
       
       $html =
 <<<HEREDOC
@@ -43,6 +46,9 @@ class ViewPanTicket
             <div class="flex-horizontal" style="align-items: flex-start;">
                $operatorDiv
                $jobDiv
+            </div>
+            <div class="flex-horizontal" style="align-items: flex-start;">
+               $weightDiv
             </div>
          </div>
          </div>
@@ -80,10 +86,10 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function dateDiv($panTicketInfo, $readOnly)
+   protected static function dateDiv($panTicketInfo)
    {
       $date = date_format(new DateTime($panTicketInfo->date), "Y-m-d");
-      $time = date_format(new DateTime($panTicketInfo->date), "h:i");
+      $time = date_format(new DateTime($panTicketInfo->date), "H:i");
       
       $html =
 <<<HEREDOC
@@ -123,9 +129,9 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function jobDiv($panTicketInfo, $readOnly)
+   protected static function jobDiv($panTicketInfo, $editable)
    {
-      $disabled = ($readOnly) ? "disabled" : "";
+      $disabled = ($editable) ? "" : "disabled";
       
       $html =
 <<<HEREDOC
@@ -153,29 +159,62 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function navBar($panTicketInfo, $readOnly)
+   protected static function weightDiv($panTicketInfo, $editable)
+   {
+      $disabled = ($editable) ? "" : "disabled";
+      
+      $weight = $panTicketInfo->weight;
+      if (isset($_POST["weight"]))
+      {
+         $weight = $_POST["weight"];
+      }
+      
+      $html =
+      <<<HEREDOC
+      <div class="flex-vertical time-card-table-col">
+         <div class="section-header-div"><h2>Weight</h2></div>
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Weight</h3></div>
+            <input id="weight-input" type="number" class="medium-text-input" form="panTicketForm" style="width:150px;" name="weight" oninput="weightValidator.validate()" value="$weight" $disabled/>
+         </div>
+      </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function navBar($panTicketInfo, $view)
    {
       $navBar = new Navigation();
       
       $navBar->start();
       
-      if ($panTicketInfo->panTicketId == 0)
+      if (($view == "edit_pan_ticket") &&
+          ($panTicketInfo->panTicketId == 0))
       {
          // Case 1
-         // Viewing as last step of creating a new time card.
+         // Editing as last step of creating a new time card.
          
          $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
          $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");
+         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_ticket', 'save_pan_ticket');};", false);
+      }
+      else if ($view == "verify_weight")
+      {
+         // Case 2
+         // Editing as last step of adding weight.
+         
+         $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
          $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
       }
-      else if ($readOnly == true)
+      else if ($view == "view_pan_ticket")
       {
          // Case 2
          // Viewing single time card selected from table of time cards.
          $navBar->printButton("onPrintPanTicket($panTicketInfo->panTicketId)");
          $navBar->highlightNavButton("Ok", "submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'no_action')", false);
       }
-      else 
+      else if ($view == "edit_pan_ticket")
       {   
          // Case 3
          // Editing a single time card selected from table of time cards.

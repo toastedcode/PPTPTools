@@ -112,6 +112,28 @@ function onNewPanTicket()
    form.submit();  	
 }
 
+function onEnterWeight()
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'panTicket.php');
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'select_pan_ticket');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'action');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'no_action');
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();    
+}
+
 function onCancel()
 {
    form = document.createElement('form');

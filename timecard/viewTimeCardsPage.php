@@ -58,7 +58,17 @@ class TimeCardTable
       
       if ($database->isConnected())
       {
-         $result = $database->getTimeCards($filter->employeeNumber, $filter->startDate, $filter->endDate);
+         // Start date.
+         $startDate = new DateTime($filter->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+         $startDateString = $startDate->format("Y-m-d");
+         
+         // End date.
+         // Increment the end date by a day to make it inclusive.
+         $endDate = new DateTime($filter->endDate, new DateTimeZone('America/New_York'));
+         $endDate->modify('+1 day');
+         $endDateString = $endDate->format("Y-m-d");
+         
+         $result = $database->getTimeCards($filter->employeeNumber, $startDateString, $endDateString);
       }
       
       return ($result);

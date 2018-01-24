@@ -19,7 +19,7 @@ class Time
       $dateTime = new DateTime($dateString, new DateTimeZone('America/New_York'));
       $dateTime->setTimezone(new DateTimeZone('UTC'));
       
-      return ($dateTime->format("Y-m-d h:i:s"));
+      return ($dateTime->format("Y-m-d H:i:s"));
    }
    
    static public function fromMySqlDate($dateString, $format)
