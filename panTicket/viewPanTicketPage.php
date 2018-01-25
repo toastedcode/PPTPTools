@@ -2,6 +2,7 @@
 require_once '../database.php';
 require_once 'panTicketInfo.php';
 require_once '../navigation.php';
+require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
 class ViewPanTicket
 {
@@ -21,11 +22,12 @@ class ViewPanTicket
          $panTicketInfo->wcNumber = $timeCardInfo->wcNumber;
       }
       
-      $titleDiv = ViewPanTicket::titleDiv();
+      $titleDiv = ViewPanTicket::titleDiv($panTicketInfo);
       $dateDiv = ViewPanTicket::dateDiv($panTicketInfo);
       $operatorDiv = ViewPanTicket::operatorDiv($panTicketInfo);
       $jobDiv = ViewPanTicket::jobDiv($panTicketInfo, ($view == "edit_pan_ticket"));
       $weightDiv = ViewPanTicket::weightDiv($panTicketInfo, (($view == "verify_weight") || (($view == "edit_pan_ticket") && !$newPanTicket)));
+      $qrDiv = ViewPanTicket::qrDiv($panTicketInfo);
       
       $navBar = ViewPanTicket::navBar($panTicketInfo, $view);
       
@@ -48,6 +50,7 @@ class ViewPanTicket
                $jobDiv
             </div>
             <div class="flex-horizontal" style="align-items: flex-start;">
+               $qrDiv
                $weightDiv
             </div>
          </div>
@@ -74,7 +77,7 @@ HEREDOC;
       echo (ViewPanTicket::getHtml($readOnly));
    }
    
-   protected static function titleDiv()
+   protected static function titleDiv($panTicketInfo)
    {
       $html =
 <<<HEREDOC
@@ -83,6 +86,24 @@ HEREDOC;
       </div>
 HEREDOC;
 
+      return ($html);
+   }
+   
+   protected static function qrDiv($panTicketInfo)
+   {
+      $url = "www.roboxes.com/pptp/panTicket/viewPanTicketPage.php?panTicketId=$panTicketInfo->panTicketId";
+
+      // http://phpqrcode.sourceforge.net/
+      QRcode::png($url, "qrCode.png");
+      
+      $html =
+<<<HEREDOC
+      <div class="flex-vertical time-card-table-col" style="align-items:center">
+         <div><img src="qrCode.png"></image></div>
+         <div>PAN$panTicketInfo->panTicketId</div>
+      </div>
+HEREDOC;
+      
       return ($html);
    }
    
@@ -197,7 +218,7 @@ HEREDOC;
          
          $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
          $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");
-         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_ticket', 'save_pan_ticket');};", false);
+         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
       }
       else if ($view == "verify_weight")
       {
@@ -232,7 +253,11 @@ HEREDOC;
    {
       $panTicketInfo = new PanTicketInfo();
       
-      if (isset($_POST['panTicketId']))
+      if (isset($_GET['panTicketId']))
+      {
+         $panTicketInfo = getPanTicketInfo($_GET['panTicketId']);
+      }
+      else if (isset($_POST['panTicketId']))
       {
          $panTicketInfo = getPanTicketInfo($_POST['panTicketId']);
       }
