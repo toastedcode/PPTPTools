@@ -162,8 +162,6 @@ class PPTPDatabase extends MySqlDatabase
          "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
          "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
-
-      echo $query;
       
       $result = $this->query($query);
       
@@ -347,8 +345,6 @@ class PPTPDatabase extends MySqlDatabase
       "SET date = \"$date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber, weight = $panTicket->weight " .
       "WHERE panTicketId = $panTicketId;";
       
-      echo $query;
-      
       $result = $this->query($query);
       
       return ($result);
@@ -366,7 +362,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getIncompleteTimeCards($employeeNumber)
    {
-      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panTicket WHERE panticket.timeCardId = timecard.TimeCard_Id);";
+      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panTicket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
       
       $result = $this->query($query);
       
