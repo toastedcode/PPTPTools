@@ -39,11 +39,10 @@ class Time
 }
 
 /*
-Time::init();
-$dateTimeString = "2018-01-23 05:50:13";
-$toMySql = Time::toMySqlDate($dateTimeString);
-$fromMySql = Time::fromMySqlDate($toMySql, "Y-m-d h:i:s");
-echo "DateTime: $dateTimeString";
+$now = Time::now("Y-m-d H:i:s");
+$toMySql = Time::toMySqlDate($now);
+$fromMySql = Time::fromMySqlDate($toMySql, "Y-m-d H:i:s");
+echo "now: $now";
 echo "<br/>";
 echo "toMySql: $toMySql";
 echo "<br/>";

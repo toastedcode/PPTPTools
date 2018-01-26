@@ -37,7 +37,7 @@ class ViewPanTicket
          <input type="hidden" name="panTicketId" value="$panTicketInfo->panTicketId"/>
       </form>
       <div class="flex-vertical card-div">
-         <div class="card-header-div">View Time Card</div>
+         <div class="card-header-div">View Pan Ticket</div>
 
          <div class="flex-vertical content-div">
          <div class="flex-vertical time-card-div">
@@ -91,7 +91,7 @@ HEREDOC;
    
    protected static function qrDiv($panTicketInfo)
    {
-      $url = "www.roboxes.com/pptp/panTicket/viewPanTicketPage.php?panTicketId=$panTicketInfo->panTicketId";
+      $url = "www.roboxes.com/pptp/panTicket/panTicket.php?view=view_pan_ticket&panTicketId=$panTicketInfo->panTicketId";
 
       // http://phpqrcode.sourceforge.net/
       QRcode::png($url, "qrCode.png");

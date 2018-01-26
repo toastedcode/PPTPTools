@@ -16,7 +16,7 @@ class SelectOperator
       <form id="panTicketForm" action="panTicket.php" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Select Operator</div>
-         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
+         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start; align-content:center;">
             $operators  
          </div>
          $navBar         

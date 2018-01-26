@@ -69,6 +69,11 @@ class MySqlDatabase implements Database
 
       return ($result);
    }
+   
+   protected function getConnection()
+   {
+      return ($this->connection);
+   }
 
    private $server = "";
 
@@ -142,11 +147,15 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $result = $this->query("SELECT * FROM timecard WHERE Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $query = "SELECT * FROM timecard WHERE Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;";
+
+         $result = $this->query($query);
       }
       else
       {
-         $result = $this->query("SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;";
+         
+         $result = $this->query($query);
       }
 
       return ($result);
@@ -157,11 +166,15 @@ class PPTPDatabase extends MySqlDatabase
    {
       $date = Time::toMySqlDate($timeCard->date);
       
+      $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
+      
       $query =
          "INSERT INTO timecard " .
          "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
-         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
+         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$comments');";
+      
+      echo $query;
       
       $result = $this->query($query);
       
@@ -174,9 +187,11 @@ class PPTPDatabase extends MySqlDatabase
    {
       $date = Time::toMySqlDate($timeCard->date);
       
+      $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
+      
       $query =
       "UPDATE timecard " .
-      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
+      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$comments\" " .
       "WHERE TimeCard_Id = $id;";
      
       $result = $this->query($query);
@@ -251,12 +266,14 @@ class PPTPDatabase extends MySqlDatabase
    
    public function resetPartCounter($sensorId)
    {
+      $now = Time::toMySqlDate(Time::now("Y-m-d H:i:s"));
+      
       // Record last contact time.
-      $query = "UPDATE sensor SET lastContact = NOW() WHERE sensorId = \"$sensorId\";";
+      $query = "UPDATE sensor SET lastContact = \"$now\" WHERE sensorId = \"$sensorId\";";
       $this->query($query);
       
       // Record the reset time.
-      $query = "UPDATE sensor SET resetTime = NOW() WHERE sensorId = \"$sensorId\";";
+      $query = "UPDATE sensor SET resetTime = \"$now\" WHERE sensorId = \"$sensorId\";";
       $this->query($query);
       
       // Update counter count.
@@ -268,14 +285,16 @@ class PPTPDatabase extends MySqlDatabase
    {
       $this->checkForNewSensor($sensorId);
       
+      $now = Time::toMySqlDate(Time::now("Y-m-d H:i:s"));
+      
       // Record last contact time.
-      $query = "UPDATE sensor SET lastContact = NOW() WHERE sensorId = \"$sensorId\";";
+      $query = "UPDATE sensor SET lastContact = \"$now\" WHERE sensorId = \"$sensorId\";";
       $this->query($query);
       
       if ($partCount > 0)
       {
          // Record last part count time.
-         $query = "UPDATE sensor SET lastCount = NOW() WHERE sensorId = \"$sensorId\";";
+         $query = "UPDATE sensor SET lastCount = \"$now\" WHERE sensorId = \"$sensorId\";";
          $this->query($query);
          
          // Update counter count.
@@ -362,7 +381,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getIncompleteTimeCards($employeeNumber)
    {
-      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panTicket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
+      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panticket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
       
       $result = $this->query($query);
       

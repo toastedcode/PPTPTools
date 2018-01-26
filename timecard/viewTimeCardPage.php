@@ -156,6 +156,10 @@ HEREDOC;
    {
       $disabled = ($readOnly) ? "disabled" : "";
       
+      // Pad minutes to 2 digits.
+      $setupTimeMinute = str_pad($timeCardInfo->setupTimeMinute, 2, '0', STR_PAD_LEFT);
+      $runTimeMinute = str_pad($timeCardInfo->runTimeMinute, 2, '0', STR_PAD_LEFT);
+      
       $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
@@ -164,13 +168,13 @@ HEREDOC;
             <div class="label-div"><h3>Setup time</h3></div>
             <input id="setupTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeHour" style="width:50px;" oninput="setupTimeHourValidator.validate()" value="$timeCardInfo->setupTimeHour" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeMinute" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$timeCardInfo->setupTimeMinute" $disabled />
+            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeMinute" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$setupTimeMinute" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Run time</h3></div>
             <input id="runTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeHour" style="width:50px;" oninput="runTimeHourValidator.validate()" value="$timeCardInfo->runTimeHour" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeMinute" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$timeCardInfo->runTimeMinute" $disabled />
+            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeMinute" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$runTimeMinute" $disabled />
          </div>
       </div>
 HEREDOC;
