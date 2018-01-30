@@ -12,8 +12,8 @@ class Filter
    
    function __construct()
    {
-      $this->startDate = date('Y-m-d');
-      $this->endDate = date('Y-m-d');
+      $this->startDate = Time::now('Y-m-d');
+      $this->endDate = Time::now('Y-m-d');
    }
 }
 
@@ -22,8 +22,8 @@ class TimeCardTable
    public function __construct($filter)
    {
       $this->filter = $filter;
-      $this->startDate = date('Y-m-d');
-      $this->endDate = date('Y-m-d');
+      $this->startDate = Time::now('Y-m-d');
+      $this->endDate = Time::now('Y-m-d');
    }
    
    public function getHtml()
@@ -58,7 +58,17 @@ class TimeCardTable
       
       if ($database->isConnected())
       {
-         $result = $database->getTimeCards($filter->employeeNumber, $filter->startDate, $filter->endDate);
+         // Start date.
+         $startDate = new DateTime($filter->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+         $startDateString = $startDate->format("Y-m-d");
+         
+         // End date.
+         // Increment the end date by a day to make it inclusive.
+         $endDate = new DateTime($filter->endDate, new DateTimeZone('America/New_York'));
+         $endDate->modify('+1 day');
+         $endDateString = $endDate->format("Y-m-d");
+         
+         $result = $database->getTimeCards($filter->employeeNumber, $startDateString, $endDateString);
       }
       
       return ($result);
@@ -144,6 +154,8 @@ HEREDOC;
          {
             $timeCardId = $row['TimeCard_ID'];
             
+            $date = Time::fromMySqlDate($row['Date'], "m-d-Y");
+            
             $operator = TimeCardTable::getOperator($row['EmployeeNumber']);
             $name = $operator["FirstName"] . " " . $operator["LastName"];
             $setupTime = round($row['SetupTime'] / 60) . ":" . sprintf("%02d", ($row['SetupTime'] % 60));
@@ -168,7 +180,7 @@ HEREDOC;
             $html .=
 <<<HEREDOC
             <tr>
-               <td>{$row['Date']}</td>
+               <td>$date</td>
                <td>$name</td>
                <td>{$row['EmployeeNumber']}</td>
                <td>{$row['WCNumber']}</td>

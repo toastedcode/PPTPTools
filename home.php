@@ -155,7 +155,7 @@ function selectActionPage()
            Time Cards
            <br/><br/>
         </button>
-        <button type="button" class="actionButton" onclick="location.href='panTickets.html';">
+        <button type="button" class="actionButton" onclick="location.href='panTicket/panTicket.php?view=view_pan_tickets';">
            <i class="material-icons action-button-icon">receipt</i>
            <br/>
            Pan Tickets

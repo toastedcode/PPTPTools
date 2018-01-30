@@ -1,5 +1,7 @@
 <?php
 
+require_once '../time.php';
+
 class MachineStatus
 {
    const UNASSIGNED = 0;
@@ -119,9 +121,9 @@ HEREDOC;
          
          if ($result && ($row = $result->fetch_assoc()))
          {
-            $lastContact = new DateTime($row["lastContact"], new DateTimeZone('America/New_York'));
-            $lastCount = new DateTime($row["lastCount"], new DateTimeZone('America/New_York'));
-            $now = new DateTime(null, new DateTimeZone('America/New_York'));
+            $lastContact = new DateTime(Time::fromMySqlDate($row["lastContact"], "Y-m-d H:i:s"));
+            $lastCount = new DateTime(Time::fromMySqlDate($row["lastCount"], "Y-m-d H:i:s"));
+            $now = new DateTime(Time::now("Y-m-d H:i:s"));
             
             $countInterval = $lastCount->diff($now);
             $contactInterval = $lastContact->diff($now);

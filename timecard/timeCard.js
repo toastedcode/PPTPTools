@@ -245,6 +245,13 @@ function validateTime()
    {
       alert("Please enter a valid run time.")      
    }
+   else if ((document.getElementById("setupTimeHour-input").value == 0) &&
+		    (document.getElementById("setupTimeMinute-input").value == 0) &&
+		    (document.getElementById("runTimeHour-input").value == 0) &&
+		    (document.getElementById("runTimeMinute-input").value == 0))
+   {
+	   alert("Please enter some valid times.")  
+   }
    else
    {
       valid = true;
@@ -296,46 +303,106 @@ function validateCard()
 
 function changeSetupTimeHour(delta)
 {
+   var newValue = 0;
+	
    var field = document.querySelector('#setupTimeHour-input');
-   var newValue = parseInt(field.value, 10) + delta;
+   
+   if ((field.value == null) || (field.value == ""))
+   {
+      newValue = (delta < 0) ? 0 : delta;
+   }
+   else
+   {
+      newValue = parseInt(field.value, 10) + delta;
+   }
    
    // Constrain values.
    newValue = Math.max(0, Math.min(newValue, 10));
    
    field.value = newValue;
+   
+   if (field.validator != null)
+   {
+      field.validator.validate();
+   }
 }
 
 function changeSetupTimeMinute(delta)
 {
+   var newValue = 0;
+   
    var field = document.querySelector('#setupTimeMinute-input');
-   var newValue = parseInt(field.value, 10) + delta;
+   
+   if ((field.value == null) || (field.value == ""))
+   {
+      newValue = (delta < 0) ? 0 : delta;
+   }
+   else
+   {
+      newValue = parseInt(field.value, 10) + delta;
+   }
    
    // Constrain values.
    newValue = Math.max(0, Math.min(newValue, 45));
    
    field.value = newValue;
+   
+   if (field.validator != null)
+   {
+      field.validator.validate();
+   }
 }
 
 function changeRunTimeHour(delta)
 {
+   var newValue = 0;
+   
    var field = document.querySelector('#runTimeHour-input');
-   var newValue = parseInt(field.value, 10) + delta;
+   
+   if ((field.value == null) || (field.value == ""))
+   {
+      newValue = (delta < 0) ? 0 : delta;
+   }
+   else
+   {
+      newValue = parseInt(field.value, 10) + delta;
+   }
    
    // Constrain values.
    newValue = Math.max(0, Math.min(newValue, 10));
    
    field.value = newValue;
+   
+   if (field.validator != null)
+   {
+      field.validator.validate();
+   }
 }
 
 function changeRunTimeMinute(delta)
 {
+   var newValue = 0;
+   
    var field = document.querySelector('#runTimeMinute-input');
-   var newValue = parseInt(field.value, 10) + delta;
+   
+   if ((field.value == null) || (field.value == ""))
+   {
+      newValue = (delta < 0) ? 0 : delta;
+   }
+   else
+   {
+      newValue = parseInt(field.value, 10) + delta;
+   }
    
    // Constrain values.
    newValue = Math.max(0, Math.min(newValue, 45));
    
    field.value = newValue;
+   
+   if (field.validator != null)
+   {
+      field.validator.validate();
+   }
 }
 
 function filterToday()

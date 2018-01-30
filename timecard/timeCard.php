@@ -65,7 +65,7 @@ function processAction($action)
       case 'new_time_card':
       {
          $_SESSION["timeCardInfo"] = new TimeCardInfo();
-         $_SESSION["timeCardInfo"]->date = date('Y-m-d');
+         $_SESSION["timeCardInfo"]->date = Time::now("Y-m-d h:i:s A");
          break;
       }
       
@@ -171,7 +171,9 @@ function updateTimeCardInfo()
    
    if (isset($_POST['date']))
    {
-      $_SESSION["timeCardInfo"]->date = $_POST['date'];
+      $dateTime = new DateTime($_POST['date']);
+      $_SESSION["timeCardInfo"]->date = $dateTime->format("Y-m-d h:i:s");
+      echo "updateTimeCard: " . $_SESSION["timeCardInfo"]->date;
    }
    
    if (isset($_POST['employeeNumber']))
@@ -291,6 +293,8 @@ function updateTimeCard($timeCardInfo)
 <!-- ********************************** BEGIN ********************************************* -->
 
 <?php 
+Time::init();
+
 session_start();
 
 if (!Authentication::isAuthenticated())

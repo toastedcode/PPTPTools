@@ -1,4 +1,6 @@
 <?php
+require_once('../time.php');
+
 class TimeCardInfo
 {
    public $timeCardId;
@@ -32,7 +34,7 @@ function getTimeCardInfo($timeCardId)
       
       $timeCardInfo = new TimeCardInfo();
       $timeCardInfo->timeCardId = $timeCard['TimeCard_ID'];
-      $timeCardInfo->date = $timeCard['Date'];
+      $timeCardInfo->date = Time::fromMySqlDate($timeCard['Date'], "Y-m-d h:i:s");
       $timeCardInfo->employeeNumber = $timeCard['EmployeeNumber'];
       $timeCardInfo->jobNumber = $timeCard['JobNumber'];
       $timeCardInfo->wcNumber = $timeCard['WCNumber'];

@@ -1,5 +1,7 @@
 <?php
 
+require_once 'time.php';
+
 interface Database
 {
    public function connect();
@@ -66,6 +68,11 @@ class MySqlDatabase implements Database
       }
 
       return ($result);
+   }
+   
+   protected function getConnection()
+   {
+      return ($this->connection);
    }
 
    private $server = "";
@@ -140,11 +147,15 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $result = $this->query("SELECT * FROM timecard WHERE Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $query = "SELECT * FROM timecard WHERE Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;";
+
+         $result = $this->query($query);
       }
       else
       {
-         $result = $this->query("SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . $startDate . "' AND '" . $endDate . "' ORDER BY Date DESC, TimeCard_ID DESC;");
+         $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;";
+         
+         $result = $this->query($query);
       }
 
       return ($result);
@@ -153,12 +164,18 @@ class PPTPDatabase extends MySqlDatabase
    public function newTimeCard(
       $timeCard)
    {
+      $date = Time::toMySqlDate($timeCard->date);
+      
+      $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
+      
       $query =
          "INSERT INTO timecard " .
          "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
          "VALUES " .
-         "('$timeCard->employeeNumber', '$timeCard->date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$timeCard->comments');";
-
+         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$comments');";
+      
+      echo $query;
+      
       $result = $this->query($query);
       
       return ($result);
@@ -168,9 +185,13 @@ class PPTPDatabase extends MySqlDatabase
       $id,
       $timeCard)
    {
+      $date = Time::toMySqlDate($timeCard->date);
+      
+      $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
+      
       $query =
       "UPDATE timecard " .
-      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$timeCard->date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$timeCard->comments\" " .
+      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$comments\" " .
       "WHERE TimeCard_Id = $id;";
      
       $result = $this->query($query);
@@ -184,6 +205,10 @@ class PPTPDatabase extends MySqlDatabase
       $query = "DELETE FROM timecard WHERE TimeCard_Id = $timeCardId;";
       
       $result = $this->query($query);
+      
+      $query = "DELETE FROM panticket WHERE timeCardId = $timeCardId;";
+      
+      $this->query($query);
       
       return ($result);
    }
@@ -241,12 +266,14 @@ class PPTPDatabase extends MySqlDatabase
    
    public function resetPartCounter($sensorId)
    {
+      $now = Time::toMySqlDate(Time::now("Y-m-d H:i:s"));
+      
       // Record last contact time.
-      $query = "UPDATE sensor SET lastContact = NOW() WHERE sensorId = \"$sensorId\";";
+      $query = "UPDATE sensor SET lastContact = \"$now\" WHERE sensorId = \"$sensorId\";";
       $this->query($query);
       
       // Record the reset time.
-      $query = "UPDATE sensor SET resetTime = NOW() WHERE sensorId = \"$sensorId\";";
+      $query = "UPDATE sensor SET resetTime = \"$now\" WHERE sensorId = \"$sensorId\";";
       $this->query($query);
       
       // Update counter count.
@@ -258,14 +285,16 @@ class PPTPDatabase extends MySqlDatabase
    {
       $this->checkForNewSensor($sensorId);
       
+      $now = Time::toMySqlDate(Time::now("Y-m-d H:i:s"));
+      
       // Record last contact time.
-      $query = "UPDATE sensor SET lastContact = NOW() WHERE sensorId = \"$sensorId\";";
+      $query = "UPDATE sensor SET lastContact = \"$now\" WHERE sensorId = \"$sensorId\";";
       $this->query($query);
       
       if ($partCount > 0)
       {
          // Record last part count time.
-         $query = "UPDATE sensor SET lastCount = NOW() WHERE sensorId = \"$sensorId\";";
+         $query = "UPDATE sensor SET lastCount = \"$now\" WHERE sensorId = \"$sensorId\";";
          $this->query($query);
          
          // Update counter count.
@@ -276,6 +305,87 @@ class PPTPDatabase extends MySqlDatabase
          $this->updatePartCount_Day($sensorId, $partCount);
          $this->updatePartCount_Shift($sensorId, $partCount);
       }
+   }
+   
+   public function getPanTicket(
+         $panTicketId)
+   {
+      $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panTicketId = $panTicketId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPanTickets(
+         $employeeNumber,
+         $startDate,
+         $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panticket.date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY panticket.date DESC, panTicketId DESC;";
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE EmployeeNumber=" . $employeeNumber . " AND panticket.date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY panticket.date DESC, panTicketId DESC;";
+         $result = $this->query($query);
+      }
+      
+      return ($result);
+   }
+   
+   public function newPanTicket(
+         $panTicket)
+   {
+      $date = Time::toMySqlDate($panTicket->date);
+      
+      $query =
+      "INSERT INTO panticket " .
+      "(date, timeCardId, partNumber, materialNumber) " .
+      "VALUES " .
+      "('$date', '$panTicket->timeCardId', '$panTicket->partNumber', '$panTicket->materialNumber');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePanTicket(
+         $panTicketId,
+         $panTicket)
+   {
+      $date = Time::toMySqlDate($panTicket->date);
+      
+      $query =
+      "UPDATE panticket " .
+      "SET date = \"$date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber, weight = $panTicket->weight " .
+      "WHERE panTicketId = $panTicketId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePanTicket(
+         $panTicketId)
+   {
+      $query = "DELETE FROM panticket WHERE panTicketId = $panTicketId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getIncompleteTimeCards($employeeNumber)
+   {
+      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panticket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
    }
       
    private function checkForNewSensor($sensorId)
