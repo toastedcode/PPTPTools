@@ -11,7 +11,7 @@ class EnterWeight
       
       $weightInput = EnterWeight::weightInput();
       
-      $keypad = Keypad::getHtml();
+      $keypad = Keypad::getHtml(true);
       
       $navBar = EnterWeight::navBar();
       
@@ -27,7 +27,6 @@ class EnterWeight
             <div class="flex-horizontal" style="flex-grow: 1">$weightInput</div>
             
             <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
-            <script type="text/javascript">initKeypad()</script>
             
          </div>
          
@@ -36,10 +35,13 @@ class EnterWeight
       </div>
       
       <script type="text/javascript">
-         initKeypad();
+         var keypad = new Keypad();
+         keypad.onEnter = "submitForm('panTicketForm', 'panTicket.php', 'verify_weight', 'update_pan_ticket')";
+         keypad.init();
+
          document.getElementById("weight-input").focus();
          
-         var validator = new IntValidator("weight-input", 5, 1, 10000, false);
+         var validator = new IntValidator("weight-input", 7, 1, 10000, false);
          validator.init();
       </script>
 HEREDOC;

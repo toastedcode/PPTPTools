@@ -30,19 +30,22 @@ function getPanTicketInfo($panTicketId)
       
       $panTicket = $result->fetch_assoc();
       
-      // Pan ticket info
-      $panTicketInfo->panTicketId = $panTicket['panTicketId'];
-      $panTicketInfo->timeCardId = $panTicket['timeCardId'];
-      $panTicketInfo->date = Time::fromMySqlDate($panTicket['panTicket_date'], "Y-m-d h:i:s");
-      $panTicketInfo->partNumber = $panTicket['partNumber'];
-      $panTicketInfo->materialNumber = $panTicket['materialNumber'];
-      $panTicketInfo->weight = $panTicket['weight'];
-      
-      // Time card info
-      $panTicketInfo->employeeNumber = $panTicket['EmployeeNumber'];
-      $panTicketInfo->jobNumber = $panTicket['JobNumber'];
-      $panTicketInfo->wcNumber = $panTicket['WCNumber'];
-      $panTicketInfo->partsCount = $panTicket['PartsCount'];
+      if ($panTicket)
+      {
+         // Pan ticket info
+         $panTicketInfo->panTicketId = $panTicket['panTicketId'];
+         $panTicketInfo->timeCardId = $panTicket['timeCardId'];
+         $panTicketInfo->date = Time::fromMySqlDate($panTicket['panTicket_date'], "Y-m-d h:i:s");
+         $panTicketInfo->partNumber = $panTicket['partNumber'];
+         $panTicketInfo->materialNumber = $panTicket['materialNumber'];
+         $panTicketInfo->weight = $panTicket['weight'];
+         
+         // Time card info
+         $panTicketInfo->employeeNumber = $panTicket['EmployeeNumber'];
+         $panTicketInfo->jobNumber = $panTicket['JobNumber'];
+         $panTicketInfo->wcNumber = $panTicket['WCNumber'];
+         $panTicketInfo->partsCount = $panTicket['PartsCount'];
+      }
    }
    
    return ($panTicketInfo);

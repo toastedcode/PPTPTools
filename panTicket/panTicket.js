@@ -300,3 +300,62 @@ function formattedDate(date)
 
    return (formattedDate);
 }
+
+function PanTicketIdValidator(inputId, callback)
+{
+   this.inputId = inputId;
+   this.callback = callback;
+   
+   PanTicketIdValidator.prototype.init = function()
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.validator = this;
+      }
+   }
+   
+   PanTicketIdValidator.prototype.color = function(color)
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.style.color = color;
+      }
+   }
+   
+   PanTicketIdValidator.prototype.validate = function()
+   {
+      requestURl = "validatePanTicket.php?panTicketId=" + panTicketId;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var response = JSON.parse(this.responseText);
+            
+            onValidationReply(response.panTicketId, response.isValidPanTicket);
+         }
+      };
+      
+      xhttp.open("GET", requestURl, true);
+      xhttp.send(); 
+   }
+   
+   PanTicketIdValidator.prototype.onValidationReply = function(panTicketId, isValidPanTicket)
+   {
+      if (isValidPanTicket)
+      {
+         this.color("#000000");
+      }
+      else
+      {
+         this.color("#FF0000");
+      }
+      
+      this.callback(panTicketId, isValidPanTicket);
+   }
+}

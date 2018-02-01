@@ -9,7 +9,7 @@ class EnterPartNumber
       
       $partNumberInput = EnterPartNumber::partNumberInput();
       
-      $keypad = Keypad::getHtml();
+      $keypad = Keypad::getHtml(false);
       
       $navBar = EnterPartNumber::navBar();
       
@@ -23,7 +23,6 @@ class EnterPartNumber
             <div class="flex-horizontal" style="flex-grow: 1">$partNumberInput</div>
             
             <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
-            <script type="text/javascript">initKeypad()</script>
             
          </div>
          
@@ -32,7 +31,10 @@ class EnterPartNumber
       </div>
       
       <script type="text/javascript">
-         initKeypad();
+         var keypad = new Keypad();
+         keypad.onEnter = "submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info')";
+         keypad.init();
+
          document.getElementById("part-number-input").focus();
          
          var validator = new IntValidator("part-number-input", 5, 1, 10000, false);

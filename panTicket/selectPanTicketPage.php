@@ -9,7 +9,7 @@ class SelectPanTicket
       
       $panTicketIdInput = SelectPanTicket::panTicketIdInput();
       
-      $keypad = Keypad::getHtml();
+      $keypad = Keypad::getHtml(false);
       
       $navBar = SelectPanTicket::navBar();
       
@@ -23,7 +23,6 @@ class SelectPanTicket
             <div class="flex-horizontal" style="flex-grow: 1">$panTicketIdInput</div>
             
             <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
-            <script type="text/javascript">initKeypad()</script>
             
          </div>
          
@@ -32,7 +31,10 @@ class SelectPanTicket
       </div>
       
       <script type="text/javascript">
-         initKeypad();
+         var keypad = new Keypad();
+         keypad.onEnter = "submitForm('panTicketForm', 'panTicket.php', 'verify_weight', 'update_pan_ticket')";
+         keypad.init();
+
          document.getElementById("pan-ticket-id-input").focus();
          
          var validator = new IntValidator("pan-ticket-id-input", 5, 1, 10000, false);
