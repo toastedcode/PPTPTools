@@ -1,7 +1,11 @@
 <?php
 
 require_once '../database.php';
+require_once '../authentication.php';
+require_once '../header.php';
 require_once 'partInspectionInfo.php';
+
+require 'viewPartInspectionsPage.php';
 
 function getAction()
 {
@@ -39,13 +43,6 @@ function processAction($action)
 {
    switch ($action)
    {
-      case 'record_part_inspection':
-      {
-         recordPartInspection();
-         break;
-      }
-         
-         
       default:
       {
          // Unhandled action.
@@ -53,103 +50,56 @@ function processAction($action)
    }
 }
 
-function recordPartInspection()
+function processView($view)
 {
-   $partInspectionInfo = parsePartInspectionInfo();
-   
-   $database = new PPTPDatabase();
-   
-   $database->connect();
-   
-   if ($database->isConnected())
+   switch ($view)
    {
-      if ($database->newPartInspection($partInspectionInfo))
-      {
-         echo ("Successfully recorded part inspection.");
-      }
-      else 
-      {
-         echo ("Failed to record part inspection.");
-      }
+         
+      case 'view_part_inspections':
+      default:
+         {
+            ViewPartInspections::render();
+            break;
+         }
    }
 }
-
-function parsePartInspectionInfo()
-{
-   $partInspectionInfo = new PartInspectionInfo();
-   
-   if (isset($_GET['$partInspectionId']))
-   {
-      $partInspectionInfo = getPartInspectionInfo($_GET['$partInspectionId']);
-   }
-   else
-   {
-      if (isset($_GET['dateTime']))
-      {
-         $partInspectionInfo->dateTime = $_GET['dateTime'];
-      }
-      
-      if (isset($_GET['employeeNumber']))
-      {
-         $partInspectionInfo->employeeNumber = $_GET['employeeNumber'];
-         
-         if (!is_numeric($partInspectionInfo->employeeNumber))
-         {
-            $partInspectionInfo->employeeNumber = 0;
-         }
-      }
-      
-      if (isset($_GET['wcNumber']))
-      {
-         $partInspectionInfo->wcNumber = $_GET['wcNumber'];
-         
-         if (!is_numeric($partInspectionInfo->wcNumber))
-         {
-            $partInspectionInfo->wcNumber = 0;
-         }
-      }
-      
-      if (isset($_GET['partNumber']))
-      {
-         $partInspectionInfo->partNumber = $_GET['partNumber'];
-      }
-      
-      if (isset($_GET['partCount']))
-      {
-         $partInspectionInfo->partCount = $_GET['partCount'];
-         
-         if (!is_numeric($partInspectionInfo->partCount))
-         {
-            $partInspectionInfo->partCount = 0;
-         }
-      }
-      
-      if (isset($_GET['failures']))
-      {
-         $partInspectionInfo->failures = $_GET['failures'];
-         
-         if (!is_numeric($partInspectionInfo->failures))
-         {
-            $partInspectionInfo->failures= 0;
-         }
-      }
-      
-      if (isset($_GET['efficiency']))
-      {
-         $partInspectionInfo->efficiency = $_GET['efficiency'];
-         
-         if (!is_numeric($partInspectionInfo->efficiency))
-         {
-            $partInspectionInfo->efficiency = 0.0;
-         }
-      }
-   }
-   
-   return ($partInspectionInfo);
-}
-
 ?>
+
+<!-- ********************************** BEGIN ********************************************* -->
 
 <?php 
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../pptpTools.php');
+   exit;
+}
+
 processAction(getAction());
 ?>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="flex.css"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+<link rel="stylesheet" type="text/css" href="partInspection.css"/>
+
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</head>
+
+<body>
+
+<?php Header::render("Part Inspections"); ?>
+
+<div class="flex-horizontal" style="height: 700px;">
+
+   <?php processView(getView())?>
+
+</div>
+
+</body>
+</html>
