@@ -388,6 +388,43 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
       
+   public function newPartInspection($partInspection)
+   {
+      $date = Time::toMySqlDate($partInspection->dateTime);
+      
+      $query =
+      "INSERT INTO partinspection " .
+      "(dateTime, employeeNumber, wcNumber, partNumber, partCount, failures, efficiency) " .
+      "VALUES " .
+      "('$date', '$partInspection->employeeNumber', '$partInspection->wcNumber', '$partInspection->partNumber', '$partInspection->partCount', '$partInspection->failures', '$partInspection->efficiency');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartInspections(
+      $employeeNumber,
+      $startDate,
+      $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM partinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC DESC;";
+         
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM partinspection WHERE employeeNumber=" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         
+         $result = $this->query($query);
+      }
+      
+      return ($result);
+   }
+      
    private function checkForNewSensor($sensorId)
    {
       $result = $this->query("SELECT * FROM sensor WHERE sensorId = \"$sensorId\";");
