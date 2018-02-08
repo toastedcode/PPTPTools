@@ -28,10 +28,10 @@ function getPanTicketInfo($panTicketId)
    {
       $result = $database->getPanTicket($panTicketId);
       
-      $panTicket = $result->fetch_assoc();
-      
-      if ($panTicket)
+      if ($result)
       {
+         $panTicket = $result->fetch_assoc();
+         
          // Pan ticket info
          $panTicketInfo->panTicketId = $panTicket['panTicketId'];
          $panTicketInfo->timeCardId = $panTicket['timeCardId'];

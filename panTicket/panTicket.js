@@ -188,6 +188,22 @@ function submitForm(form, page, view, action)
    form.submit();
 }
 
+function validatePanTicketId()
+{
+   valid = false;
+
+   if (!(document.getElementById("pan-ticket-id-input").style.color == "rgb(0, 0, 0)"))
+   {
+      alert("Please enter a valid pan ticket id.")      
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);
+}
+
 function validateOperator()
 {
    radioButtons = document.getElementsByName("employeeNumber"); 
@@ -301,10 +317,9 @@ function formattedDate(date)
    return (formattedDate);
 }
 
-function PanTicketIdValidator(inputId, callback)
+function PanTicketIdValidator(inputId)
 {
    this.inputId = inputId;
-   this.callback = callback;
    
    PanTicketIdValidator.prototype.init = function()
    {
@@ -328,34 +343,54 @@ function PanTicketIdValidator(inputId, callback)
    
    PanTicketIdValidator.prototype.validate = function()
    {
-      requestURl = "validatePanTicket.php?panTicketId=" + panTicketId;
+      var element = document.getElementById(this.inputId);
       
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function()
+      if (element)
       {
-         if (this.readyState == 4 && this.status == 200)
-         {
-            var response = JSON.parse(this.responseText);
-            
-            onValidationReply(response.panTicketId, response.isValidPanTicket);
-         }
-      };
+         var panTicketId = element.value;
       
-      xhttp.open("GET", requestURl, true);
-      xhttp.send(); 
+         requestURl = "validatePanTicket.php?panTicketId=" + panTicketId;
+         
+         var xhttp = new XMLHttpRequest();
+         xhttp.validator = this;
+         xhttp.onreadystatechange = function()
+         {
+            if (this.readyState == 4 && this.status == 200)
+            {
+               var response = JSON.parse(this.responseText);
+               
+               validator.onValidationReply(response.panTicketId, response.isValidPanTicket, response.panTicketDiv);
+            }
+         };
+         
+         xhttp.open("GET", requestURl, true);
+         xhttp.send(); 
+      }
    }
    
-   PanTicketIdValidator.prototype.onValidationReply = function(panTicketId, isValidPanTicket)
+   PanTicketIdValidator.prototype.onValidationReply = function(panTicketId, isValidPanTicket, panTicketDiv)
    {
       if (isValidPanTicket)
       {
          this.color("#000000");
+         
+         var element = document.getElementById("pan-ticket-div");
+         
+         if (element)
+         {
+            element.innerHTML = panTicketDiv;
+         }
       }
       else
       {
          this.color("#FF0000");
+         
+         var element = document.getElementById("pan-ticket-div");
+         
+         if (element)
+         {
+            element.innerHTML = "";
+         }
       }
-      
-      this.callback(panTicketId, isValidPanTicket);
    }
 }

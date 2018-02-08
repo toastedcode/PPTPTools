@@ -1,5 +1,6 @@
 <?php
 
+require_once '../authentication.php';
 require_once '../database.php';
 require_once '../navigation.php';
 
@@ -50,6 +51,20 @@ class ViewPanTickets
 
       </div>
 HEREDOC;
+      
+      return ($html);
+   }
+   
+   public static function getPanTicketDiv($panTicketId)
+   {
+      $html = "";
+
+      $panTicketInfo = getPanTicketInfo($panTicketId);
+
+      if ($panTicketInfo)
+      {
+         $html = ViewPanTickets::panTicketDiv($panTicketInfo);
+      }
       
       return ($html);
    }

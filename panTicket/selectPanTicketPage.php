@@ -20,7 +20,10 @@ class SelectPanTicket
          <div class="card-header-div">Select Pan Ticket</div>
          <div class="flex-horizontal content-div">
          
-            <div class="flex-horizontal" style="flex-grow: 1">$panTicketIdInput</div>
+            <div class="flex-vertical" style="flex-grow: 1">
+               <div class="flex-horizontal">$panTicketIdInput</div>
+               <div id="pan-ticket-div"></div>
+            </div>
             
             <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
             
@@ -32,12 +35,12 @@ class SelectPanTicket
       
       <script type="text/javascript">
          var keypad = new Keypad();
-         keypad.onEnter = "submitForm('panTicketForm', 'panTicket.php', 'verify_weight', 'update_pan_ticket')";
+         keypad.onEnter = "if (validatePanTicketId()){submitForm('panTicketForm', 'panTicket.php', 'verify_weight', 'update_pan_ticket');}";
          keypad.init();
 
          document.getElementById("pan-ticket-id-input").focus();
          
-         var validator = new IntValidator("pan-ticket-id-input", 5, 1, 10000, false);
+         var validator = new PanTicketIdValidator("pan-ticket-id-input");
          validator.init();
       </script>
 HEREDOC;
@@ -56,7 +59,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-      $navBar->nextButton("submitForm('panTicketForm', 'panTicket.php', 'enter_weight', 'edit_pan_ticket')");
+      $navBar->nextButton("if (validatePanTicketId()){submitForm('panTicketForm', 'panTicket.php', 'enter_weight', 'edit_pan_ticket');}");
       $navBar->end();
       
       return ($navBar->getHtml());

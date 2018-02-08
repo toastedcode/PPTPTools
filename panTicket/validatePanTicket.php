@@ -1,6 +1,8 @@
 <?php
 
+require_once '../database.php';
 require_once 'panTicketInfo.php';
+require_once 'viewPanTicketsPage.php';
 
 // *****************************************************************************
 //                                   Begin
@@ -11,9 +13,12 @@ if (isset($_GET["panTicketId"]))
    
    $panTicketInfo = getPanTicketInfo($panTicketId);
    
-   if ($panTicketInfo.panTicketId == $panTicketId)
+   if ($panTicketInfo->panTicketId == $panTicketId)
    {
-      echo "{\"isValidPanTicket\":true}";
+      $panTicketDiv = addslashes(ViewPanTickets::getPanTicketDiv($panTicketId));
+      $panTicketDiv = str_replace(array("   ", "\n", "\t", "\r"), '', $panTicketDiv);
+      
+      echo "{\"isValidPanTicket\":true, \"panTicketDiv\":\"$panTicketDiv\"}";
    }
    else
    {
