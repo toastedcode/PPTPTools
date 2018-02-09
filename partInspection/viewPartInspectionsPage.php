@@ -34,7 +34,7 @@ class ViewPartInspections
       
       $html = 
 <<<HEREDOC
-      <script src="viewPanTicketsPage.js"></script>
+      <script src="partInspection.js"></script>
    
       <div class="flex-vertical card-div">
          <div class="card-header-div">View Part Inspections</div>
@@ -75,7 +75,7 @@ HEREDOC;
       $html = 
 <<<HEREDOC
       <div>
-      <form id="panTicketForm" action="panTicket.php" method="POST">
+      <form action="#" method="POST">
          <input type="hidden" name="view" value="view_pan_tickets"/>
          Employee:
          <select id="employeeNumberInput" name="employeeNumber">$options</select>
@@ -115,7 +115,18 @@ HEREDOC;
    {
       $html = 
 <<<HEREDOC
-         <div class="pan-tickets-div">
+         <div class="part-inspections-div">
+            <table class="part-inspection-table">
+               <tr>
+                  <th>Name</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Work Center #</th>
+                  <th>Part #</th>
+                  <th>Part Count</th>
+                  <th>Failure Count</th>
+                  <th>Efficiency</th>
+               </tr>
 HEREDOC;
       
       $database = new PPTPDatabase();
@@ -140,84 +151,48 @@ HEREDOC;
          {
             while ($row = $result->fetch_assoc())
             {
-               $partInspectionInfo = getPartInspectionInfo($row["panTicketId"]);
+               $partInspectionInfo = getPartInspectionInfo($row["partInspectionId"]);
                
-               $html .= ViewPartInspections::partInspectionDiv($partInspectionInfo);
+               if ($partInspectionInfo)
+               {
+                  $operatorName = "unknown";
+                  $operator = ViewPartInspections::getOperator($partInspectionInfo->employeeNumber);
+                  if ($operator)
+                  {
+                     $operatorName = $operator['FirstName'] . " " . $operator['LastName'];
+                  }
+                  
+                  $dateTime = new DateTime($partInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $date = $dateTime->format("m-d-Y");
+                  $time = $dateTime->format("h:i a");
+                  
+                  $inspectionClass = ($partInspectionInfo->failures > 0) ? "failed-inspection" : "good-inspection"; 
+                  
+                  $workCenter = ($partInspectionInfo->wcNumber == 0) ? "unknown" : $partInspectionInfo->wcNumber;
+
+                  $html .=
+<<<HEREDOC
+                     <tr class="$inspectionClass">
+                        <td>$operatorName</td>
+                        <td>$date</td>
+                        <td>$time</td>
+                        <td>$workCenter</td>
+                        <td>$partInspectionInfo->partNumber</td>
+                        <td>$partInspectionInfo->partCount</td>
+                        <td>$partInspectionInfo->failures</td>
+                        <td>$partInspectionInfo->efficiency</td>
+                     </tr>
+HEREDOC;
+               }
             }
          }
       }
       
       $html .=
 <<<HEREDOC
+            </table>
          </div>
 HEREDOC;
-      
-      return ($html);
-   }
-   
-   private static function partInspectionDiv($partInspectionInfo)
-   {
-      $html = "";
-            
-      /*
-      $operator = ViewPanTickets::getOperator($panTicketInfo->employeeNumber);
-      
-      $dateTime = new DateTime($panTicketInfo->date);
-      
-      $name = $operator["LastName"];
-      $date = date_format(new DateTime($panTicketInfo->date), "m-d-Y");
-      $time = date_format(new DateTime($panTicketInfo->date), "H:i A");
-      $jobNumber = $panTicketInfo->jobNumber;
-      $partNumber = $panTicketInfo->partNumber;
-      $weight = $panTicketInfo->weight ? $panTicketInfo->weight : "";
-      $weightLabel = $panTicketInfo->weight ? "LBS" : "unweighed";
-      
-      $viewEditIcon = "";
-      $deleteIcon = "";
-      if (Authentication::getPermissions() < Permissions::ADMIN)
-      {
-         $viewEditIcon =
-         "<i class=\"material-icons table-function-button\" onclick=\"onViewPanTicket($panTicketInfo->panTicketId)\">visibility</i>";
-      }
-      else
-      {
-         $viewEditIcon =
-         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditPanTicket($panTicketInfo->panTicketId)\">mode_edit</i>";
-         
-         $deleteIcon =
-         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeletePanTicket($panTicketInfo->panTicketId)\">delete</i>";
-      }
-      
-      $html =
-<<<HEREDOC
-         <div class="flex-horizontal stretch pan-ticket-div">
-            <div style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-start;">
-               <div class="pan-ticket-name">$name</div>
-               <div>Job $jobNumber</div>
-               <div>Part $partNumber</div>
-            </div>
-            <div class="flex-vertical" style="flex-grow: 1;">
-               <div class="flex-horizontal">
-                  <div class="pan-ticket-count">$panTicketInfo->partsCount</div>
-                  <div class="pan-ticket-count-label">&nbsp CT</div>
-               </div>
-               <div class="count-weight-divider"></div>
-               <div class="flex-horizontal">
-                  <div class="pan-ticket-weight">$weight</div>
-                  <div class="pan-ticket-weight-label">&nbsp $weightLabel</div>
-               </div>
-            </div>
-            <div class="flex-vertical" style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-around; align-items:flex-end;">
-               <div>$date</div>
-               <div>$time</div>
-               <div class="flex-horizontal">
-                  $viewEditIcon
-                  $deleteIcon
-               </div>
-            </div>
-         </div>
-HEREDOC;
-      */
       
       return ($html);
    }

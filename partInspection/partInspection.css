@@ -201,111 +201,39 @@ input:checked + label > div  {
 	margin-left:10px;
 	margin-right:10px;
 }
-	
-/* viewTimeCardPage.php */	
-	
-.label-div {
-   width: 100px;
-}
 
-.section-header-div {
-   align-self: center;
-}
-
-.time-card-table-row {
-   margin-bottom: 5px;
-}
-
-.time-card-table-col {
-   flex-basis: 50%; 
-   align-items: flex-start;
-}
-
-.time-card-div {
-   width:700px;
-   align-items: stretch;
-}
-
-.time-card-div h1 {
-   font-weight:bold;
-   font-size: 40px;
-   margin: 0px 0px 0px 0px;
-   display: flex;
-}
-
-.time-card-div h2 {
-   font-weight:bold;
-   font-size: 18px;
-   margin: 0px 0px 0px 0px;
-   display: flex;
-}
-
-.time-card-div h3 {
-   font-weight:bold;
-   font-size: 14px;
-   margin: 0px 0px 0px 0px;
-   display: flex;
-}
-
-.time-card-div .comments-input {
-   width:700px;
-   rows: 10;
-}
-
-.pan-tickets-div {
-	width: 400px;
-	height: 400px;
+.part-inspections-div
+{
 	overflow-y: scroll;
+	height: 400px;
+}
 	
-	display: flex;
-   flex-direction: column;
-   align-items: stretch;
-   justify-content: flex-start;
+.part-inspection-table
+{
+	width: 900px;
+}	
+
+table {
+   background: #ffffff;
+   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+   border-collapse:collapse;
 }
 
-.pan-ticket-div {
-   background: #7988c9;
-   margin-bottom: 5px;
-   height: 100px;
-   flex-shrink: 0;
-   
-   color: #ffffff;
-   padding: 5px 15px 5px 15px;
+tr {
+   border: 1px solid #dddddd;
 }
 
-.pan-ticket-name {
-	font-size: 30px;
+.failed-inspection {
+	background: #EDC5BE;
 }
 
-.pan-ticket-count {
-   font-size: 40px;
-   color: #101057;
+th, td {
+   text-align: left;
+   padding: 18px;
+   font-size: 10pt;
 }
 
-.pan-ticket-count-label {
-   font-size: 18px;
-   color: #101057;
-}
-
-.pan-ticket-weight {
-   font-size: 40px;
-   color: #101057;
-}
-
-.pan-ticket-weight-label {
-   font-size: 18px;
-   color: #101057;
-}
-
-.count-weight-divider {
-	border-color: #101057;
-	border-bottom-style: solid;
-	margin-top: 15px;
-	margin-bottom: 15px;
-	align-self: stretch;
-}
-
-.pan-ticket-function-button {
-	font-size: 30px;
-	cursor: pointer;
+tr:hover {
+   background: #eeeeee;
+   cursor: pointer;
 }

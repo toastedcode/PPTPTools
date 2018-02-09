@@ -21,21 +21,23 @@ function getPartInspectionInfo($partInspectionId)
    
    if ($database->isConnected())
    {
-      $result = $database->getPartInspection($panTicketId);
+      $result = $database->getPartInspection($partInspectionId);
       
-      $partInspection = $result->fetch_assoc();
-      
-      if ($partInspection)
+      if ($result)
       {
-
-         $partInspection->partInspectionId = $partInspection['partInspectionId'];
-         $partInspection->dateTime = Time::fromMySqlDate($partInspection['dateTime'], "Y-m-d h:i:s");
-         $partInspection->employeeNumber = $partInspection['employeeNumber'];
-         $partInspection->wcNumber = $partInspection['wcNumber'];
-         $partInspection->partNumber = $partInspection['partNumber'];
-         $partInspection->partCount= $partInspection['$partCount'];
-         $partInspection->failures= $partInspection['failures'];
-         $partInspection->efficiency= $partInspection['efficiency'];
+         $partInspection = $result->fetch_assoc();
+      
+         if ($partInspection)
+         {
+            $partInspectionInfo->partInspectionId = $partInspection['partInspectionId'];
+            $partInspectionInfo->dateTime = Time::fromMySqlDate($partInspection['dateTime'], "Y-m-d h:i:s");
+            $partInspectionInfo->employeeNumber = $partInspection['employeeNumber'];
+            $partInspectionInfo->wcNumber = $partInspection['wcNumber'];
+            $partInspectionInfo->partNumber = $partInspection['partNumber'];
+            $partInspectionInfo->partCount= $partInspection['partCount'];
+            $partInspectionInfo->failures= $partInspection['failures'];
+            $partInspectionInfo->efficiency= $partInspection['efficiency'];
+         }
       }
    }
    

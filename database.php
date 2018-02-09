@@ -114,7 +114,7 @@ class PPTPDatabase extends MySqlDatabase
 
       $result = $this->query("SELECT * FROM operator WHERE EmployeeNumber=" . $employeeNumber . ";");
 
-      if ($row = $result->fetch_assoc())
+      if ($result && ($row = $result->fetch_assoc()))
       {
          $operator = $row;
       }
@@ -403,6 +403,16 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getPartInspection(
+         $partInspectionId)
+   {
+      $query = "SELECT * FROM partinspection WHERE partInspectionId = \"$partInspectionId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function getPartInspections(
       $employeeNumber,
       $startDate,
@@ -411,13 +421,13 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $query = "SELECT * FROM partinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC DESC;";
-         
+         $query = "SELECT * FROM partinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+
          $result = $this->query($query);
       }
       else
       {
-         $query = "SELECT * FROM partinspection WHERE employeeNumber=" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         $query = "SELECT * FROM partinspection WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
          
          $result = $this->query($query);
       }
