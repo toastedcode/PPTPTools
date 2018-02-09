@@ -1,6 +1,7 @@
 <?php
 
 require_once 'database.php';
+require_once 'header.php';
 require_once 'authentication.php';
 
 function loginPage()
@@ -83,7 +84,7 @@ function selectActionPage()
    <!-- Wide card with share menu button -->
    <style>
 
-   .select-action-card > .mdl-card__title {
+   .select-action-card-header {
      color: #fff;
      height: 176px;
      background: url('./images/parts2.jpg') center / cover;
@@ -97,32 +98,31 @@ function selectActionPage()
      height: 176px;
    }
 
-   button {
-     display: inline-block;
-     margin: 0 10px 0 0;
-     padding: 15px 45px;
-     width: 200px;
-     height: 200px;
-     font-size: 18px;
-     line-height: 1.8;
-     appearance: none;
-     box-shadow: none;
-     border-radius: 0;
-   }
+   .action-button {
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
 
-   .actionButton {
+      width: 150px;
+      height: 150px;
+
       color: #fff;
-      background-color: #6496c8;
+      font-size: 18px;
       text-shadow: -1px 1px #417cb8;
-      border: none;
+
+      margin: 10px;
+
+      background-color: #6496c8;
+      
    }
 
-   .actionButton:hover {
+   .action-button:hover {
       background-color: #346392;
       text-shadow: -1px 1px #27496d;
    }
 
-   .actionButton:active {
+   .action-button:active {
       background-color: #27496d;
       text-shadow: -1px 1px #193047;
    }
@@ -139,39 +139,52 @@ function selectActionPage()
       margin: auto;
    }
 
+   .select-action-card-header-div {
+
+   }
+
    </style>
 
-   <div class="select-action-card mdl-card mdl-shadow--2dp">
-     <div class="mdl-card__title">
-       <!--h2 class="mdl-card__title-text">Select an action</h2-->
-     </div>
-      <div class="mdl-card__supporting-text">
-         Select a task to work on. 
-      </div>
-     <div class="button-container">
-        <button type="button" class="actionButton" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
-           <i class="material-icons action-button-icon">schedule</i>
-           <br/>
-           Time Cards
-           <br/><br/>
-        </button>
-        <button type="button" class="actionButton" onclick="location.href='panTicket/panTicket.php?view=view_pan_tickets';">
+   <div class="flex-vertical card-div">
+      <div class="flex-vertical select-action-card-header"></div>
+
+      <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
+
+         <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
+            <div><i class="material-icons action-button-icon">schedule</i></div>
+            <div>Time Cards</div>
+         </div>
+
+        <div  class="action-button" onclick="location.href='panTicket/panTicket.php?view=view_pan_tickets';">
            <i class="material-icons action-button-icon">receipt</i>
-           <br/>
-           Pan Tickets
-           <br/><br/>
-        </button>
-        <button type="button" class="actionButton" onclick="location.href='machineStatus/machineStatus.php?view=view_machine_status';">
+           <div>Pan Tickets</div>
+        </div>
+
+        <div class="action-button" onclick="location.href='machineStatus/machineStatus.php?view=view_machine_status';">
            <i class="material-icons action-button-icon">opacity</i>
-           <br/>
-           Parts Washer Log
-        </button>
-        <button type="button" class="actionButton" onclick="location.href='productionSummary';">
+           <div>Parts Washer</div>
+           <div>Log</div>
+        </div>
+
+        <div class="action-button" onclick="location.href='partInspection/partInspection.php?view=view_part_inspections';">
+           <i class="material-icons action-button-icon">search</i>
+           <div>Part</div>
+           <div>Inspections</div>
+        </div>
+
+        <div class="action-button" onclick="location.href='machineStatus/machineStatus.php?view=view_machines';">
+           <i class="material-icons action-button-icon">verified_user</i>
+           <div>Machine</div>
+           <div>Status</div>
+        </div>
+
+        <div class="action-button" onclick="location.href='productionSummary';">
            <i class="material-icons action-button-icon">show_chart</i>
-           <br/>
-           Production Summary
-        </button>
-     <div>
+           <div>Production</div>
+           <div>Summary</div>
+        </div>
+
+      </div>
    </div>
 HEREDOC;
 }
@@ -270,39 +283,30 @@ switch ($action)
 
 $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFloor.jpg') center / cover";
 
-echo 
-<<<HEREDOC
+?>
+
 <!DOCTYPE html>
 <html>
 
 <head>
-
-   <link rel="stylesheet" type="text/css" href="flex.css"/>
-
    <!--  Material Design Lite -->
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
-   <style>
-      .mdl-layout {
-         background: $background;
-      }
-   </style>
+   <!-- PPTP -->
+   <link rel="stylesheet" type="text/css" href="flex.css"/>
+   <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
+
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </head>
 
-<body>
-   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-HEREDOC;
+<body style="background: <?php echo $background?>;">
 
-pageHeader();
+<?php Header::render("Pittsburgh Precision Tools"); ?>
 
-echo
-<<<HEREDOC
-   <main class="mdl-layout__content">
-      <div class="page-content">
-HEREDOC;
+<div class="flex-horizontal" style="height: 700px;">
 
+<?php 
 if (Authentication::isAuthenticated())
 {
    selectActionPage();
@@ -311,15 +315,10 @@ else
 {
    loginPage();
 }
+?>
 
-echo
-<<<HEREDOC
-      </div>
-   </main>
 </div>
 
 </body>
 
 </html>
-HEREDOC;
-?>

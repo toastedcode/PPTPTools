@@ -114,7 +114,7 @@ class PPTPDatabase extends MySqlDatabase
 
       $result = $this->query("SELECT * FROM operator WHERE EmployeeNumber=" . $employeeNumber . ";");
 
-      if ($row = $result->fetch_assoc())
+      if ($result && ($row = $result->fetch_assoc()))
       {
          $operator = $row;
       }
@@ -384,6 +384,53 @@ class PPTPDatabase extends MySqlDatabase
       $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panticket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
       
       $result = $this->query($query);
+      
+      return ($result);
+   }
+      
+   public function newPartInspection($partInspection)
+   {
+      $date = Time::toMySqlDate($partInspection->dateTime);
+      
+      $query =
+      "INSERT INTO partinspection " .
+      "(dateTime, employeeNumber, wcNumber, partNumber, partCount, failures, efficiency) " .
+      "VALUES " .
+      "('$date', '$partInspection->employeeNumber', '$partInspection->wcNumber', '$partInspection->partNumber', '$partInspection->partCount', '$partInspection->failures', '$partInspection->efficiency');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartInspection(
+         $partInspectionId)
+   {
+      $query = "SELECT * FROM partinspection WHERE partInspectionId = \"$partInspectionId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartInspections(
+      $employeeNumber,
+      $startDate,
+      $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM partinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM partinspection WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         
+         $result = $this->query($query);
+      }
       
       return ($result);
    }
