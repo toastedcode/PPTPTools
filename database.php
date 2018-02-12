@@ -311,7 +311,7 @@ class PPTPDatabase extends MySqlDatabase
          $panTicketId)
    {
       $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panTicketId = $panTicketId;";
-      
+
       $result = $this->query($query);
       
       return ($result);

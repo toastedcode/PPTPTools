@@ -267,6 +267,7 @@ input:checked + label > div  {
    background: #7988c9;
    margin-bottom: 5px;
    height: 100px;
+   width: 350px;
    flex-shrink: 0;
    
    color: #ffffff;

@@ -13,9 +13,9 @@ if (isset($_GET["panTicketId"]))
    
    $panTicketInfo = getPanTicketInfo($panTicketId);
    
-   if ($panTicketInfo->panTicketId == $panTicketId)
+   if ($panTicketInfo)
    {
-      $panTicketDiv = addslashes(ViewPanTickets::getPanTicketDiv($panTicketId));
+      $panTicketDiv = addslashes(ViewPanTickets::getPanTicketDiv($panTicketId, false));  // isEditable = false
       $panTicketDiv = str_replace(array("   ", "\n", "\t", "\r"), '', $panTicketDiv);
       
       echo "{\"isValidPanTicket\":true, \"panTicketDiv\":\"$panTicketDiv\"}";

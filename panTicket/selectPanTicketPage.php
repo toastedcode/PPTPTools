@@ -18,14 +18,14 @@ class SelectPanTicket
       <form id="panTicketForm" action="panTicket.php" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Select Pan Ticket</div>
-         <div class="flex-horizontal content-div">
+         <div class="flex-horizontal content-div" style="align-items:stretch;">
          
-            <div class="flex-vertical" style="flex-grow: 1">
-               <div class="flex-horizontal">$panTicketIdInput</div>
-               <div id="pan-ticket-div"></div>
+            <div class="flex-vertical" style="flex-grow:1;">
+               <div class="flex-horizontal" style="flex-grow:1; flex-shrink: 0;">$panTicketIdInput</div>
+               <div id="pan-ticket-div" style="flex-grow:1; flex-shrink: 0; width:350px;"></div>
             </div>
             
-            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+            <div class="flex-horizontal" style="flex-grow:1">$keypad</div>
             
          </div>
          
@@ -35,7 +35,7 @@ class SelectPanTicket
       
       <script type="text/javascript">
          var keypad = new Keypad();
-         keypad.onEnter = "if (validatePanTicketId()){submitForm('panTicketForm', 'panTicket.php', 'verify_weight', 'update_pan_ticket');}";
+         keypad.onEnter = "if (validatePanTicketId()){submitForm('panTicketForm', 'panTicket.php', 'enter_weight', 'update_pan_ticket');}";
          keypad.init();
 
          document.getElementById("pan-ticket-id-input").focus();

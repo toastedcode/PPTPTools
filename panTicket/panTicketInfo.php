@@ -18,7 +18,7 @@ class PanTicketInfo
 
 function getPanTicketInfo($panTicketId)
 {
-   $panTicketInfo = new PanTicketInfo();
+   $panTicketInfo = null;
    
    $database = new PPTPDatabase();
    
@@ -28,9 +28,9 @@ function getPanTicketInfo($panTicketId)
    {
       $result = $database->getPanTicket($panTicketId);
       
-      if ($result)
+      if ($result && ($panTicket = $result->fetch_assoc()))
       {
-         $panTicket = $result->fetch_assoc();
+         $panTicketInfo = new PanTicketInfo();
          
          // Pan ticket info
          $panTicketInfo->panTicketId = $panTicket['panTicketId'];

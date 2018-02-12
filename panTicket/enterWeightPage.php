@@ -104,7 +104,9 @@ HEREDOC;
    {
       $panTicketInfo = getPanTicketInfo($panTicketId);
       
-      return ($panTicketInfo->weight);
+      $weight = $panTicketInfo ? $panTicketInfo->weight : 0;
+      
+      return ($weight);
    }
 }
 ?>
