@@ -188,6 +188,22 @@ function submitForm(form, page, view, action)
    form.submit();
 }
 
+function validatePanTicketId()
+{
+   valid = false;
+
+   if (!(document.getElementById("pan-ticket-id-input").style.color == "rgb(0, 0, 0)"))
+   {
+      alert("Please enter a valid pan ticket id.")      
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);
+}
+
 function validateOperator()
 {
    radioButtons = document.getElementsByName("employeeNumber"); 
@@ -299,4 +315,82 @@ function formattedDate(date)
    var formattedDate = date.getFullYear() + "-" + (month) + "-" + (day);
 
    return (formattedDate);
+}
+
+function PanTicketIdValidator(inputId)
+{
+   this.inputId = inputId;
+   
+   PanTicketIdValidator.prototype.init = function()
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.validator = this;
+      }
+   }
+   
+   PanTicketIdValidator.prototype.color = function(color)
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.style.color = color;
+      }
+   }
+   
+   PanTicketIdValidator.prototype.validate = function()
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         var panTicketId = element.value;
+      
+         requestURl = "validatePanTicket.php?panTicketId=" + panTicketId;
+         
+         var xhttp = new XMLHttpRequest();
+         xhttp.validator = this;
+         xhttp.onreadystatechange = function()
+         {
+            if (this.readyState == 4 && this.status == 200)
+            {
+               var response = JSON.parse(this.responseText);
+               
+               validator.onValidationReply(response.panTicketId, response.isValidPanTicket, response.panTicketDiv);
+            }
+         };
+         
+         xhttp.open("GET", requestURl, true);
+         xhttp.send(); 
+      }
+   }
+   
+   PanTicketIdValidator.prototype.onValidationReply = function(panTicketId, isValidPanTicket, panTicketDiv)
+   {
+      if (isValidPanTicket)
+      {
+         this.color("#000000");
+         
+         var element = document.getElementById("pan-ticket-div");
+         
+         if (element)
+         {
+            element.innerHTML = panTicketDiv;
+         }
+      }
+      else
+      {
+         this.color("#FF0000");
+         
+         var element = document.getElementById("pan-ticket-div");
+         
+         if (element)
+         {
+            element.innerHTML = "";
+         }
+      }
+   }
 }

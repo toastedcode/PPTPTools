@@ -1,6 +1,5 @@
 <?php
 require_once '../database.php';
-require_once 'keypad.php';
 
 class EnterMaterialNumber
 {
@@ -10,7 +9,7 @@ class EnterMaterialNumber
       
       $materialNumberInput = EnterMaterialNumber::materialNumberInput();
       
-      $keypad = Keypad::getHtml();
+      $keypad = Keypad::getHtml(false);
       
       $navBar = EnterMaterialNumber::navBar();
       
@@ -24,7 +23,6 @@ class EnterMaterialNumber
             <div class="flex-horizontal" style="flex-grow: 1">$materialNumberInput</div>
             
             <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
-            <script type="text/javascript">initKeypad()</script>
             
          </div>
          
@@ -33,7 +31,10 @@ class EnterMaterialNumber
       </div>
       
       <script type="text/javascript">
-         initKeypad();
+         var keypad = new Keypad();
+         keypad.onEnter = "submitForm('panTicketForm', 'panTicket.php', 'edit_pan_ticket', 'update_pan_ticket_info')";
+         keypad.init();
+
          document.getElementById("material-number-input").focus();
          
          var validator = new IntValidator("material-number-input", 5, 1, 10000, false);

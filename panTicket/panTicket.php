@@ -4,6 +4,7 @@ require_once '../database.php';
 require_once '../authentication.php';
 require_once '../header.php';
 require_once 'panTicketInfo.php';
+require_once 'keypad.php';
 
 require 'viewPanTicketsPage.php';
 require 'viewPanTicketPage.php';

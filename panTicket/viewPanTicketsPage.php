@@ -1,5 +1,6 @@
 <?php
 
+require_once '../authentication.php';
 require_once '../database.php';
 require_once '../navigation.php';
 
@@ -50,6 +51,20 @@ class ViewPanTickets
 
       </div>
 HEREDOC;
+      
+      return ($html);
+   }
+   
+   public static function getPanTicketDiv($panTicketId, $isEditable)
+   {
+      $html = "";
+
+      $panTicketInfo = getPanTicketInfo($panTicketId);
+
+      if ($panTicketInfo)
+      {
+         $html = ViewPanTickets::panTicketDiv($panTicketInfo, $isEditable);
+      }
       
       return ($html);
    }
@@ -144,7 +159,10 @@ HEREDOC;
             {
                $panTicketInfo = getPanTicketInfo($row["panTicketId"]);
                
-               $html .= ViewPanTickets::panTicketDiv($panTicketInfo);
+               if ($panTicketInfo)
+               {
+                  $html .= ViewPanTickets::panTicketDiv($panTicketInfo, true);  // isEditable = true
+               }
             }
          }
       }
@@ -157,7 +175,7 @@ HEREDOC;
       return ($html);
    }
    
-   private static function panTicketDiv($panTicketInfo)
+   private static function panTicketDiv($panTicketInfo, $isEditable)
    {
       $operator = ViewPanTickets::getOperator($panTicketInfo->employeeNumber);
       
@@ -168,23 +186,41 @@ HEREDOC;
       $time = date_format(new DateTime($panTicketInfo->date), "H:i A");
       $jobNumber = $panTicketInfo->jobNumber;
       $partNumber = $panTicketInfo->partNumber;
-      $weight = $panTicketInfo->weight ? $panTicketInfo->weight : "";
       $weightLabel = $panTicketInfo->weight ? "LBS" : "unweighed";
+      
+      $weight = "";
+      if ($panTicketInfo->weight)
+      {
+         $weight = $panTicketInfo->weight;
+         
+         // Display weight as integer if no decimal.
+         if (floatval($weight) == round($weight, 2))
+         {
+            $weight = round($weight, 2);
+         }
+         else
+         {
+            
+         }
+      }
       
       $viewEditIcon = "";
       $deleteIcon = "";
-      if (Authentication::getPermissions() < Permissions::ADMIN)
+      if ($isEditable)
       {
-         $viewEditIcon =
-         "<i class=\"material-icons table-function-button\" onclick=\"onViewPanTicket($panTicketInfo->panTicketId)\">visibility</i>";
-      }
-      else
-      {
-         $viewEditIcon =
-         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditPanTicket($panTicketInfo->panTicketId)\">mode_edit</i>";
-         
-         $deleteIcon =
-         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeletePanTicket($panTicketInfo->panTicketId)\">delete</i>";
+         if (Authentication::getPermissions() < Permissions::ADMIN)
+         {
+            $viewEditIcon =
+            "<i class=\"material-icons table-function-button\" onclick=\"onViewPanTicket($panTicketInfo->panTicketId)\">visibility</i>";
+         }
+         else
+         {
+            $viewEditIcon =
+            "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditPanTicket($panTicketInfo->panTicketId)\">mode_edit</i>";
+            
+            $deleteIcon =
+            "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeletePanTicket($panTicketInfo->panTicketId)\">delete</i>";
+         }
       }
       
       $html =
