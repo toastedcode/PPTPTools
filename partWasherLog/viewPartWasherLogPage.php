@@ -103,6 +103,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->mainMenuButton();
+      $navBar->highlightNavButton("New Log Entry", "onNewLogEntry()", true);
       $navBar->end();
       
       return ($navBar->getHtml());
