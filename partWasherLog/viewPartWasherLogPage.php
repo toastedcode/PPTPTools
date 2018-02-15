@@ -2,6 +2,7 @@
 
 require_once '../database.php';
 require_once '../navigation.php';
+require_once '../panTicket/panTicketInfo.php';
 
 class Filter
 {
@@ -74,7 +75,7 @@ HEREDOC;
       <div>
       <form action="#" method="POST">
          <input type="hidden" name="view" value="view_part_washer_log"/>
-         Employee:
+         Washer:
          <select id="employeeNumberInput" name="employeeNumber">$options</select>
          &nbsp
          Start Date:
@@ -103,7 +104,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->mainMenuButton();
-      $navBar->highlightNavButton("New Log Entry", "onNewLogEntry()", true);
+      $navBar->highlightNavButton("New Log Entry", "onNewPartWasherEntry()", true);
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -121,12 +122,13 @@ HEREDOC;
                   <th>Operator Name</th>
                   <th>Mfg. Date</th>
                   <th>Work Center #</th>
+                  <th>Part #</th>
                   <th>Basket Count</th>
                   <th>Part Count</th>
+                  <th></th>
                </tr>
 HEREDOC;
       
-      /*
       $database = new PPTPDatabase();
       
       $database->connect();
@@ -143,49 +145,66 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartInspections($filter->employeeNumber, $startDateString, $endDateString);
-         
+         $result = $database->getPartWasherEntries($filter->employeeNumber, $startDateString, $endDateString);
+        
          if ($result)
          {
             while ($row = $result->fetch_assoc())
             {
-               $partInspectionInfo = getPartInspectionInfo($row["partInspectionId"]);
+               $partWasherEntry = getPartWasherEntry($row["partWasherEntryId"]);
                
-               if ($partInspectionInfo)
+               if ($partWasherEntry)
                {
-                  $operatorName = "unknown";
-                  $operator = ViewPartInspections::getOperator($partInspectionInfo->employeeNumber);
-                  if ($operator)
+                  $panTicketInfo = getPanTicketInfo($partWasherEntry->panTicketId);
+                  
+                  if ($panTicketInfo)
                   {
-                     $operatorName = $operator['FirstName'] . " " . $operator['LastName'];
-                  }
-                  
-                  $dateTime = new DateTime($partInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $date = $dateTime->format("m-d-Y");
-                  $time = $dateTime->format("h:i a");
-                  
-                  $inspectionClass = ($partInspectionInfo->failures > 0) ? "failed-inspection" : "good-inspection"; 
-                  
-                  $workCenter = ($partInspectionInfo->wcNumber == 0) ? "unknown" : $partInspectionInfo->wcNumber;
-
-                  $html .=
+                     $partWasherName = "unknown";
+                     $operator = ViewPartWasherLog::getOperator($partWasherEntry->employeeNumber);
+                     if ($operator)
+                     {
+                        $partWasherName= $operator['FirstName'] . " " . $operator['LastName'];
+                     }
+                     
+                     $operatorName = "unknown";
+                     $operator = ViewPartWasherLog::getOperator($panTicketInfo->employeeNumber);
+                     if ($operator)
+                     {
+                        $operatorName = $operator['FirstName'] . " " . $operator['LastName'];
+                     }
+                     
+                     $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $washDate = $dateTime->format("m-d-Y");
+                     
+                     $dateTime = new DateTime($panTicketInfo->date, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $mfgDate = $dateTime->format("m-d-Y");
+                     
+                     $deleteIcon = "";
+                     if (Authentication::getPermissions() >= Permissions::ADMIN)
+                     {
+                        $deleteIcon =
+                        "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
+                     }
+   
+                     $html .=
 <<<HEREDOC
-                     <tr class="$inspectionClass">
-                        <td>$operatorName</td>
-                        <td>$date</td>
-                        <td>$time</td>
-                        <td>$workCenter</td>
-                        <td>$partInspectionInfo->partNumber</td>
-                        <td>$partInspectionInfo->partCount</td>
-                        <td>$partInspectionInfo->failures</td>
-                        <td>$partInspectionInfo->efficiency</td>
-                     </tr>
+                        <tr>
+                           <td>$partWasherName</td>
+                           <td>$washDate</td>
+                           <td>$operatorName</td>
+                           <td>$mfgDate</td>
+                           <td>$panTicketInfo->wcNumber</td>
+                           <td>$panTicketInfo->partNumber</td>
+                           <td>$partWasherEntry->panCount</td>
+                           <td>$partWasherEntry->partCount</td>
+                           <td>$deleteIcon</td>
+                        </tr>
 HEREDOC;
+                  }
                }
             }
          }
       }
-      */
       
       $html .=
 <<<HEREDOC

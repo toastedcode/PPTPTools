@@ -434,6 +434,79 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function getPartWasherEntry($partWasherEntryId)
+   {
+      $query = "SELECT * FROM partwasher WHERE partWasherEntryId = \"$partWasherEntryId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartWasherEntries(
+      $employeeNumber,
+      $startDate,
+      $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM partwasher WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM partwasher WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         
+         $result = $this->query($query);
+      }
+      
+      return ($result);
+   }
+   
+   public function newPartWasherEntry(
+      $partWasherEntry)
+   {
+      $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
+      
+      $query =
+      "INSERT INTO partwasher " .
+      "(dateTime, employeeNumber, panTicketId, panCount, partCount) " .
+      "VALUES " .
+      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->panTicketId', '$partWasherEntry->panCount', '$partWasherEntry->partCount');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePartWasherEntry(
+      $partWasherEntryId,
+      $partWasherEntry)
+   {
+      $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
+      
+      $query =
+      "UPDATE partwasher " .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, panTicketId = $partWasherEntry->panTicketId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount" .
+      "WHERE partWasherEntryId = $partWasherEntryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePartWasherEntry(
+      $partWasherEntryId)
+   {
+      $query = "DELETE FROM partwasher WHERE partWasherEntryId = $partWasherEntryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
       
    private function checkForNewSensor($sensorId)
    {

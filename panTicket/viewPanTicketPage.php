@@ -214,7 +214,7 @@ HEREDOC;
           ($panTicketInfo->panTicketId == 0))
       {
          // Case 1
-         // Editing as last step of creating a new time card.
+         // Editing as last step of creating a new pan ticket.
          
          $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
          $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");

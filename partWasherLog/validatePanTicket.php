@@ -1,9 +1,8 @@
 <?php
 
 require_once '../database.php';
-require_once 'panTicketInfo.php';
-require_once 'viewPanTicketsPage.php';
-
+require_once '../panTicket/panTicketInfo.php';
+require_once '../panTicket/viewPanTicketsPage.php';
 
 // *****************************************************************************
 //                                   Begin
