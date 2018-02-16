@@ -30,7 +30,7 @@ function getPartInspectionInfo($partInspectionId)
          if ($partInspection)
          {
             $partInspectionInfo->partInspectionId = $partInspection['partInspectionId'];
-            $partInspectionInfo->dateTime = Time::fromMySqlDate($partInspection['dateTime'], "Y-m-d H:i:s");
+            $partInspectionInfo->dateTime = Time::fromMySqlDate($partInspection['dateTime'], "Y-m-d h:i:s");
             $partInspectionInfo->employeeNumber = $partInspection['employeeNumber'];
             $partInspectionInfo->wcNumber = $partInspection['wcNumber'];
             $partInspectionInfo->partNumber = $partInspection['partNumber'];

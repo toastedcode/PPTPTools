@@ -76,16 +76,15 @@ HEREDOC;
       
    private static function filterDiv($filter)
    {
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = ViewPanTickets::getOperators();
       
       $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       
       $options = "<option $selected value=0>All</option>";
-      
-      foreach ($operators as $operator)
+      while ($row = $operators->fetch_assoc())
       {
-         $selected = ($operator->employeeNumber == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $operator->employeeNumber . "\">" . $operator->getFullName() . "</option>";
+         $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
+         $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
       }
       
       $html = 
@@ -178,11 +177,11 @@ HEREDOC;
    
    private static function panTicketDiv($panTicketInfo, $isEditable)
    {
-      $operator = User::getUser($panTicketInfo->employeeNumber);
+      $operator = ViewPanTickets::getOperator($panTicketInfo->employeeNumber);
       
       $dateTime = new DateTime($panTicketInfo->date);
       
-      $name = $operator->lastName;
+      $name = $operator["LastName"];
       $date = date_format(new DateTime($panTicketInfo->date), "m-d-Y");
       $time = date_format(new DateTime($panTicketInfo->date), "H:i A");
       $jobNumber = $panTicketInfo->jobNumber;
@@ -209,18 +208,18 @@ HEREDOC;
       $deleteIcon = "";
       if ($isEditable)
       {
-         if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+         if (Authentication::getPermissions() < Permissions::ADMIN)
+         {
+            $viewEditIcon =
+            "<i class=\"material-icons table-function-button\" onclick=\"onViewPanTicket($panTicketInfo->panTicketId)\">visibility</i>";
+         }
+         else
          {
             $viewEditIcon =
             "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditPanTicket($panTicketInfo->panTicketId)\">mode_edit</i>";
             
             $deleteIcon =
             "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeletePanTicket($panTicketInfo->panTicketId)\">delete</i>";
-         }
-         else
-         {
-            $viewEditIcon =
-            "<i class=\"material-icons table-function-button\" onclick=\"onViewPanTicket($panTicketInfo->panTicketId)\">visibility</i>";
          }
       }
       
@@ -255,6 +254,38 @@ HEREDOC;
 HEREDOC;
       
       return ($html);
+   }
+   
+   private static function getOperators()
+   {
+      $operators = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operators= $database->getOperators();
+      }
+      
+      return ($operators);
+   }
+   
+   private static function getOperator($employeeNumber)
+   {
+      $operator = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operator = $database->getOperator($employeeNumber);
+      }
+      
+      return ($operator);
    }
    
    private static function getFilter()

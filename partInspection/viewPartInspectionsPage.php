@@ -2,7 +2,6 @@
 
 require_once '../database.php';
 require_once '../navigation.php';
-require_once '../user.php';
 
 class Filter
 {
@@ -62,16 +61,15 @@ HEREDOC;
       
    private static function filterDiv($filter)
    {
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = ViewPartInspections::getOperators();
       
       $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       
       $options = "<option $selected value=0>All</option>";
-      
-      foreach ($operators as $operator)
+      while ($row = $operators->fetch_assoc())
       {
-         $selected = ($operator->employeeNumber == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $operator->employeeNumber . "\">" . $operator->getFullName() . "</option>";
+         $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
+         $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
       }
       
       $html = 
@@ -158,10 +156,10 @@ HEREDOC;
                if ($partInspectionInfo)
                {
                   $operatorName = "unknown";
-                  $operator = User::getUser($partInspectionInfo->employeeNumber);
+                  $operator = ViewPartInspections::getOperator($partInspectionInfo->employeeNumber);
                   if ($operator)
                   {
-                     $operatorName = $operator->getFullName();
+                     $operatorName = $operator['FirstName'] . " " . $operator['LastName'];
                   }
                   
                   $dateTime = new DateTime($partInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
@@ -197,6 +195,38 @@ HEREDOC;
 HEREDOC;
       
       return ($html);
+   }
+   
+   private static function getOperators()
+   {
+      $operators = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operators= $database->getOperators();
+      }
+      
+      return ($operators);
+   }
+   
+   private static function getOperator($employeeNumber)
+   {
+      $operator = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operator = $database->getOperator($employeeNumber);
+      }
+      
+      return ($operator);
    }
    
    private static function getFilter()
