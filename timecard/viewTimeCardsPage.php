@@ -1,7 +1,6 @@
 <?php
 
 require_once '../database.php';
-require_once '../user.php';
 
 class Filter
 {
@@ -75,6 +74,22 @@ class TimeCardTable
       return ($result);
    }
    
+   private static function getOperator($employeeNumber)
+   {
+      $operator = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operator = $database->getOperator($employeeNumber);
+      }
+      
+      return ($operator);
+   }
+   
    private function tableStart()
    {
       $html =
@@ -141,30 +156,25 @@ HEREDOC;
             
             $date = Time::fromMySqlDate($row['Date'], "m-d-Y");
             
-            $name = "";
-            $operator = User::getUser($row['EmployeeNumber']);
-            if ($operator)
-            {
-               $name = $operator->getFullName();
-            }
-
+            $operator = TimeCardTable::getOperator($row['EmployeeNumber']);
+            $name = $operator["FirstName"] . " " . $operator["LastName"];
             $setupTime = round($row['SetupTime'] / 60) . ":" . sprintf("%02d", ($row['SetupTime'] % 60));
             $runTime = round($row['RunTime'] / 60) . ":" . sprintf("%02d", ($row['RunTime'] % 60));
             
             $viewEditIcon = "";
             $deleteIcon = "";
-            if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
-            {
-               $viewEditIcon =
-               "<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard($timeCardId)\">mode_edit</i>";
-               
-               $deleteIcon =
-               "<i class=\"material-icons table-function-button\" onclick=\"onDeleteTimeCard($timeCardId)\">delete</i>";
-            }
-            else
+            if (Authentication::getPermissions() < Permissions::ADMIN)
             {
                $viewEditIcon = 
                   "<i class=\"material-icons table-function-button\" onclick=\"onViewTimeCard($timeCardId)\">visibility</i>";
+            }
+            else
+            {
+               $viewEditIcon =
+                  "<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard($timeCardId)\">mode_edit</i>";
+               
+               $deleteIcon = 
+                  "<i class=\"material-icons table-function-button\" onclick=\"onDeleteTimeCard($timeCardId)\">delete</i>";
             }
             
             $html .=
@@ -285,16 +295,15 @@ HEREDOC;
       
    private static function filterDiv($filter)
    {
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = ViewTimeCards::getOperators();
       
       $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       
       $options = "<option $selected value=0>All</option>";
-      
-      foreach ($operators as $operator)
+      while ($row = $operators->fetch_assoc())
       {
-         $selected = ($operator->employeeNumber == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $operator->employeeNumber . "\">" . $operator->getFullName() . "</option>";
+         $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
+         $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
       }
       
       $html = 
@@ -335,6 +344,22 @@ HEREDOC;
       $navBar->end();
       
       return ($navBar->getHtml());
+   }
+   
+   private static function getOperators()
+   {
+      $operators = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $operators= $database->getOperators();
+      }
+      
+      return ($operators);
    }
    
    private static function getFilter()

@@ -4,7 +4,6 @@ require_once '../database.php';
 require_once 'panTicketInfo.php';
 require_once 'viewPanTicketsPage.php';
 
-
 // *****************************************************************************
 //                                   Begin
 
