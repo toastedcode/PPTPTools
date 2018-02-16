@@ -1,5 +1,5 @@
 <?php
-require_once '../database.php';
+require_once '../user.php';
 
 class SelectOperator
 {
@@ -37,25 +37,15 @@ HEREDOC;
       
       $selectedEmployeeNumber = SelectOperator::getEmployeeNumber();
       
-      $database = new PPTPDatabase();
+      $operators = User::getUsers(Permissions::OPERATOR);
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      foreach ($operators as $operator)
       {
-         $result = $database->getOperators();
-     
-         // output data of each row
-         while ($row = $result->fetch_assoc())
-         {
-            $name = $row["FirstName"] . " " . $row["LastName"];
-            
-            $employeeNumber = $row["EmployeeNumber"];
-            
-            $isChecked = ($selectedEmployeeNumber == $employeeNumber);
-            
-            $html .= SelectOperator::operator($employeeNumber, $name, $isChecked);
-         }
+         $name = $operator->getFullName();
+         $employeeNumber = $operator->employeeNumber;
+         $isChecked = ($selectedEmployeeNumber == $employeeNumber);
+         
+         $html .= SelectOperator::operator($employeeNumber, $name, $isChecked);
       }
       
       return ($html);

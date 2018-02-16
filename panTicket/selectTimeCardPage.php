@@ -74,9 +74,13 @@ HEREDOC;
    
    private static function timeCardDiv($timeCardInfo, $isChecked)
    {
-      $operator = SelectTimeCard::getOperator($timeCardInfo->employeeNumber);
-      
-      $name = $operator["LastName"];
+      $name = "";
+      $operator = User::getUser($timeCardInfo->employeeNumber);
+      if ($operator)
+      {
+         $name = $operator->lastName;
+      }
+
       $date = date_format(new DateTime($timeCardInfo->date), "m-d-Y");
       $jobNumber = $timeCardInfo->jobNumber;
       $wcNumber = $timeCardInfo->wcNumber;
@@ -122,22 +126,6 @@ HEREDOC;
       $navBar->end();
       
       return ($navBar->getHtml());
-   }
-   
-   private static function getOperator($employeeNumber)
-   {
-      $operator = null;
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $operator = $database->getOperator($employeeNumber);
-      }
-      
-      return ($operator);
    }
    
    private static function getTimeCardId()

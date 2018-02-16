@@ -1,7 +1,7 @@
 <?php
-require_once '../database.php';
 require_once 'timeCardInfo.php';
 require_once '../navigation.php';
+require_once '../user.php';
 
 class ViewTimeCard
 {
@@ -110,7 +110,12 @@ HEREDOC;
    
    protected static function operatorDiv($timeCardInfo)
    {
-      $name = ViewTimeCard::getOperatorName($timeCardInfo->employeeNumber);
+      $name = "";
+      $operator = User::getUser($timeCardInfo->employeeNumber);
+      if ($operator)
+      {
+         $name = $operator->getFullName();
+      }
       
       $html = 
 <<<HEREDOC
@@ -272,25 +277,6 @@ HEREDOC;
       }
       
       return ($timeCardInfo);
-   }
-   
-   protected static function getOperatorName($employeeNumber)
-   {
-      $name = "";
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         if ($operator = $database->getOperator($employeeNumber))
-         {
-            $name = $operator["FirstName"] . " " . $operator["LastName"];
-         }
-      }
-      
-      return ($name);
    }
 }
 ?>

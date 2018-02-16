@@ -1,5 +1,5 @@
 <?php
-require_once '../user.php';
+require_once '../database.php';
 
 class SelectOperator
 {
@@ -13,9 +13,9 @@ class SelectOperator
       
       $html =
 <<<HEREDOC
-      <form id="panTicketForm" action="panTicket.php" method="POST"></form>
+      <form id="partWasherForm" action="#" method="POST"></form>
       <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Operator</div>
+         <div class="card-header-div">Select Part Washer</div>
          <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start; align-content:center;">
             $operators  
          </div>
@@ -37,7 +37,7 @@ HEREDOC;
       
       $selectedEmployeeNumber = SelectOperator::getEmployeeNumber();
       
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = User::getUsers(Permissions::PART_WASHER);
       
       foreach ($operators as $operator)
       {
@@ -63,7 +63,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <input type="radio" form="panTicketForm" id="$id" class="operator-input" name="employeeNumber" value="$employeeNumber" $checked/>
+      <input type="radio" form="partWasherForm" id="$id" class="operator-input" name="employeeNumber" value="$employeeNumber" $checked/>
       <label for="$id">
          <div type="button" class="select-button operator-select-button">
             <i class="material-icons button-icon">person</i>
@@ -80,8 +80,8 @@ HEREDOC;
       $navBar = new Navigation();
       
       $navBar->start();
-      $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-      $navBar->nextButton("if (validateOperator()) {submitForm('panTicketForm', 'panTicket.php', 'select_time_card', 'update_pan_ticket_info');};");
+      $navBar->cancelButton("submitForm('partWasherForm', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
+      $navBar->nextButton("if (validateOperator()) {submitForm('partWasherForm', 'partWasherLog.php', 'select_pan_ticket', 'update_part_washer_entry');};");
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -91,9 +91,9 @@ HEREDOC;
    {
       $employeeNumber = null;
       
-      if (isset($_SESSION['panTicketInfo']))
+      if (isset($_SESSION['partWasherEntry']))
       {
-         $employeeNumber = $_SESSION['panTicketInfo']->employeeNumber;
+         $employeeNumber = $_SESSION['partWasherEntry']->employeeNumber;
       }
       
       return ($employeeNumber);
