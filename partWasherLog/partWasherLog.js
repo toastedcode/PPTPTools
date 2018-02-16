@@ -1,6 +1,6 @@
 function onDeletePartWasherEntry(panWasherEntryId)
 {
-   if (confirm("Are you sure you want to delete entry?"))
+   if (confirm("Are you sure you want to delete this log entry?"))
    {
       form = document.createElement('form');
       form.setAttribute('method', 'POST');

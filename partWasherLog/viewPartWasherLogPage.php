@@ -59,15 +59,16 @@ HEREDOC;
       
    private static function filterDiv($filter)
    {
-      $operators = ViewPartWasherLog::getOperators();
+      $operators = User::getUsers(Permissions::PART_WASHER);
       
       $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       
       $options = "<option $selected value=0>All</option>";
-      while ($row = $operators->fetch_assoc())
+      
+      foreach ($operators as $operator)
       {
-         $selected = ($row["EmployeeNumber"] == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $row["EmployeeNumber"] . "\">" . $row["FirstName"] . " " . $row["LastName"] . "</option>";
+         $selected = ($operator->employeeNumber == $filter->employeeNumber) ? "selected" : "";
+         $options .= "<option $selected value=\"" . $operator->employeeNumber . "\">" . $operator->getFullName() . "</option>";
       }
       
       $html = 
@@ -160,17 +161,17 @@ HEREDOC;
                   if ($panTicketInfo)
                   {
                      $partWasherName = "unknown";
-                     $operator = ViewPartWasherLog::getOperator($partWasherEntry->employeeNumber);
+                     $operator = User::getUser($partWasherEntry->employeeNumber);
                      if ($operator)
                      {
-                        $partWasherName= $operator['FirstName'] . " " . $operator['LastName'];
+                        $partWasherName= $operator->getFullName();
                      }
                      
                      $operatorName = "unknown";
-                     $operator = ViewPartWasherLog::getOperator($panTicketInfo->employeeNumber);
+                     $operator = User::getUser($panTicketInfo->employeeNumber);
                      if ($operator)
                      {
-                        $operatorName = $operator['FirstName'] . " " . $operator['LastName'];
+                        $operatorName = $operator->getFullName();
                      }
                      
                      $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
@@ -180,7 +181,7 @@ HEREDOC;
                      $mfgDate = $dateTime->format("m-d-Y");
                      
                      $deleteIcon = "";
-                     if (Authentication::getPermissions() >= Permissions::ADMIN)
+                     if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
                      {
                         $deleteIcon =
                         "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
@@ -213,38 +214,6 @@ HEREDOC;
 HEREDOC;
       
       return ($html);
-   }
-   
-   private static function getOperators()
-   {
-      $operators = null;
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $operators= $database->getOperators();
-      }
-      
-      return ($operators);
-   }
-   
-   private static function getOperator($employeeNumber)
-   {
-      $operator = null;
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $operator = $database->getOperator($employeeNumber);
-      }
-      
-      return ($operator);
    }
    
    private static function getFilter()
