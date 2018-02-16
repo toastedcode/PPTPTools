@@ -72,7 +72,7 @@ function processAction($action)
          
          updatePartWasherLog($_SESSION['partWasherEntry']);
          
-         $_SESSION["partWasherEntry"] = new PanTicketInfo();
+         $_SESSION["partWasherEntry"] = new PartWasherEntry();
          break;
       }
       
