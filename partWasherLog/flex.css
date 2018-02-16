@@ -1,0 +1,89 @@
+@CHARSET "ISO-8859-1";
+
+.flex-horizontal {
+   display: flex;
+   flex-direction: row;     /* horizontal orientation */
+   align-items:center;      /* center vertically */
+   justify-content: center; /* center horizontally */
+}
+
+.flex-vertical {
+   display: flex;
+   flex-direction: column;     /* horizontal orientation */
+   align-items:center;         /* center vertically */
+   justify-content: center;    /* center horizontally */
+}
+
+.flex-row {
+   display: flex;
+   flex-direction: row;     /* horizontal orientation */
+   align-items:center;      /* center vertically */
+   justify-content: center; /* center horizontally */
+}
+
+.flex-col {
+   display: flex;
+   flex-direction: column;     /* horizontal orientation */
+   align-items:center;         /* center vertically */
+   justify-content: center;    /* center horizontally */
+}
+
+.flex-row-top-left {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;      /* top */
+   justify-content: flex-start;  /* left */
+}
+
+.flex-row-top-right {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;    /* top */
+   justify-content: flex-end;  /* right */
+}
+
+.flex-row-bottom-left {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-end;        /* bottom */
+   justify-content: flex-start;  /* left */
+}
+
+.flex-row-bottom-right {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-end;      /* bottom */
+   justify-content: flex-end;  /* right */
+}
+
+.flex-col-top-left {
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-start;  /* top */
+   align-items: flex-start;      /* left */
+}
+
+.flex-col-top-right {
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-start;  /* top */
+   align-items: flex-end;        /* right */
+}
+
+.flex-col-bottom-left {
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-end;  /* bottom */
+   align-items: flex-start;    /* left */
+}
+
+.flex-col-bottom-right {
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-end;  /* bottom */
+   align-items: flex-end;      /* right */
+}
+
+.stretch {
+   align-items: stretch;
+}

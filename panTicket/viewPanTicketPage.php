@@ -1,7 +1,7 @@
 <?php
-require_once '../database.php';
 require_once 'panTicketInfo.php';
 require_once '../navigation.php';
+require_once '../user.php';
 require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
 class ViewPanTicket
@@ -130,7 +130,12 @@ HEREDOC;
    
    protected static function operatorDiv($panTicketInfo)
    {
-      $name = ViewPanTicket::getOperatorName($panTicketInfo->employeeNumber);
+      $name = "";
+      $operator = User::getUser($panTicketInfo->employeeNumber);
+      if ($operator)
+      {
+         $name = $operator->getFullName();
+      }
       
       $html = 
 <<<HEREDOC
@@ -214,7 +219,7 @@ HEREDOC;
           ($panTicketInfo->panTicketId == 0))
       {
          // Case 1
-         // Editing as last step of creating a new time card.
+         // Editing as last step of creating a new pan ticket.
          
          $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
          $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");
@@ -267,25 +272,6 @@ HEREDOC;
       }
       
       return ($panTicketInfo);
-   }
-   
-   protected static function getOperatorName($employeeNumber)
-   {
-      $name = "";
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         if ($operator = $database->getOperator($employeeNumber))
-         {
-            $name = $operator["FirstName"] . " " . $operator["LastName"];
-         }
-      }
-      
-      return ($name);
    }
 }
 ?>

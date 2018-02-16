@@ -236,7 +236,7 @@ function deleteTimeCard($timeCardId)
 {
    $result = false;
    
-   $database = new PPTPDatabase("localhost", "root", "", "pptp");
+   $database = new PPTPDatabase();
    
    $database->connect();
    

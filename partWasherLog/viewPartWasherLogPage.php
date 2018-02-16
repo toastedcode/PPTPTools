@@ -2,15 +2,13 @@
 
 require_once '../database.php';
 require_once '../navigation.php';
-require_once '../user.php';
+require_once '../panTicket/panTicketInfo.php';
 
 class Filter
 {
    public $employeeNumber = 0;
    public $startDate;
    public $endDate;
-   public $page = -1;
-   public $itemsPerPage = 0;
    
    function __construct()
    {
@@ -19,31 +17,30 @@ class Filter
    }
 }
 
-class ViewPartInspections
+class ViewPartWasherLog
 {
 
    public static function getHtml()
    {
-      $filter = ViewPartInspections::getFilter();
-      $filter->itemsPerPage = 5;
+      $filter = ViewPartWasherLog::getFilter();
       
-      $filterDiv = ViewPartInspections::filterDiv($filter);
+      $filterDiv = ViewPartWasherLog::filterDiv($filter);
       
-      $partInspectionsDiv = ViewPartInspections::partInspectionsDiv($filter);
+      $partWasherLogDiv = ViewPartWasherLog::partWasherLogDiv($filter);
       
-      $navBar = ViewPartInspections::navBar();
+      $navBar = ViewPartWasherLog::navBar();
       
       $html = 
 <<<HEREDOC
-      <script src="partInspection.js"></script>
+      <script src="partWasherLog.js"></script>
    
       <div class="flex-vertical card-div">
-         <div class="card-header-div">View Part Inspections</div>
+         <div class="card-header-div">View Part Washer Log</div>
          <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
    
                $filterDiv
    
-               $partInspectionsDiv
+               $partWasherLogDiv
          
          </div>
 
@@ -57,12 +54,12 @@ HEREDOC;
    
    public static function render()
    {
-      echo (ViewPartInspections::getHtml());
+      echo (ViewPartWasherLog::getHtml());
    }
       
    private static function filterDiv($filter)
    {
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = User::getUsers(Permissions::PART_WASHER);
       
       $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       
@@ -78,8 +75,8 @@ HEREDOC;
 <<<HEREDOC
       <div>
       <form action="#" method="POST">
-         <input type="hidden" name="view" value="view_pan_tickets"/>
-         Employee:
+         <input type="hidden" name="view" value="view_part_washer_log"/>
+         Washer:
          <select id="employeeNumberInput" name="employeeNumber">$options</select>
          &nbsp
          Start Date:
@@ -108,26 +105,28 @@ HEREDOC;
       
       $navBar->start();
       $navBar->mainMenuButton();
+      $navBar->highlightNavButton("New Log Entry", "onNewPartWasherEntry()", true);
       $navBar->end();
       
       return ($navBar->getHtml());
    }
    
-   private static function partInspectionsDiv($filter)
+   private static function partWasherLogDiv($filter)
    {
       $html = 
 <<<HEREDOC
-         <div class="part-inspections-div">
-            <table class="part-inspection-table">
+         <div class="part-washer-log-div">
+            <table class="part-washer-log-table">
                <tr>
-                  <th>Name</th>
-                  <th>Date</th>
-                  <th>Time</th>
+                  <th>Washer Name</th>
+                  <th>Wash Date</th>
+                  <th>Operator Name</th>
+                  <th>Mfg. Date</th>
                   <th>Work Center #</th>
                   <th>Part #</th>
+                  <th>Basket Count</th>
                   <th>Part Count</th>
-                  <th>Failure Count</th>
-                  <th>Efficiency</th>
+                  <th></th>
                </tr>
 HEREDOC;
       
@@ -147,44 +146,62 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartInspections($filter->employeeNumber, $startDateString, $endDateString);
-         
+         $result = $database->getPartWasherEntries($filter->employeeNumber, $startDateString, $endDateString);
+        
          if ($result)
          {
             while ($row = $result->fetch_assoc())
             {
-               $partInspectionInfo = getPartInspectionInfo($row["partInspectionId"]);
+               $partWasherEntry = getPartWasherEntry($row["partWasherEntryId"]);
                
-               if ($partInspectionInfo)
+               if ($partWasherEntry)
                {
-                  $operatorName = "unknown";
-                  $operator = User::getUser($partInspectionInfo->employeeNumber);
-                  if ($operator)
+                  $panTicketInfo = getPanTicketInfo($partWasherEntry->panTicketId);
+                  
+                  if ($panTicketInfo)
                   {
-                     $operatorName = $operator->getFullName();
-                  }
-                  
-                  $dateTime = new DateTime($partInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $date = $dateTime->format("m-d-Y");
-                  $time = $dateTime->format("h:i a");
-                  
-                  $inspectionClass = ($partInspectionInfo->failures > 0) ? "failed-inspection" : "good-inspection"; 
-                  
-                  $workCenter = ($partInspectionInfo->wcNumber == 0) ? "unknown" : $partInspectionInfo->wcNumber;
-
-                  $html .=
+                     $partWasherName = "unknown";
+                     $operator = User::getUser($partWasherEntry->employeeNumber);
+                     if ($operator)
+                     {
+                        $partWasherName= $operator->getFullName();
+                     }
+                     
+                     $operatorName = "unknown";
+                     $operator = User::getUser($panTicketInfo->employeeNumber);
+                     if ($operator)
+                     {
+                        $operatorName = $operator->getFullName();
+                     }
+                     
+                     $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $washDate = $dateTime->format("m-d-Y");
+                     
+                     $dateTime = new DateTime($panTicketInfo->date, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $mfgDate = $dateTime->format("m-d-Y");
+                     
+                     $deleteIcon = "";
+                     if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+                     {
+                        $deleteIcon =
+                        "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
+                     }
+   
+                     $html .=
 <<<HEREDOC
-                     <tr class="$inspectionClass">
-                        <td>$operatorName</td>
-                        <td>$date</td>
-                        <td>$time</td>
-                        <td>$workCenter</td>
-                        <td>$partInspectionInfo->partNumber</td>
-                        <td>$partInspectionInfo->partCount</td>
-                        <td>$partInspectionInfo->failures</td>
-                        <td>$partInspectionInfo->efficiency</td>
-                     </tr>
+                        <tr>
+                           <td>$partWasherName</td>
+                           <td>$washDate</td>
+                           <td>$operatorName</td>
+                           <td>$mfgDate</td>
+                           <td>$panTicketInfo->wcNumber</td>
+                           <td>$panTicketInfo->partNumber</td>
+                           <td>$partWasherEntry->panCount</td>
+                           <td>$partWasherEntry->partCount</td>
+                           <td>$deleteIcon</td>
+                        </tr>
 HEREDOC;
+                  }
                }
             }
          }
