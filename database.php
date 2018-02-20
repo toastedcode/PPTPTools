@@ -494,7 +494,7 @@ class PPTPDatabase extends MySqlDatabase
       "(dateTime, employeeNumber, panTicketId, panCount, partCount) " .
       "VALUES " .
       "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->panTicketId', '$partWasherEntry->panCount', '$partWasherEntry->partCount');";
-echo $query;
+
       $result = $this->query($query);
       
       return ($result);
@@ -539,6 +539,68 @@ echo $query;
          
          $this->query($query);
       }
+   }
+   
+   public function getJobs($onlyActiveJobs)
+   {
+      $whereClause = "";
+      if ($onlyActiveJobs)
+      {
+         $whereClause = "WHERE isActive = TRUE";
+      }
+      
+      $query = "SELECT * FROM job $whereClause;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getJob($jobNumber)
+   {
+      $query = "SELECT * FROM job WHERE jobNumber = \"$jobNumber\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newJob($jobInfo)
+   {
+      $dateTime = Time::toMySqlDate($jobInfo->dateTime);
+      
+      $query =
+      "INSERT INTO job " .
+      "(jobNumber, creator, dateTime, partNumber, wcNumber, isActive) " .
+      "VALUES " .
+      "('$jobInfo->jobNumber', $dateTime', '$jobInfo->creator', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->isActive');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateJob($jobInfo)
+   {
+      $dateTime = Time::toMySqlDate($jobInfo->dateTime);
+      
+      $query =
+      "UPDATE job " .
+      "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', isActive = '$jobInfo->isActive'," .
+      "WHERE jobNumber = '$jobInfo->jobNumber';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteJob($jobNumber)
+   {
+      $query = "DELETE FROM job WHERE jobNumber = '$jobNumber';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
    }
    
    private function updatePartCount_Hour($sensorId, $partCount)
