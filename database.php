@@ -541,16 +541,16 @@ class PPTPDatabase extends MySqlDatabase
       }
    }
    
-   public function getJobs($onlyActiveJobs)
+   public function getJobs($startDate, $endDate, $onlyActiveJobs)
    {
-      $whereClause = "";
+      $whereClause = "WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       if ($onlyActiveJobs)
       {
-         $whereClause = "WHERE isActive = TRUE";
+         $whereClause .= " AND isActive = TRUE";
       }
       
       $query = "SELECT * FROM job $whereClause;";
-      
+
       $result = $this->query($query);
       
       return ($result);

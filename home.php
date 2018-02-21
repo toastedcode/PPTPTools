@@ -150,6 +150,11 @@ function selectActionPage()
 
       <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
 
+         <div class="action-button" onclick="location.href='jobs/jobs.php?view=view_jobs';">
+            <div><i class="material-icons action-button-icon">assignment</i></div>
+            <div>Jobs</div>
+         </div>
+
          <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
             <div><i class="material-icons action-button-icon">schedule</i></div>
             <div>Time Cards</div>
