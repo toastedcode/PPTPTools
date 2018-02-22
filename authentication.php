@@ -21,7 +21,7 @@ class Authentication
       
       if (isset($_SESSION["authenticatedUser"]) && ($_SESSION["authenticatedUser"] == true))
       {
-         $authenticatedUser = $_SESSION["authenticatedUser"];
+         $authenticatedUser = User::getUserByName($_SESSION["authenticatedUser"]);
       }
       
       return ($authenticatedUser);

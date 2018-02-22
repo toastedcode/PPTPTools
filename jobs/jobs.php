@@ -5,6 +5,7 @@ require_once '../authentication.php';
 require_once '../database.php';
 require_once '../header.php';
 
+require 'viewJob.php';
 require 'viewJobs.php';
 
 function getAction()
@@ -58,8 +59,12 @@ function processAction($action)
       case 'new_job':
       {
          $_SESSION["jobInfo"] = new jobInfo();
-         $_SESSION["jobInfo"]->creator = Authentication::getAuthenticatedUser().employeeNumber;
          $_SESSION["jobInfo"]->dateTime = Time::now("Y-m-d h:i:s A");
+         
+         if ($user = Authentication::getAuthenticatedUser())
+         {
+            $_SESSION["jobInfo"]->creator = $user->employeeNumber;
+         }
          break;
       }
       
@@ -102,6 +107,15 @@ function processView($view)
 {
    switch ($view)
    {  
+      case 'new_job':
+      case 'edit_job':
+      case 'view_job':
+      {
+         $page = new ViewJob();
+         $page->render($view);
+         break;
+      }
+      
       case 'view_jobs':
       default:
       {

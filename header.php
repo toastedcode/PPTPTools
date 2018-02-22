@@ -14,13 +14,13 @@ HEREDOC;
          
       if (Authentication::isAuthenticated())
       {
-         $authenticatedUser = Authentication::getAuthenticatedUser();
+         $username = Authentication::getAuthenticatedUser()->username;
          
          echo
 <<<HEREDOC
             <div class="flex-horizontal">
                <i class="material-icons" style="margin-right:5px; color: #ffffff; font-size: 24px;">person</i>
-               <div class="nav-username">$authenticatedUser &nbsp | &nbsp</div>
+               <div class="nav-username">$username&nbsp | &nbsp</div>
                <a class="nav-link" href="/pptp/home.php?action=logout">Logout</a>
             </div>
 HEREDOC;

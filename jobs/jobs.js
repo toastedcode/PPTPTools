@@ -7,7 +7,7 @@ function onNewJob()
    input = document.createElement('input');
    input.setAttribute('name', 'view');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'view_job');
+   input.setAttribute('value', 'new_job');
    form.appendChild(input);
    
    input = document.createElement('input');

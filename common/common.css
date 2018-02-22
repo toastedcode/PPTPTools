@@ -162,3 +162,54 @@ tr:hover {
 {
 	margin-right: 10px;
 }
+
+/* time card, pan ticket, job forms */
+/* rename these !!!*/
+
+.time-card-table-row {
+   margin-bottom: 5px;
+}
+
+.time-card-table-col {
+   flex-basis: 50%; 
+   align-items: flex-start;
+}
+
+.time-card-div {
+   width:700px;
+   align-items: stretch;
+}
+
+.time-card-div h1 {
+   font-weight:bold;
+   font-size: 40px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div h2 {
+   font-weight:bold;
+   font-size: 18px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div h3 {
+   font-weight:bold;
+   font-size: 14px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
+}
+
+.time-card-div .comments-input {
+   width:700px;
+   rows: 10;
+} 
+   
+.label-div {
+   width: 100px;
+}
+
+.section-header-div {
+   align-self: center;
+}
