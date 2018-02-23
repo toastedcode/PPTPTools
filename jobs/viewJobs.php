@@ -121,6 +121,8 @@ HEREDOC;
                   <th>Part #</th>
                   <th>Work Center #</th>
                   <th>Status</th>
+                  <th/>
+                  <th/>
                </tr>
 HEREDOC;
       
@@ -164,6 +166,25 @@ HEREDOC;
                   
                   $status = JobStatus::getName($jobInfo->status);
                   
+                  $viewEditIcon = "";
+                  $deleteIcon = "";
+                  if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+                  {
+                     $viewEditIcon =
+                        "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditJob('$jobInfo->jobNumber')\">mode_edit</i>";
+                     
+                     if ($jobInfo->status != JobStatus::DELETED)
+                     {
+                        $deleteIcon =
+                           "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeleteJob('$jobInfo->jobNumber')\">delete</i>";
+                     }
+                  }
+                  else
+                  {
+                     $viewEditIcon =
+                        "<i class=\"material-icons table-function-button\" onclick=\"onViewJob('$jobInfo->jobNumber')\">visibility</i>";
+                  }
+                  
                   $html .=
 <<<HEREDOC
                      <tr>
@@ -173,6 +194,8 @@ HEREDOC;
                         <td>$jobInfo->partNumber</td>
                         <td>$jobInfo->wcNumber</td>
                         <td>$status</td>
+                        <td>$viewEditIcon</td>
+                        <td>$deleteIcon</td>
                      </tr>
 HEREDOC;
                }

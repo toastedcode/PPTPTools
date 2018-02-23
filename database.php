@@ -543,10 +543,17 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getJobs($startDate, $endDate, $onlyActiveJobs)
    {
+      $active = JobStatus::ACTIVE;
+      $deleted = JobStatus::DELETED;
+      
       $whereClause = "WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       if ($onlyActiveJobs)
       {
-         $whereClause .= " AND status = 1";  // TODO: No magic numbers.
+         $whereClause .= " AND status = $active";
+      }
+      else
+      {
+         $whereClause .= " AND status != $deleted";
       }
       
       $query = "SELECT * FROM job $whereClause;";
@@ -571,10 +578,10 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO job " .
-      "(jobNumber, creator, dateTime, partNumber, wcNumber, isActive) " .
+      "(jobNumber, creator, dateTime, partNumber, wcNumber, status) " .
       "VALUES " .
-      "('$jobInfo->jobNumber', $dateTime', '$jobInfo->creator', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->isActive');";
-
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->status');";
+echo $query;
       $result = $this->query($query);
       
       return ($result);
@@ -585,12 +592,24 @@ class PPTPDatabase extends MySqlDatabase
       $dateTime = Time::toMySqlDate($jobInfo->dateTime);
       
       $query =
-      "UPDATE job " .
-      "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', isActive = '$jobInfo->isActive'," .
-      "WHERE jobNumber = '$jobInfo->jobNumber';";
-      
+         "UPDATE job " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', status = '$jobInfo->status' " .
+         "WHERE jobNumber = '$jobInfo->jobNumber';";
+
       $result = $this->query($query);
       
+      return ($result);
+   }
+   
+   public function updateJobStatus($jobNumber, $status)
+   {
+      $query =
+         "UPDATE job " .
+         "SET status = '$status' " .
+         "WHERE jobNumber = '$jobNumber';";
+
+      $result = $this->query($query);
+
       return ($result);
    }
    

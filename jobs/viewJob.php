@@ -18,7 +18,7 @@ class ViewJob
       
       $titleDiv = ViewJob::titleDiv();
       $creationDiv = ViewJob::creationDiv($jobInfo);
-      $jobDiv = ViewJob::jobDiv($jobInfo, $editable);
+      $jobDiv = ViewJob::jobDiv($jobInfo, $view);
       $partDiv = ViewJob::partDiv($jobInfo, $editable);
       
       $navBar = ViewJob::navBar($jobInfo, $view);
@@ -30,7 +30,7 @@ class ViewJob
       }
       else if ($view == "edit_job")
       {
-         $title = "New Job";
+         $title = "Edit Job";
       }
       else if ($view == "view_job")
       {
@@ -116,9 +116,13 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function jobDiv($jobInfo, $editable)
+   protected static function jobDiv($jobInfo, $view)
    {
+      $editable = (($view == "new_job") || ($view == "edit_job"));
+      $jobEditable = ($view == "new_job");
+      
       $disabled = ($editable) ? "" : "disabled";
+      $jobDisabled = ($jobEditable) ? "" : "disabled";
       
       $workcenters = ViewJob::getWorkcenters();
       
@@ -148,19 +152,19 @@ HEREDOC;
 
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input id="job-number-prefix-input" type="text" class="medium-text-input" style="width:150px;" value="$prefix" $disabled />
+            <input id="job-number-prefix-input" type="text" class="medium-text-input" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" onchange="autoFillPartNumber()" oninput="autoFillPartNumber()" $jobDisabled/>
             <div><h3>&nbsp-&nbsp</h3></div>
-            <input id="job-number-suffix-input" type="text" class="medium-text-input" style="width:150px;" value="$suffix" $disabled />
+            <input id="job-number-suffix-input" type="text" class="medium-text-input" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" $jobDisabled/>
          </div>
 
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
-            <div><select id="work-center-input" class="medium-text-input" name="wcNumber" $disabled>$wcOptions</select></div>
+            <div><select id="work-center-input" class="medium-text-input" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
          </div>
 
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job status</h3></div>
-            <div><select id="status-input" class="medium-text-input" name="status" $disabled>$statusOptions</select></div>
+            <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
          </div>
       </div>
 HEREDOC;
@@ -168,8 +172,10 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function partDiv($jobInfo)
+   protected static function partDiv($jobInfo, $editable)
    {
+      $disabled = ($editable) ? "" : "disabled";
+      
        $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
@@ -178,7 +184,7 @@ HEREDOC;
 
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Part #</h3></div>
-            <input id="part-number-prefix-input" type="text" class="medium-text-input" style="width:150px;" value="$jobInfo->partNumber" disabled />
+            <input id="part-number-input" type="text" class="medium-text-input" name="partNumber" form="input-form" style="width:150px;" value="$jobInfo->partNumber" disabled />
          </div>
 
       </div>
@@ -193,37 +199,22 @@ HEREDOC;
       
       $navBar->start();
       
-      if (($view == "new_job") &&
-          ($jobInfo->jobNumber == JobInfo::UNKNOWN_JOB_NUMBER))
+      if (($view == "new_job") ||
+          ($view == "edit_job"))
       {
          // Case 1
          // Creating a new job.
-         
-         /*
-         $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-         $navBar->backButton("submitForm('panTicketForm', 'panTicket.php', 'enter_material_number', 'update_pan_ticket_info');");
-         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
-         */
-      }
-      else if ($view == "edit_job")
-      {
-         // Case 2
          // Editing an existing job.
          
-         /*
-         $navBar->cancelButton("submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'cancel_pan_ticket')");
-         $navBar->highlightNavButton("Save", "if (validatePanTicket()){submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'save_pan_ticket');};", false);
-         */
+         $navBar->cancelButton("submitForm('input-form', 'jobs.php', 'view_jobs', 'cancel_job')");
+         $navBar->highlightNavButton("Save", "if (validateJob()){submitForm('input-form', 'jobs.php', 'view_jobs', 'save_job');};", false);
       }
       else if ($view == "view_job")
       {
-         // Case 3
+         // Case 2
          // Viewing an existing job.
          
-         /*
-         $navBar->printButton("onPrintPanTicket($panTicketInfo->panTicketId)");
-         $navBar->highlightNavButton("Ok", "submitForm('panTicketForm', 'panTicket.php', 'view_pan_tickets', 'no_action')", false);
-         */
+         $navBar->highlightNavButton("Ok", "submitForm('input-form', 'jobs.php', 'view_jobs', 'no_action')", false);
       }
       
       $navBar->end();

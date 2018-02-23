@@ -6,7 +6,7 @@ abstract class JobStatus
    const PENDING = 0;
    const ACTIVE = 1;
    const COMPLETE = 2;
-   const DELETED = 2;
+   const DELETED = 3;
    
    private static $names = array("Pending", "Active", "Complete", "Deleted");
    

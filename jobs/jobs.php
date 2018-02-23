@@ -58,7 +58,7 @@ function processAction($action)
       
       case 'new_job':
       {
-         $_SESSION["jobInfo"] = new jobInfo();
+         $_SESSION["jobInfo"] = new JobInfo();
          $_SESSION["jobInfo"]->dateTime = Time::now("Y-m-d h:i:s A");
          
          if ($user = Authentication::getAuthenticatedUser())
@@ -79,11 +79,14 @@ function processAction($action)
       
       case 'save_job':
       {
-         updateJobInfo();
-         
-         updateJob($_SESSION['jobInfo']);
-         
-         $_SESSION["jobInfo"] = new JobInfo();
+         if (isset($_SESSION['jobInfo']))
+         {
+            updateJobInfo();
+            
+            updateJob($_SESSION['jobInfo']);
+            
+            unset($_SESSION["jobInfo"]);
+         }
          break;
       }
       
@@ -130,7 +133,13 @@ function updateJobInfo()
 {
    if (isset($_POST['jobNumber']))
    {
-      $_SESSION["jobInfo"]->panTicketId = $_POST['panTicketId'];
+      $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumber'];
+      $_SESSION["jobInfo"]->partNumber = JobInfo::getJobPrefix($_POST['jobNumber']);
+   }
+   
+   if (isset($_POST['jobNumberPrefix']) && isset($_POST['jobNumberSuffix']))
+   {
+      $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumberPrefix'] . "-" . $_POST['jobNumberSuffix'];
    }
    
    if (isset($_POST['creator']))
@@ -144,19 +153,14 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->dateTime = $dateTime->format("Y-m-d h:i:s");
    }
    
-   if (isset($_POST['partNumber']))
-   {
-      $_SESSION["jobInfo"]->partNumber= $_POST['partNumber'];
-   }
-   
    if (isset($_POST['wcNumber']))
    {
-      $_SESSION["jobInfo"]->wcNumber= $_POST['wcNumber'];
+      $_SESSION["jobInfo"]->wcNumber = $_POST['wcNumber'];
    }
    
-   if (isset($_POST['isActive']))
+   if (isset($_POST['status']))
    {
-      $_SESSION["jobInfo"]->isActive= $_POST['isActive'];
+      $_SESSION["jobInfo"]->status = $_POST['status'];
    }
 }
 
@@ -170,7 +174,7 @@ function deleteJob($jobNumber)
    
    if ($database->isConnected())
    {
-      $result = $database->deletePanTicket($jobNumber);
+      $result = $database->updateJobStatus($jobNumber, JobStatus::DELETED);
    }
    
    return ($result);
@@ -186,9 +190,13 @@ function updateJob($jobInfo)
    
    if ($database->isConnected())
    {
-      if ($jobInfo->jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
+      $result = $database->getJob($jobInfo->jobNumber);
+      
+      $jobExists = ($result && ($result->num_rows == 1));
+      
+      if ($jobExists)
       {
-         $database->updateJob($jobInfo->jobNumber, $jobInfo);
+         $database->updateJob($jobInfo);
       }
       else
       {
@@ -200,6 +208,7 @@ function updateJob($jobInfo)
    
    return ($success);
 }
+
 ?>
 
 <!-- ********************************** BEGIN ********************************************* -->
@@ -227,6 +236,7 @@ processAction(getAction());
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script src="jobs.js"></script>
+<script src="/pptp/common/common.js"></script> <!--  use $ROOT variable -->
 <script src="../validate.js"></script>
 </head>
 
