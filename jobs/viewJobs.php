@@ -162,7 +162,7 @@ HEREDOC;
                   $dateTime = new DateTime($jobInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $date = $dateTime->format("m-d-Y");
                   
-                  $status = $jobInfo->isActive ? "Active" : "Inactive";
+                  $status = JobStatus::getName($jobInfo->status);
                   
                   $html .=
 <<<HEREDOC

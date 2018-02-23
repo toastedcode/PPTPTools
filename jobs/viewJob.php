@@ -20,7 +20,6 @@ class ViewJob
       $creationDiv = ViewJob::creationDiv($jobInfo);
       $jobDiv = ViewJob::jobDiv($jobInfo, $editable);
       $partDiv = ViewJob::partDiv($jobInfo, $editable);
-      $statusDiv = ViewJob::statusDiv($jobInfo, $editable);
       
       $navBar = ViewJob::navBar($jobInfo, $view);
       
@@ -56,9 +55,6 @@ class ViewJob
                <div class="flex-horizontal" style="align-items: flex-start;">
                   $jobDiv
                   $partDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
-                  $statusDiv
                </div>
             </div>
          </div>
@@ -122,86 +118,71 @@ HEREDOC;
    
    protected static function jobDiv($jobInfo, $editable)
    {
-      $html = "";
-      
-      /*
       $disabled = ($editable) ? "" : "disabled";
+      
+      $workcenters = ViewJob::getWorkcenters();
+      
+      $wcOptions = "";
+      foreach ($workcenters as $workcenter)
+      {
+         $selected = ($jobInfo->wcNumber == $workcenter) ? "selected" : "";
+         $wcOptions .= "<option $selected value=\"" . $workcenter . "\">" . $workcenter . "</option>";
+      }
+      
+      $statusOptions = "";
+      for ($status = JobStatus::PENDING; $status <= JobStatus::COMPLETE; $status++)
+      {
+         $statusName = JobStatus::getName($status);
+         $selected = ($jobInfo->status == $status) ? "selected" : "";
+         $statusOptions .= "<option $selected value=\"" . $status . "\">" . $statusName . "</option>";
+      }
+      
+      $prefix = JobInfo::getJobPrefix($jobInfo->jobNumber);
+      $suffix = JobInfo::getJobSuffix($jobInfo->jobNumber);
       
       $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
+
          <div class="section-header-div"><h2>Job</h2></div>
+
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input type="number" class="medium-text-input" style="width:150px;" oninput="jobValidator.validate()" value="$panTicketInfo->jobNumber" disabled />
+            <input id="job-number-prefix-input" type="text" class="medium-text-input" style="width:150px;" value="$prefix" $disabled />
+            <div><h3>&nbsp-&nbsp</h3></div>
+            <input id="job-number-suffix-input" type="text" class="medium-text-input" style="width:150px;" value="$suffix" $disabled />
          </div>
+
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
-            <input type="text" class="medium-text-input" style="width:150px;" value="$panTicketInfo->wcNumber" disabled />
+            <div><select id="work-center-input" class="medium-text-input" name="wcNumber" $disabled>$wcOptions</select></div>
          </div>
+
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Part #</h3></div>
-            <input id="partNumber-input" type="text" class="medium-text-input" form="panTicketForm" style="width:150px;" name="partNumber" value="$panTicketInfo->partNumber" $disabled />
-         </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Heat #</h3></div>
-            <input id="materialNumber-input" type="text" class="medium-text-input" form="panTicketForm" style="width:150px;" name="materialNumber" value="$panTicketInfo->materialNumber" $disabled />
+            <div class="label-div"><h3>Job status</h3></div>
+            <div><select id="status-input" class="medium-text-input" name="status" $disabled>$statusOptions</select></div>
          </div>
       </div>
 HEREDOC;
-*/
       
       return ($html);
    }
    
    protected static function partDiv($jobInfo)
    {
-      $html = "";
-      
-      /*
        $html =
-       <<<HEREDOC
-       <div class="flex-vertical time-card-table-col">
-       <div class="section-header-div"><h2>Operator</h2></div>
-       <div class="flex-horizontal time-card-table-row">
-       <div class="label-div"><h3>Name</h3></div>
-       <input type="text" class="medium-text-input" style="width:200px;" value="$name" disabled>
-       </div>
-       <div class="flex-horizontal time-card-table-row">
-       <div class="label-div"><h3>Employee #</h3></div>
-       <input type="text" class="medium-text-input" style="width:100px;" value="$panTicketInfo->employeeNumber" disabled>
-       </div>
-       </div>
-       HEREDOC;
-       */
-      
-      return ($html);
-   }
-   
-   protected static function statusDiv($jobInfo, $editable)
-   {
-      $html = "";
-      
-      /*
-      $disabled = ($editable) ? "" : "disabled";
-      
-      $weight = $panTicketInfo->weight;
-      if (isset($_POST["weight"]))
-      {
-         $weight = $_POST["weight"];
-      }
-      
-      $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Weight</h2></div>
+
+         <div class="section-header-div"><h2>Part</h2></div>
+
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Weight</h3></div>
-            <input id="weight-input" type="number" class="medium-text-input" form="panTicketForm" style="width:150px;" name="weight" oninput="weightValidator.validate()" value="$weight" $disabled/>
+            <div class="label-div"><h3>Part #</h3></div>
+            <input id="part-number-prefix-input" type="text" class="medium-text-input" style="width:150px;" value="$jobInfo->partNumber" disabled />
          </div>
+
       </div>
 HEREDOC;
-*/
       
       return ($html);
    }
@@ -268,6 +249,30 @@ HEREDOC;
       }
       
       return ($jobInfo);
+   }
+   
+   protected static function getWorkcenters()
+   {
+      $workcenters = array();
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getWorkCenters();
+         
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $workcenters[] = $row["WCNumber"];
+            }
+         }
+      }
+      
+      return ($workcenters);
    }
 }
 ?>

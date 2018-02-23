@@ -546,7 +546,7 @@ class PPTPDatabase extends MySqlDatabase
       $whereClause = "WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       if ($onlyActiveJobs)
       {
-         $whereClause .= " AND isActive = TRUE";
+         $whereClause .= " AND status = 1";  // TODO: No magic numbers.
       }
       
       $query = "SELECT * FROM job $whereClause;";
