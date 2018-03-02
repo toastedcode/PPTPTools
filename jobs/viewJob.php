@@ -40,7 +40,8 @@ class ViewJob
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST">
-         <input type="hidden" name="jobNumber" value="$jobInfo->jobNumber"/>
+         <input id="job-number-input" type="hidden" name="jobNumber" value="$jobInfo->jobNumber"/>
+         <input id="part-number-input" type="hidden" name="partNumber" value="$jobInfo->partNumber"/>
       </form>
 
       <div class="flex-vertical card-div">
@@ -54,7 +55,6 @@ class ViewJob
                </div>
                <div class="flex-horizontal" style="align-items: flex-start;">
                   $jobDiv
-                  $partDiv
                </div>
             </div>
          </div>
@@ -148,18 +148,31 @@ HEREDOC;
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
 
-         <div class="section-header-div"><h2>Job</h2></div>
-
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input id="job-number-prefix-input" type="text" class="medium-text-input" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" onchange="autoFillPartNumber()" oninput="autoFillPartNumber()" $jobDisabled/>
+            <input id="job-number-prefix-input" type="text" class="medium-text-input" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" oninput="autoFillPartNumber()" $jobDisabled/>
             <div><h3>&nbsp-&nbsp</h3></div>
-            <input id="job-number-suffix-input" type="text" class="medium-text-input" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" $jobDisabled/>
+            <input id="job-number-suffix-input" type="text" class="medium-text-input" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" oninput="autoFillJobNumber()" $jobDisabled/>
+         </div>
+
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Part #</h3></div>
+            <input id="part-number-display-input" type="text" class="medium-text-input" style="width:150px;" value="$jobInfo->partNumber" disabled />
          </div>
 
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
             <div><select id="work-center-input" class="medium-text-input" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
+         </div>
+
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Cycle Time</h3></div>
+            <input id="part-number-input" type="number" class="medium-text-input" name="cycleTime" form="input-form" style="width:150px;" value="$jobInfo->cycleTime" $disabled />
+         </div>
+
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Net Pieces/Hour</h3></div>
+            <input id="part-number-input" type="number" class="medium-text-input" name="netPartsPerHour" form="input-form" style="width:150px;" value="$jobInfo->netPartsPerHour" $disabled />
          </div>
 
          <div class="flex-horizontal time-card-table-row">

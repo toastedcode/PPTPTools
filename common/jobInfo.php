@@ -25,6 +25,8 @@ class JobInfo
    public $dateTime;
    public $partNumber;
    public $wcNumber;
+   public $cycleTime;
+   public $netPartsPerHour;
    public $status = JobStatus::PENDING;
    
    public function isActive()
@@ -53,6 +55,8 @@ class JobInfo
             $jobInfo->dateTime =   Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $jobInfo->partNumber = $row['partNumber'];
             $jobInfo->wcNumber =   $row['wcNumber'];
+            $jobInfo->cycleTime = $row['cycleTime'];
+            $jobInfo->netPartsPerHour = $row['netPartsPerHour'];
             $jobInfo->status =   $row['status'];
          }
       }
@@ -95,12 +99,15 @@ if (isset($_GET["jobNumber"]))
    
    if ($jobInfo)
    {
-      echo "jobNumber: " .  $jobInfo->jobNumber  . "<br/>";
-      echo "creator: " .    $jobInfo->creator    . "<br/>";
-      echo "dateTime: " .   $jobInfo->dateTime   . "<br/>";
-      echo "partNumber: " . $jobInfo->partNumber . "<br/>";
-      echo "wcNumber: " .   $jobInfo->wcNumber   . "<br/>";
-      echo "isActive: " .   $jobInfo->isActive   . "<br/>";
+      echo "jobNumber: " .          $jobInfo->jobNumber .       "<br/>";
+      echo "creator: " .            $jobInfo->creator .         "<br/>";
+      echo "dateTime: " .           $jobInfo->dateTime .        "<br/>";
+      echo "partNumber: " .         $jobInfo->partNumber .      "<br/>";
+      echo "wcNumber: " .           $jobInfo->wcNumber .        "<br/>";
+      echo "cycleTime: " .          $jobInfo->cycleTime .       "<br/>";
+      echo "netPartsPerHour: " .    $jobInfo->netPartsPerHour . "<br/>";
+      
+      echo "isActive: " . JobStatus::getName($jobInfo->isActive) . "<br/>";
    }
    else
    {

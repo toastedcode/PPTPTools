@@ -102,11 +102,27 @@ function validateJob()
 
 function autoFillPartNumber()
 {
-   jobNumberInput = document.getElementById('job-number-prefix-input');
+   jobNumberPrefixInput = document.getElementById('job-number-prefix-input');
    partNumberInput = document.getElementById('part-number-input');
+   partNumberDisplayInput = document.getElementById('part-number-display-input');
    
-   if (jobNumberInput && partNumberInput)
+   if (jobNumberPrefixInput && partNumberInput && partNumberDisplayInput)
    {
-      partNumberInput.value = jobNumberInput.value;
+      partNumberInput.value = jobNumberPrefixInput.value;
+      partNumberDisplayInput.value = jobNumberPrefixInput.value;
+   }
+   
+   autoFillJobNumber();
+}
+
+function autoFillJobNumber()
+{
+   jobNumberPrefixInput = document.getElementById('job-number-prefix-input');
+   jobNumberSuffixInput = document.getElementById('job-number-suffix-input');
+   jobNumberInput = document.getElementById('job-number-input');
+   
+   if (jobNumberPrefixInput && jobNumberSuffixInput && jobNumberInput)
+   {
+      jobNumberInput.value = jobNumberPrefixInput.value + "-" + jobNumberSuffixInput.value;
    }
 }

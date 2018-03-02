@@ -578,9 +578,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO job " .
-      "(jobNumber, creator, dateTime, partNumber, wcNumber, status) " .
+      "(jobNumber, creator, dateTime, partNumber, wcNumber, cycleTime, netPartsPerHour, status) " .
       "VALUES " .
-      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->status');";
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPartsPerHour', '$jobInfo->status');";
 echo $query;
       $result = $this->query($query);
       
@@ -593,7 +593,7 @@ echo $query;
       
       $query =
          "UPDATE job " .
-         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', status = '$jobInfo->status' " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPartsPerHour = '$jobInfo->netPartsPerHour', status = '$jobInfo->status' " .
          "WHERE jobNumber = '$jobInfo->jobNumber';";
 
       $result = $this->query($query);

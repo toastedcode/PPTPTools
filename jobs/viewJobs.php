@@ -120,6 +120,8 @@ HEREDOC;
                   <th>Date</th>
                   <th>Part #</th>
                   <th>Work Center #</th>
+                  <th>Cycle Time</th>
+                  <th>Net Pieces/Hour</th>
                   <th>Status</th>
                   <th/>
                   <th/>
@@ -193,6 +195,8 @@ HEREDOC;
                         <td>$date</td>
                         <td>$jobInfo->partNumber</td>
                         <td>$jobInfo->wcNumber</td>
+                        <td>$jobInfo->cycleTime</td>
+                        <td>$jobInfo->netPartsPerHour</td>
                         <td>$status</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>

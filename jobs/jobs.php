@@ -134,10 +134,8 @@ function updateJobInfo()
    if (isset($_POST['jobNumber']))
    {
       $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumber'];
-      $_SESSION["jobInfo"]->partNumber = JobInfo::getJobPrefix($_POST['jobNumber']);
    }
-   
-   if (isset($_POST['jobNumberPrefix']) && isset($_POST['jobNumberSuffix']))
+   else if (isset($_POST['jobNumberPrefix']) && isset($_POST['jobNumberSuffix']))
    {
       $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumberPrefix'] . "-" . $_POST['jobNumberSuffix'];
    }
@@ -153,9 +151,24 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->dateTime = $dateTime->format("Y-m-d h:i:s");
    }
    
+   if (isset($_POST['partNumber']))
+   {
+      $_SESSION["jobInfo"]->partNumber = $_POST['partNumber'];
+   }
+   
    if (isset($_POST['wcNumber']))
    {
       $_SESSION["jobInfo"]->wcNumber = $_POST['wcNumber'];
+   }
+   
+   if (isset($_POST['cycleTime']))
+   {
+      $_SESSION["jobInfo"]->cycleTime = $_POST['cycleTime'];
+   }
+   
+   if (isset($_POST['netPartsPerHour']))
+   {
+      $_SESSION["jobInfo"]->netPartsPerHour = $_POST['netPartsPerHour'];
    }
    
    if (isset($_POST['status']))
@@ -233,6 +246,8 @@ processAction(getAction());
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+<link rel="stylesheet" type="text/css" href="jobs.css"/>
+
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script src="jobs.js"></script>
