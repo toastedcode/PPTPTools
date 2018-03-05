@@ -494,7 +494,7 @@ class PPTPDatabase extends MySqlDatabase
       "(dateTime, employeeNumber, panTicketId, panCount, partCount) " .
       "VALUES " .
       "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->panTicketId', '$partWasherEntry->panCount', '$partWasherEntry->partCount');";
-echo $query;
+
       $result = $this->query($query);
       
       return ($result);
@@ -539,6 +539,87 @@ echo $query;
          
          $this->query($query);
       }
+   }
+   
+   public function getJobs($startDate, $endDate, $onlyActiveJobs)
+   {
+      $active = JobStatus::ACTIVE;
+      $deleted = JobStatus::DELETED;
+      
+      $whereClause = "WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+      if ($onlyActiveJobs)
+      {
+         $whereClause .= " AND status = $active";
+      }
+      else
+      {
+         $whereClause .= " AND status != $deleted";
+      }
+      
+      $query = "SELECT * FROM job $whereClause;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getJob($jobNumber)
+   {
+      $query = "SELECT * FROM job WHERE jobNumber = \"$jobNumber\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newJob($jobInfo)
+   {
+      $dateTime = Time::toMySqlDate($jobInfo->dateTime);
+      
+      $query =
+      "INSERT INTO job " .
+      "(jobNumber, creator, dateTime, partNumber, wcNumber, cycleTime, netPartsPerHour, status) " .
+      "VALUES " .
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPartsPerHour', '$jobInfo->status');";
+echo $query;
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateJob($jobInfo)
+   {
+      $dateTime = Time::toMySqlDate($jobInfo->dateTime);
+      
+      $query =
+         "UPDATE job " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPartsPerHour = '$jobInfo->netPartsPerHour', status = '$jobInfo->status' " .
+         "WHERE jobNumber = '$jobInfo->jobNumber';";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateJobStatus($jobNumber, $status)
+   {
+      $query =
+         "UPDATE job " .
+         "SET status = '$status' " .
+         "WHERE jobNumber = '$jobNumber';";
+
+      $result = $this->query($query);
+
+      return ($result);
+   }
+   
+   public function deleteJob($jobNumber)
+   {
+      $query = "DELETE FROM job WHERE jobNumber = '$jobNumber';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
    }
    
    private function updatePartCount_Hour($sensorId, $partCount)

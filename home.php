@@ -150,6 +150,11 @@ function selectActionPage()
 
       <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
 
+         <div class="action-button" onclick="location.href='jobs/jobs.php?view=view_jobs';">
+            <div><i class="material-icons action-button-icon">assignment</i></div>
+            <div>Jobs</div>
+         </div>
+
          <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
             <div><i class="material-icons action-button-icon">schedule</i></div>
             <div>Time Cards</div>
@@ -198,52 +203,6 @@ function login($username, $password)
 function logout()
 {
    Authentication::deauthenticate();
-}
-
-function pageHeader()
-{
-   echo
-<<<HEREDOC
-   <style>
-      .mdl-layout__header {
-         margin-bottom: 100px;
-      }
-   </style>
-   <header class="mdl-layout__header">
-      <div class="mdl-layout__header-row">
-         <!-- Title -->
-         <span class="mdl-layout-title">Pittsburgh Precision Tools</span>
-         <!-- Add spacer, to align navigation to the right -->
-         <div class="mdl-layout-spacer"></div>
-HEREDOC;
-   
-   if (Authentication::isAuthenticated())
-   {
-      $authenticatedUser = Authentication::getAuthenticatedUser();
-      
-      $self = $_SERVER['PHP_SELF'];
-      
-      echo
-<<<HEREDOC
-      <!-- Navigation.-->
-      <nav class="mdl-navigation">
-
-         <div style="display:flex; flex-direction:row;">
-            <i class="material-icons button-icon">person</i>
-            <div>&nbsp $authenticatedUser &nbsp | &nbsp</div>
-         </div>
-
-         <a class="mdl-navigation__link" href="$self?action=logout">Logout</a>
-
-      </nav>
-HEREDOC;
-   }
-   
-   echo
-   <<<HEREDOC
-      </div>
-   </header>
-HEREDOC;
 }
 
 // *****************************************************************************
