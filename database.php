@@ -132,7 +132,7 @@ class PPTPDatabase extends MySqlDatabase
    public function getTimeCard(
       $timeCardId)
    {
-      $query = "SELECT * FROM timecard WHERE TimeCard_Id = $timeCardId";
+      $query = "SELECT * FROM timecard WHERE timeCardId = $timeCardId";
       
       $result = $this->query($query);
       
@@ -147,13 +147,13 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $query = "SELECT * FROM timecard WHERE Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;";
+         $query = "SELECT * FROM timecard WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
 
          $result = $this->query($query);
       }
       else
       {
-         $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND Date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY Date DESC, TimeCard_ID DESC;";
+         $query = "SELECT * FROM timecard WHERE employeeNumber=" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
          
          $result = $this->query($query);
       }
@@ -162,7 +162,7 @@ class PPTPDatabase extends MySqlDatabase
    }
 
    public function newTimeCard(
-      $timeCard)
+      $timeCardInfo)
    {
       $date = Time::toMySqlDate($timeCard->date);
       
@@ -170,11 +170,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "INSERT INTO timecard " .
-         "(EmployeeNumber, Date, JobNumber, WCNumber, SetupTime, RunTime, PanCount, PartsCount, ScrapCount, Comments) " .
+         "(employeeNumber, dateTime, jobNumber, setupTime, runTime, panCount, partCount, scrapCount, comments) " .
          "VALUES " .
-         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->wcNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$comments');";
-      
-      echo $query;
+         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$comments');";
       
       $result = $this->query($query);
       
@@ -182,17 +180,16 @@ class PPTPDatabase extends MySqlDatabase
    }
 
    public function updateTimeCard(
-      $id,
-      $timeCard)
+      $timeCardInfo)
    {
-      $date = Time::toMySqlDate($timeCard->date);
+      $dateTime = Time::toMySqlDate($timeCard->dateTime);
       
       $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
       
       $query =
       "UPDATE timecard " .
-      "SET EmployeeNumber = $timeCard->employeeNumber, Date = \"$date\", JobNumber = $timeCard->jobNumber, WCNumber = $timeCard->wcNumber, SetupTime = $timeCard->setupTime, RunTime = $timeCard->runTime, PanCount = $timeCard->panCount, PartsCount = $timeCard->partsCount, ScrapCount = $timeCard->scrapCount, Comments = \"$comments\" " .
-      "WHERE TimeCard_Id = $id;";
+      "SET employeeNumber = $timeCard->employeeNumber, dateTime = \"$dateTime\", jobNumber = $timeCard->jobNumber, setupTime = $timeCard->setupTime, runTime = $timeCard->runTime, panCount = $timeCard->panCount, partCount = $timeCard->partCount, scrapCount = $timeCard->scrapCount, comments = \"$comments\" " .
+      "WHERE timeCardId = $id;";
      
       $result = $this->query($query);
       
@@ -202,7 +199,7 @@ class PPTPDatabase extends MySqlDatabase
    public function deleteTimeCard(
       $timeCardId)
    {
-      $query = "DELETE FROM timecard WHERE TimeCard_Id = $timeCardId;";
+      $query = "DELETE FROM timecard WHERE timeCardId = $timeCardId;";
       
       $result = $this->query($query);
       

@@ -1,5 +1,4 @@
 <?php
-require_once 'timeCardInfo.php';
 require_once '../navigation.php';
 require_once '../user.php';
 

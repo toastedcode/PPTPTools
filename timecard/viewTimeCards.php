@@ -2,22 +2,9 @@
 
 require_once '../database.php';
 require_once '../user.php';
+require_once '../common/filter.php';
 
-class Filter
-{
-   public $employeeNumber = 0;
-   public $startDate;
-   public $endDate;
-   public $page = -1;
-   public $itemsPerPage = 0;
-   
-   function __construct()
-   {
-      $this->startDate = Time::now('Y-m-d');
-      $this->endDate = Time::now('Y-m-d');
-   }
-}
-
+/*
 class TimeCardTable
 {
    public function __construct($filter)
@@ -240,92 +227,70 @@ HEREDOC;
       return ($html);
    }
 }
+*/
 
 class ViewTimeCards
 {
-
-   public static function getHtml()
+   private $filter;
+   
+   public function __construct()
    {
-      $filter = ViewTimeCards::getFilter();
-      $filter->itemsPerPage = 5;
+      $this->filter = new Filter();
       
-      $filterDiv = ViewTimeCards::filterDiv($filter);
+      $operators = User::getUsers(Permissions::OPERATOR);
       
-      $table = new TimeCardTable($filter);
-      $timeCardsTable = $table->getHtml();
+      $this->filter->addByName('date', new DateFilterComponent());
+      $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, "All"));
+      $this->filter->add(new FilterButton());
+      $this->filter->add(new FilterDivider());
+      $this->filter->add(new TodayButton());
+      $this->filter->add(new YesterdayButton());
+      $this->filter->add(new ThisWeekButton());
+      
+      $this->filter->load();
+   }
+   
+   public function getHtml()
+   {
+      $filterDiv = ViewTimeCards::filterDiv();
+      
+      $timeCardsDiv = ViewTimeCards::timeCardsDiv();
       
       $navBar = ViewTimeCards::navBar();
       
-      $html = 
-<<<HEREDOC
-      <script src="viewTimeCardsPage.js"></script>
-   
+      $html =
+      <<<HEREDOC
+      <script src="jobs.js"></script>
+      
       <div class="flex-vertical card-div">
          <div class="card-header-div">View Time Cards</div>
          <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
-   
-               $filterDiv
-   
-               $timeCardsTable
          
+               $filterDiv
+               
+               $timeCardsDiv
+               
          </div>
-
+         
          $navBar;
-
+         
       </div>
 HEREDOC;
       
       return ($html);
    }
    
-   public static function render()
+   public function render()
    {
       echo (ViewTimeCards::getHtml());
    }
-      
-   private static function filterDiv($filter)
+   
+   private function filterDiv()
    {
-      $operators = User::getUsers(Permissions::OPERATOR);
-      
-      $selected = ($filter->employeeNumber == 0) ? "selected" : "";
-      
-      $options = "<option $selected value=0>All</option>";
-      
-      foreach ($operators as $operator)
-      {
-         $selected = ($operator->employeeNumber == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $operator->employeeNumber . "\">" . $operator->getFullName() . "</option>";
-      }
-      
-      $html = 
-<<<HEREDOC
-      <div>
-      <form id="timeCardForm" action="timeCard.php" method="POST">
-         <input type="hidden" name="view" value="view_time_cards"/>
-         Employee:
-         <select id="employeeNumberInput" name="employeeNumber">$options</select>
-         &nbsp
-         Start Date:
-         <input type="date" id="startDateInput" name="startDate" value="$filter->startDate">
-         &nbsp
-         End Date:
-         <input type="date" id="endDateInput" name="endDate" value="$filter->endDate">
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised">Filter</button>
-         &nbsp | &nbsp 
-         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterToday()">Today</button>
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterYesterday()">Yesterday</button>
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterThisWeek()">This Week</button>
-      </form>
-      </div>
-HEREDOC;
-      
-      return ($html);
+      return ($this->filter->getHtml());
    }
    
-   private static function navBar()
+   private function navBar()
    {
       $navBar = new Navigation();
       
@@ -337,47 +302,117 @@ HEREDOC;
       return ($navBar->getHtml());
    }
    
-   private static function getFilter()
+   
+   private function timeCardsDiv()
    {
-      $filter = null;
+      $html =
+      <<<HEREDOC
+         <div class="time-cards-div">
+            <table class="time-card-table">
+               <tr>
+                  <th>Date</th>
+                  <th>Operator</th>
+                  <th>Job #</th>
+                  <th>Work Center #</th>
+                  <th>Setup Time</th>
+                  <th>Run Time</th>
+                  <th>Pan Count</th>
+                  <th>Part Count</th>
+                  <th>Scrap Count</th>
+                  <th/>
+                  <th/>
+               </tr>
+HEREDOC;
       
-      if (isset($_SESSION['filter']))
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
       {
-         $filter = $_SESSION['filter'];
-      }
-      else 
-      {
-         $filter = new Filter();
-         $filter->startDate = date('Y-m-d', strtotime(' -1 day'));
+         // Start date.
+         $startDate = new DateTime($this->filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+         $startDateString = $startDate->format("Y-m-d");
+         
+         // End date.
+         // Increment the end date by a day to make it inclusive.
+         $endDate = new DateTime($this->filter->get('date')->endDate, new DateTimeZone('America/New_York'));
+         $endDate->modify('+1 day');
+         $endDateString = $endDate->format("Y-m-d");
+         
+         $employeeNumber = $this->filter->get('operator')->selectedEmployeeNumber;
+         
+         $result = $database->getTimeCards($employeeNumber, $startDate, $endDate);
+         
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $timeCardInfo = TimeCardInfo::load($row["timeCardId"]);
+               
+               if ($timeCardInfo)
+               {
+                  $operatorName = "unknown";
+                  $user = User::getUser($timeCardInfo->employeeNumber);
+                  if ($user)
+                  {
+                     $operatorName= $user->getFullName();
+                  }
+                  
+                  $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $date = $dateTime->format("m-d-Y");
+                  
+                  $wcNumber = "unknown";
+                  $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
+                  if ($jobInfo)
+                  {
+                     $wcNumber = $jobInfo->wcNumber;
+                  }
+                  
+                  $viewEditIcon = "";
+                  $deleteIcon = "";
+                  if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+                  {
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard('$timeCardInfo->timeCardId')\">mode_edit</i>";
+                     
+                     $deleteIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onDeleteTimeCard('$timeCardInfo->timeCardId')\">delete</i>";
+                  }
+                  else
+                  {
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onViewTimeCard('$timeCardInfo->timeCardId')\">visibility</i>";
+                  }
+                  
+                  $html .=
+<<<HEREDOC
+                     <tr>
+                        <td>$date</td>
+                        <td>$operator</td>
+                        <td>$timeCardInfo->jobNumber</td>
+                        <td>$wcNumber</td>
+                        <td>$timeCardInfo->formatSetupTime()</td>
+                        <td>$timeCardInfo->formatRunTime()</td>
+                        <td>$timeCardInfo->$panCount</td>
+                        <td>$timeCardInfo->$partCount</td>
+                        <td>$timeCardInfo->$scrapCount</td>
+                        <td>$viewEditIcon</td>
+                        <td>$deleteIcon</td>
+                     </tr>
+HEREDOC;
+               }
+            }
+         }
       }
       
-      if (isset($_POST['startDate']))
-      {
-         $filter->startDate = $_POST['startDate'];
-      }
+      $html .=
+<<<HEREDOC
+            </table>
+         </div>
+HEREDOC;
       
-      if (isset($_POST['endDate']))
-      {
-         $filter->endDate = $_POST['endDate'];
-      }
-      
-      if (isset($_POST["employeeNumber"]))
-      {
-         $filter->employeeNumber = $_POST['employeeNumber'];
-      }
-      
-      if (isset($_POST["page"]))
-      {
-         $filter->page = $_POST["page"];
-      }
-      else
-      {
-         $filter->page = 0;
-      }
-      
-      $_SESSION['filter'] = $filter;
-      
-      return ($filter);
+      return ($html);
    }
 }
 ?>

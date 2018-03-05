@@ -2,9 +2,9 @@
 
 require_once '../database.php';
 require_once '../authentication.php';
-require_once 'keypad.php';
 require_once '../header.php';
-require_once 'timeCardInfo.php';
+require_once '../common/timeCardInfo.php';
+require_once 'keypad.php';
 require 'selectOperatorPage.php';
 require 'selectWorkCenterPage.php';
 require 'selectJobPage.php';
@@ -12,7 +12,7 @@ require 'enterTimePage.php';
 require 'enterPartCountPage.php';
 require 'enterCommentsPage.php';
 require 'viewTimeCardPage.php';
-require 'viewTimeCardsPage.php';
+require 'viewTimeCards.php';
 
 function getAction()
 {
@@ -156,7 +156,8 @@ function processView($view)
       case 'view_time_cards':
       default:
       {
-         ViewTimeCards::render();
+         $page = new ViewTimeCards();
+         $page->render();
          break;
       }
    }
@@ -169,11 +170,10 @@ function updateTimeCardInfo()
       $_SESSION["timeCardInfo"]->timeCardId = $_POST['timeCardId'];
    }
    
-   if (isset($_POST['date']))
+   if (isset($_POST['dateTime']))
    {
-      $dateTime = new DateTime($_POST['date']);
+      $dateTime = new DateTime($_POST['dateTime']);
       $_SESSION["timeCardInfo"]->date = $dateTime->format("Y-m-d h:i:s");
-      echo "updateTimeCard: " . $_SESSION["timeCardInfo"]->date;
    }
    
    if (isset($_POST['employeeNumber']))
@@ -186,29 +186,14 @@ function updateTimeCardInfo()
       $_SESSION["timeCardInfo"]->jobNumber = $_POST['jobNumber'];
    }
    
-   if (isset($_POST['wcNumber']))
+   if (isset($_POST['setupTimeHours']) && isset($_POST['setupTimeMinutes']))
    {
-      $_SESSION["timeCardInfo"]->wcNumber = $_POST['wcNumber'];
+      $_SESSION["timeCardInfo"]->setupTime = (($_POST['setupTimeHours'] * 60) + $_POST['setupTimeMinutes']);
    }
    
-   if (isset($_POST['setupTimeHour']))
+   if (isset($_POST['runTimeHours']) && isset($_POST['runTimeMinutes']))
    {
-      $_SESSION["timeCardInfo"]->setupTimeHour = $_POST['setupTimeHour'];
-   }
-   
-   if (isset($_POST['setupTimeMinute']))
-   {
-      $_SESSION["timeCardInfo"]->setupTimeMinute = $_POST['setupTimeMinute'];
-   }
-   
-   if (isset($_POST['runTimeHour']))
-   {
-      $_SESSION["timeCardInfo"]->runTimeHour = $_POST['runTimeHour'];
-   }
-   
-   if (isset($_POST['runTimeMinute']))
-   {
-      $_SESSION["timeCardInfo"]->runTimeMinute = $_POST['runTimeMinute'];
+      $_SESSION["timeCardInfo"]->runTime = (($_POST['runTimeHours'] * 60) + $_POST['runTimeMinutes']);
    }
    
    if (isset($_POST['panCount']))
@@ -216,9 +201,9 @@ function updateTimeCardInfo()
       $_SESSION["timeCardInfo"]->panCount = $_POST['panCount'];
    }
    
-   if (isset($_POST['partsCount']))
+   if (isset($_POST['partCount']))
    {
-      $_SESSION["timeCardInfo"]->partsCount = $_POST['partsCount'];
+      $_SESSION["timeCardInfo"]->partCount = $_POST['partCount'];
    }
    
    if (isset($_POST['scrapCount']))
@@ -258,29 +243,13 @@ function updateTimeCard($timeCardInfo)
    
    if ($database->isConnected())
    {
-      $setupTime = (($timeCardInfo->setupTimeHour * 60) + $timeCardInfo->setupTimeMinute);
-      $runTime = (($timeCardInfo->runTimeHour * 60) + $timeCardInfo->runTimeMinute);
-      
-      $timeCard = new stdClass();
-      
-      $timeCard->date = $timeCardInfo->date;
-      $timeCard->employeeNumber = $timeCardInfo->employeeNumber;
-      $timeCard->jobNumber = $timeCardInfo->jobNumber;
-      $timeCard->wcNumber = $timeCardInfo->wcNumber;
-      $timeCard->setupTime = $setupTime;
-      $timeCard->runTime = $runTime;
-      $timeCard->panCount = $timeCardInfo->panCount;
-      $timeCard->partsCount = $timeCardInfo->partsCount;
-      $timeCard->scrapCount = $timeCardInfo->scrapCount;
-      $timeCard->comments = $timeCardInfo->comments;
-      
       if ($timeCardInfo->timeCardId != 0)
       {
-         $database->updateTimeCard($timeCardInfo->timeCardId, $timeCard);
+         $database->updateTimeCard($timeCardInfo);
       }
       else
       {
-         $database->newTimeCard($timeCard);
+         $database->newTimeCard($timeCardInfo);
       }
       
       $success = true;

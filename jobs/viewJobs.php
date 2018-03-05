@@ -6,7 +6,7 @@ require_once '../navigation.php';
 require_once '../user.php';
 
 // *****************************************************************************
-//                                  FilterSpacer
+//                              OnlyActiveFilterComponent
 
 class OnlyActiveFilterComponent extends FilterComponent
 {
