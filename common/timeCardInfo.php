@@ -17,7 +17,7 @@ class TimeCardInfo
    
    public function formatSetupTime()
    {
-      return(getSetupTimeHours() . ":" . sprintf("%02d", getSetupTimeMinutes()));
+      return($this->getSetupTimeHours() . ":" . sprintf("%02d", $this->getSetupTimeMinutes()));
    }
    
    public function getSetupTimeHours()
@@ -32,7 +32,7 @@ class TimeCardInfo
    
    public function formatRunTime()
    {
-      return(getRunTimeHours() . ":" . sprintf("%02d", getRunTimeMinutes()));
+      return($this->getRunTimeHours() . ":" . sprintf("%02d", $this->getRunTimeMinutes()));
    }
    
    public function getRunTimeHours()

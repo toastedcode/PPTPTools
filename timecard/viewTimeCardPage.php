@@ -1,6 +1,8 @@
 <?php
 require_once '../navigation.php';
 require_once '../user.php';
+require_once '../common/timeCardInfo.php';
+require_once '../common/jobInfo.php';
 
 class ViewTimeCard
 {
@@ -138,17 +140,24 @@ HEREDOC;
    {
       $disabled = ($readOnly) ? "disabled" : "";
       
+      $wcNumber = "unknown";
+      $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
+      if ($jobInfo)
+      {
+         $wcNumber = $jobInfo->wcNumber;
+      }
+      
       $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Job</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input id="jobNumber-input" type="number" class="medium-text-input" form="timeCardForm" name="jobNumber" style="width:150px;" oninput="jobValidator.validate()" value="$timeCardInfo->jobNumber" $disabled />
+            <input id="jobNumber-input" type="text" class="medium-text-input" form="timeCardForm" name="jobNumber" style="width:150px;" oninput="jobValidator.validate()" value="$timeCardInfo->jobNumber" disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
-            <input type="text" class="medium-text-input" style="width:150px;" value="$timeCardInfo->wcNumber" disabled />
+            <input type="text" class="medium-text-input" style="width:150px;" value="$wcNumber" disabled />
          </div>
       </div>
 HEREDOC;
@@ -161,8 +170,8 @@ HEREDOC;
       $disabled = ($readOnly) ? "disabled" : "";
       
       // Pad minutes to 2 digits.
-      $setupTimeMinute = str_pad($timeCardInfo->setupTimeMinute, 2, '0', STR_PAD_LEFT);
-      $runTimeMinute = str_pad($timeCardInfo->runTimeMinute, 2, '0', STR_PAD_LEFT);
+      $setupTimeMinutes = str_pad($timeCardInfo->getSetupTimeMinutes(), 2, '0', STR_PAD_LEFT);
+      $runTimeMinutes = str_pad($timeCardInfo->getRunTimeMinutes(), 2, '0', STR_PAD_LEFT);
       
       $html =
 <<<HEREDOC
@@ -170,15 +179,15 @@ HEREDOC;
          <div class="section-header-div"><h2>Time</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Setup time</h3></div>
-            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeHour" style="width:50px;" oninput="setupTimeHourValidator.validate()" value="$timeCardInfo->setupTimeHour" $disabled />
+            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeHour" style="width:50px;" oninput="setupTimeHourValidator.validate()" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeMinute" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$setupTimeMinute" $disabled />
+            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeMinute" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$setupTimeMinutes" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Run time</h3></div>
-            <input id="runTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeHour" style="width:50px;" oninput="runTimeHourValidator.validate()" value="$timeCardInfo->runTimeHour" $disabled />
+            <input id="runTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeHour" style="width:50px;" oninput="runTimeHourValidator.validate()" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeMinute" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$runTimeMinute" $disabled />
+            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeMinute" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$runTimeMinutes" $disabled />
          </div>
       </div>
 HEREDOC;
@@ -200,7 +209,7 @@ HEREDOC;
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Good count</h3></div>
-            <input id="partsCount-input" type="number" class="medium-text-input" form="timeCardForm" name="partsCount" style="width:100px;" oninput="partsCountValidator.validate()" value="$timeCardInfo->partsCount" $disabled />
+            <input id="partsCount-input" type="number" class="medium-text-input" form="timeCardForm" name="partsCount" style="width:100px;" oninput="partsCountValidator.validate()" value="$timeCardInfo->partCount" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Scrap count</h3></div>
@@ -268,7 +277,7 @@ HEREDOC;
       
       if (isset($_POST['timeCardId']))
       {
-         $timeCardInfo = getTimeCardInfo($_POST['timeCardId']);
+         $timeCardInfo = TimeCardInfo::load($_POST['timeCardId']);
       }
       else if (isset($_SESSION['timeCardInfo']))
       {

@@ -180,6 +180,11 @@ body {
    height: 50px;
 }
 
+.job-select-button {
+   width: 200px;
+   height: 50px;
+}
+
 input:checked + label > div  {
    background-color: #27496d;
    text-shadow: -1px 1px #193047;

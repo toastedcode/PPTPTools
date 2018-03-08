@@ -3,6 +3,7 @@
 require_once '../database.php';
 require_once '../user.php';
 require_once '../common/filter.php';
+require_once '../common/jobInfo.php';
 
 /*
 class TimeCardTable
@@ -342,7 +343,7 @@ HEREDOC;
          
          $employeeNumber = $this->filter->get('operator')->selectedEmployeeNumber;
          
-         $result = $database->getTimeCards($employeeNumber, $startDate, $endDate);
+         $result = $database->getTimeCards($employeeNumber, $startDateString, $endDateString);
          
          if ($result)
          {
@@ -360,7 +361,7 @@ HEREDOC;
                   }
                   
                   $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $date = $dateTime->format("m-d-Y");
+                  $date = $dateTime->format("n-j-Y");
                   
                   $wcNumber = "unknown";
                   $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
@@ -389,14 +390,14 @@ HEREDOC;
 <<<HEREDOC
                      <tr>
                         <td>$date</td>
-                        <td>$operator</td>
+                        <td>$operatorName</td>
                         <td>$timeCardInfo->jobNumber</td>
                         <td>$wcNumber</td>
-                        <td>$timeCardInfo->formatSetupTime()</td>
-                        <td>$timeCardInfo->formatRunTime()</td>
-                        <td>$timeCardInfo->$panCount</td>
-                        <td>$timeCardInfo->$partCount</td>
-                        <td>$timeCardInfo->$scrapCount</td>
+                        <td>{$timeCardInfo->formatSetupTime()}</td>
+                        <td>{$timeCardInfo->formatRunTime()}</td>
+                        <td>$timeCardInfo->panCount</td>
+                        <td>$timeCardInfo->partCount</td>
+                        <td>$timeCardInfo->scrapCount</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>
                      </tr>

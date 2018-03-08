@@ -560,6 +560,17 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getActiveJobs($wcNumber)
+   {
+      $active = JobStatus::ACTIVE;
+      
+      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function getJob($jobNumber)
    {
       $query = "SELECT * FROM job WHERE jobNumber = \"$jobNumber\";";

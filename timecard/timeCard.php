@@ -73,7 +73,7 @@ function processAction($action)
       {
          if (isset($_POST['timeCardId']))
          {
-            $_SESSION["timeCardInfo"] = getTimeCardInfo($_POST['timeCardId']);
+            $_SESSION["timeCardInfo"] = TimeCardInfo::load($_POST['timeCardId']);
          }
          break;
       }
@@ -280,6 +280,7 @@ processAction(getAction());
 <link rel="stylesheet" type="text/css" href="flex.css"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+<link rel="stylesheet" type="text/css" href="../common/common.css"/>
 <link rel="stylesheet" type="text/css" href="timeCard.css"/>
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>

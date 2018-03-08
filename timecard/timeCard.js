@@ -113,7 +113,7 @@ function onNewTimeCard()
    input = document.createElement('input');
    input.setAttribute('name', 'view');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'select_operator');
+   input.setAttribute('value', 'select_work_center');
    form.appendChild(input);
    input = document.createElement('input');
    input.setAttribute('name', 'action');
@@ -219,13 +219,23 @@ function validateJob()
 {
    valid = false;
 
-   if (!(document.getElementById("jobNumber-input").validator.validate()))
+   radioButtons = document.getElementsByName("jobNumber");
+   
+   if (radioButtons.length == 0)
    {
-      alert("Please enter a valid job number.")      
+      valid = true;
    }
    else
    {
-      valid = true;
+      for (var i = 0; i < radioButtons.length; i++)
+      {
+         valid |= radioButtons[i].checked;
+      }
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a work center.")
    }
    
    return (valid);
