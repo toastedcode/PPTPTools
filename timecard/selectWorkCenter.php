@@ -13,7 +13,7 @@ class SelectWorkCenter
       
       $html =
 <<<HEREDOC
-      <form id="timeCardForm" action="timeCard.php" method="POST"></form>
+      <form id="input-form" action="#" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Select Work Center</div>
          <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
@@ -45,12 +45,12 @@ HEREDOC;
       
       if ($database->isConnected())
       {
-         $result = $database->getWorkCenters();
+         $result = $database->getActiveWorkCenters();
          
          // output data of each row
-         while ($row = $result->fetch_assoc())
+         while ($result && ($row = $result->fetch_assoc()))
          {
-            $wcNumber = $row["WCNumber"];
+            $wcNumber = $row["wcNumber"];
             
             $isChecked = ($selectedWorkCenter == $wcNumber);
             
@@ -71,8 +71,8 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="timeCardForm" id="$id" class="operator-input" name="wcNumber" value="$wcNumber" $checked/>
-         <label for="$wcNumber">
+         <input type="radio" form="input-form" id="$id" class="operator-input" name="wcNumber" value="$wcNumber" $checked/>
+         <label for="$id">
             <div type="button" class="select-button wc-select-button">
                <i class="material-icons button-icon">build</i>
                <div>$wcNumber</div>
@@ -88,9 +88,8 @@ HEREDOC;
       $navBar = new Navigation();
       
       $navBar->start();
-      $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("if (validateWorkCenter()){submitForm('timeCardForm', 'timeCard.php', 'select_operator', 'update_time_card_info');};");
-      $navBar->nextButton("if (validateWorkCenter()) {submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};");
+      $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+      $navBar->nextButton("if (validateWorkCenter()) {submitForm('input-form', 'timeCard.php', 'select_job', 'update_time_card_info');};");
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -99,12 +98,17 @@ HEREDOC;
    private static function getWorkCenter()
    {
       $wcNumber = null;
-      
+
       if (isset($_SESSION['timeCardInfo']))
       {
-         $wcNumber = $_SESSION['timeCardInfo']->wcNumber;
+         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobNumber);
+
+         if ($jobInfo)
+         {
+            $wcNumber = $jobInfo->wcNumber;
+         }
       }
-      
+
       return ($wcNumber);
    }
 }

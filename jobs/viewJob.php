@@ -271,7 +271,7 @@ HEREDOC;
          {
             while ($row = $result->fetch_assoc())
             {
-               $workcenters[] = $row["WCNumber"];
+               $workcenters[] = $row["wcNumber"];
             }
          }
       }
