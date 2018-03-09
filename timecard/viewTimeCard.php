@@ -24,7 +24,7 @@ class ViewTimeCard
       
       $html =
 <<<HEREDOC
-      <form id="timeCardForm" action="timeCard.php" method="POST">
+      <form id="input-form" action="timeCard.php" method="POST">
          <input type="hidden" name="timeCardId" value="$timeCardInfo->timeCardId"/>
       </form>
       <div class="flex-vertical card-div">
@@ -58,7 +58,7 @@ class ViewTimeCard
          var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
          var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
-         var panCountValidator = new IntValidator("panCount-input", 1, 1, 4, false);
+         var panCountValidator = new IntValidator("panCount-input", 1, 1, 25, false);
          var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
          var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
 
@@ -153,7 +153,7 @@ HEREDOC;
          <div class="section-header-div"><h2>Job</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input id="jobNumber-input" type="text" class="medium-text-input" form="timeCardForm" name="jobNumber" style="width:150px;" oninput="jobValidator.validate()" value="$timeCardInfo->jobNumber" disabled />
+            <input id="jobNumber-input" type="text" class="medium-text-input" form="input-form" name="jobNumber" style="width:150px;" oninput="jobValidator.validate()" value="$timeCardInfo->jobNumber" disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
@@ -179,15 +179,15 @@ HEREDOC;
          <div class="section-header-div"><h2>Time</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Setup time</h3></div>
-            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeHour" style="width:50px;" oninput="setupTimeHourValidator.validate()" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
+            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate()" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="setupTimeMinute" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$setupTimeMinutes" $disabled />
+            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$setupTimeMinutes" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Run time</h3></div>
-            <input id="runTimeHour-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeHour" style="width:50px;" oninput="runTimeHourValidator.validate()" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
+            <input id="runTimeHour-input" type="number" class="medium-text-input" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate()" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="timeCardForm" name="runTimeMinute" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$runTimeMinutes" $disabled />
+            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$runTimeMinutes" $disabled />
          </div>
       </div>
 HEREDOC;
@@ -205,15 +205,15 @@ HEREDOC;
          <div class="section-header-div"><h2>Part Counts</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Pan count</h3></div>
-            <input id="panCount-input" type="number" class="medium-text-input" form="timeCardForm" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="$timeCardInfo->panCount" $disabled />
+            <input id="panCount-input" type="number" class="medium-text-input" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="$timeCardInfo->panCount" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Good count</h3></div>
-            <input id="partsCount-input" type="number" class="medium-text-input" form="timeCardForm" name="partsCount" style="width:100px;" oninput="partsCountValidator.validate()" value="$timeCardInfo->partCount" $disabled />
+            <input id="partsCount-input" type="number" class="medium-text-input" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate()" value="$timeCardInfo->partCount" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Scrap count</h3></div>
-            <input id="scrapCount-input" type="number" class="medium-text-input" form="timeCardForm" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="$timeCardInfo->scrapCount" $disabled />
+            <input id="scrapCount-input" type="number" class="medium-text-input" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="$timeCardInfo->scrapCount" $disabled />
          </div>
       </div>
 HEREDOC;
@@ -228,7 +228,7 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="flex-horizontal">
-         <textarea form="timeCardForm" class="comments-input" type="text" form="timeCardForm" name="comments" rows="4" maxlength="256" $disabled>$timeCardInfo->comments</textarea>
+         <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" $disabled>$timeCardInfo->comments</textarea>
       </div>
 HEREDOC;
       
@@ -246,24 +246,24 @@ HEREDOC;
          // Case 1
          // Viewing as last step of creating a new time card.
          
-         $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-         $navBar->backButton("submitForm('timeCardForm', 'timeCard.php', 'enter_comments', 'update_time_card_info');");
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
+         $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+         $navBar->backButton("submitForm('input-form', 'timeCard.php', 'enter_comments', 'update_time_card_info');");
+         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
       }
       else if ($readOnly == true)
       {
          // Case 2
          // Viewing single time card selected from table of time cards.
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
-         $navBar->highlightNavButton("Ok", "submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'no_action')", false);
+         $navBar->highlightNavButton("Ok", "submitForm('input-form', 'timeCard.php', 'view_time_cards', 'no_action')", false);
       }
       else 
       {   
          // Case 3
          // Editing a single time card selected from table of time cards.
-         $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+         $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
+         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
       }
       
       $navBar->end();

@@ -1,23 +1,23 @@
 <?php
 require_once '../database.php';
 
-class SelectWorkCenter
+class SelectJob
 {
    public static function getHtml()
    {
       $html = "";
       
-      $workCenters = SelectWorkCenter::workCenters();
-      
-      $navBar = SelectWorkCenter::navBar();
+      $jobsDiv = SelectJob::jobsDiv();
+            
+      $navBar = SelectJob::navBar();
       
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
       <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Work Center</div>
+         <div class="card-header-div">Select Job</div>
          <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
-            $workCenters
+            $jobsDiv
          </div>
          
          $navBar
@@ -30,14 +30,16 @@ HEREDOC;
    
    public static function render()
    {
-      echo (SelectWorkCenter::getHtml());
+      echo (SelectJob::getHtml());
    }
    
-   private static function workCenters()
+   private static function jobsDiv()
    {
       $html = "";
       
-      $selectedWorkCenter = SelectWorkCenter::getWorkCenter();
+      $selectedJob = SelectJob::getJobNumber();
+      
+      $wcNumber = SelectJob::getWorkCenter();
       
       $database = new PPTPDatabase();
       
@@ -45,37 +47,37 @@ HEREDOC;
       
       if ($database->isConnected())
       {
-         $result = $database->getWorkCenters();
+         $result = $database->getActiveJobs($wcNumber);
          
          // output data of each row
          while ($result && ($row = $result->fetch_assoc()))
          {
-            $wcNumber = $row["wcNumber"];
+            $jobNumber = $row["jobNumber"];
             
-            $isChecked = ($selectedWorkCenter == $wcNumber);
+            $isChecked = ($selectedJob == $jobNumber);
             
-            $html .= SelectWorkCenter::workCenter($wcNumber, $isChecked);
+            $html .= SelectJob::jobDiv($jobNumber, $isChecked);
          }
       }
       
       return ($html);
    }
    
-   private static function workCenter($wcNumber, $isChecked)
+   private static function jobDiv($jobNumber, $isChecked)
    {
       $html = "";
       
       $checked = $isChecked ? "checked" : "";
       
-      $id = "list-option-" + $wcNumber;
+      $id = "list-option-" + $jobNumber;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="input-form" id="$id" class="operator-input" name="wcNumber" value="$wcNumber" $checked/>
-         <label for="$wcNumber">
-            <div type="button" class="select-button wc-select-button">
-               <i class="material-icons button-icon">build</i>
-               <div>$wcNumber</div>
+         <input type="radio" form="input-form" id="$id" class="operator-input" name="jobNumber" value="$jobNumber" $checked/>
+         <label for="$id">
+            <div type="button" class="select-button job-select-button">
+               <i class="material-icons button-icon">assignment</i>
+               <div>$jobNumber</div>
             </div>
          </label>
 HEREDOC;
@@ -89,18 +91,34 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("if (validateWorkCenter()){submitForm('input-form', 'timeCard.php', 'select_operator', 'update_time_card_info');};");
-      $navBar->nextButton("if (validateWorkCenter()) {submitForm('input-form', 'timeCard.php', 'select_job', 'update_time_card_info');};");
+      $navBar->backButton("submitForm('input-form', 'timeCard.php', 'select_work_center', 'update_time_card_info');");
+      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'timeCard.php', 'enter_time', 'update_time_card_info');};");
       $navBar->end();
       
       return ($navBar->getHtml());
+   }
+   
+   private static function getJobNumber()
+   {
+      $jobNumber = null;
+      
+      if (isset($_SESSION['timeCardInfo']))
+      {
+         $jobNumber = $_SESSION['timeCardInfo']->jobNumber;
+      }
+      
+      return ($jobNumber);
    }
    
    private static function getWorkCenter()
    {
       $wcNumber = null;
       
-      if (isset($_SESSION['timeCardInfo']))
+      if (isset($_POST['wcNumber']))
+      {
+         $wcNumber = $_POST['wcNumber'];
+      }
+      else if (isset($_SESSION['timeCardInfo']))
       {
          $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobNumber);
          

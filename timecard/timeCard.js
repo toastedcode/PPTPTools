@@ -198,13 +198,20 @@ function validateOperator()
 
 function validateWorkCenter()
 {
-   radioButtons = document.getElementsByName("wcNumber"); 
-   
    var valid = false;
    
-   for (var i = 0; i < radioButtons.length; i++)
+   radioButtons = document.getElementsByName("wcNumber"); 
+   
+   if (radioButtons.length == 0)
    {
-      valid |= radioButtons[i].checked;
+      valid = true;
+   }
+   else
+   {
+      for (var i = 0; i < radioButtons.length; i++)
+      {
+         valid |= radioButtons[i].checked;
+      }
    }
    
    if (!valid)
@@ -235,7 +242,7 @@ function validateJob()
    
    if (!valid)
    {
-      alert("Please select a work center.")
+      alert("Please select a job.")
    }
    
    return (valid);
@@ -308,7 +315,7 @@ function validatePartCount()
 
 function validateCard()
 {
-   return (validateJob() && validateTime() && validatePartCount());
+   return (validateTime() && validatePartCount());
 }
 
 function changeSetupTimeHour(delta)

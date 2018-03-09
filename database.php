@@ -129,6 +129,17 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getActiveWorkCenters()
+   {
+      $active = JobStatus::ACTIVE;
+
+      $query = "SELECT * FROM workCenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
+      
+      $result = $this->query($query);
+
+      return ($result);
+   }
+   
    public function getTimeCard(
       $timeCardId)
    {
@@ -164,15 +175,15 @@ class PPTPDatabase extends MySqlDatabase
    public function newTimeCard(
       $timeCardInfo)
    {
-      $date = Time::toMySqlDate($timeCard->date);
+      $date = Time::toMySqlDate($timeCardInfo->dateTime);
       
-      $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
+      $comments = mysqli_real_escape_string($this->getConnection(), $timeCardInfo->comments);
       
       $query =
          "INSERT INTO timecard " .
          "(employeeNumber, dateTime, jobNumber, setupTime, runTime, panCount, partCount, scrapCount, comments) " .
          "VALUES " .
-         "('$timeCard->employeeNumber', '$date', '$timeCard->jobNumber', '$timeCard->setupTime', '$timeCard->runTime', '$timeCard->panCount', '$timeCard->partsCount', '$timeCard->scrapCount', '$comments');";
+         "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$comments');";
       
       $result = $this->query($query);
       
@@ -182,15 +193,15 @@ class PPTPDatabase extends MySqlDatabase
    public function updateTimeCard(
       $timeCardInfo)
    {
-      $dateTime = Time::toMySqlDate($timeCard->dateTime);
+      $dateTime = Time::toMySqlDate($timeCardInfo->dateTime);
       
-      $comments = mysqli_real_escape_string($this->getConnection(), $timeCard->comments);
+      $comments = mysqli_real_escape_string($this->getConnection(), $timeCardInfo->comments);
       
       $query =
       "UPDATE timecard " .
-      "SET employeeNumber = $timeCard->employeeNumber, dateTime = \"$dateTime\", jobNumber = $timeCard->jobNumber, setupTime = $timeCard->setupTime, runTime = $timeCard->runTime, panCount = $timeCard->panCount, partCount = $timeCard->partCount, scrapCount = $timeCard->scrapCount, comments = \"$comments\" " .
-      "WHERE timeCardId = $id;";
-     
+      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", jobNumber = \"$timeCardInfo->jobNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, comments = \"$comments\" " .
+      "WHERE timeCardId = $timeCardInfo->timeCardId;";
+
       $result = $this->query($query);
       
       return ($result);
@@ -574,7 +585,7 @@ class PPTPDatabase extends MySqlDatabase
    public function getJob($jobNumber)
    {
       $query = "SELECT * FROM job WHERE jobNumber = \"$jobNumber\";";
-      
+
       $result = $this->query($query);
       
       return ($result);
@@ -589,7 +600,7 @@ class PPTPDatabase extends MySqlDatabase
       "(jobNumber, creator, dateTime, partNumber, wcNumber, cycleTime, netPartsPerHour, status) " .
       "VALUES " .
       "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPartsPerHour', '$jobInfo->status');";
-echo $query;
+
       $result = $this->query($query);
       
       return ($result);

@@ -57,7 +57,7 @@ HEREDOC;
       $timeCardInfo = EnterPartCount::getTimeCardInfo();
       
       $panCount = $timeCardInfo->panCount;
-      $partsCount = $timeCardInfo->partsCount;
+      $partCount = $timeCardInfo->partCount;
       $scrapCount = $timeCardInfo->scrapCount;
       
       $html =
@@ -70,7 +70,7 @@ HEREDOC;
 
       <!-- Parts count -->
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="partsCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="partsCount" oninput="this.validator.validate()" value="$partsCount">
+         <input id="partsCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="partCount" oninput="this.validator.validate()" value="$partCount">
          <label class="mdl-textfield__label" for="partsCount-input">Good part count</label>
       </div>
 

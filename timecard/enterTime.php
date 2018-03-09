@@ -13,7 +13,7 @@ class EnterTime
       
       $html =
 <<<HEREDOC
-      <form id="timeCardForm" action="timeCard.php" method="POST"></form>
+      <form id="input-form" action="timeCard.php" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Enter Time</div>
          <div class="flex-vertical content-div" style="justify-content: space-evenly">
@@ -49,10 +49,10 @@ HEREDOC;
    {
       $timeCardInfo = EnterTime::getTimeCardInfo();
       
-      $setupTimeHour= $timeCardInfo->setupTimeHour;
-      $setupTimeMinute= $timeCardInfo->setupTimeMinute;
-      $runTimeHour= $timeCardInfo->runTimeHour;
-      $runTimeMinute= $timeCardInfo->runTimeMinute;
+      $setupTimeHours = $timeCardInfo->getSetupTimeHours();
+      $setupTimeMinutes = $timeCardInfo->getSetupTimeMinutes();
+      $runTimeHours = $timeCardInfo->getRunTimeHours();
+      $runTimeMinutes = $timeCardInfo->getRunTimeMinutes();
       
       $html =
 <<<HEREDOC
@@ -67,7 +67,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(-1)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="setupTimeHour-input" form="timeCardForm" class="large-text-input" name="setupTimeHour" type="number" oninput="this.validator.validate()" value="$setupTimeHour">
+                  <input id="setupTimeHour-input" form="input-form" class="large-text-input" name="setupTimeHours" type="number" oninput="this.validator.validate()" value="$setupTimeHours">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(1)">
                      <i class="material-icons">add</i>
                   </button> 
@@ -80,7 +80,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(-15)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="setupTimeMinute-input" form="timeCardForm" class="large-text-input" name="setupTimeMinute" type="number" oninput="this.validator.validate()" value="$setupTimeMinute">
+                  <input id="setupTimeMinute-input" form="input-form" class="large-text-input" name="setupTimeMinutes" type="number" oninput="this.validator.validate()" value="$setupTimeMinutes">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(15)">
                      <i class="material-icons">add</i>
                   </button>
@@ -100,7 +100,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeHour(-1)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeHour-input" form="timeCardForm" class="large-text-input" name="runTimeHour" type="number" oninput="this.validator.validate()" value="$runTimeHour">
+                  <input id="runTimeHour-input" form="input-form" class="large-text-input" name="runTimeHours" type="number" oninput="this.validator.validate()" value="$runTimeHours">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeHour(1)">
                      <i class="material-icons">add</i>
                   </button>
@@ -113,7 +113,7 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(-15)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeMinute-input" form="timeCardForm" class="large-text-input" name="runTimeMinute" type="number" oninput="this.validator.validate()" value="$runTimeMinute">
+                  <input id="runTimeMinute-input" form="input-form" class="large-text-input" name="runTimeMinutes" type="number" oninput="this.validator.validate()" value="$runTimeMinutes">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(15)">
                      <i class="material-icons">add</i>
                   </button>
@@ -131,9 +131,9 @@ HEREDOC;
       $navBar = new Navigation();
       
       $navBar->start();
-      $navBar->cancelButton("submitForm('timeCardForm', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'select_job', 'update_time_card_info');};");
-      $navBar->nextButton("if (validateTime()){submitForm('timeCardForm', 'timeCard.php', 'enter_part_count', 'update_time_card_info');};");
+      $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+      $navBar->backButton("if (validateTime()){submitForm('input-form', 'timeCard.php', 'select_job', 'update_time_card_info');};");
+      $navBar->nextButton("if (validateTime()){submitForm('input-form', 'timeCard.php', 'enter_part_count', 'update_time_card_info');};");
       $navBar->end();
       
       return ($navBar->getHtml());

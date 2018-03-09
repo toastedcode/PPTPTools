@@ -307,7 +307,7 @@ HEREDOC;
    private function timeCardsDiv()
    {
       $html =
-      <<<HEREDOC
+<<<HEREDOC
          <div class="time-cards-div">
             <table class="time-card-table">
                <tr>

@@ -5,13 +5,12 @@ require_once '../authentication.php';
 require_once '../header.php';
 require_once '../common/timeCardInfo.php';
 require_once 'keypad.php';
-require 'selectOperatorPage.php';
-require 'selectWorkCenterPage.php';
-require 'selectJobPage.php';
-require 'enterTimePage.php';
-require 'enterPartCountPage.php';
-require 'enterCommentsPage.php';
-require 'viewTimeCardPage.php';
+require 'selectWorkCenter.php';
+require 'selectJob.php';
+require 'enterTime.php';
+require 'enterPartCount.php';
+require 'enterComments.php';
+require 'viewTimeCard.php';
 require 'viewTimeCards.php';
 
 function getAction()
@@ -65,7 +64,13 @@ function processAction($action)
       case 'new_time_card':
       {
          $_SESSION["timeCardInfo"] = new TimeCardInfo();
+         
          $_SESSION["timeCardInfo"]->date = Time::now("Y-m-d h:i:s A");
+         
+         if ($user = Authentication::getAuthenticatedUser())
+         {
+            $_SESSION["timeCardInfo"]->employeeNumber = $user->employeeNumber;
+         }
          break;
       }
       
@@ -81,7 +86,7 @@ function processAction($action)
       case 'save_time_card':
       {
          updateTimeCardInfo();
-         
+
          updateTimeCard($_SESSION['timeCardInfo']);
          
          $_SESSION["timeCardInfo"] = new TimeCardInfo();
@@ -105,12 +110,6 @@ function processView($view)
 {
    switch ($view)
    {  
-      case 'select_operator':
-      {
-         SelectOperator::render();
-         break;
-      }
-         
       case 'select_work_center':
       {
          SelectWorkCenter::render();
