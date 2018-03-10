@@ -160,11 +160,6 @@ function selectActionPage()
             <div>Time Cards</div>
          </div>
 
-        <div  class="action-button" onclick="location.href='panTicket/panTicket.php?view=view_pan_tickets';">
-           <i class="material-icons action-button-icon">receipt</i>
-           <div>Pan Tickets</div>
-        </div>
-
         <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
            <i class="material-icons action-button-icon">opacity</i>
            <div>Parts Washer</div>

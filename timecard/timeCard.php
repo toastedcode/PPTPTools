@@ -4,9 +4,10 @@ require_once '../database.php';
 require_once '../authentication.php';
 require_once '../header.php';
 require_once '../common/timeCardInfo.php';
-require_once 'keypad.php';
+require_once '../common/keypad.php';
 require 'selectWorkCenter.php';
 require 'selectJob.php';
+require 'enterMaterialNumber.php';
 require 'enterTime.php';
 require 'enterPartCount.php';
 require 'enterComments.php';
@@ -121,6 +122,12 @@ function processView($view)
          SelectJob::render();
          break;
       }
+      
+      case 'enter_material_number':
+      {
+         EnterMaterialNumber::render();
+         break;
+      }
          
       case 'enter_time':
       {
@@ -183,6 +190,11 @@ function updateTimeCardInfo()
    if (isset($_POST['jobNumber']))
    {
       $_SESSION["timeCardInfo"]->jobNumber = $_POST['jobNumber'];
+   }
+   
+   if (isset($_POST['materialNumber']))
+   {
+      $_SESSION["timeCardInfo"]->materialNumber = $_POST['materialNumber'];
    }
    
    if (isset($_POST['setupTimeHours']) && isset($_POST['setupTimeMinutes']))

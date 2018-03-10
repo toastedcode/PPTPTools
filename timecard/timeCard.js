@@ -93,7 +93,7 @@ function onPrintTimeCard(timeCardId)
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'printTimeCardPage.php');
+   form.setAttribute('action', 'printTimeCard.php');
    form.setAttribute("target", "_blank");
    input = document.createElement('input');
    input.setAttribute('name', 'timeCardId');
@@ -248,6 +248,22 @@ function validateJob()
    return (valid);
 }
 
+function validateMaterialNumber()
+{
+   valid = false;
+
+   if (!(document.getElementById("material-number-input").validator.validate()))
+   {
+      alert("Please enter a valid material number.")      
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);    
+}
+
 function validateTime()
 {
    var valid = false;
@@ -315,7 +331,7 @@ function validatePartCount()
 
 function validateCard()
 {
-   return (validateTime() && validatePartCount());
+   return (validateMaterialNumber() && validateTime() && validatePartCount());
 }
 
 function changeSetupTimeHour(delta)
