@@ -1,6 +1,6 @@
 <?php
 require_once '../database.php';
-require_once 'viewTimeCardPage.php';
+require_once 'viewTimeCard.php';
 
 class PrintTimeCard extends ViewTimeCard
 {

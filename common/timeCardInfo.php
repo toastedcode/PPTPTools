@@ -8,6 +8,7 @@ class TimeCardInfo
    public $dateTime;
    public $employeeNumber;
    public $jobNumber;
+   public $materialNumber;
    public $setupTime;
    public $runTime;
    public $panCount;
@@ -65,6 +66,7 @@ class TimeCardInfo
             $timeCardInfo->date = Time::fromMySqlDate($row['dateTime'], "Y-m-d h:i:s");
             $timeCardInfo->employeeNumber = $row['employeeNumber'];
             $timeCardInfo->jobNumber = $row['jobNumber'];
+            $timeCardInfo->materialNumber = $row['materialNumber'];
             $timeCardInfo->setupTime = $row['setupTime'];
             $timeCardInfo->runTime = $row['runTime'];
             $timeCardInfo->panCount = $row['panCount'];
@@ -93,6 +95,7 @@ if (isset($_GET["timeCardId"]))
       echo "dateTime: " .       $timeCardInfo->dateTime .       "<br/>";
       echo "employeeNumber: " . $timeCardInfo->employeeNumber . "<br/>";
       echo "jobNumber: " .      $timeCardInfo->jobNumber .      "<br/>";
+      echo "materialNumber: " . $timeCardInfo->materialNumber . "<br/>";
       echo "setupTime: " .      $setupTime .                    "<br/>";
       echo "runTime: " .        $runTime .                      "<br/>";
       echo "partCount: " .      $timeCardInfo->partCount .      "<br/>";

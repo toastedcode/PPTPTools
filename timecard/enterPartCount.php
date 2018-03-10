@@ -9,13 +9,13 @@ class EnterPartCount
       
       $partCountInput = EnterPartCount::partCountInput();
       
-      $keypad = Keypad::getHtml();
+      $keypad = Keypad::getHtml(false);
       
       $navBar = EnterPartCount::navBar();
       
       $html =
 <<<HEREDOC
-      <form id="timeCardForm" action="timeCard.php" method="POST"></form>
+      <form id="timeCardForm" action="#" method="POST"></form>
       <div class="flex-vertical card-div">
          <div class="card-header-div">Enter Part Count</div>
          <div class="flex-horizontal content-div">
@@ -31,7 +31,10 @@ class EnterPartCount
       </div>
 
       <script type="text/javascript">
-         initKeypad();
+         var keypad = new Keypad();
+         keypad.onEnter = "if (validatePartCount()){submitForm('timeCardForm', 'timeCard.php', 'enter_comments', 'update_time_card_info');};";
+         keypad.init();
+
          document.getElementById("panCount-input").focus();
 
          var panCountValidator = new IntValidator("panCount-input", 2, 2, 25, false);

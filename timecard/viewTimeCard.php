@@ -53,7 +53,7 @@ class ViewTimeCard
       </div>
 
       <script>
-         var jobValidator = new IntValidator("jobNumber-input", 5, 1, 10000, false);
+         var materialNumberValidator = new IntValidator("material-number-input", 5, 1, 10000, false);
          var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
          var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
@@ -62,7 +62,7 @@ class ViewTimeCard
          var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
          var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
 
-         jobValidator.init();
+         materialNumberValidator.init();
          setupTimeHourValidator.init();
          setupTimeMinuteValidator.init();
          runTimeHourValidator.init();
@@ -153,11 +153,15 @@ HEREDOC;
          <div class="section-header-div"><h2>Job</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Job #</h3></div>
-            <input id="jobNumber-input" type="text" class="medium-text-input" form="input-form" name="jobNumber" style="width:150px;" oninput="jobValidator.validate()" value="$timeCardInfo->jobNumber" disabled />
+            <input type="text" class="medium-text-input" style="width:150px;" value="$timeCardInfo->jobNumber" disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Work center #</h3></div>
             <input type="text" class="medium-text-input" style="width:150px;" value="$wcNumber" disabled />
+         </div>
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Material #</h3></div>
+            <input id="material-number-input" type="number" class="medium-text-input" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled />
          </div>
       </div>
 HEREDOC;

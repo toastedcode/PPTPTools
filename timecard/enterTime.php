@@ -132,7 +132,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("if (validateTime()){submitForm('input-form', 'timeCard.php', 'select_job', 'update_time_card_info');};");
+      $navBar->backButton("if (validateTime()){submitForm('input-form', 'timeCard.php', 'enter_material_number', 'update_time_card_info');};");
       $navBar->nextButton("if (validateTime()){submitForm('input-form', 'timeCard.php', 'enter_part_count', 'update_time_card_info');};");
       $navBar->end();
       
