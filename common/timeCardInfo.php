@@ -49,7 +49,7 @@ class TimeCardInfo
    
    public function hasCommentCode($code)
    {
-      return (($this->commentCodes && code) != 0);
+      return (($this->commentCodes & $code) != 0);
    }
    
    public function setCommentcode($code)

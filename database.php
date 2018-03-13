@@ -643,7 +643,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getCommentCodes()
    {
-      $query = "SELECT * FROM comments;";
+      $query = "SELECT * FROM comment;";
       
       $result = $this->query($query);
       
