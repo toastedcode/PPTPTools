@@ -641,6 +641,15 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getCommentCodes()
+   {
+      $query = "SELECT * FROM comments;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    private function updatePartCount_Hour($sensorId, $partCount)
    {
    }

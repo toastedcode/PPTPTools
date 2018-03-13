@@ -14,6 +14,7 @@ class TimeCardInfo
    public $panCount;
    public $partCount;
    public $scrapCount;
+   public $commentCodes;
    public $comments;
    
    public function formatSetupTime()
@@ -46,6 +47,21 @@ class TimeCardInfo
       return (round($this->runTime % 60));
    }
    
+   public function hasCommentCode($code)
+   {
+      return (($this->commentCodes && code) != 0);
+   }
+   
+   public function setCommentcode($code)
+   {
+      $this->commentCodes |= $code;
+   }
+   
+   public function clearCommentcode($code)
+   {
+      $this->commentCodes &= ~$code;
+   }
+   
    public static function load($timeCardId)
    {
       $timeCardInfo = null;
@@ -72,6 +88,7 @@ class TimeCardInfo
             $timeCardInfo->panCount = $row['panCount'];
             $timeCardInfo->partCount = $row['partCount'];
             $timeCardInfo->scrapCount = $row['scrapCount'];
+            $timeCardInfo->commentCodes = $row['commentCodes'];
             $timeCardInfo->comments = $row['comments'];
          }
       }
@@ -91,16 +108,17 @@ if (isset($_GET["timeCardId"]))
       $setupTime = $timeCardInfo->getSetupTimeHours() . ":" . $timeCardInfo->getSetupTimeMinutes();
       $runTime = $timeCardInfo->getRunTimeHours() . ":" . $timeCardInfo->getRunTimeMinutes();
       
-      echo "timeCardId: " .     $timeCardInfo->timeCardId .     "<br/>";
-      echo "dateTime: " .       $timeCardInfo->dateTime .       "<br/>";
-      echo "employeeNumber: " . $timeCardInfo->employeeNumber . "<br/>";
-      echo "jobNumber: " .      $timeCardInfo->jobNumber .      "<br/>";
-      echo "materialNumber: " . $timeCardInfo->materialNumber . "<br/>";
-      echo "setupTime: " .      $setupTime .                    "<br/>";
-      echo "runTime: " .        $runTime .                      "<br/>";
-      echo "partCount: " .      $timeCardInfo->partCount .      "<br/>";
-      echo "scrapCount: " .     $timeCardInfo->scrapCount .     "<br/>";
-      echo "comments: " .       $timeCardInfo->comments .       "<br/>";
+      echo "timeCardId: " .     $timeCardInfo->timeCardId .           "<br/>";
+      echo "dateTime: " .       $timeCardInfo->dateTime .             "<br/>";
+      echo "employeeNumber: " . $timeCardInfo->employeeNumber .       "<br/>";
+      echo "jobNumber: " .      $timeCardInfo->jobNumber .            "<br/>";
+      echo "materialNumber: " . $timeCardInfo->materialNumber .       "<br/>";
+      echo "setupTime: " .      $setupTime .                          "<br/>";
+      echo "runTime: " .        $runTime .                            "<br/>";
+      echo "partCount: " .      $timeCardInfo->partCount .            "<br/>";
+      echo "scrapCount: " .     $timeCardInfo->scrapCount .           "<br/>";
+      echo "commentCodes:"      dechex($timeCardInfo->commentCodes) . "<br/>"; 
+      echo "comments: " .       $timeCardInfo->comments .             "<br/>";
    }
    else
    {
