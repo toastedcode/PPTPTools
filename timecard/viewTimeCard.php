@@ -3,6 +3,7 @@ require_once '../navigation.php';
 require_once '../user.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/jobInfo.php';
+require_once 'enterComments.php';
 
 class ViewTimeCard
 {
@@ -250,22 +251,22 @@ HEREDOC;
    {
       $disabled = ($readOnly) ? "disabled" : "";
       
-      $commentCodes = ViewTimeCard::getCommentCodes();
+      $commentCodes = CommentsPage::getCommentCodes();
       
       $leftColumn = "";
       $rightColumn = "";
       $index = 0;
       foreach($commentCodes as $commentCode)
       {
-         $id = "code-" . $commentCode["code"] . "-input";
-         $name = "code-" . $commentCode["code"];
-         $checked = ($timeCardInfo->hasCommentCode($commentCode["code"]) ? "checked" : "");
-         $description = $commentCode["description"];
+         $id = "code-" . $commentCode->code . "-input";
+         $name = "code-" . $commentCode->code;
+         $checked = ($timeCardInfo->hasCommentCode($commentCode->code) ? "checked" : "");
+         $description = $commentCode->description;
          
          $codeDiv = 
 <<< HEREDOC
             <div class="flex-horizontal">
-               <input id="$id" type="checkbox" form="input-form" name="$name" $checked/>
+               <input id="$id" type="checkbox" form="input-form" name="$name" $checked $disabled/>
                <label for="$id">$description</label>
             </div>
 HEREDOC;
@@ -284,6 +285,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
+      <input type="hidden" form="input-form" name="commentCodes" value="true"/>
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Codes</h2></div>
          <div class="flex-horizontal time-card-table-row">
@@ -350,27 +352,6 @@ HEREDOC;
       }
       
       return ($timeCardInfo);
-   }
-   
-   protected static function getCommentCodes()
-   {
-      $commentCodes = array();
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getCommentCodes();
-         
-         while ($result && ($row = $result->fetch_assoc()))
-         {
-            $commentCodes[] = $row;            
-         }
-      }
-      
-      return ($commentCodes);
    }
 }
 ?>

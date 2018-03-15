@@ -52,12 +52,12 @@ class TimeCardInfo
       return (($this->commentCodes & $code) != 0);
    }
    
-   public function setCommentcode($code)
+   public function setCommentCode($code)
    {
       $this->commentCodes |= $code;
    }
    
-   public function clearCommentcode($code)
+   public function clearCommentCode($code)
    {
       $this->commentCodes &= ~$code;
    }
@@ -78,17 +78,17 @@ class TimeCardInfo
          {
             $timeCardInfo = new TimeCardInfo();
             
-            $timeCardInfo->timeCardId = $row['timeCardId'];
+            $timeCardInfo->timeCardId = intval($row['timeCardId']);
             $timeCardInfo->date = Time::fromMySqlDate($row['dateTime'], "Y-m-d h:i:s");
-            $timeCardInfo->employeeNumber = $row['employeeNumber'];
+            $timeCardInfo->employeeNumber = intval($row['employeeNumber']);
             $timeCardInfo->jobNumber = $row['jobNumber'];
-            $timeCardInfo->materialNumber = $row['materialNumber'];
+            $timeCardInfo->materialNumber = intval($row['materialNumber']);
             $timeCardInfo->setupTime = $row['setupTime'];
             $timeCardInfo->runTime = $row['runTime'];
-            $timeCardInfo->panCount = $row['panCount'];
-            $timeCardInfo->partCount = $row['partCount'];
-            $timeCardInfo->scrapCount = $row['scrapCount'];
-            $timeCardInfo->commentCodes = $row['commentCodes'];
+            $timeCardInfo->panCount = intval($row['panCount']);
+            $timeCardInfo->partCount = intval($row['partCount']);
+            $timeCardInfo->scrapCount = intval($row['scrapCount']);
+            $timeCardInfo->commentCodes = intval($row['commentCodes']);
             $timeCardInfo->comments = $row['comments'];
          }
       }

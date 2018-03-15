@@ -181,9 +181,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "INSERT INTO timecard " .
-         "(employeeNumber, dateTime, jobNumber, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, comments) " .
+         "(employeeNumber, dateTime, jobNumber, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments) " .
          "VALUES " .
-         "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobNumber', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$comments');";
+         "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobNumber', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments');";
       
       $result = $this->query($query);
       
@@ -199,7 +199,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE timecard " .
-      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", jobNumber = \"$timeCardInfo->jobNumber\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, comments = \"$comments\" " .
+      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", jobNumber = \"$timeCardInfo->jobNumber\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\" " .
       "WHERE timeCardId = $timeCardInfo->timeCardId;";
 
       $result = $this->query($query);

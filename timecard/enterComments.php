@@ -39,6 +39,31 @@ HEREDOC;
       echo (CommentsPage::getHtml());
    }
    
+   public static function getCommentCodes()
+   {
+      $commentCodes = array();
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getCommentCodes();
+         
+         while ($result && ($row = $result->fetch_assoc()))
+         {
+            $code = new stdClass();
+            $code->description = $row["description"];
+            $code->code = intval($row["code"]);
+            
+            $commentCodes[] = $code;
+         }
+      }
+      
+      return ($commentCodes);
+   }
+   
    protected static function commentsDiv($timeCardInfo)
    {
       $html = 
@@ -58,10 +83,10 @@ HEREDOC;
       $index = 0;
       foreach($commentCodes as $commentCode)
       {
-         $id = "code-" . $commentCode["code"] . "-input";
-         $name = "code-" . $commentCode["code"];
-         $checked = ($timeCardInfo->hasCommentCode($commentCode["code"]) ? "checked" : "");
-         $description = $commentCode["description"];
+         $id = "code-" . $commentCode->code . "-input";
+         $name = "code-" . $commentCode->code;
+         $checked = ($timeCardInfo->hasCommentCode($commentCode->code) ? "checked" : "");
+         $description = $commentCode->description;
          
          $codeDiv =
 <<< HEREDOC
@@ -85,6 +110,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
+         <input type="hidden" form="input-form" name="commentCodes" value="true"/>
          <div class="flex-horizontal">
             <div class="flex-vertical">
                $leftColumn
@@ -115,37 +141,12 @@ HEREDOC;
    {
       $timeCardInfo = new TimeCardInfo();
       
-      if (isset($_POST['timeCardId']))
-      {
-         $timeCardInfo = TimeCardInfo::load($_POST['timeCardId']);
-      }
-      else if (isset($_SESSION['timeCardInfo']))
+      if (isset($_SESSION['timeCardInfo']))
       {
          $timeCardInfo = $_SESSION['timeCardInfo'];
       }
       
       return ($timeCardInfo);
-   }
-   
-   protected static function getCommentCodes()
-   {
-      $commentCodes = array();
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getCommentCodes();
-         
-         while ($result && ($row = $result->fetch_assoc()))
-         {
-            $commentCodes[] = $row;
-         }
-      }
-      
-      return ($commentCodes);
-   }
+   }  
 }
 ?>
