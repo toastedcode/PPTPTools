@@ -12,11 +12,29 @@ class ViewTimeCards
    public function __construct()
    {
       $this->filter = new Filter();
+
+      $user = Authentication::getAuthenticatedUser();
       
-      $operators = User::getUsers(Permissions::OPERATOR);
-      
+      $operators = null;
+      $selectedOperator = null;
+      $allowAll = false;
+      if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+      {
+         // Allow selection from all operators.
+         $operators = User::getUsers(Permissions::OPERATOR);
+         $selectedOperator = "All";
+         $allowAll = true;
+      }
+      else
+      {
+         // Limit to own time cards.
+         $operators = array($user);
+         $selectedOperator = $user->employeeNumber;
+         $allowAll = false;
+      }
+
+      $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
       $this->filter->addByName('date', new DateFilterComponent());
-      $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, "All"));
       $this->filter->add(new FilterButton());
       $this->filter->add(new FilterDivider());
       $this->filter->add(new TodayButton());
@@ -35,7 +53,7 @@ class ViewTimeCards
       $navBar = ViewTimeCards::navBar();
       
       $html =
-      <<<HEREDOC
+<<<HEREDOC
       <div class="flex-vertical card-div">
          <div class="card-header-div">View Time Cards</div>
          <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
