@@ -253,6 +253,6 @@ input:checked + label > div  {
 }
 
 .time-card-div .comments-input {
-   width:700px;
+   width:300px;
    rows: 10;
-}
+} 

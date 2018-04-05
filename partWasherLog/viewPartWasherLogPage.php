@@ -1,34 +1,57 @@
 <?php
 
+require_once '../common/filter.php';
 require_once '../database.php';
 require_once '../navigation.php';
 require_once '../panTicket/panTicketInfo.php';
 
-class Filter
-{
-   public $employeeNumber = 0;
-   public $startDate;
-   public $endDate;
-   
-   function __construct()
-   {
-      $this->startDate = Time::now("Y-m-d");
-      $this->endDate = Time::now("Y-m-d");
-   }
-}
-
 class ViewPartWasherLog
 {
-
-   public static function getHtml()
+   private $filter;
+   
+   public function __construct()
    {
-      $filter = ViewPartWasherLog::getFilter();
+      $this->filter = new Filter();
       
-      $filterDiv = ViewPartWasherLog::filterDiv($filter);
+      $user = Authentication::getAuthenticatedUser();
       
-      $partWasherLogDiv = ViewPartWasherLog::partWasherLogDiv($filter);
+      $operators = null;
+      $selectedOperator = null;
+      $allowAll = false;
+      if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+      {
+         // Allow selection from all operators.
+         $operators = User::getUsers(Permissions::PART_WASHER);
+         $selectedOperator = "All";
+         $allowAll = true;
+      }
+      else
+      {
+         // Limit to own time cards.
+         $operators = array($user);
+         $selectedOperator = $user->employeeNumber;
+         $allowAll = false;
+      }
       
-      $navBar = ViewPartWasherLog::navBar();
+      $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+      $this->filter->addByName('date', new DateFilterComponent());
+      $this->filter->add(new FilterButton());
+      $this->filter->add(new FilterDivider());
+      $this->filter->add(new TodayButton());
+      $this->filter->add(new YesterdayButton());
+      $this->filter->add(new ThisWeekButton());
+      
+      $this->filter->load();
+   }
+   
+
+   public function getHtml()
+   {
+      $filterDiv = $this->filterDiv();
+      
+      $partWasherLogDiv = $this->partWasherLogDiv();
+      
+      $navBar = $this->navBar();
       
       $html = 
 <<<HEREDOC
@@ -52,54 +75,17 @@ HEREDOC;
       return ($html);
    }
    
-   public static function render()
+   public function render()
    {
-      echo (ViewPartWasherLog::getHtml());
+      echo ($this->getHtml());
    }
       
-   private static function filterDiv($filter)
+   private function filterDiv()
    {
-      $operators = User::getUsers(Permissions::PART_WASHER);
-      
-      $selected = ($filter->employeeNumber == 0) ? "selected" : "";
-      
-      $options = "<option $selected value=0>All</option>";
-      
-      foreach ($operators as $operator)
-      {
-         $selected = ($operator->employeeNumber == $filter->employeeNumber) ? "selected" : "";
-         $options .= "<option $selected value=\"" . $operator->employeeNumber . "\">" . $operator->getFullName() . "</option>";
-      }
-      
-      $html = 
-<<<HEREDOC
-      <div>
-      <form action="#" method="POST">
-         <input type="hidden" name="view" value="view_part_washer_log"/>
-         Washer:
-         <select id="employeeNumberInput" name="employeeNumber">$options</select>
-         &nbsp
-         Start Date:
-         <input type="date" id="startDateInput" name="startDate" value="$filter->startDate">
-         &nbsp
-         End Date:
-         <input type="date" id="endDateInput" name="endDate" value="$filter->endDate">
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised">Filter</button>
-         &nbsp | &nbsp 
-         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterToday()">Today</button>
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterYesterday()">Yesterday</button>
-         &nbsp
-         <button class="mdl-button mdl-js-button mdl-button--raised" onclick="filterThisWeek()">This Week</button>
-      </form>
-      </div>
-HEREDOC;
-      
-      return ($html);
+      return ($this->filter->getHtml());
    }
    
-   private static function navBar()
+   private function navBar()
    {
       $navBar = new Navigation();
       
@@ -111,7 +97,7 @@ HEREDOC;
       return ($navBar->getHtml());
    }
    
-   private static function partWasherLogDiv($filter)
+   private function partWasherLogDiv()
    {
       $html = 
 <<<HEREDOC
@@ -137,16 +123,16 @@ HEREDOC;
       if ($database->isConnected())
       {
          // Start date.
-         $startDate = new DateTime($filter->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+         $startDate = new DateTime($this->filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
          $startDateString = $startDate->format("Y-m-d");
          
          // End date.
          // Increment the end date by a day to make it inclusive.
-         $endDate = new DateTime($filter->endDate, new DateTimeZone('America/New_York'));
+         $endDate = new DateTime($this->filter->get('date')->endDate, new DateTimeZone('America/New_York'));
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWasherEntries($filter->employeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWasherEntries($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
         
          if ($result)
          {
@@ -214,49 +200,6 @@ HEREDOC;
 HEREDOC;
       
       return ($html);
-   }
-   
-   private static function getFilter()
-   {
-      $filter = null;
-      
-      if (isset($_SESSION['filter']))
-      {
-         $filter = $_SESSION['filter'];
-      }
-      else 
-      {
-         $filter = new Filter();
-         $filter->startDate = date('Y-m-d', strtotime(' -1 day'));
-      }
-      
-      if (isset($_POST['startDate']))
-      {
-         $filter->startDate = $_POST['startDate'];
-      }
-      
-      if (isset($_POST['endDate']))
-      {
-         $filter->endDate = $_POST['endDate'];
-      }
-      
-      if (isset($_POST["employeeNumber"]))
-      {
-         $filter->employeeNumber = $_POST['employeeNumber'];
-      }
-      
-      if (isset($_POST["page"]))
-      {
-         $filter->page = $_POST["page"];
-      }
-      else
-      {
-         $filter->page = 0;
-      }
-      
-      $_SESSION['filter'] = $filter;
-      
-      return ($filter);
    }
 }
 ?>

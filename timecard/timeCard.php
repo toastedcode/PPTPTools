@@ -226,6 +226,26 @@ function updateTimeCardInfo()
    {
       $_SESSION["timeCardInfo"]->comments = $_POST['comments'];
    }
+   
+   if (isset($_POST['commentCodes']))
+   {
+      $commentCodes = CommentsPage::getCommentCodes();
+      
+      foreach ($commentCodes as $commentCode)
+      {
+         $code = $commentCode->code;
+         $name = "code-" . $code;
+         
+         if (isset($_POST[$name]))
+         {
+            $_SESSION["timeCardInfo"]->setCommentCode($code);
+         }
+         else
+         {
+            $_SESSION["timeCardInfo"]->clearCommentCode($code);
+         }
+      }
+   }
 }
 
 function deleteTimeCard($timeCardId)

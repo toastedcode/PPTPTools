@@ -200,11 +200,6 @@ tr:hover {
    margin: 0px 0px 0px 0px;
    display: flex;
 }
-
-.time-card-div .comments-input {
-   width:700px;
-   rows: 10;
-} 
    
 .label-div {
    width: 100px;

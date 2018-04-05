@@ -76,18 +76,21 @@ class UserFilterComponent extends FilterComponent
    
    public $selectedEmployeeNumber;
    
-   function __construct($label, $users, $selectedEmployeeNumber)
+   public $allowAll;
+   
+   function __construct($label, $users, $selectedEmployeeNumber, $allowAll)
    {
       $this->label = $label;
       $this->users = $users;
       $this->selectedEmployeeNumber = $selectedEmployeeNumber;
+      $this->allowAll = $allowAll;
    }
    
    public function getHtml()
    {
       $selected = "";
       
-      $options = "<option $selected value=0>All</option>";
+      $options = $this->allowAll ? "<option $selected value=0>All</option>" : "";
       
       foreach ($this->users as $user)
       {

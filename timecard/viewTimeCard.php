@@ -3,6 +3,7 @@ require_once '../navigation.php';
 require_once '../user.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/jobInfo.php';
+require_once 'enterComments.php';
 
 class ViewTimeCard
 {
@@ -19,6 +20,7 @@ class ViewTimeCard
       $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, $readOnly);
       $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
       $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
+      $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
       
       $navBar = ViewTimeCard::navBar($timeCardInfo, $readOnly);
       
@@ -44,7 +46,10 @@ class ViewTimeCard
                $jobDiv
                $partsDiv
             </div>
-            $commentsDiv
+            <div class="flex-horizontal" style="align-items: flex-start;">
+               $commentsDiv
+               $commentCodesDiv
+            </div>
          </div>
          </div>
          
@@ -231,8 +236,66 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-horizontal">
-         <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" $disabled>$timeCardInfo->comments</textarea>
+      <div class="flex-vertical time-card-table-col">
+         <div class="section-header-div"><h2>Comments</h2></div>
+         <div class="flex-horizontal">
+            <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" $disabled>$timeCardInfo->comments</textarea>
+         </div>
+      </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function commentCodesDiv($timeCardInfo, $readOnly)
+   {
+      $disabled = ($readOnly) ? "disabled" : "";
+      
+      $commentCodes = CommentsPage::getCommentCodes();
+      
+      $leftColumn = "";
+      $rightColumn = "";
+      $index = 0;
+      foreach($commentCodes as $commentCode)
+      {
+         $id = "code-" . $commentCode->code . "-input";
+         $name = "code-" . $commentCode->code;
+         $checked = ($timeCardInfo->hasCommentCode($commentCode->code) ? "checked" : "");
+         $description = $commentCode->description;
+         
+         $codeDiv = 
+<<< HEREDOC
+            <div class="flex-horizontal">
+               <input id="$id" type="checkbox" form="input-form" name="$name" $checked $disabled/>
+               <label for="$id">$description</label>
+            </div>
+HEREDOC;
+
+         if (($index % 2) == 0)
+         {
+            $leftColumn .= $codeDiv;
+         }
+         else
+         {
+            $rightColumn .= $codeDiv;
+         }
+         
+         $index++;
+      }
+      
+      $html =
+<<<HEREDOC
+      <input type="hidden" form="input-form" name="commentCodes" value="true"/>
+      <div class="flex-vertical time-card-table-col">
+         <div class="section-header-div"><h2>Codes</h2></div>
+         <div class="flex-horizontal time-card-table-row">
+            <div class="flex-vertical">
+               $leftColumn
+            </div>
+            <div class="flex-vertical">
+               $rightColumn
+            </div>
+         </div>
       </div>
 HEREDOC;
       
