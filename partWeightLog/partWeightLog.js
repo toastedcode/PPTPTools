@@ -1,21 +1,21 @@
-function onDeletePartWasherEntry(partWasherEntryId)
+function onDeletePartWeightEntry(partWeightEntryId)
 {
    if (confirm("Are you sure you want to delete this log entry?"))
    {
       form = document.createElement('form');
       form.setAttribute('method', 'POST');
-      form.setAttribute('action', 'partWasherLog.php');
+      form.setAttribute('action', 'partWeightLog.php');
       
       input = document.createElement('input');
       input.setAttribute('name', 'action');
       input.setAttribute('type', 'hidden');
-      input.setAttribute('value', 'delete_part_washer_entry');
+      input.setAttribute('value', 'delete_part_weight_entry');
       form.appendChild(input);
       
       input = document.createElement('input');
-      input.setAttribute('name', 'partWasherEntryId');
+      input.setAttribute('name', 'partWeightEntryId');
       input.setAttribute('type', 'hidden');
-      input.setAttribute('value', partWasherEntryId);
+      input.setAttribute('value', partWeightEntryId);
       form.appendChild(input);
       
       document.body.appendChild(form);
@@ -23,11 +23,11 @@ function onDeletePartWasherEntry(partWasherEntryId)
    }
 }
 
-function onNewPartWasherEntry()
+function onNewPartWeightEntry()
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'partWasherLog.php');
+   form.setAttribute('action', 'partWeightLog.php');
    
    input = document.createElement('input');
    input.setAttribute('name', 'view');
@@ -38,7 +38,7 @@ function onNewPartWasherEntry()
    input = document.createElement('input');
    input.setAttribute('name', 'action');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'new_part_washer_entry');
+   input.setAttribute('value', 'new_part_weight_entry');
    form.appendChild(input);
    
    document.body.appendChild(form);
@@ -49,18 +49,18 @@ function onCancel()
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'partWasherLog.php');
+   form.setAttribute('action', 'partWeightLog.php');
    
    input = document.createElement('input');
    input.setAttribute('name', 'view');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'view_part_washer_log');
+   input.setAttribute('value', 'view_part_weight_log');
    form.appendChild(input);
    
    input = document.createElement('input');
    input.setAttribute('name', 'action');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'cancel_part_washer_entry');
+   input.setAttribute('value', 'cancel_part_weight_entry');
    form.appendChild(input);
    
    document.body.appendChild(form);
@@ -115,17 +115,13 @@ function validateTimeCardId()
    return (valid);
 }
 
-function validatePartCount()
+function validateWeight()
 {
    var valid = false;
 
-   if (!(document.getElementById("panCount-input").validator.validate()))
+   if (!(document.getElementById("weight-input").validator.validate()))
    {
-      alert("Please enter a valid pan count.")
-   }
-   else if (!(document.getElementById("partCount-input").validator.validate()))
-   {
-         alert("Please enter a valid part count.");
+      alert("Please enter a valid weight.")
    }
    else
    {

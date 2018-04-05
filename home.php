@@ -160,9 +160,15 @@ function selectActionPage()
             <div>Time Cards</div>
          </div>
 
+        <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
+           <i class="material-icons action-button-icon">scale</i>
+           <div>Part Weight</div>
+           <div>Log</div>
+        </div>
+
         <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
            <i class="material-icons action-button-icon">opacity</i>
-           <div>Parts Washer</div>
+           <div>Part Washer</div>
            <div>Log</div>
         </div>
 

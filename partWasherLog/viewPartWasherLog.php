@@ -1,9 +1,9 @@
 <?php
 
 require_once '../common/filter.php';
-require_once '../database.php';
+require_once '../common/jobInfo.php';
+require_once '../common/timeCardInfo.php';
 require_once '../navigation.php';
-require_once '../panTicket/panTicketInfo.php';
 
 class ViewPartWasherLog
 {
@@ -27,7 +27,7 @@ class ViewPartWasherLog
       }
       else
       {
-         // Limit to own time cards.
+         // Limit to own logs.
          $operators = array($user);
          $selectedOperator = $user->employeeNumber;
          $allowAll = false;
@@ -138,13 +138,15 @@ HEREDOC;
          {
             while ($row = $result->fetch_assoc())
             {
-               $partWasherEntry = getPartWasherEntry($row["partWasherEntryId"]);
+               $partWasherEntry = PartWasherEntry::load($row["partWasherEntryId"]);
                
                if ($partWasherEntry)
                {
-                  $panTicketInfo = getPanTicketInfo($partWasherEntry->panTicketId);
+                  $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
                   
-                  if ($panTicketInfo)
+                  $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
+                  
+                  if ($timeCardInfo && $jobInfo)
                   {
                      $partWasherName = "unknown";
                      $operator = User::getUser($partWasherEntry->employeeNumber);
@@ -154,7 +156,7 @@ HEREDOC;
                      }
                      
                      $operatorName = "unknown";
-                     $operator = User::getUser($panTicketInfo->employeeNumber);
+                     $operator = User::getUser($timeCardInfo->employeeNumber);
                      if ($operator)
                      {
                         $operatorName = $operator->getFullName();
@@ -163,7 +165,7 @@ HEREDOC;
                      $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $washDate = $dateTime->format("m-d-Y");
                      
-                     $dateTime = new DateTime($panTicketInfo->date, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $dateTime = new DateTime($timeCardInfo->date, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $mfgDate = $dateTime->format("m-d-Y");
                      
                      $deleteIcon = "";
@@ -180,8 +182,8 @@ HEREDOC;
                            <td>$washDate</td>
                            <td>$operatorName</td>
                            <td>$mfgDate</td>
-                           <td>$panTicketInfo->wcNumber</td>
-                           <td>$panTicketInfo->partNumber</td>
+                           <td>$jobInfo->wcNumber</td>
+                           <td>$jobInfo->partNumber</td>
                            <td>$partWasherEntry->panCount</td>
                            <td>$partWasherEntry->partCount</td>
                            <td>$deleteIcon</td>

@@ -196,7 +196,7 @@ HEREDOC;
       }
       
       $html =
-      <<<HEREDOC
+<<<HEREDOC
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Weight</h2></div>
          <div class="flex-horizontal time-card-table-row">
