@@ -27,7 +27,7 @@ class PartWeightEntry
             $partWeightEntry = new PartWeightEntry();
             
             $partWeightEntry->partWeightEntryId = intval($row['partWeightEntryId']);
-            $partWeightEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d h:i:s");
+            $partWeightEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $partWeightEntry->employeeNumber = intval($row['employeeNumber']);
             $partWeightEntry->timeCardId = intval($row['timeCardId']);
             $partWeightEntry->weight = doubleval($row['weight']);

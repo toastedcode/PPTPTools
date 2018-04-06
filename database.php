@@ -636,7 +636,7 @@ class PPTPDatabase extends MySqlDatabase
          $whereClause .= " AND status != $deleted";
       }
       
-      $query = "SELECT * FROM job $whereClause;";
+      $query = "SELECT * FROM job $whereClause ORDER BY dateTime DESC;";
 
       $result = $this->query($query);
       
@@ -647,7 +647,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
       
-      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active;";
+      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active ORDER BY dateTime DESC;";
       
       $result = $this->query($query);
       

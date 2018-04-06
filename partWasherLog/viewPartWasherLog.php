@@ -2,6 +2,7 @@
 
 require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
+require_once '../common/newIndicator.php';
 require_once '../common/timeCardInfo.php';
 require_once '../navigation.php';
 
@@ -165,6 +166,9 @@ HEREDOC;
                      $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $washDate = $dateTime->format("m-d-Y");
                      
+                     $newIndicator = new NewIndicator($dateTime, 60);
+                     $new = $newIndicator->getHtml();
+                                          
                      $dateTime = new DateTime($timeCardInfo->date, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $mfgDate = $dateTime->format("m-d-Y");
                      
@@ -179,7 +183,7 @@ HEREDOC;
 <<<HEREDOC
                         <tr>
                            <td>$partWasherName</td>
-                           <td>$washDate</td>
+                           <td>$washDate $new</td>
                            <td>$operatorName</td>
                            <td>$mfgDate</td>
                            <td>$jobInfo->wcNumber</td>

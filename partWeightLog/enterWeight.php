@@ -33,7 +33,7 @@ class EnterWeight
       
       <script type="text/javascript">
          var keypad = new Keypad();
-         keypad.onEnter = "submitForm('input-form', 'partWeightLog.php', 'view_weight_log', 'update_part_weight_entry')";
+         keypad.onEnter = "if (validateWeight()){submitForm('input-form', 'partWeightLog.php', 'view_weight_log', 'save_part_weight_entry');};";
          keypad.init();
 
          document.getElementById("weight-input").focus();

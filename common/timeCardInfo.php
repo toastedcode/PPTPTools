@@ -79,7 +79,7 @@ class TimeCardInfo
             $timeCardInfo = new TimeCardInfo();
             
             $timeCardInfo->timeCardId = intval($row['timeCardId']);
-            $timeCardInfo->date = Time::fromMySqlDate($row['dateTime'], "Y-m-d h:i:s");
+            $timeCardInfo->date = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $timeCardInfo->employeeNumber = intval($row['employeeNumber']);
             $timeCardInfo->jobNumber = $row['jobNumber'];
             $timeCardInfo->materialNumber = intval($row['materialNumber']);

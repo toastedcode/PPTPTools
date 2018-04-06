@@ -1,6 +1,7 @@
 <?php
 
 require_once '../common/filter.php';
+require_once '../common/newIndicator.php';
 require_once '../database.php';
 require_once '../navigation.php';
 require_once '../user.php';
@@ -166,6 +167,9 @@ HEREDOC;
                   $dateTime = new DateTime($jobInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $date = $dateTime->format("m-d-Y");
                   
+                  $newIndicator = new NewIndicator($dateTime, 60);
+                  $new = $newIndicator->getHtml();
+                  
                   $status = JobStatus::getName($jobInfo->status);
                   
                   $viewEditIcon = "";
@@ -192,7 +196,7 @@ HEREDOC;
                      <tr>
                         <td>$jobInfo->jobNumber</td>
                         <td>$creatorName</td>
-                        <td>$date</td>
+                        <td>$date $new</td>
                         <td>$jobInfo->partNumber</td>
                         <td>$jobInfo->wcNumber</td>
                         <td>$jobInfo->cycleTime</td>

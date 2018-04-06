@@ -28,7 +28,7 @@ class PartWasherEntry
             $partWasherEntry = new PartWasherEntry();
             
             $partWasherEntry->partWasherEntryId = intval($row['partWasherEntryId']);
-            $partWasherEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d h:i:s");
+            $partWasherEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $partWasherEntry->employeeNumber = intval($row['employeeNumber']);
             $partWasherEntry->timeCardId = intval($row['timeCardId']);
             $partWasherEntry->panCount = intval($row['panCount']);
