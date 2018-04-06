@@ -1,10 +1,6 @@
 @CHARSET "ISO-8859-1";
 
-.label-div {
-   width: 130px;
-}
-
-.jobs-div {
+.part-weight-log-div {
    overflow-y: scroll;
    height: 400px;
 }
