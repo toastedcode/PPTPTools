@@ -1,7 +1,9 @@
 <?php
+
+require_once '../common/navigation.php';
+require_once '../common/user.php';
 require_once 'panTicketInfo.php';
-require_once '../navigation.php';
-require_once '../user.php';
+
 require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
 class ViewPanTicket
@@ -196,7 +198,7 @@ HEREDOC;
       }
       
       $html =
-      <<<HEREDOC
+<<<HEREDOC
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Weight</h2></div>
          <div class="flex-horizontal time-card-table-row">

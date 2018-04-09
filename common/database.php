@@ -492,6 +492,15 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getPartWasherEntriesByTimeCard($timeCardId)
+   {
+      $query = "SELECT * FROM partwasher WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function newPartWasherEntry(
       $partWasherEntry)
    {
@@ -499,9 +508,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO partwasher " .
-      "(dateTime, employeeNumber, panTicketId, panCount, partCount) " .
+      "(dateTime, employeeNumber, timeCardId, panCount, partCount) " .
       "VALUES " .
-      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->panTicketId', '$partWasherEntry->panCount', '$partWasherEntry->partCount');";
+      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->timeCardId', '$partWasherEntry->panCount', '$partWasherEntry->partCount');";
 
       $result = $this->query($query);
       
@@ -509,14 +518,13 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    public function updatePartWasherEntry(
-      $partWasherEntryId,
       $partWasherEntry)
    {
       $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
       
       $query =
       "UPDATE partwasher " .
-      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, panTicketId = $partWasherEntry->panTicketId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount" .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount" .
       "WHERE partWasherEntryId = $partWasherEntryId;";
       
       $result = $this->query($query);
@@ -528,6 +536,88 @@ class PPTPDatabase extends MySqlDatabase
       $partWasherEntryId)
    {
       $query = "DELETE FROM partwasher WHERE partWasherEntryId = $partWasherEntryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartWeightEntry(
+      $partWeightEntryId)
+   {
+      $query = "SELECT * FROM partWeight WHERE partWeightEntryId = \"$partWeightEntryId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartWeightEntries(
+      $employeeNumber,
+      $startDate,
+      $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM partWeight WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM partWeight WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         
+         $result = $this->query($query);
+      }
+      
+      return ($result);
+   }
+   
+   public function getPartWeightEntriesByTimeCard($timeCardId)
+   {
+      $query = "SELECT * FROM partweight WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newPartWeightEntry(
+      $partWeightEntry)
+   {
+      $dateTime = Time::toMySqlDate($partWeightEntry->dateTime);
+      
+      $query =
+      "INSERT INTO partWeight " .
+      "(dateTime, employeeNumber, timeCardId, weight) " .
+      "VALUES " .
+      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePartWeightEntry(
+      $partWeightEntry)
+   {
+      $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
+      
+      $query =
+      "UPDATE partWeight " .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight" .
+      "WHERE partWeightEntryId = $partWeightEntry->partWeightEntryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePartWeightEntry(
+      $partWeightEntryId)
+   {
+      $query = "DELETE FROM partWeight WHERE partWeightEntryId = $partWeightEntryId;";
       
       $result = $this->query($query);
       
@@ -564,7 +654,7 @@ class PPTPDatabase extends MySqlDatabase
          $whereClause .= " AND status != $deleted";
       }
       
-      $query = "SELECT * FROM job $whereClause;";
+      $query = "SELECT * FROM job $whereClause ORDER BY dateTime DESC;";
 
       $result = $this->query($query);
       
@@ -575,7 +665,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
       
-      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active;";
+      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active ORDER BY dateTime DESC;";
       
       $result = $this->query($query);
       

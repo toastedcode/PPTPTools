@@ -158,6 +158,13 @@ tr:hover {
    cursor: pointer;
 }
 
+.new-indicator {
+   vertical-align: super;
+   font-size: 10px;
+   background-color: yellow;
+   color: black;
+}
+
 .filter-component
 {
 	margin-right: 10px;

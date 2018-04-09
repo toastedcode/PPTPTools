@@ -1,8 +1,9 @@
 <?php
-require_once '../navigation.php';
-require_once '../user.php';
-require_once '../common/timeCardInfo.php';
+
+require_once '../common/user.php';
 require_once '../common/jobInfo.php';
+require_once '../common/navigation.php';
+require_once '../common/timeCardInfo.php';
 require_once 'enterComments.php';
 
 class ViewTimeCard
@@ -100,7 +101,7 @@ HEREDOC;
    
    protected static function dateDiv($timeCardInfo)
    {
-      $dateString = Time::toJavascriptDate($timeCardInfo->date);
+      $dateString = Time::toJavascriptDate($timeCardInfo->dateTime);
       
       $html =
 <<<HEREDOC

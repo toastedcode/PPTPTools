@@ -1,5 +1,5 @@
 <?php
-require_once '../database.php';
+require_once '../common/database.php';
 
 class EnterPartCount
 {
@@ -32,13 +32,13 @@ class EnterPartCount
 
       <script type="text/javascript">
          var keypad = new Keypad();
-         keypad.onEnter = "submitForm('input-form', 'partWasherLog.php', '', 'update_pan_ticket')";
+         keypad.onEnter = "if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', '', 'save_part_washer_entry');};";
          keypad.init();
 
          document.getElementById("panCount-input").focus();
 
-         var panCountValidator = new IntValidator("panCount-input", 2, 2, 25, false);
-         var partsCountValidator = new IntValidator("partCount-input", 6, 0, 100000, false);
+         var panCountValidator = new IntValidator("panCount-input", 2, 1, 25, false);
+         var partsCountValidator = new IntValidator("partCount-input", 6, 1, 100000, false);
 
          panCountValidator.init();
          partsCountValidator.init();
@@ -85,7 +85,7 @@ HEREDOC;
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
       $navBar->backButton("if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', 'select_pan_ticket', 'update_part_washer_entry');};");
-      $navBar->nextButton("if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');};");
+      $navBar->highlightNavButton("Save", "if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');};", false);
       $navBar->end();
       
       return ($navBar->getHtml());

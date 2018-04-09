@@ -1,10 +1,11 @@
 <?php
 
-require_once '../database.php';
-require_once '../authentication.php';
-require_once '../header.php';
-require_once '../common/timeCardInfo.php';
+require_once '../common/authentication.php';
+require_once '../common/database.php';
+require_once '../common/header.php';
 require_once '../common/keypad.php';
+require_once '../common/partWeightEntry.php';
+
 require 'selectWorkCenter.php';
 require 'selectJob.php';
 require 'enterMaterialNumber.php';
@@ -308,7 +309,7 @@ processAction(getAction());
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="flex.css"/>
+<link rel="stylesheet" type="text/css" href="../common/flex.css"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>

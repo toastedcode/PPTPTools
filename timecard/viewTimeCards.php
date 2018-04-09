@@ -1,9 +1,10 @@
 <?php
 
-require_once '../database.php';
-require_once '../user.php';
+require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
+require_once '../common/user.php';
+require_once '../common/newIndicator.php';
 
 class ViewTimeCards
 {
@@ -155,6 +156,9 @@ HEREDOC;
                   $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $date = $dateTime->format("n-j-Y");
                   
+                  $newIndicator = new NewIndicator($dateTime, 60);
+                  $new = $newIndicator->getHtml();
+                  
                   $wcNumber = "unknown";
                   $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
                   if ($jobInfo)
@@ -181,7 +185,7 @@ HEREDOC;
                   $html .=
 <<<HEREDOC
                      <tr>
-                        <td>$date</td>
+                        <td>$date $new</td>
                         <td>$operatorName</td>
                         <td>$timeCardInfo->jobNumber</td>
                         <td>$wcNumber</td>

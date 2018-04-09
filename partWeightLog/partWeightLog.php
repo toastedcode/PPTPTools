@@ -3,11 +3,11 @@
 require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/header.php';
-require_once '../common/partWasherEntry.php';
+require_once '../common/partWeightEntry.php';
 
-require 'viewPartWasherLog.php';
+require 'viewPartWeightLog.php';
 require 'selectTimeCard.php';
-require 'enterPartCount.php';
+require 'enterWeight.php';
 
 function getAction()
 {
@@ -45,43 +45,43 @@ function processAction($action)
 {
    switch ($action)
    {
-      case 'new_part_washer_entry':
+      case 'new_part_weight_entry':
       {
-         $_SESSION["partWasherEntry"] = new PartWasherEntry();
-         $_SESSION["partWasherEntry"]->dateTime = Time::now("Y-m-d h:i:s A");
+         $_SESSION["partWeightEntry"] = new PartWeightEntry();
+         $_SESSION["partWeightEntry"]->dateTime = Time::now("Y-m-d h:i:s A");
          
          if ($user = Authentication::getAuthenticatedUser())
          {
-            $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
+            $_SESSION["partWeightEntry"]->employeeNumber = $user->employeeNumber;
          }
          break;
       }
          
-      case 'update_part_washer_entry':
+      case 'update_part_weight_entry':
       {
-         updatePartWasherEntry();
+         updatePartWeightEntry();
          break;   
       }
       
-      case 'cancel_part_washer_entry':
+      case 'cancel_part_weight_entry':
       {
-         unset($_SESSION["partWasherEntry"]);
+         unset($_SESSION["partWeightEntry"]);
          break;
       }
       
-      case 'save_part_washer_entry':
+      case 'save_part_weight_entry':
       {
-         updatePartWasherEntry();
+         updatePartWeightEntry();
          
-         updatePartWasherLog($_SESSION['partWasherEntry']);
+         updatePartWeightLog($_SESSION['partWeightEntry']);
          
-         $_SESSION["partWasherEntry"] = new PartWasherEntry();
+         $_SESSION["partWeightEntry"] = new PartWeightEntry();
          break;
       }
       
-      case 'delete_part_washer_entry':
+      case 'delete_part_weight_entry':
       {
-         deletePartWasherEntry($_POST['partWasherEntryId']);
+         deletePartWeightEntry($_POST['partWeightEntryId']);
          break;
       }
       
@@ -103,53 +103,48 @@ function processView($view)
          break;
       }
       
-      case 'enter_part_count':
+      case 'enter_weight':
       {
-         $page = new EnterPartCount();
+         $page = new EnterWeight();
          $page->render();
          break;
       }
          
-      case 'view_part_washer_log':
+      case 'view_part_weight_log':
       default:
       {
-         $page = new ViewPartWasherLog();
+         $page = new ViewPartWeightLog();
          $page->render();
          break;
       }
    }
 }
 
-function updatePartWasherEntry()
+function updatePartWeightEntry()
 {
    if (isset($_POST['dateTime']))
    {
       $dateTime = new DateTime($_POST['dateTime']);
-      $_SESSION["partWasherEntry"]->dateTime = $dateTime->format("Y-m-d h:i:s");
+      $_SESSION["partWeightEntry"]->dateTime = $dateTime->format("Y-m-d h:i:s");
    }
    
    if (isset($_POST['employeeNumber']))
    {
-      $_SESSION["partWasherEntry"]->employeeNumber = $_POST['employeeNumber'];
+      $_SESSION["partWeightEntry"]->employeeNumber = $_POST['employeeNumber'];
    }
    
    if (isset($_POST['timeCardId']))
    {
-      $_SESSION["partWasherEntry"]->timeCardId= $_POST['timeCardId'];
+      $_SESSION["partWeightEntry"]->timeCardId= $_POST['timeCardId'];
    }
    
-   if (isset($_POST['panCount']))
+   if (isset($_POST['weight']))
    {
-      $_SESSION["partWasherEntry"]->panCount = $_POST['panCount'];
-   }
-   
-   if (isset($_POST['partCount']))
-   {
-      $_SESSION["partWasherEntry"]->partCount= $_POST['partCount'];
+      $_SESSION["partWeightEntry"]->weight = $_POST['weight'];
    }
 }
 
-function deletePartWasherEntry($partWasherEntryId)
+function deletePartWeightEntry($partWeightEntryId)
 {
    $result = false;
    
@@ -159,13 +154,13 @@ function deletePartWasherEntry($partWasherEntryId)
    
    if ($database->isConnected())
    {
-      $result = $database->deletePartWasherEntry($partWasherEntryId);
+      $result = $database->deletePartWeightEntry($partWeightEntryId);
    }
    
    return ($result);
 }
 
-function updatePartWasherLog($partWasherEntry)
+function updatePartWeightLog($partWeightEntry)
 {
    $success = false;
    
@@ -175,13 +170,13 @@ function updatePartWasherLog($partWasherEntry)
    
    if ($database->isConnected())
    {
-      if ($partWasherEntry->partWasherEntryId != 0)
+      if ($partWeightEntry->partWeightEntryId != 0)
       {
-         $database->updatePartWasherEntry($partWasherEntry->partWasherEntryId, $partWasherEntry);
+         $database->updatePartWeightEntry($partWeightEntry->partWeightEntryId, $partWeightEntry);
       }
       else
       {
-         $database->newPartWasherEntry($partWasherEntry);
+         $database->newPartWeightEntry($partWeightEntry);
       }
       
       $success = true;
@@ -213,16 +208,16 @@ processAction(getAction());
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-<link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
+<link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<script src="partWasherLog.js"></script>
+<script src="partWeightLog.js"></script>
 <script src="../validate.js"></script>
 </head>
 
 <body>
 
-<?php Header::render("Part Washer Log"); ?>
+<?php Header::render("Part Weight Log"); ?>
 
 <div class="flex-horizontal" style="height: 700px;">
 

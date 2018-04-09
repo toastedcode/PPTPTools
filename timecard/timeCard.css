@@ -206,8 +206,15 @@ input:checked + label > div  {
 	margin-left:10px;
 	margin-right:10px;
 }
+
+/* viewTimeCards.php */
+
+.time-cards-div {
+   overflow-y: scroll;
+   height: 400px;
+}
 	
-/* viewTimeCardPage.php */	
+/* viewTimeCard.php */	
 	
 .label-div {
    width: 100px;

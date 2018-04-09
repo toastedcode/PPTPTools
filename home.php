@@ -1,8 +1,8 @@
 <?php
 
-require_once 'database.php';
-require_once 'header.php';
-require_once 'authentication.php';
+require_once './common/database.php';
+require_once './common/header.php';
+require_once './common/authentication.php';
 
 function loginPage()
 {
@@ -160,9 +160,15 @@ function selectActionPage()
             <div>Time Cards</div>
          </div>
 
+        <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
+           <i class="material-icons action-button-icon">scale</i>
+           <div>Part Weight</div>
+           <div>Log</div>
+        </div>
+
         <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
            <i class="material-icons action-button-icon">opacity</i>
-           <div>Parts Washer</div>
+           <div>Part Washer</div>
            <div>Log</div>
         </div>
 
