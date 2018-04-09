@@ -492,6 +492,15 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getPartWasherEntriesByTimeCard($timeCardId)
+   {
+      $query = "SELECT * FROM partwasher WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function newPartWasherEntry(
       $partWasherEntry)
    {
@@ -561,6 +570,15 @@ class PPTPDatabase extends MySqlDatabase
          
          $result = $this->query($query);
       }
+      
+      return ($result);
+   }
+   
+   public function getPartWeightEntriesByTimeCard($timeCardId)
+   {
+      $query = "SELECT * FROM partweight WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
+      
+      $result = $this->query($query);
       
       return ($result);
    }

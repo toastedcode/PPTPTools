@@ -1,10 +1,10 @@
 <?php
 
+require_once '../common/database.php';
 require_once '../common/filter.php';
+require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
-require_once '../database.php';
-require_once '../navigation.php';
-require_once '../user.php';
+require_once '../common/user.php';
 
 // *****************************************************************************
 //                              OnlyActiveFilterComponent

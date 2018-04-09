@@ -1,6 +1,6 @@
 <?php
-require_once '../database.php';
-require_once('../time.php');
+require_once 'database.php';
+require_once('time.php');
 
 class PartWasherEntry
 {
@@ -33,6 +33,27 @@ class PartWasherEntry
             $partWasherEntry->timeCardId = intval($row['timeCardId']);
             $partWasherEntry->panCount = intval($row['panCount']);
             $partWasherEntry->partCount= intval($row['partCount']);
+         }
+      }
+      
+      return ($partWasherEntry);
+   }
+   
+   public static function getPartWasherEntryForTimeCard($timeCardId)
+   {
+      $partWasherEntry = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getPartWasherEntriesByTimeCard($timeCardId);
+         
+         if ($result && ($row = $result->fetch_assoc()))
+         {
+            $partWasherEntry = PartWasherEntry::load(intval($row['partWasherEntryId']));
          }
       }
       

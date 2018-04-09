@@ -1,5 +1,6 @@
 <?php
-require_once '../navigation.php';
+
+require_once '../common/navigation.php';
 
 class CommentsPage
 {

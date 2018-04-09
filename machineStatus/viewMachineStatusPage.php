@@ -1,7 +1,7 @@
 <?php
 
-require_once '../database.php';
-require_once '../navigation.php';
+require_once '../common/database.php';
+require_once '../common/navigation.php';
 require_once 'machineStatusIndicator.php';
 
 class MachineStatusPage

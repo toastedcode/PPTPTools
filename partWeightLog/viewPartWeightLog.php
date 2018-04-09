@@ -2,9 +2,9 @@
 
 require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
+require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
 require_once '../common/timeCardInfo.php';
-require_once '../navigation.php';
 
 class ViewPartWeightLog
 {
@@ -169,7 +169,7 @@ HEREDOC;
                      $newIndicator = new NewIndicator($dateTime, 60);
                      $new = $newIndicator->getHtml();
                      
-                     $dateTime = new DateTime($timeCardInfo->date, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $mfgDate = $dateTime->format("m-d-Y");
                      
                      $deleteIcon = "";

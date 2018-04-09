@@ -1,7 +1,7 @@
 <?php
 
-require_once '../authentication.php';
-require_once '../header.php';
+require_once '../common/authentication.php';
+require_once '../common/header.php';
 require_once 'viewMachineStatusPage.php';
 
 function getAction()

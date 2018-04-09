@@ -1,7 +1,9 @@
 <?php
+
+require_once '../common/navigation.php';
+require_once '../common/user.php';
 require_once 'panTicketInfo.php';
-require_once '../navigation.php';
-require_once '../user.php';
+
 require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
 class ViewPanTicket

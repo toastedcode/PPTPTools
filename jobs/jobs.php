@@ -1,9 +1,9 @@
 <?php
 
+require_once '../common/authentication.php';
+require_once '../common/database.php';
 require_once '../common/jobInfo.php';
-require_once '../authentication.php';
-require_once '../database.php';
-require_once '../header.php';
+require_once '../common/header.php';
 
 require 'viewJob.php';
 require 'viewJobs.php';

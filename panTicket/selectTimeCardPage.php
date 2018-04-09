@@ -81,7 +81,7 @@ HEREDOC;
          $name = $operator->lastName;
       }
 
-      $date = date_format(new DateTime($timeCardInfo->date), "m-d-Y");
+      $date = date_format(new DateTime($timeCardInfo->dateTime), "m-d-Y");
       $jobNumber = $timeCardInfo->jobNumber;
       $wcNumber = $timeCardInfo->wcNumber;
       

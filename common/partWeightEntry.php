@@ -1,6 +1,6 @@
 <?php
-require_once '../database.php';
-require_once('../time.php');
+require_once 'database.php';
+require_once('time.php');
 
 class PartWeightEntry
 {
@@ -31,6 +31,27 @@ class PartWeightEntry
             $partWeightEntry->employeeNumber = intval($row['employeeNumber']);
             $partWeightEntry->timeCardId = intval($row['timeCardId']);
             $partWeightEntry->weight = doubleval($row['weight']);
+         }
+      }
+      
+      return ($partWeightEntry);
+   }
+   
+   public static function getPartWeightEntryForTimeCard($timeCardId)
+   {
+      $partWeightEntry= null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getPartWeightEntriesByTimeCard($timeCardId);
+         
+         if ($result && ($row = $result->fetch_assoc()))
+         {
+            $partWeightEntry = PartWeightEntry::load(intval($row['partWeightEntryId']));
          }
       }
       

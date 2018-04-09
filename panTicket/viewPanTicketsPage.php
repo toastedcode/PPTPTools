@@ -1,8 +1,8 @@
 <?php
 
-require_once '../authentication.php';
-require_once '../database.php';
-require_once '../navigation.php';
+require_once '../common/authentication.php';
+require_once '../common/database.php';
+require_once '../common/navigation.php';
 
 class Filter
 {

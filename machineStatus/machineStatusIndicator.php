@@ -1,6 +1,6 @@
 <?php
 
-require_once '../time.php';
+require_once '../common/time.php';
 
 class MachineStatus
 {

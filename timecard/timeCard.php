@@ -1,10 +1,11 @@
 <?php
 
-require_once '../database.php';
-require_once '../authentication.php';
-require_once '../header.php';
-require_once '../common/timeCardInfo.php';
+require_once '../common/authentication.php';
+require_once '../common/database.php';
+require_once '../common/header.php';
 require_once '../common/keypad.php';
+require_once '../common/partWeightEntry.php';
+
 require 'selectWorkCenter.php';
 require 'selectJob.php';
 require 'enterMaterialNumber.php';

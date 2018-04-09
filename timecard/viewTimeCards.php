@@ -1,9 +1,9 @@
 <?php
 
-require_once '../database.php';
-require_once '../user.php';
+require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
+require_once '../common/user.php';
 require_once '../common/newIndicator.php';
 
 class ViewTimeCards
