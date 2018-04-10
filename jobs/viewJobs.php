@@ -34,6 +34,10 @@ HEREDOC;
       {
          $this->onlyActive = boolval($_POST['onlyActive']);
       }
+      else
+      {
+         $this->onlyActive = false;
+      }
    }
 }
 
