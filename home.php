@@ -4,6 +4,43 @@ require_once './common/database.php';
 require_once './common/header.php';
 require_once './common/authentication.php';
 
+class Activity
+{
+   const JOBS = 0;
+   const TIME_CARD = 1;
+   const PART_WEIGHT = 2;
+   const PART_WASH = 3;
+   const PART_INSPECTION = 4;
+   const MACHINE_STATUS = 5;
+   const PRODUCTION_SUMMARY = 6;
+   
+   private static $permissionMasks = array(
+      (Permissions::SUPER_USER | Permissions::ADMIN),                            // JOBS
+      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::OPERATOR),    // TIME_CARD
+      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::LABORER),     // PART_WEIGHT
+      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::PART_WASHER), // PART_WASH
+      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::OPERATOR),    // PART_INSPECTION
+      (Permissions::SUPER_USER | Permissions::ADMIN),                            // MACHINE_STATUS
+      (Permissions::SUPER_USER | Permissions::ADMIN));                           // PRODUCTION_SUMMARY
+
+   public static function getPermissionMask($activity)
+   {
+      $permissionMask = 0;
+      
+      if ($activity <= Activity::PRODUCTION_SUMMARY)
+      {
+         $permissionMask = Activity::$permissionMasks[$activity];
+      }
+      
+      return ($permissionMask);
+   }
+   
+   public static function isAllowed($activity, $permissions)
+   {
+      return ($permissions & Activity::getPermissionMask($activity));
+   }
+}
+
 function loginPage()
 {
    
@@ -77,8 +114,106 @@ function loginPage()
 HEREDOC;
 }
 
-function selectActionPage()
+function selectActivityPage()
 {
+   $permissions = Authentication::getPermissions();
+
+   // Jobs
+   $jobsButton = "";
+   if (Activity::isAllowed(Activity::JOBS, $permissions))
+   {
+      $jobsButton = 
+<<<HEREDOC
+      <div class="action-button" onclick="location.href='jobs/jobs.php?view=view_jobs';">
+         <div><i class="material-icons action-button-icon">assignment</i></div>
+         <div>Jobs</div>
+      </div>
+HEREDOC;
+   }
+      
+   // Time Card
+   $timeCardButton = "";
+   if (Activity::isAllowed(Activity::TIME_CARD, $permissions))
+   {
+      $timeCardButton =
+<<<HEREDOC
+      <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
+         <div><i class="material-icons action-button-icon">schedule</i></div>
+         <div>Time Cards</div>
+      </div>
+HEREDOC;
+   }
+      
+   // Part Weight
+   $partWeightButton = "";
+   if (Activity::isAllowed(Activity::PART_WEIGHT, $permissions))
+   {
+      $partWeightButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
+        <i class="material-icons action-button-icon">scale</i>
+        <div>Part Weight</div>
+        <div>Log</div>
+     </div>
+HEREDOC;
+   }
+      
+   // Part Wash
+   $partWashButton = "";
+   if (Activity::isAllowed(Activity::PART_WASH, $permissions))
+   {
+      $partWashButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
+        <i class="material-icons action-button-icon">opacity</i>
+        <div>Part Washer</div>
+        <div>Log</div>
+     </div>
+HEREDOC;
+   }
+      
+   // Part Inspection
+   $partInspectionButton = "";
+   if (Activity::isAllowed(Activity::PART_INSPECTION, $permissions))
+   {
+      $partInspectionButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='partInspection/partInspection.php?view=view_part_inspections';">
+        <i class="material-icons action-button-icon">search</i>
+        <div>Part</div>
+        <div>Inspections</div>
+     </div>
+HEREDOC;
+   }
+      
+   // Machine Status
+   $machineStatusButton = "";
+   if (Activity::isAllowed(Activity::MACHINE_STATUS, $permissions))
+   {
+      $machineStatusButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='machineStatus/machineStatus.php?view=view_machines';">
+        <i class="material-icons action-button-icon">verified_user</i>
+        <div>Machine</div>
+        <div>Status</div>
+     </div>
+HEREDOC;
+   }
+      
+   // Production Summary
+   $productionSummaryButton = "";
+   if (Activity::isAllowed(Activity::PRODUCTION_SUMMARY, $permissions))
+   {
+      $productionSummaryButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='productionSummary';">
+        <i class="material-icons action-button-icon">show_chart</i>
+        <div>Production</div>
+        <div>Summary</div>
+     </div>
+HEREDOC;
+   }
+   
    echo
 <<<HEREDOC
    <!-- Wide card with share menu button -->
@@ -150,45 +285,19 @@ function selectActionPage()
 
       <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
 
-         <div class="action-button" onclick="location.href='jobs/jobs.php?view=view_jobs';">
-            <div><i class="material-icons action-button-icon">assignment</i></div>
-            <div>Jobs</div>
-         </div>
+         $jobsButton
 
-         <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
-            <div><i class="material-icons action-button-icon">schedule</i></div>
-            <div>Time Cards</div>
-         </div>
-
-        <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
-           <i class="material-icons action-button-icon">scale</i>
-           <div>Part Weight</div>
-           <div>Log</div>
-        </div>
-
-        <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
-           <i class="material-icons action-button-icon">opacity</i>
-           <div>Part Washer</div>
-           <div>Log</div>
-        </div>
-
-        <div class="action-button" onclick="location.href='partInspection/partInspection.php?view=view_part_inspections';">
-           <i class="material-icons action-button-icon">search</i>
-           <div>Part</div>
-           <div>Inspections</div>
-        </div>
-
-        <div class="action-button" onclick="location.href='machineStatus/machineStatus.php?view=view_machines';">
-           <i class="material-icons action-button-icon">verified_user</i>
-           <div>Machine</div>
-           <div>Status</div>
-        </div>
-
-        <div class="action-button" onclick="location.href='productionSummary';">
-           <i class="material-icons action-button-icon">show_chart</i>
-           <div>Production</div>
-           <div>Summary</div>
-        </div>
+         $timeCardButton
+         
+         $partWeightButton
+         
+         $partWashButton
+         
+         $partInspectionButton
+         
+         $machineStatusButton
+         
+         $productionSummaryButton
 
       </div>
    </div>
@@ -204,6 +313,8 @@ function login($username, $password)
 function logout()
 {
    Authentication::deauthenticate();
+   
+   session_unset();
 }
 
 // *****************************************************************************
@@ -269,7 +380,7 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 <?php 
 if (Authentication::isAuthenticated())
 {
-   selectActionPage();
+   selectActivityPage();
 }
 else
 {
