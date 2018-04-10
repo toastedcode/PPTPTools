@@ -12,7 +12,7 @@ class FilterComponent
       // Override in child classes.
    }
    
-   public function load()
+   public function update()
    {
       // Override in child classes.
    }
@@ -53,7 +53,7 @@ HEREDOC;
       return ($html);
    }
    
-   public function load()
+   public function update()
    {
       if (isset($_POST['startDate']))
       {
@@ -109,7 +109,7 @@ HEREDOC;
       return ($html);
    }
    
-   public function load()
+   public function update()
    {
       if (isset($_POST['employeeNumber']))
       {
@@ -238,11 +238,11 @@ class Filter
       return ($this->components[$key]);
    }
    
-   public function load()
+   public function update()
    {
       foreach($this->components as $component)
       {
-         $component->load();
+         $component->update();
       }
    }
    

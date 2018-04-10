@@ -28,7 +28,7 @@ HEREDOC;
       return ($html);
    }
    
-   public function load()
+   public function update()
    {
       if (isset($_POST['onlyActive']))
       {
@@ -46,15 +46,24 @@ class ViewJobs
    
    public function __construct()
    {
-      $this->filter = new Filter();
+      if (isset($_SESSION["jobFilter"]))
+      {
+         $this->filter = $_SESSION["jobFilter"];
+      }
+      else
+      {
+         $this->filter = new Filter();
       
-      $this->filter->addByName('date', new DateFilterComponent());
-      $this->filter->addByName('onlyActive', new OnlyActiveFilterComponent());
-      $this->filter->add(new FilterButton());
-      $this->filter->add(new FilterDivider());
-      $this->filter->add(new ThisWeekButton());
+         $this->filter->addByName('date', new DateFilterComponent());
+         $this->filter->addByName('onlyActive', new OnlyActiveFilterComponent());
+         $this->filter->add(new FilterButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new ThisWeekButton());
+      }
       
-      $this->filter->load();
+      $this->filter->update();
+      
+      $_SESSION["jobFilter"] = $this->filter;
    }
 
    public function getHtml()

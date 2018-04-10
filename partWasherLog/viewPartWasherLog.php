@@ -12,37 +12,46 @@ class ViewPartWasherLog
    
    public function __construct()
    {
-      $this->filter = new Filter();
-      
-      $user = Authentication::getAuthenticatedUser();
-      
-      $operators = null;
-      $selectedOperator = null;
-      $allowAll = false;
-      if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+      if (isset($_SESSION["partWasherFilter"]))
       {
-         // Allow selection from all operators.
-         $operators = User::getUsers(Permissions::PART_WASHER);
-         $selectedOperator = "All";
-         $allowAll = true;
+         $this->filter = $_SESSION["partWasherFilter"];
       }
       else
       {
-         // Limit to own logs.
-         $operators = array($user);
-         $selectedOperator = $user->employeeNumber;
+         $user = Authentication::getAuthenticatedUser();
+         
+         $operators = null;
+         $selectedOperator = null;
          $allowAll = false;
+         if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+         {
+            // Allow selection from all operators.
+            $operators = User::getUsers(Permissions::PART_WASHER);
+            $selectedOperator = "All";
+            $allowAll = true;
+         }
+         else
+         {
+            // Limit to own logs.
+            $operators = array($user);
+            $selectedOperator = $user->employeeNumber;
+            $allowAll = false;
+         }
+         
+         $this->filter = new Filter();
+         
+         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName('date', new DateFilterComponent());
+         $this->filter->add(new FilterButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new TodayButton());
+         $this->filter->add(new YesterdayButton());
+         $this->filter->add(new ThisWeekButton());
       }
       
-      $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
-      $this->filter->addByName('date', new DateFilterComponent());
-      $this->filter->add(new FilterButton());
-      $this->filter->add(new FilterDivider());
-      $this->filter->add(new TodayButton());
-      $this->filter->add(new YesterdayButton());
-      $this->filter->add(new ThisWeekButton());
+      $this->filter->update();
       
-      $this->filter->load();
+      $_SESSION["partWasherFilter"] = $this->filter;
    }
    
 
