@@ -151,7 +151,7 @@ HEREDOC;
       $partWeightButton =
 <<<HEREDOC
      <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
-        <i class="material-icons action-button-icon">scale</i>
+        <i class="material-icons action-button-icon">fingerprint</i>
         <div>Part Weight</div>
         <div>Log</div>
      </div>
