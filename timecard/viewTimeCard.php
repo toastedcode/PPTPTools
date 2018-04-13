@@ -6,6 +6,8 @@ require_once '../common/navigation.php';
 require_once '../common/timeCardInfo.php';
 require_once 'enterComments.php';
 
+require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
+
 class ViewTimeCard
 {
    public static function getHtml($readOnly)
@@ -22,6 +24,7 @@ class ViewTimeCard
       $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
       $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
       $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
+      $qrDiv = ViewTimeCard::qrDiv($timeCardInfo);
       
       $navBar = ViewTimeCard::navBar($timeCardInfo, $readOnly);
       
@@ -50,6 +53,9 @@ class ViewTimeCard
             <div class="flex-horizontal" style="align-items: flex-start;">
                $commentsDiv
                $commentCodesDiv
+            </div>
+            <div class="flex-horizontal" style="align-items: flex-start;">
+               $qrDiv
             </div>
          </div>
          </div>
@@ -267,8 +273,8 @@ HEREDOC;
          $codeDiv = 
 <<< HEREDOC
             <div class="flex-horizontal">
-               <input id="$id" type="checkbox" form="input-form" name="$name" $checked $disabled/>
-               <label for="$id">$description</label>
+               <input id="$id" type="checkbox" class="comment-checkbox" form="input-form" name="$name" $checked $disabled/>
+               <label for="$id" class="medium-text-input">$description</label>
             </div>
 HEREDOC;
 
@@ -299,6 +305,27 @@ HEREDOC;
          </div>
       </div>
 HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function qrDiv($timeCardInfo)
+   {
+      if ($timeCardInfo->timeCardId != 0)
+      {
+         $url = "www.roboxes.com/pptp/timecard/timeCard.php?view=view_time_card&timeCardId=$timeCardInfo->timeCardId";
+         
+         // http://phpqrcode.sourceforge.net/
+         QRcode::png($url, "qrCode.png");
+         
+         $html =
+<<<HEREDOC
+         <div class="flex-vertical time-card-table-col" style="align-items:center">
+            <div><img src="qrCode.png"></image></div>
+            <div>TC$timeCardInfo->timeCardId</div>
+         </div>
+HEREDOC;
+      }
       
       return ($html);
    }

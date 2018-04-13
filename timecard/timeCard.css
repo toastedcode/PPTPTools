@@ -112,8 +112,7 @@ body {
 }
 
 .comments-input {
-   width:500px;
-   rows: 10;
+   width:600px;
    
    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
    font-size: 16px;
@@ -261,5 +260,18 @@ input:checked + label > div  {
 
 .time-card-div .comments-input {
    width:300px;
-   rows: 10;
-} 
+}
+
+.comment-code-column {
+   width: 300px;
+}
+
+.comment-code-row {
+   margin-bottom: 10px;
+}
+
+.comment-checkbox {
+   width: 20px;
+   height: 20px;
+   margin-right: 10px;
+}

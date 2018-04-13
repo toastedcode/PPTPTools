@@ -91,9 +91,9 @@ HEREDOC;
          
          $codeDiv =
 <<< HEREDOC
-            <div class="flex-horizontal">
-               <input id="$id" type="checkbox" form="input-form" name="$name" $checked/>
-               <label for="$id">$description</label>
+            <div class="flex-horizontal comment-code-row">
+               <input id="$id" type="checkbox" class="comment-checkbox" form="input-form" name="$name" $checked/>
+               <label for="$id" class="medium-text-input">$description</label>
             </div>
 HEREDOC;
          
@@ -113,10 +113,10 @@ HEREDOC;
 <<<HEREDOC
          <input type="hidden" form="input-form" name="commentCodes" value="true"/>
          <div class="flex-horizontal">
-            <div class="flex-vertical">
+            <div class="flex-col-top-left comment-code-column">
                $leftColumn
             </div>
-            <div class="flex-vertical">
+            <div class="flex-col-top-left comment-code-column">
                $rightColumn
             </div>
          </div>
