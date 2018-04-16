@@ -17,6 +17,8 @@ class PrintTimeCard extends ViewTimeCard
       $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, $readOnly);
       $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
       $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
+      $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
+      $qrDiv = ViewTimeCard::qrDiv($timeCardInfo);
       
       $html =
 <<<HEREDOC
@@ -34,7 +36,13 @@ class PrintTimeCard extends ViewTimeCard
                   $jobDiv
                   $partsDiv
                </div>
-               $commentsDiv
+               <div class="flex-horizontal" style="align-items: flex-start;">
+                  $commentCodesDiv
+                  $commentsDiv
+               </div>
+               <div class="flex-horizontal" style="align-items: flex-start;">
+                  $qrDiv
+               </div>
             </div>
          </div>
 HEREDOC;

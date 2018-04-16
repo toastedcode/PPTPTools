@@ -1,5 +1,6 @@
 <?php
 
+require_once 'databaseKey.php';
 require_once 'time.php';
 
 interface Database
@@ -90,14 +91,12 @@ class MySqlDatabase implements Database
 
 class PPTPDatabase extends MySqlDatabase
 {
-   public $SERVER = "localhost";
-   public $USER = "root";
-   public $PASSWORD = "";
-   public $DATABASE = "pptp";
-   
+  
    public function __construct()
    {
-      parent::__construct($this->SERVER, $this->USER, $this->PASSWORD, $this->DATABASE);
+      global $SERVER, $USER, $PASSWORD, $DATABASE;
+      
+      parent::__construct($SERVER, $USER, $PASSWORD, $DATABASE);
    }
    
    public function getOperators()
@@ -133,7 +132,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
 
-      $query = "SELECT * FROM workCenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
+      $query = "SELECT * FROM workcenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
       
       $result = $this->query($query);
 
@@ -545,7 +544,7 @@ class PPTPDatabase extends MySqlDatabase
    public function getPartWeightEntry(
       $partWeightEntryId)
    {
-      $query = "SELECT * FROM partWeight WHERE partWeightEntryId = \"$partWeightEntryId\";";
+      $query = "SELECT * FROM partweight WHERE partWeightEntryId = \"$partWeightEntryId\";";
       
       $result = $this->query($query);
       
@@ -560,13 +559,13 @@ class PPTPDatabase extends MySqlDatabase
       $result = NULL;
       if ($employeeNumber == 0)
       {
-         $query = "SELECT * FROM partWeight WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         $query = "SELECT * FROM partweight WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
          
          $result = $this->query($query);
       }
       else
       {
-         $query = "SELECT * FROM partWeight WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
+         $query = "SELECT * FROM partweight WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
          
          $result = $this->query($query);
       }
@@ -589,7 +588,7 @@ class PPTPDatabase extends MySqlDatabase
       $dateTime = Time::toMySqlDate($partWeightEntry->dateTime);
       
       $query =
-      "INSERT INTO partWeight " .
+      "INSERT INTO partweight " .
       "(dateTime, employeeNumber, timeCardId, weight) " .
       "VALUES " .
       "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight');";
@@ -605,7 +604,7 @@ class PPTPDatabase extends MySqlDatabase
       $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
       
       $query =
-      "UPDATE partWeight " .
+      "UPDATE partweight " .
       "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight" .
       "WHERE partWeightEntryId = $partWeightEntry->partWeightEntryId;";
       
@@ -617,7 +616,7 @@ class PPTPDatabase extends MySqlDatabase
    public function deletePartWeightEntry(
       $partWeightEntryId)
    {
-      $query = "DELETE FROM partWeight WHERE partWeightEntryId = $partWeightEntryId;";
+      $query = "DELETE FROM partweight WHERE partWeightEntryId = $partWeightEntryId;";
       
       $result = $this->query($query);
       

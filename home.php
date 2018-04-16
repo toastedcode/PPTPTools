@@ -365,7 +365,7 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
 
    <!-- PPTP -->
-   <link rel="stylesheet" type="text/css" href="flex.css"/>
+   <link rel="stylesheet" type="text/css" href="common/flex.css"/>
    <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
 
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>

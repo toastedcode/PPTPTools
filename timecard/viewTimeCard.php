@@ -24,7 +24,6 @@ class ViewTimeCard
       $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
       $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
       $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
-      $qrDiv = ViewTimeCard::qrDiv($timeCardInfo);
       
       $navBar = ViewTimeCard::navBar($timeCardInfo, $readOnly);
       
@@ -37,27 +36,24 @@ class ViewTimeCard
          <div class="card-header-div">View Time Card</div>
 
          <div class="flex-vertical content-div">
-         <div class="flex-vertical time-card-div">
-            <div class="flex-horizontal">
-               $titleDiv
-               $dateDiv
+            <div class="flex-vertical time-card-div">
+               <div class="flex-horizontal">
+                  $titleDiv
+                  $dateDiv
+               </div>
+               <div class="flex-horizontal" style="align-items: flex-start;">
+                  $operatorDiv
+                  $timeDiv
+               </div>
+               <div class="flex-horizontal" style="align-items: flex-start;">
+                  $jobDiv
+                  $partsDiv
+               </div>
+               <div class="flex-horizontal" style="align-items: flex-start;">
+                  $commentCodesDiv
+                  $commentsDiv
+               </div>
             </div>
-            <div class="flex-horizontal" style="align-items: flex-start;">
-               $operatorDiv
-               $timeDiv
-            </div>
-            <div class="flex-horizontal" style="align-items: flex-start;">
-               $jobDiv
-               $partsDiv
-            </div>
-            <div class="flex-horizontal" style="align-items: flex-start;">
-               $commentsDiv
-               $commentCodesDiv
-            </div>
-            <div class="flex-horizontal" style="align-items: flex-start;">
-               $qrDiv
-            </div>
-         </div>
          </div>
          
          $navBar
