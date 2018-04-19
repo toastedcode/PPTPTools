@@ -289,6 +289,38 @@ function updateTimeCard($timeCardInfo)
    
    return ($success);
 }
+
+function redirectToLogin()
+{
+   $params = array();
+   
+   $action = getAction();
+   if ($action != "")
+   {
+      $params["action"] = $action;
+   }
+  
+   $view = getView();
+   if ($view!= "")
+   {
+      $params["view"] = $view;
+   }
+   
+   if (isset($_GET["timeCardId"]))
+   {
+      $params["timeCardId"] = $_GET["timeCardId"];
+   }
+   else if (isset($_POST["timeCardId"]))
+   {
+      $params["timeCardId"] = $_POST["timeCardId"];
+   }
+   
+   $url = "./timecard/timeCard.php" . "?" . http_build_query($params);
+   
+   $_SESSION["redirect"] = $url;
+   header('Location: ../home.php');
+   exit;
+}
 ?>
 
 <!-- ********************************** BEGIN ********************************************* -->
@@ -300,8 +332,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
-   exit;
+   redirectToLogin();  // Note: exits.
 }
 
 processAction(getAction());

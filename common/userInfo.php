@@ -1,30 +1,25 @@
 <?php
 
 require_once 'database.php';
+require_once 'permissions.php';
+require_once 'roles.php';
 
 class UserInfo
 {
    const UNKNOWN_EMPLOYEE_NUMBER = 0;
    
    public $employeeNumber;
-   
    public $username;
-   
    public $password;
-   
    public $firstName;
-   
    public $lastName;
-   
    public $roles = Role::UNKNOWN;
-   
    public $permissions = Permission::NO_PERMISSIONS;
-   
    public $email;
    
    public static function load($employeeNumber)
    {
-      $userInfo= null;
+      $userInfo = null;
       
       $database = new PPTPDatabase();
       
@@ -66,7 +61,7 @@ class UserInfo
          
          if ($result && ($row = $result->fetch_assoc()))
          {
-            $userInfo= new UserInfo();
+            $userInfo = new UserInfo();
             
             $userInfo->employeeNumber = intval($row['employeeNumber']);
             $userInfo->username = $row['username'];
@@ -113,28 +108,35 @@ class UserInfo
 }
 
 /*
+$userInfo = null;
+
 if (isset($_GET["employeeNumber"]))
 {
    $employeeNumber = $_GET["employeeNumber"];
-   $user = UserInfo::load($employeeNumber);
+   $userInfo = UserInfo::load($employeeNumber);
+}
+else if (isset($_GET["username"]))
+{
+   $username = $_GET["username"];
+   $userInfo = UserInfo::loadByName($username);
+}
     
-   if ($user)
-   {
-      echo "employeeNumber: " . $user->employeeNumber . "<br/>";
-      echo "username: " .       $user->username .       "<br/>";
-      echo "password: " .       $user->password .       "<br/>";
-      echo "roles: " .          $user->roles .          "<br/>";
-      echo "permissions: " .    $user->permissions .    "<br/>";
-      echo "firstName: " .      $user->firstName .      "<br/>";
-      echo "lastName: " .       $user->lastName .       "<br/>";
-      echo "email: " .          $user->email .          "<br/>";
-      
-      echo "fullName: " . $user->getFullName() . "<br/>";
-   }
-   else
-   {
-      echo "No user found.";
-   }
+if ($userInfo)
+{
+   echo "employeeNumber: " . $userInfo->employeeNumber . "<br/>";
+   echo "username: " .       $userInfo->username .       "<br/>";
+   echo "password: " .       $userInfo->password .       "<br/>";
+   echo "roles: " .          $userInfo->roles .          "<br/>";
+   echo "permissions: " .    $userInfo->permissions .    "<br/>";
+   echo "firstName: " .      $userInfo->firstName .      "<br/>";
+   echo "lastName: " .       $userInfo->lastName .       "<br/>";
+   echo "email: " .          $userInfo->email .          "<br/>";
+   
+   echo "fullName: " . $userInfo->getFullName() . "<br/>";
+}
+else
+{
+   echo "No user found.";
 }
 */
 ?>

@@ -370,6 +370,10 @@ HEREDOC;
       {
          $timeCardInfo = TimeCardInfo::load($_POST['timeCardId']);
       }
+      else if (isset($_GET['timeCardId']))
+      {
+         $timeCardInfo = TimeCardInfo::load($_GET['timeCardId']);
+      }
       else if (isset($_SESSION['timeCardInfo']))
       {
          $timeCardInfo = $_SESSION['timeCardInfo'];

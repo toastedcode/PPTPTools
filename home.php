@@ -335,7 +335,6 @@ HEREDOC;
 HEREDOC;
 }
 
-
 function login($username, $password)
 {
    $result = Authentication::authenticate($username, $password);
@@ -346,6 +345,14 @@ function logout()
    Authentication::deauthenticate();
    
    session_unset();
+}
+
+function redirect($url)
+{
+   unset($_SESSION["redirect"]);
+   
+   header("Location: $url");
+   exit;
 }
 
 // *****************************************************************************
@@ -411,7 +418,14 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 <?php 
 if (Authentication::isAuthenticated())
 {
-   selectActivityPage();
+   if (isset($_SESSION["redirect"]))
+   {
+      redirect($_SESSION["redirect"]);
+   }
+   else
+   {
+      selectActivityPage();
+   }
 }
 else
 {
