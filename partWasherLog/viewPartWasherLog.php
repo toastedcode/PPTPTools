@@ -26,7 +26,7 @@ class ViewPartWasherLog
          if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
          {
             // Allow selection from all operators.
-            $operators = User::getUsers(Permissions::PART_WASHER);
+            $operators = UserInfo::getUsers(Permissions::PART_WASHER);
             $selectedOperator = "All";
             $allowAll = true;
          }
@@ -159,14 +159,14 @@ HEREDOC;
                   if ($timeCardInfo && $jobInfo)
                   {
                      $partWasherName = "unknown";
-                     $operator = User::getUser($partWasherEntry->employeeNumber);
+                     $operator = UserInfo::getUser($partWasherEntry->employeeNumber);
                      if ($operator)
                      {
                         $partWasherName= $operator->getFullName();
                      }
                      
                      $operatorName = "unknown";
-                     $operator = User::getUser($timeCardInfo->employeeNumber);
+                     $operator = UserInfo::getUser($timeCardInfo->employeeNumber);
                      if ($operator)
                      {
                         $operatorName = $operator->getFullName();

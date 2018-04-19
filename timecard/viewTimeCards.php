@@ -3,8 +3,8 @@
 require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
-require_once '../common/user.php';
 require_once '../common/newIndicator.php';
+require_once '../common/userInfo.php';
 
 class ViewTimeCards
 {
@@ -26,7 +26,7 @@ class ViewTimeCards
          if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
          {
             // Allow selection from all operators.
-            $operators = User::getUsers(Permissions::OPERATOR);
+            $operators = UserInfo::getUsers(Permissions::OPERATOR);
             $selectedOperator = "All";
             $allowAll = true;
          }
@@ -156,7 +156,7 @@ HEREDOC;
                if ($timeCardInfo)
                {
                   $operatorName = "unknown";
-                  $user = User::getUser($timeCardInfo->employeeNumber);
+                  $user = UserInfo::getUser($timeCardInfo->employeeNumber);
                   if ($user)
                   {
                      $operatorName= $user->getFullName();

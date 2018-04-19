@@ -1,8 +1,8 @@
 <?php
 
-require_once '../common/user.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
+require_once '../common/userInfo.php';
 
 class ViewJob
 {
@@ -101,7 +101,7 @@ HEREDOC;
       $html = "";
       
       $creatorName = "";
-      if ($user = User::getUser($jobInfo->creator))
+      if ($user = UserInfo::getUser($jobInfo->creator))
       {
          $creatorName = $user->getFullName();
       }

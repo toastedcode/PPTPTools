@@ -4,7 +4,7 @@ require_once 'jobInfo.php';
 require_once 'timeCardInfo.php';
 require_once 'partWasherEntry.php';
 require_once 'partWeightEntry.php';
-require_once 'user.php';
+require_once 'userInfo.php';
 
 class TimeCardThumbnail
 {
@@ -27,7 +27,7 @@ class TimeCardThumbnail
       if (($this->timeCardInfo) &&
           ($this->jobInfo))
       {
-         $user = User::getUser($this->timeCardInfo->employeeNumber);
+         $user = UserInfo::getUser($this->timeCardInfo->employeeNumber);
          
          $username = "unknown";
          if ($user)

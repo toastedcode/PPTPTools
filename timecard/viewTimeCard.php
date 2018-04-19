@@ -1,6 +1,6 @@
 <?php
 
-require_once '../common/user.php';
+require_once '../common/userInfo.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/timeCardInfo.php';
@@ -120,7 +120,7 @@ HEREDOC;
    protected static function operatorDiv($timeCardInfo)
    {
       $name = "";
-      $operator = User::getUser($timeCardInfo->employeeNumber);
+      $operator = UserInfo::getUser($timeCardInfo->employeeNumber);
       if ($operator)
       {
          $name = $operator->getFullName();

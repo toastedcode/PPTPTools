@@ -1,7 +1,7 @@
 <?php
 
 require_once '../common/navigation.php';
-require_once '../common/user.php';
+require_once '../common/userInfo.php';
 require_once 'panTicketInfo.php';
 
 require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
@@ -133,7 +133,7 @@ HEREDOC;
    protected static function operatorDiv($panTicketInfo)
    {
       $name = "";
-      $operator = User::getUser($panTicketInfo->employeeNumber);
+      $operator = UserInfo::getUser($panTicketInfo->employeeNumber);
       if ($operator)
       {
          $name = $operator->getFullName();

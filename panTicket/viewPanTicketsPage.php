@@ -76,7 +76,7 @@ HEREDOC;
       
    private static function filterDiv($filter)
    {
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = UserInfo::getUsers(Permissions::OPERATOR);
       
       $selected = ($filter->employeeNumber == 0) ? "selected" : "";
       
@@ -178,7 +178,7 @@ HEREDOC;
    
    private static function panTicketDiv($panTicketInfo, $isEditable)
    {
-      $operator = User::getUser($panTicketInfo->employeeNumber);
+      $operator = UserInfo::getUser($panTicketInfo->employeeNumber);
       
       $dateTime = new DateTime($panTicketInfo->date);
       

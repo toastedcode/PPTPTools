@@ -1,5 +1,5 @@
 <?php
-require_once '../user.php';
+require_once '../userInfo.php';
 
 class SelectOperator
 {
@@ -37,7 +37,7 @@ HEREDOC;
       
       $selectedEmployeeNumber = SelectOperator::getEmployeeNumber();
       
-      $operators = User::getUsers(Permissions::OPERATOR);
+      $operators = UserInfo::getUsers(Permissions::OPERATOR);
       
       foreach ($operators as $operator)
       {

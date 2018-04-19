@@ -28,7 +28,7 @@ class ViewPartWeightLog
          if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
          {
             // Allow selection from all operators.
-            $operators = User::getUsers(Permissions::PART_WASHER);
+            $operators = UserInfo::getUsers(Permissions::PART_WASHER);
             $selectedOperator = "All";
             $allowAll = true;
          }
@@ -161,14 +161,14 @@ HEREDOC;
                   if ($timeCardInfo && $jobInfo)
                   {
                      $laborerName = "unknown";
-                     $operator = User::getUser($partWeightEntry->employeeNumber);
+                     $operator = UserInfo::getUser($partWeightEntry->employeeNumber);
                      if ($operator)
                      {
                         $laborerName = $operator->getFullName();
                      }
                      
                      $operatorName = "unknown";
-                     $operator = User::getUser($timeCardInfo->employeeNumber);
+                     $operator = UserInfo::getUser($timeCardInfo->employeeNumber);
                      if ($operator)
                      {
                         $operatorName = $operator->getFullName();

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'user.php';
+require_once 'userInfo.php';
 
 // *****************************************************************************
 //                            FilterComponent (base)
@@ -279,7 +279,7 @@ HEREDOC;
 }
 
 /*
-$operators = User::getUsers(Permissions::OPERATOR);
+$operators = UserInfo::getUsers(Permissions::OPERATOR);
 
 $filter = new Filter();
 

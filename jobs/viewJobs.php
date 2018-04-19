@@ -4,7 +4,7 @@ require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
-require_once '../common/user.php';
+require_once '../common/userInfo.php';
 
 // *****************************************************************************
 //                              OnlyActiveFilterComponent
@@ -171,7 +171,7 @@ HEREDOC;
                if ($jobInfo)
                {
                   $creatorName = "unknown";
-                  $user = User::getUser($jobInfo->creator);
+                  $user = UserInfo::getUser($jobInfo->creator);
                   if ($user)
                   {
                      $creatorName= $user->getFullName();
