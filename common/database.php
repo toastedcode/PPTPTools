@@ -238,6 +238,15 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getUsers()
+   {
+      $query = "SELECT * FROM user ORDER BY username ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function getUsersByRole($role)
    {
       $query = "SELECT * FROM user WHERE role = $role ORDER BY username ASC;";

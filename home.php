@@ -16,7 +16,8 @@ class Activity
    const PART_INSPECTION = 5;
    const MACHINE_STATUS = 6;
    const PRODUCTION_SUMMARY = 7;
-   const LAST = Activity::PRODUCTION_SUMMARY;
+   const USER = 8;
+   const LAST = Activity::USER;
       
    private static $permissionMasks = null;
    
@@ -25,13 +26,14 @@ class Activity
       if (Activity::$permissionMasks == null)
       {
          Activity::$permissionMasks = array(
-            Permission::getPermission(Permission::VIEW_JOB)->bits,                  // JOBS
-            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,            // TIME_CARD
-            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,      // PART_WEIGHT
-            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,      // PART_WASH
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,      // PART_INSPECTION
-            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,       // MACHINE_STATUS
-            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits);  // PRODUCTION_SUMMARY
+            Permission::getPermission(Permission::VIEW_JOB)->bits,                 // JOBS
+            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           // TIME_CARD
+            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
+            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
+            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
+            Permission::getPermission(Permission::VIEW_USER)->bits);               // USER
       }
       
       return (Activity::$permissionMasks);
@@ -43,7 +45,7 @@ class Activity
       
       if (($activity >= Activity::FIRST) && ($activity <= Activity::LAST))
       {
-         $permissionMask = Activity::getPermissionMasks()[$activity - $activity >= Activity::FIRST];
+         $permissionMask = Activity::getPermissionMasks()[$activity - Activity::FIRST];
       }
       
       return ($permissionMask);
@@ -51,7 +53,7 @@ class Activity
    
    public static function isAllowed($activity, $permissions)
    {
-      return ($permissions & Activity::getPermissionMask($activity));
+      return (($permissions & Activity::getPermissionMask($activity)) > 0);
    }
 }
 
@@ -131,6 +133,19 @@ HEREDOC;
 function selectActivityPage()
 {
    $permissions = Authentication::getPermissions();
+   
+   // Jobs
+   $usersButton = "";
+   if (Activity::isAllowed(Activity::USER, $permissions))
+   {
+      $usersButton =
+<<<HEREDOC
+      <div class="action-button" onclick="location.href='user/user.php?view=view_users';">
+         <div><i class="material-icons action-button-icon">group</i></div>
+         <div>Users</div>
+      </div>
+HEREDOC;
+   }
 
    // Jobs
    $jobsButton = "";
@@ -299,6 +314,8 @@ HEREDOC;
 
       <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
 
+         $usersButton
+         
          $jobsButton
 
          $timeCardButton

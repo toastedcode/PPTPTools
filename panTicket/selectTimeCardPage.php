@@ -75,7 +75,7 @@ HEREDOC;
    private static function timeCardDiv($timeCardInfo, $isChecked)
    {
       $name = "";
-      $operator = UserInfo::getUser($timeCardInfo->employeeNumber);
+      $operator = UserInfo::load($timeCardInfo->employeeNumber);
       if ($operator)
       {
          $name = $operator->lastName;

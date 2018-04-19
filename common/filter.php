@@ -279,7 +279,7 @@ HEREDOC;
 }
 
 /*
-$operators = UserInfo::getUsers(Permissions::OPERATOR);
+$operators = UserInfo::getUsersByRole(Role::OPERATOR);
 
 $filter = new Filter();
 

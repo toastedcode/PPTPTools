@@ -27,12 +27,12 @@ class TimeCardThumbnail
       if (($this->timeCardInfo) &&
           ($this->jobInfo))
       {
-         $user = UserInfo::getUser($this->timeCardInfo->employeeNumber);
+         $userInfo = UserInfo::load($this->timeCardInfo->employeeNumber);
          
          $username = "unknown";
-         if ($user)
+         if ($userInfo)
          {
-            $username = $user->username;
+            $username = $userInfo->username;
          }
          
          $weight = "-----";

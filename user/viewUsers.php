@@ -3,6 +3,9 @@
 require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/navigation.php';
+require_once '../common/permissions.php';
+require_once '../common/roles.php';
+
 
 class ViewUsers
 {
@@ -67,6 +70,7 @@ HEREDOC;
                   <th>Name</th>
                   <th>Username</th>                  
                   <th>Email</th>
+                  <th>Role</th>
                   <th>Permissions</th>
                   <th/>
                   <th/>
@@ -88,11 +92,13 @@ HEREDOC;
                $userInfo = UserInfo::load($row["employeeNumber"]);
                
                if ($userInfo)
-               {      
+               {
+                  // TODO: Use roles as a bitmap of roles.
+                  $roleName = Role::getRole($userInfo->roles)->roleName;
+                  
                   $viewEditIcon = "";
                   $deleteIcon = "";
-                  //if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
-                  if (true)
+                  if (Authentication::checkPermissions(Permission::EDIT_USER))
                   {
                      $viewEditIcon =
                         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditUser('$userInfo->employeeNumber')\">mode_edit</i>";
@@ -110,9 +116,10 @@ HEREDOC;
 <<<HEREDOC
                      <tr>
                         <td>$userInfo->employeeNumber</td>
-                        <td>$userInfo->getFullName()</td>
+                        <td>{$userInfo->getFullName()}</td>
                         <td>$userInfo->username</td>
                         <td>$userInfo->email</td>
+                        <td>$roleName</td>
                         <td>$userInfo->permissions</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>

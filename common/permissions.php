@@ -15,7 +15,9 @@ class Permission
    const VIEW_PART_INSPECTION    = 9;
    const VIEW_MACHINE_STATUS     = 10;
    const VIEW_PRODUCTION_SUMMARY = 11;
-   const VIEW_OTHER_USERS        = 12;
+   const VIEW_USER               = 12;
+   const EDIT_USER               = 13;
+   const VIEW_OTHER_USERS        = 14;
    const LAST                    = Permission::VIEW_OTHER_USERS;
    
    const NO_PERMISSIONS = 0x0000;
@@ -43,7 +45,10 @@ class Permission
                   new Permission(Permission::VIEW_PART_INSPECTION,   "View part inspection"),
                   new Permission(Permission::VIEW_MACHINE_STATUS,     "View machine status"),
                   new Permission(Permission::VIEW_PRODUCTION_SUMMARY, "View production summary"),
-                  new Permission(Permission::VIEW_OTHER_USERS,        "View other users"));
+                  new Permission(Permission::VIEW_USER,               "View user"),
+                  new Permission(Permission::EDIT_USER,               "Edit user"),
+                  new Permission(Permission::VIEW_OTHER_USERS,        "View other users")
+            );
       }
       
       return (Permission::$permissions);
@@ -53,7 +58,7 @@ class Permission
    {
       $permission = new Permission(Permission::UNKNOWN, "");
       
-      if (($permissionId>= Permission::FIRST) && ($permissionId<= Permission::LAST))
+      if (($permissionId>= Permission::FIRST) && ($permissionId <= Permission::LAST))
       {
          $permission = Permission::getPermissions()[$permissionId - Permission::FIRST];
       }
@@ -84,6 +89,6 @@ class Permission
    {
       $this->permissionId = $permissionId;
       $this->permissionName = $permissionName;
-      $this->bits = (1 << $permissionId);
+      $this->bits = (1 << ($permissionId - Permission::FIRST));
    }
 }

@@ -3,6 +3,8 @@
 require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/navigation.php';
+require_once '../common/permissions.php';
+require_once '../common/roles.php';
 require_once '../common/userInfo.php';
 
 class ViewPartInspections
@@ -22,10 +24,10 @@ class ViewPartInspections
          $operators = null;
          $selectedOperator = null;
          $allowAll = false;
-         if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+         if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
          {
             // Allow selection from all operators.
-            $operators = UserInfo::getUsers(Permissions::OPERATOR);
+            $operators = UserInfo::getUsersByRole(Role::OPERATOR);
             $selectedOperator = "All";
             $allowAll = true;
          }
@@ -149,7 +151,7 @@ HEREDOC;
                if ($partInspectionInfo)
                {
                   $operatorName = "unknown";
-                  $operator = UserInfo::getUser($partInspectionInfo->employeeNumber);
+                  $operator = UserInfo::load($partInspectionInfo->employeeNumber);
                   if ($operator)
                   {
                      $operatorName = $operator->getFullName();

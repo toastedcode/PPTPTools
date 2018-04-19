@@ -101,9 +101,9 @@ HEREDOC;
       $html = "";
       
       $creatorName = "";
-      if ($user = UserInfo::getUser($jobInfo->creator))
+      if ($userInfo = UserInfo::load($jobInfo->creator))
       {
-         $creatorName = $user->getFullName();
+         $creatorName = $userInfo->getFullName();
       }
        
       $date = date_format(new DateTime($jobInfo->dateTime), "Y-m-d");

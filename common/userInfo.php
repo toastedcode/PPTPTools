@@ -12,6 +12,8 @@ class UserInfo
    
    public $lastName;
    
+   public $roles;
+   
    public $permissions;
    
    public $email;
@@ -92,6 +94,7 @@ class UserInfo
       $this->employeeNumber = intval($userData['employeeNumber']);
       $this->username = $userData['username'];
       $this->password = $userData['password'];
+      $this->roles = intval($userData['roles']);
       $this->permissions = intval($userData['permissions']);
       $this->firstName = $userData['firstName'];
       $this->lastName = $userData['lastName'];
@@ -110,6 +113,7 @@ if (isset($_GET["employeeNumber"]))
       echo "employeeNumber: " . $user->employeeNumber . "<br/>";
       echo "username: " .       $user->username .       "<br/>";
       echo "password: " .       $user->password .       "<br/>";
+      echo "roles: " .          $user->roles .          "<br/>";
       echo "permissions: " .    $user->permissions .    "<br/>";
       echo "firstName: " .      $user->firstName .      "<br/>";
       echo "lastName: " .       $user->lastName .       "<br/>";

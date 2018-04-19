@@ -133,7 +133,7 @@ HEREDOC;
    protected static function operatorDiv($panTicketInfo)
    {
       $name = "";
-      $operator = UserInfo::getUser($panTicketInfo->employeeNumber);
+      $operator = UserInfo::load($panTicketInfo->employeeNumber);
       if ($operator)
       {
          $name = $operator->getFullName();

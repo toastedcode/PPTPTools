@@ -120,7 +120,7 @@ HEREDOC;
    protected static function operatorDiv($timeCardInfo)
    {
       $name = "";
-      $operator = UserInfo::getUser($timeCardInfo->employeeNumber);
+      $operator = UserInfo::load($timeCardInfo->employeeNumber);
       if ($operator)
       {
          $name = $operator->getFullName();
