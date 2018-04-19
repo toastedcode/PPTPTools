@@ -4,23 +4,27 @@ require_once 'database.php';
 
 class UserInfo
 {
+   const UNKNOWN_EMPLOYEE_NUMBER = 0;
+   
    public $employeeNumber;
    
    public $username;
+   
+   public $password;
    
    public $firstName;
    
    public $lastName;
    
-   public $roles;
+   public $roles = Role::UNKNOWN;
    
-   public $permissions;
+   public $permissions = Permission::NO_PERMISSIONS;
    
    public $email;
    
    public static function load($employeeNumber)
    {
-      $user = null;
+      $userInfo= null;
       
       $database = new PPTPDatabase();
       
@@ -32,11 +36,20 @@ class UserInfo
          
          if ($result && ($row = $result->fetch_assoc()))
          {
-            $user = new UserInfo($row);
+            $userInfo = new UserInfo();
+            
+            $userInfo->employeeNumber = intval($row['employeeNumber']);
+            $userInfo->username = $row['username'];
+            $userInfo->password = $row['password'];
+            $userInfo->roles = intval($row['roles']);
+            $userInfo->permissions = intval($row['permissions']);
+            $userInfo->firstName = $row['firstName'];
+            $userInfo->lastName = $row['lastName'];
+            $userInfo->email = $row['email'];
          }
       }
       
-      return ($user);
+      return ($userInfo);
    }
    
    static public function loadByName($username)
@@ -53,7 +66,16 @@ class UserInfo
          
          if ($result && ($row = $result->fetch_assoc()))
          {
-            $userInfo = new UserInfo($row);
+            $userInfo= new UserInfo();
+            
+            $userInfo->employeeNumber = intval($row['employeeNumber']);
+            $userInfo->username = $row['username'];
+            $userInfo->password = $row['password'];
+            $userInfo->roles = intval($row['roles']);
+            $userInfo->permissions = intval($row['permissions']);
+            $userInfo->firstName = $row['firstName'];
+            $userInfo->lastName = $row['lastName'];
+            $userInfo->email = $row['email'];
          }
       }
       
@@ -87,18 +109,6 @@ class UserInfo
    public function getFullName()
    {
       return ($this->firstName . " " . $this->lastName);
-   }
-   
-   private function __construct($userData)
-   {
-      $this->employeeNumber = intval($userData['employeeNumber']);
-      $this->username = $userData['username'];
-      $this->password = $userData['password'];
-      $this->roles = intval($userData['roles']);
-      $this->permissions = intval($userData['permissions']);
-      $this->firstName = $userData['firstName'];
-      $this->lastName = $userData['lastName'];
-      $this->email = $userData['email'];
    }
 }
 

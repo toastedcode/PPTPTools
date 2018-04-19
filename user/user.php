@@ -5,7 +5,7 @@ require_once '../common/database.php';
 require_once '../common/header.php';
 require_once '../common/userInfo.php';
 
-//require 'viewUser.php';
+require 'viewUser.php';
 require 'viewUsers.php';
 
 function getAction()
@@ -108,8 +108,8 @@ function processView($view)
       case 'edit_user':
       case 'view_user':
       {
-         //$page = new ViewUser();
-         //$page->render($view);
+         $page = new ViewUser();
+         $page->render($view);
          break;
       }
       
@@ -135,6 +135,11 @@ function updateUserInfo()
       $_SESSION["userInfo"]->username = $_POST['username'];
    }
    
+   if (isset($_POST['password']))
+   {
+      $_SESSION["userInfo"]->password = $_POST['password'];
+   }
+   
    if (isset($_POST['firstName']))
    {
       $_SESSION["userInfo"]->firstName = $_POST['firstName'];
@@ -143,6 +148,11 @@ function updateUserInfo()
    if (isset($_POST['lastName']))
    {
       $_SESSION["userInfo"]->lastName = $_POST['lastName'];
+   }
+   
+   if (isset($_POST['roles']))
+   {
+      $_SESSION["userInfo"]->roles= intval($_POST['roles']);
    }
    
    if (isset($_POST['permissions']))
@@ -154,6 +164,17 @@ function updateUserInfo()
    {
       $_SESSION["userInfo"]->email = $_POST['email'];
    }
+   
+   foreach (Permission::getPermissions() as $permission)
+   {
+      $name = "permission-" . $permission->permissionId;
+      
+      if (isset($_POST[$name]))
+      {
+         $_SESSION["userInfo"]->permissions |= $permission->bits;                  
+      }
+   }
+   
 }
 
 function deleteUser($employeeNumber)
@@ -229,7 +250,7 @@ processAction(getAction());
 
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<script src="users.js"></script>
+<script src="user.js"></script>
 <script src="/pptp/common/common.js"></script> <!--  use $ROOT variable -->
 <script src="../validate.js"></script>
 </head>

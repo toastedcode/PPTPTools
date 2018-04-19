@@ -24,8 +24,6 @@ class ViewUsers
       
       $html = 
 <<<HEREDOC
-      <script src="users.js"></script>
-   
       <div class="flex-vertical card-div">
          <div class="card-header-div">View Users</div>
          <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">

@@ -255,6 +255,31 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function newUser($userInfo)
+   {
+      $query =
+      "INSERT INTO user " .
+      "(employeeNumber, username, password, roles, permissions, firstName, lastName, email) " .
+      "VALUES " .
+      "('$userInfo->employeeNumber', '$userInfo->username', '$userInfo->password', '$userInfo->roles', '$userInfo->permissions', '$userInfo->firstName', '$userInfo->lastName', '$userInfo->email');";
+      echo $query; 
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateUser($userInfo)
+   {
+      $query =
+      "UPDATE user " .
+      "SET username = '$userInfo->username', password = '$userInfo->password', roles = '$userInfo->roles', permissions = '$userInfo->permissions', firstName = '$userInfo->firstName', lastName = '$userInfo->lastName', email = '$userInfo->email' " .
+      "WHERE employeeNumber = '$userInfo->employeeNumber';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
   
    public function getSensors()
    {
