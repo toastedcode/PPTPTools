@@ -4,6 +4,8 @@ require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
+require_once '../common/permissions.php';
+
 require_once '../common/userInfo.php';
 
 // *****************************************************************************
@@ -171,7 +173,7 @@ HEREDOC;
                if ($jobInfo)
                {
                   $creatorName = "unknown";
-                  $user = UserInfo::getUser($jobInfo->creator);
+                  $user = UserInfo::load($jobInfo->creator);
                   if ($user)
                   {
                      $creatorName= $user->getFullName();
@@ -187,7 +189,7 @@ HEREDOC;
                   
                   $viewEditIcon = "";
                   $deleteIcon = "";
-                  if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+                  if (Authentication::checkPermissions(Permission::EDIT_JOB))
                   {
                      $viewEditIcon =
                         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditJob('$jobInfo->jobNumber')\">mode_edit</i>";

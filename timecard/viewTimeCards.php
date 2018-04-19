@@ -23,10 +23,10 @@ class ViewTimeCards
          $operators = null;
          $selectedOperator = null;
          $allowAll = false;
-         if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+         if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
          {
             // Allow selection from all operators.
-            $operators = UserInfo::getUsers(Permissions::OPERATOR);
+            $operators = UserInfo::getUsersByRole(Role::OPERATOR);
             $selectedOperator = "All";
             $allowAll = true;
          }

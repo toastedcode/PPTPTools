@@ -71,5 +71,13 @@ class Authentication
       $_SESSION['authenticated'] = false;
       unset($_SESSION['authenticatedUser']);
    }
+   
+   static public function checkPermissions($permissionId)
+   {
+      $permission = Permission::getPermission($permissionId)->bits;
+      $userPermissions = Authentication::getPermissions();
+      
+      return ($userPermissions & $permission);
+   }
 }
 ?>

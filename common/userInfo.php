@@ -58,7 +58,7 @@ class UserInfo
       return ($userInfo);
    }
    
-   static public function getUsers($permissionMask)
+   static public function getUsersByRole($role)
    {
       $users = array();
       
@@ -68,7 +68,7 @@ class UserInfo
       
       if ($database->isConnected())
       {
-         $result = $database->getUsersByPermissions($permissionMask);
+         $result = $database->getUsersByRole($role);
 
          if ($result)
          {

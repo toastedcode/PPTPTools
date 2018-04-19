@@ -238,9 +238,9 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
-   public function getUsersByPermissions($permissionMask)
+   public function getUsersByRole($role)
    {
-      $query = "SELECT * FROM user WHERE ((permissions & $permissionMask) > 0);";
+      $query = "SELECT * FROM user WHERE role = $role ORDER BY username ASC;";
 
       $result = $this->query($query);
       
