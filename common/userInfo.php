@@ -33,14 +33,7 @@ class UserInfo
          {
             $userInfo = new UserInfo();
             
-            $userInfo->employeeNumber = intval($row['employeeNumber']);
-            $userInfo->username = $row['username'];
-            $userInfo->password = $row['password'];
-            $userInfo->roles = intval($row['roles']);
-            $userInfo->permissions = intval($row['permissions']);
-            $userInfo->firstName = $row['firstName'];
-            $userInfo->lastName = $row['lastName'];
-            $userInfo->email = $row['email'];
+            $userInfo->initialize($row);
          }
       }
       
@@ -63,14 +56,7 @@ class UserInfo
          {
             $userInfo = new UserInfo();
             
-            $userInfo->employeeNumber = intval($row['employeeNumber']);
-            $userInfo->username = $row['username'];
-            $userInfo->password = $row['password'];
-            $userInfo->roles = intval($row['roles']);
-            $userInfo->permissions = intval($row['permissions']);
-            $userInfo->firstName = $row['firstName'];
-            $userInfo->lastName = $row['lastName'];
-            $userInfo->email = $row['email'];
+            $userInfo->initialize($row);
          }
       }
       
@@ -93,7 +79,11 @@ class UserInfo
          {
             while ($row = $result->fetch_assoc())
             {
-               $users[] = new UserInfo($row);
+               $userInfo = new UserInfo();
+               
+               $userInfo->initialize($row);
+               
+               $users[] = $userInfo;
             }
          }
       }
@@ -104,6 +94,18 @@ class UserInfo
    public function getFullName()
    {
       return ($this->firstName . " " . $this->lastName);
+   }
+   
+   private function initialize($row)
+   {
+      $this->employeeNumber = intval($row['employeeNumber']);
+      $this->username = $row['username'];
+      $this->password = $row['password'];
+      $this->roles = intval($row['roles']);
+      $this->permissions = intval($row['permissions']);
+      $this->firstName = $row['firstName'];
+      $this->lastName = $row['lastName'];
+      $this->email = $row['email'];
    }
 }
 

@@ -77,7 +77,7 @@ class Authentication
       $permission = Permission::getPermission($permissionId)->bits;
       $userPermissions = Authentication::getPermissions();
       
-      return ($userPermissions & $permission);
+      return (($userPermissions & $permission) > 0);
    }
 }
 ?>

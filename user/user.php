@@ -171,7 +171,13 @@ function updateUserInfo()
       
       if (isset($_POST[$name]))
       {
+         // Set bit.
          $_SESSION["userInfo"]->permissions |= $permission->bits;                  
+      }
+      else if ($permission->isSetIn($_SESSION["userInfo"]->permissions))
+      {
+         // Clear bit.
+         $_SESSION["userInfo"]->permissions &= ~($permission->bits);
       }
    }
    

@@ -183,7 +183,7 @@ class PPTPDatabase extends MySqlDatabase
          "(employeeNumber, dateTime, jobNumber, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments) " .
          "VALUES " .
          "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobNumber', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments');";
-      echo $query;
+
       $result = $this->query($query);
       
       return ($result);
@@ -249,7 +249,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUsersByRole($role)
    {
-      $query = "SELECT * FROM user WHERE role = $role ORDER BY username ASC;";
+      $query = "SELECT * FROM user WHERE roles = $role ORDER BY username ASC;";
 
       $result = $this->query($query);
       
@@ -263,7 +263,7 @@ class PPTPDatabase extends MySqlDatabase
       "(employeeNumber, username, password, roles, permissions, firstName, lastName, email) " .
       "VALUES " .
       "('$userInfo->employeeNumber', '$userInfo->username', '$userInfo->password', '$userInfo->roles', '$userInfo->permissions', '$userInfo->firstName', '$userInfo->lastName', '$userInfo->email');";
-      echo $query; 
+ 
       $result = $this->query($query);
       
       return ($result);

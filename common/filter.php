@@ -91,7 +91,7 @@ class UserFilterComponent extends FilterComponent
       $selected = "";
       
       $options = $this->allowAll ? "<option $selected value=0>All</option>" : "";
-      
+
       foreach ($this->users as $user)
       {
          $selected = ($user->employeeNumber == $this->selectedEmployeeNumber) ? "selected" : "";
@@ -284,7 +284,7 @@ $operators = UserInfo::getUsersByRole(Role::OPERATOR);
 $filter = new Filter();
 
 $filter->add(new DateFilterComponent());
-$filter->add(new UserFilterComponent("Operators", $operators, 0));
+$filter->add(new UserFilterComponent("Operators", $operators, 1975, true));
 $filter->add(new FilterButton());
 $filter->add(new FilterDivider());
 $filter->add(new TodayButton());
