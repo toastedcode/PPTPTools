@@ -89,6 +89,14 @@ class Permission
    {
       $this->permissionId = $permissionId;
       $this->permissionName = $permissionName;
-      $this->bits = (1 << ($permissionId - Permission::FIRST));
+      
+      if ($permissionId > Permission::UNKNOWN)
+      {
+         $this->bits = (1 << ($permissionId - Permission::FIRST));
+      }
+      else
+      {
+         $this->bits = 0;
+      }
    }
 }
