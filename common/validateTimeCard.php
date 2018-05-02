@@ -4,7 +4,7 @@ require_once 'jobInfo.php';
 require_once 'timeCardInfo.php';
 require_once 'partWasherEntry.php';
 require_once 'partWeightEntry.php';
-require_once 'user.php';
+require_once 'userInfo.php';
 
 class TimeCardThumbnail
 {
@@ -27,12 +27,12 @@ class TimeCardThumbnail
       if (($this->timeCardInfo) &&
           ($this->jobInfo))
       {
-         $user = User::getUser($this->timeCardInfo->employeeNumber);
+         $userInfo = UserInfo::load($this->timeCardInfo->employeeNumber);
          
          $username = "unknown";
-         if ($user)
+         if ($userInfo)
          {
-            $username = $user->username;
+            $username = $userInfo->username;
          }
          
          $weight = "-----";
@@ -49,9 +49,12 @@ class TimeCardThumbnail
          
          $html = 
 <<<HEREDOC
-         <div class="flex-vertical">
+         <div class="flex-vertical time-card-thumb">
+            <div class="flex-horizontal">
+               <i class="material-icons time-card-thumb-icon">schedule</i>
+               <div class="time-card-thumb-large-text">{$this->jobInfo->jobNumber}</div>
+            </div>
             <div>{$this->timeCardInfo->dateTime}<div>
-            <div>{$this->jobInfo->jobNumber}<div>
             <div>$username<div>
             <div>Weight: $weight<div>
             <div>Count: $partCount<div>

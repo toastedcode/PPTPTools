@@ -1,5 +1,5 @@
 <?php
-require_once 'user.php';
+require_once 'userInfo.php';
 
 abstract class AuthenticationResult
 {
@@ -21,7 +21,7 @@ class Authentication
       
       if (isset($_SESSION["authenticatedUser"]) && ($_SESSION["authenticatedUser"] == true))
       {
-         $authenticatedUser = User::getUserByName($_SESSION["authenticatedUser"]);
+         $authenticatedUser = UserInfo::loadByName($_SESSION["authenticatedUser"]);
       }
       
       return ($authenticatedUser);
@@ -43,7 +43,7 @@ class Authentication
    {
       $result = AuthenticationResult::INVALID_USERNAME;
       
-      $user = User::getUserByName($username);
+      $user = UserInfo::loadByName($username);
       
       if ($user == null)
       {
@@ -70,6 +70,14 @@ class Authentication
    {
       $_SESSION['authenticated'] = false;
       unset($_SESSION['authenticatedUser']);
+   }
+   
+   static public function checkPermissions($permissionId)
+   {
+      $permission = Permission::getPermission($permissionId)->bits;
+      $userPermissions = Authentication::getPermissions();
+      
+      return (($userPermissions & $permission) > 0);
    }
 }
 ?>

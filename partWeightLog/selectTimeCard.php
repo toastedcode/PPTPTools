@@ -34,6 +34,8 @@ class SelectTimeCard
          
       </div>
       
+      <link rel="stylesheet" type="text/css" href="../common/validateTimeCard.css"/>
+
       <script src="../common/validateTimeCard.js"></script>
       <script type="text/javascript">
          var keypad = new Keypad();

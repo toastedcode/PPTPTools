@@ -1,7 +1,7 @@
 <?php
 
-require_once '../database.php';
-require_once 'partInspectionInfo.php';
+require_once '../common/database.php';
+require_once '../common/partInspectionInfo.php';
 
 function recordPartInspection()
 {

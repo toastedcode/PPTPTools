@@ -54,6 +54,8 @@ function processAction($action)
          {
             $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
          }
+         
+         updatePartWasherEntry();
          break;
       }
          
@@ -133,7 +135,11 @@ function updatePartWasherEntry()
       $_SESSION["partWasherEntry"]->employeeNumber = $_POST['employeeNumber'];
    }
    
-   if (isset($_POST['timeCardId']))
+   if (isset($_GET['timeCardId']))  // When called from viewTimeCard.php
+   {
+      $_SESSION["partWasherEntry"]->timeCardId= $_GET['timeCardId'];
+   }
+   else if (isset($_POST['timeCardId']))
    {
       $_SESSION["partWasherEntry"]->timeCardId= $_POST['timeCardId'];
    }

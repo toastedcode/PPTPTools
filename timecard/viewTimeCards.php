@@ -3,8 +3,10 @@
 require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
-require_once '../common/user.php';
 require_once '../common/newIndicator.php';
+require_once '../common/permissions.php';
+require_once '../common/roles.php';
+require_once '../common/userInfo.php';
 
 class ViewTimeCards
 {
@@ -23,10 +25,10 @@ class ViewTimeCards
          $operators = null;
          $selectedOperator = null;
          $allowAll = false;
-         if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+         if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
          {
             // Allow selection from all operators.
-            $operators = User::getUsers(Permissions::OPERATOR);
+            $operators = UserInfo::getUsersByRole(Role::OPERATOR);
             $selectedOperator = "All";
             $allowAll = true;
          }
@@ -156,7 +158,7 @@ HEREDOC;
                if ($timeCardInfo)
                {
                   $operatorName = "unknown";
-                  $user = User::getUser($timeCardInfo->employeeNumber);
+                  $user = UserInfo::load($timeCardInfo->employeeNumber);
                   if ($user)
                   {
                      $operatorName= $user->getFullName();
@@ -177,7 +179,7 @@ HEREDOC;
                   
                   $viewEditIcon = "";
                   $deleteIcon = "";
-                  if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+                  if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
                   {
                      $viewEditIcon =
                      "<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard('$timeCardInfo->timeCardId')\">mode_edit</i>";

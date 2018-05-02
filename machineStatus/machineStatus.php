@@ -78,7 +78,7 @@ processAction(getAction());
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../flex.css"/>
+<link rel="stylesheet" type="text/css" href="../common/flex.css"/>
 <link rel="stylesheet" type="text/css" href="../pptpTools.css"/>
 <link rel="stylesheet" type="text/css" href="machineStatus.css"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>

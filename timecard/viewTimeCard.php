@@ -1,6 +1,6 @@
 <?php
 
-require_once '../common/user.php';
+require_once '../common/userInfo.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/timeCardInfo.php';
@@ -120,7 +120,7 @@ HEREDOC;
    protected static function operatorDiv($timeCardInfo)
    {
       $name = "";
-      $operator = User::getUser($timeCardInfo->employeeNumber);
+      $operator = UserInfo::load($timeCardInfo->employeeNumber);
       if ($operator)
       {
          $name = $operator->getFullName();
@@ -345,15 +345,40 @@ HEREDOC;
       {
          // Case 2
          // Viewing single time card selected from table of time cards.
+         
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
+         
+         if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
+         {
+            $navBar->highlightNavButton("Weigh Parts", "submitForm('input-form', '../partWeightLog/partWeightLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_weight', 'new_part_weight_entry')", true);
+         }
+         
+         if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+         {
+            $navBar->highlightNavButton("Count Parts", "submitForm('input-form', '../partWasherLog/partWasherLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_part_count', 'new_part_washer_entry')", true);
+         }
+         
          $navBar->highlightNavButton("Ok", "submitForm('input-form', 'timeCard.php', 'view_time_cards', 'no_action')", false);
       }
       else 
       {   
          // Case 3
          // Editing a single time card selected from table of time cards.
+         
          $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+         
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
+         
+         if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
+         {
+            $navBar->highlightNavButton("Weigh Parts", "submitForm('input-form', '../partWeightLog/partWeightLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_weight', 'new_part_weight_entry')", true);
+         }
+         
+         if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+         {
+            $navBar->highlightNavButton("Count Parts", "submitForm('input-form', '../partWasherLog/partWasherLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_part_count', 'new_part_washer_entry')", true);
+         }
+                  
          $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
       }
       
@@ -369,6 +394,10 @@ HEREDOC;
       if (isset($_POST['timeCardId']))
       {
          $timeCardInfo = TimeCardInfo::load($_POST['timeCardId']);
+      }
+      else if (isset($_GET['timeCardId']))
+      {
+         $timeCardInfo = TimeCardInfo::load($_GET['timeCardId']);
       }
       else if (isset($_SESSION['timeCardInfo']))
       {

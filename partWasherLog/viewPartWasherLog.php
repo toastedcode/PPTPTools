@@ -4,6 +4,8 @@ require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
+require_once '../common/permissions.php';
+require_once '../common/roles.php';
 require_once '../common/timeCardInfo.php';
 
 class ViewPartWasherLog
@@ -23,10 +25,10 @@ class ViewPartWasherLog
          $operators = null;
          $selectedOperator = null;
          $allowAll = false;
-         if ($user->permissions & (Permissions::ADMIN | Permissions::SUPER_USER))
+         if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
          {
             // Allow selection from all operators.
-            $operators = User::getUsers(Permissions::PART_WASHER);
+            $operators = UserInfo::getUsersByRole(Role::PART_WASHER);
             $selectedOperator = "All";
             $allowAll = true;
          }
@@ -159,14 +161,14 @@ HEREDOC;
                   if ($timeCardInfo && $jobInfo)
                   {
                      $partWasherName = "unknown";
-                     $operator = User::getUser($partWasherEntry->employeeNumber);
+                     $operator = UserInfo::load($partWasherEntry->employeeNumber);
                      if ($operator)
                      {
                         $partWasherName= $operator->getFullName();
                      }
                      
                      $operatorName = "unknown";
-                     $operator = User::getUser($timeCardInfo->employeeNumber);
+                     $operator = UserInfo::load($timeCardInfo->employeeNumber);
                      if ($operator)
                      {
                         $operatorName = $operator->getFullName();
@@ -182,7 +184,7 @@ HEREDOC;
                      $mfgDate = $dateTime->format("m-d-Y");
                      
                      $deleteIcon = "";
-                     if (Authentication::getPermissions() & (Permissions::ADMIN | Permissions::SUPER_USER))
+                     if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
                      {
                         $deleteIcon =
                         "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";

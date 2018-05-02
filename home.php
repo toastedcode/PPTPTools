@@ -1,35 +1,51 @@
 <?php
 
+require_once './common/authentication.php';
 require_once './common/database.php';
 require_once './common/header.php';
-require_once './common/authentication.php';
+require_once './common/permissions.php';
 
 class Activity
 {
-   const JOBS = 0;
-   const TIME_CARD = 1;
-   const PART_WEIGHT = 2;
-   const PART_WASH = 3;
-   const PART_INSPECTION = 4;
-   const MACHINE_STATUS = 5;
-   const PRODUCTION_SUMMARY = 6;
+   const UNKNOWN = 0;
+   const FIRST = 1;
+   const JOBS = Activity::FIRST;
+   const TIME_CARD = 2;
+   const PART_WEIGHT = 3;
+   const PART_WASH = 4;
+   const PART_INSPECTION = 5;
+   const MACHINE_STATUS = 6;
+   const PRODUCTION_SUMMARY = 7;
+   const USER = 8;
+   const LAST = Activity::USER;
+      
+   private static $permissionMasks = null;
    
-   private static $permissionMasks = array(
-      (Permissions::SUPER_USER | Permissions::ADMIN),                            // JOBS
-      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::OPERATOR),    // TIME_CARD
-      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::LABORER),     // PART_WEIGHT
-      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::PART_WASHER), // PART_WASH
-      (Permissions::SUPER_USER | Permissions::ADMIN | Permissions::OPERATOR),    // PART_INSPECTION
-      (Permissions::SUPER_USER | Permissions::ADMIN),                            // MACHINE_STATUS
-      (Permissions::SUPER_USER | Permissions::ADMIN));                           // PRODUCTION_SUMMARY
+   private static function getPermissionMasks()
+   {
+      if (Activity::$permissionMasks == null)
+      {
+         Activity::$permissionMasks = array(
+            Permission::getPermission(Permission::VIEW_JOB)->bits,                 // JOBS
+            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           // TIME_CARD
+            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
+            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
+            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
+            Permission::getPermission(Permission::VIEW_USER)->bits);               // USER
+      }
+      
+      return (Activity::$permissionMasks);
+   }
 
    public static function getPermissionMask($activity)
    {
       $permissionMask = 0;
       
-      if ($activity <= Activity::PRODUCTION_SUMMARY)
+      if (($activity >= Activity::FIRST) && ($activity <= Activity::LAST))
       {
-         $permissionMask = Activity::$permissionMasks[$activity];
+         $permissionMask = Activity::getPermissionMasks()[$activity - Activity::FIRST];
       }
       
       return ($permissionMask);
@@ -37,7 +53,7 @@ class Activity
    
    public static function isAllowed($activity, $permissions)
    {
-      return ($permissions & Activity::getPermissionMask($activity));
+      return (($permissions & Activity::getPermissionMask($activity)) > 0);
    }
 }
 
@@ -117,6 +133,19 @@ HEREDOC;
 function selectActivityPage()
 {
    $permissions = Authentication::getPermissions();
+   
+   // Jobs
+   $usersButton = "";
+   if (Activity::isAllowed(Activity::USER, $permissions))
+   {
+      $usersButton =
+<<<HEREDOC
+      <div class="action-button" onclick="location.href='user/user.php?view=view_users';">
+         <div><i class="material-icons action-button-icon">group</i></div>
+         <div>Users</div>
+      </div>
+HEREDOC;
+   }
 
    // Jobs
    $jobsButton = "";
@@ -285,6 +314,8 @@ HEREDOC;
 
       <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
 
+         $usersButton
+         
          $jobsButton
 
          $timeCardButton
@@ -304,7 +335,6 @@ HEREDOC;
 HEREDOC;
 }
 
-
 function login($username, $password)
 {
    $result = Authentication::authenticate($username, $password);
@@ -315,6 +345,14 @@ function logout()
    Authentication::deauthenticate();
    
    session_unset();
+}
+
+function redirect($url)
+{
+   unset($_SESSION["redirect"]);
+   
+   header("Location: $url");
+   exit;
 }
 
 // *****************************************************************************
@@ -380,7 +418,14 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 <?php 
 if (Authentication::isAuthenticated())
 {
-   selectActivityPage();
+   if (isset($_SESSION["redirect"]))
+   {
+      redirect($_SESSION["redirect"]);
+   }
+   else
+   {
+      selectActivityPage();
+   }
 }
 else
 {

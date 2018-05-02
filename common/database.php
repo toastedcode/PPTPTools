@@ -183,7 +183,7 @@ class PPTPDatabase extends MySqlDatabase
          "(employeeNumber, dateTime, jobNumber, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments) " .
          "VALUES " .
          "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobNumber', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments');";
-      echo $query;
+
       $result = $this->query($query);
       
       return ($result);
@@ -238,10 +238,44 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
-   public function getUsersByPermissions($permissionMask)
+   public function getUsers()
    {
-      $query = "SELECT * FROM user WHERE ((permissions & $permissionMask) > 0);";
+      $query = "SELECT * FROM user ORDER BY username ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getUsersByRole($role)
+   {
+      $query = "SELECT * FROM user WHERE roles = $role ORDER BY username ASC;";
 
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newUser($userInfo)
+   {
+      $query =
+      "INSERT INTO user " .
+      "(employeeNumber, username, password, roles, permissions, firstName, lastName, email) " .
+      "VALUES " .
+      "('$userInfo->employeeNumber', '$userInfo->username', '$userInfo->password', '$userInfo->roles', '$userInfo->permissions', '$userInfo->firstName', '$userInfo->lastName', '$userInfo->email');";
+ 
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateUser($userInfo)
+   {
+      $query =
+      "UPDATE user " .
+      "SET username = '$userInfo->username', password = '$userInfo->password', roles = '$userInfo->roles', permissions = '$userInfo->permissions', firstName = '$userInfo->firstName', lastName = '$userInfo->lastName', email = '$userInfo->email' " .
+      "WHERE employeeNumber = '$userInfo->employeeNumber';";
+      
       $result = $this->query($query);
       
       return ($result);
