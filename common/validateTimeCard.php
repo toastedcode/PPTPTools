@@ -49,9 +49,12 @@ class TimeCardThumbnail
          
          $html = 
 <<<HEREDOC
-         <div class="flex-vertical">
+         <div class="flex-vertical time-card-thumb">
+            <div class="flex-horizontal">
+               <i class="material-icons time-card-thumb-icon">schedule</i>
+               <div class="time-card-thumb-large-text">{$this->jobInfo->jobNumber}</div>
+            </div>
             <div>{$this->timeCardInfo->dateTime}<div>
-            <div>{$this->jobInfo->jobNumber}<div>
             <div>$username<div>
             <div>Weight: $weight<div>
             <div>Count: $partCount<div>
