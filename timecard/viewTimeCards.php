@@ -118,10 +118,10 @@ HEREDOC;
                   <th>Operator</th>
                   <th>Job #</th>
                   <th>Machine #</th>
-                  <th>Material #</th>
+                  <th>Heat #</th>
                   <th>Setup Time</th>
                   <th>Run Time</th>
-                  <th>Pan Count</th>
+                  <th>Basket Count</th>
                   <th>Part Count</th>
                   <th>Scrap Count</th>
                   <th/>

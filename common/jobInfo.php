@@ -20,6 +20,10 @@ class JobInfo
 {
    const UNKNOWN_JOB_NUMBER = "";
    
+   const SECONDS_PER_MINUTE = 60;
+   
+   const SECONDS_PER_HOUR = 3600;
+      
    public $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    public $creator;
    public $dateTime;
@@ -55,8 +59,8 @@ class JobInfo
             $jobInfo->dateTime =   Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $jobInfo->partNumber = $row['partNumber'];
             $jobInfo->wcNumber =   $row['wcNumber'];
-            $jobInfo->cycleTime = $row['cycleTime'];
-            $jobInfo->netPartsPerHour = $row['netPartsPerHour'];
+            $jobInfo->cycleTime = doubleval($row['cycleTime']);
+            $jobInfo->netPartsPerHour = intval($row['netPartsPerHour']);
             $jobInfo->status =   $row['status'];
          }
       }
@@ -88,6 +92,33 @@ class JobInfo
       }
 
       return ($suffix);
+   }
+   
+   public function getGrossPartsPerHour()
+   {
+      $grossPartsPerHour = 0;
+      
+      if (($this->cycleTime > 0) &&
+            ($this->cycleTime <= JobInfo::SECONDS_PER_MINUTE))
+      {
+         $grossPartsPerHour = (JobInfo::SECONDS_PER_HOUR / $this->cycleTime);   
+      }
+      
+      return ($grossPartsPerHour);
+   }
+   
+   public function getNetPercentage()
+   {
+      $netPercentage = 0;
+      
+      $grossPartsPerHour = $this->getGrossPartsPerHour();
+      
+      if ($grossPartsPerHour > 0)
+      {
+         $netPercentage = (($this->netPartsPerHour / $grossPartsPerHour) * 100);
+      }
+           
+      return ($netPercentage);
    }
 }
 

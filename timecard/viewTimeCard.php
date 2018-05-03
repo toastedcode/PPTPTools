@@ -66,7 +66,7 @@ class ViewTimeCard
          var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
          var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
-         var panCountValidator = new IntValidator("panCount-input", 1, 1, 25, false);
+         var panCountValidator = new IntValidator("panCount-input", 2, 1, 30, false);
          var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
          var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
 
@@ -168,7 +168,7 @@ HEREDOC;
             <input type="text" class="medium-text-input" style="width:150px;" value="$wcNumber" disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Material #</h3></div>
+            <div class="label-div"><h3>Heat #</h3></div>
             <input id="material-number-input" type="number" class="medium-text-input" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled />
          </div>
       </div>
@@ -216,7 +216,7 @@ HEREDOC;
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Part Counts</h2></div>
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Pan count</h3></div>
+            <div class="label-div"><h3>Basket count</h3></div>
             <input id="panCount-input" type="number" class="medium-text-input" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="$timeCardInfo->panCount" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">

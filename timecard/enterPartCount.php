@@ -37,7 +37,7 @@ class EnterPartCount
 
          document.getElementById("panCount-input").focus();
 
-         var panCountValidator = new IntValidator("panCount-input", 2, 2, 25, false);
+         var panCountValidator = new IntValidator("panCount-input", 2, 2, 30, false);
          var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, false);
          var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, false);
 
@@ -68,7 +68,7 @@ HEREDOC;
       <!-- Pan count -->
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
          <input id="panCount-input" form="timeCardForm" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="panCount" oninput="this.validator.validate()" value="$panCount">
-         <label class="mdl-textfield__label" for="panCount-input">Pan count</label>
+         <label class="mdl-textfield__label" for="panCount-input">Basket count</label>
       </div>
 
       <!-- Parts count -->

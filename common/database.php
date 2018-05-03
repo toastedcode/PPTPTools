@@ -575,6 +575,16 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function deleteAllPartWasherEntries(
+      $timeCardId)
+   {
+      $query = "DELETE FROM partwasher WHERE timeCardId = $timeCardId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function getPartWeightEntry(
       $partWeightEntryId)
    {
@@ -641,7 +651,7 @@ class PPTPDatabase extends MySqlDatabase
       "UPDATE partweight " .
       "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight" .
       "WHERE partWeightEntryId = $partWeightEntry->partWeightEntryId;";
-      
+
       $result = $this->query($query);
       
       return ($result);
@@ -652,6 +662,16 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query = "DELETE FROM partweight WHERE partWeightEntryId = $partWeightEntryId;";
       
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteAllPartWeightEntries(
+      $timeCardId)
+   {
+      $query = "DELETE FROM partweight WHERE timeCardId = $timeCardId;";
+
       $result = $this->query($query);
       
       return ($result);

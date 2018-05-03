@@ -299,7 +299,7 @@ function validatePartCount()
 
    if (!(document.getElementById("panCount-input").validator.validate()))
    {
-      alert("Please enter a valid pan count.")
+      alert("Please enter a valid basket count.")
    }
    else
    {
