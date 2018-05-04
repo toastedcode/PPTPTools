@@ -494,3 +494,35 @@ function formattedDate(date)
 
    return (formattedDate);
 }
+
+function autoFillEfficiency()
+{
+   var runTimeHourInput = document.getElementById("runTimeHour-input");
+   var runTimeMinuteInput = document.getElementById("runTimeMinute-input");
+   var partCountInput = document.getElementById("partsCount-input");
+   var grossPartsPerHourInput = document.getElementById("gross-parts-per-hour-input");
+   var efficiencyInput = document.getElementById("efficiency-input");
+   
+   if (runTimeHourInput.validator.isValid() && 
+       runTimeMinuteInput.validator.isValid() &&
+       partCountInput.validator.isValid())
+   {
+      var runTimeMinutes = ((parseInt(runTimeHourInput.value) * 60) + parseInt(runTimeMinuteInput.value));
+      
+      var partCount = partCountInput.value;
+      
+      var grossPartsPerHour = parseInt(grossPartsPerHourInput.value);
+      
+      if (grossPartsPerHour > 0)
+      {
+         var potentialParts = ((runTimeMinutes / 60) * grossPartsPerHour);
+         
+         if (potentialParts > 0)
+         {
+            var efficiency = ((partCount / potentialParts) * 100);
+            
+            efficiencyInput.value = efficiency.toFixed(2);
+         }
+      }
+   }
+}

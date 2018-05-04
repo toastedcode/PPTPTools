@@ -78,6 +78,8 @@ class ViewTimeCard
          panCountValidator.init();
          partsCountValidator.init();
          scrapCountValidator.init();
+
+         autoFillEfficiency();
       </script>
 HEREDOC;
       
@@ -157,6 +159,9 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
+      
+      <input id="gross-parts-per-hour-input" type="hidden" value="{$jobInfo->getGrossPartsPerHour()}"/>
+
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Job</h2></div>
          <div class="flex-horizontal time-card-table-row">
@@ -191,15 +196,15 @@ HEREDOC;
          <div class="section-header-div"><h2>Time</h2></div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Setup time</h3></div>
-            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate()" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
+            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate()" value="$setupTimeMinutes" $disabled />
+            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate();" value="$setupTimeMinutes" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Run time</h3></div>
-            <input id="runTimeHour-input" type="number" class="medium-text-input" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate()" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
+            <input id="runTimeHour-input" type="number" class="medium-text-input" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); autoFillEfficiency();" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate()"value="$runTimeMinutes" $disabled />
+            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate();  autoFillEfficiency();"value="$runTimeMinutes" $disabled />
          </div>
       </div>
 HEREDOC;
@@ -221,11 +226,16 @@ HEREDOC;
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Good count</h3></div>
-            <input id="partsCount-input" type="number" class="medium-text-input" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate()" value="$timeCardInfo->partCount" $disabled />
+            <input id="partsCount-input" type="number" class="medium-text-input" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); autoFillEfficiency();" value="$timeCardInfo->partCount" $disabled />
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Scrap count</h3></div>
             <input id="scrapCount-input" type="number" class="medium-text-input" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="$timeCardInfo->scrapCount" $disabled />
+         </div>
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Efficiency</h3></div>
+            <input id="efficiency-input" type="number" class="medium-text-input" style="width:100px;" disabled />
+            <div><h3>&nbsp%</h3></div>
          </div>
       </div>
 HEREDOC;

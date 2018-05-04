@@ -1,9 +1,12 @@
 <?php
 require_once 'database.php';
-require_once('time.php');
+require_once 'jobInfo.php';
+require_once 'time.php';
 
 class TimeCardInfo
 {
+   const MINUTES_PER_HOUR = 60;
+   
    public $timeCardId;
    public $dateTime;
    public $employeeNumber;
@@ -94,6 +97,28 @@ class TimeCardInfo
       }
       
       return ($timeCardInfo);
+   }
+   
+   public function getEfficiency()
+   {
+      $efficiency = 0.0;
+      
+      // Retrieve the associated job.
+      $jobInfo = JobInfo::load($this->jobNumber);
+      
+      if ($jobInfo)
+      {
+         // Calculate the total number of parts that could be potentially created in the run time.
+         $potentialParts = (($this->runTime / TimeCardInfo::MINUTES_PER_HOUR) * $jobInfo->getGrossPartsPerHour());
+         
+         if ($potentialParts > 0)
+         {
+            // Calculate the efficiency.
+            $efficiency = (($this->partCount / $potentialParts) * 100);
+         }
+      }
+      
+      return ($efficiency);
    }
 }
 
