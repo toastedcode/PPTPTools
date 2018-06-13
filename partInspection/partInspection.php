@@ -63,6 +63,29 @@ function processView($view)
       }
    }
 }
+
+function redirectToLogin()
+{
+   $params = array();
+   
+   $action = getAction();
+   if ($action != "")
+   {
+      $params["action"] = $action;
+   }
+   
+   $view = getView();
+   if ($view!= "")
+   {
+      $params["view"] = $view;
+   }
+   
+   $url = "./partInspection/partInspection.php" . "?" . http_build_query($params);
+   
+   $_SESSION["redirect"] = $url;
+   header('Location: ../home.php');
+   exit;
+}
 ?>
 
 <!-- ********************************** BEGIN ********************************************* -->
@@ -74,8 +97,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
-   exit;
+   redirectToLogin();  // Note: exits.
 }
 
 processAction(getAction());

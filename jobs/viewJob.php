@@ -67,12 +67,12 @@ class ViewJob
          var jobNumberPrefixValidator = new PartNumberValidator("job-number-prefix-input", 5, 1, 9999, false);
          var jobNumberSuffixValidator = new IntValidator("job-number-suffix-input", 4, 1, 9999, false);
          var cycleTimeValidator = new DecimalValidator("cycle-time-input", 5, 1, 60, 2, false);
-         var netPartsPerHourValidator = new NetPartsPerHourValidator("net-parts-per-hour-input", 5, 1, 10000, false);
+         var netPercentageValidator = new DecimalValidator("net-percentage-input", 5, 0, 100, 2, false);
 
          jobNumberPrefixValidator.init();
          jobNumberSuffixValidator.init();
          cycleTimeValidator.init();
-         netPartsPerHourValidator.init();
+         netPercentageValidator.init();
 
          autoFillPartNumber();
          autoFillPartStats();
@@ -189,14 +189,14 @@ HEREDOC;
          </div>
 
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Net Pieces/Hour</h3></div>
-            <input id="net-parts-per-hour-input" type="number" class="medium-text-input" name="netPartsPerHour" form="input-form" style="width:150px;" value="$jobInfo->netPartsPerHour" oninput="this.validator.validate(); autoFillPartStats();" $disabled />
+            <div class="label-div"><h3>Net Percentage</h3></div>
+            <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
+            <div><h3>&nbsp%</h3></div>
          </div>
 
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Net Percentage</h3></div>
-            <input id="net-percentage-input" type="number" class="medium-text-input" style="width:150px;" disabled />
-            <div><h3>&nbsp%</h3></div>
+            <div class="label-div"><h3>Net Pieces/Hour</h3></div>
+            <input id="net-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
          </div>
 
          <div class="flex-horizontal time-card-table-row">

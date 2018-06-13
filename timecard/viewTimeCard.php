@@ -66,7 +66,7 @@ class ViewTimeCard
          var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
          var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
-         var panCountValidator = new IntValidator("panCount-input", 2, 1, 30, false);
+         var panCountValidator = new IntValidator("panCount-input", 2, 1, 40, false);
          var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
          var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
 

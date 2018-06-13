@@ -166,9 +166,9 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->cycleTime = $_POST['cycleTime'];
    }
    
-   if (isset($_POST['netPartsPerHour']))
+   if (isset($_POST['netPercentage']))
    {
-      $_SESSION["jobInfo"]->netPartsPerHour = $_POST['netPartsPerHour'];
+      $_SESSION["jobInfo"]->netPercentage = $_POST['netPercentage'];
    }
    
    if (isset($_POST['status']))

@@ -137,7 +137,7 @@ HEREDOC;
                   <th>Part #</th>
                   <th>Work Center #</th>
                   <th>Cycle Time</th>
-                  <th>Net Pieces/Hour</th>
+                  <th>Net Percentage</th>
                   <th>Status</th>
                   <th/>
                   <th/>
@@ -215,7 +215,7 @@ HEREDOC;
                         <td>$jobInfo->partNumber</td>
                         <td>$jobInfo->wcNumber</td>
                         <td>$jobInfo->cycleTime</td>
-                        <td>$jobInfo->netPartsPerHour</td>
+                        <td>$jobInfo->netPercentage</td>
                         <td>$status</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>
