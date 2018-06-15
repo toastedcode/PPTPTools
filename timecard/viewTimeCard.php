@@ -62,19 +62,19 @@ class ViewTimeCard
 
       <script>
          var materialNumberValidator = new IntValidator("material-number-input", 5, 1, 10000, false);
-         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
-         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
          var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
+         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
+         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var panCountValidator = new IntValidator("panCount-input", 2, 1, 40, false);
          var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
          var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
 
          materialNumberValidator.init();
-         setupTimeHourValidator.init();
-         setupTimeMinuteValidator.init();
          runTimeHourValidator.init();
          runTimeMinuteValidator.init();
+         setupTimeHourValidator.init();
+         setupTimeMinuteValidator.init();
          panCountValidator.init();
          partsCountValidator.init();
          scrapCountValidator.init();
@@ -186,25 +186,38 @@ HEREDOC;
    {
       $disabled = ($readOnly) ? "disabled" : "";
       
+      $approvalText = "";
+      $approval = "";
+      if ($timeCardInfo->requiresApproval())
+      {
+         $approval = $timeCardInfo->isApproved() ? "approved" : "unapproved";
+         $approvalText = $timeCardInfo->isApproved() ? "Approved by supervisor" : "Requires supervisor approval";
+      }
+      else
+      {
+         $approval = "no-approval-required";
+      }
+      
       // Pad minutes to 2 digits.
-      $setupTimeMinutes = str_pad($timeCardInfo->getSetupTimeMinutes(), 2, '0', STR_PAD_LEFT);
       $runTimeMinutes = str_pad($timeCardInfo->getRunTimeMinutes(), 2, '0', STR_PAD_LEFT);
+      $setupTimeMinutes = str_pad($timeCardInfo->getSetupTimeMinutes(), 2, '0', STR_PAD_LEFT);
       
       $html =
 <<<HEREDOC
       <div class="flex-vertical time-card-table-col">
          <div class="section-header-div"><h2>Time</h2></div>
          <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Setup time</h3></div>
-            <input id="setupTimeHour-input" type="number" class="medium-text-input" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
-            <div style="padding: 5px;">:</div>
-            <input id="setupTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate();" value="$setupTimeMinutes" $disabled />
-         </div>
-         <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Run time</h3></div>
             <input id="runTimeHour-input" type="number" class="medium-text-input" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); autoFillEfficiency();" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
             <input id="runTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate();  autoFillEfficiency();"value="$runTimeMinutes" $disabled />
+         </div>
+         <div class="flex-horizontal time-card-table-row">
+            <div class="label-div"><h3>Setup time</h3></div>
+            <input id="setupTimeHour-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
+            <div style="padding: 5px;">:</div>
+            <input id="setupTimeMinute-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate();" value="$setupTimeMinutes" $disabled />
+            <div id="approval-div" class="approval-div $approval">$approvalText</div>
          </div>
       </div>
 HEREDOC;
@@ -215,6 +228,7 @@ HEREDOC;
    protected static function partsDiv($timeCardInfo, $readOnly)
    {
       $disabled = ($readOnly) ? "disabled" : "";
+      $efficiency = round($timeCardInfo->getEfficiency(), 2);
       
       $html =
 <<<HEREDOC
@@ -234,7 +248,7 @@ HEREDOC;
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Efficiency</h3></div>
-            <input id="efficiency-input" type="number" class="medium-text-input" style="width:100px;" disabled />
+            <input id="efficiency-input" type="number" class="medium-text-input" style="width:100px;" value="$efficiency" disabled />
             <div><h3>&nbsp%</h3></div>
          </div>
       </div>

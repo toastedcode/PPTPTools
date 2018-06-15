@@ -19,6 +19,8 @@ class TimeCardInfo
    public $scrapCount;
    public $commentCodes;
    public $comments;
+   public $approvedBy;
+   public $approvedDateTime;
    
    public function formatSetupTime()
    {
@@ -48,6 +50,26 @@ class TimeCardInfo
    public function getRunTimeMinutes()
    {
       return (round($this->runTime % 60));
+   }
+   
+   public function formatTotalTime()
+   {
+      return($this->getTotalTimeHours() . ":" . sprintf("%02d", $this->getTotalTimeMinutes()));
+   }
+   
+   public function getTotalTime()
+   {
+      return ($this->runTime + $this->setupTime);
+   }
+   
+   public function getTotalTimeHours()
+   {
+      return (round($this->getTotalTime() / 60));
+   }
+   
+   public function getTotalTimeMinutes()
+   {
+      return (round($this->getTotalTime()% 60));
    }
    
    public function hasCommentCode($code)
@@ -93,6 +115,8 @@ class TimeCardInfo
             $timeCardInfo->scrapCount = intval($row['scrapCount']);
             $timeCardInfo->commentCodes = intval($row['commentCodes']);
             $timeCardInfo->comments = $row['comments'];
+            $timeCardInfo->approvedBy = intval($row['approvedBy']);
+            $timeCardInfo->approvedDateTime = Time::fromMySqlDate($row['approvedDateTime'], "Y-m-d H:i:s");
          }
       }
       
@@ -120,6 +144,17 @@ class TimeCardInfo
       
       return ($efficiency);
    }
+   
+   public function requiresApproval()
+   {
+      return ($this->setupTime > 0);
+   }
+   
+   public function isApproved()
+   {
+      // A time card is considered approved if there was no setup time, or if a manager has approved the setup time.
+      return (!$this->requiresApproval()|| ($this->approvedBy > 0));
+   }
 }
 
 /*
@@ -130,20 +165,24 @@ if (isset($_GET["timeCardId"]))
  
    if ($timeCardInfo)
    {
-      $setupTime = $timeCardInfo->getSetupTimeHours() . ":" . $timeCardInfo->getSetupTimeMinutes();
-      $runTime = $timeCardInfo->getRunTimeHours() . ":" . $timeCardInfo->getRunTimeMinutes();
+      $runTime = $timeCardInfo->formatRunTime();
+      $setupTime = $timeCardInfo->formatSetupTime();
+      $totalTime = $timeCardInfo->formatTotalTime();
       
-      echo "timeCardId: " .     $timeCardInfo->timeCardId .           "<br/>";
-      echo "dateTime: " .       $timeCardInfo->dateTime .             "<br/>";
-      echo "employeeNumber: " . $timeCardInfo->employeeNumber .       "<br/>";
-      echo "jobNumber: " .      $timeCardInfo->jobNumber .            "<br/>";
-      echo "materialNumber: " . $timeCardInfo->materialNumber .       "<br/>";
-      echo "setupTime: " .      $setupTime .                          "<br/>";
-      echo "runTime: " .        $runTime .                            "<br/>";
-      echo "partCount: " .      $timeCardInfo->partCount .            "<br/>";
-      echo "scrapCount: " .     $timeCardInfo->scrapCount .           "<br/>";
-      echo "commentCodes:"      dechex($timeCardInfo->commentCodes) . "<br/>"; 
-      echo "comments: " .       $timeCardInfo->comments .             "<br/>";
+      echo "timeCardId: " .       $timeCardInfo->timeCardId .           "<br/>";
+      echo "dateTime: " .         $timeCardInfo->dateTime .             "<br/>";
+      echo "employeeNumber: " .   $timeCardInfo->employeeNumber .       "<br/>";
+      echo "jobNumber: " .        $timeCardInfo->jobNumber .            "<br/>";
+      echo "materialNumber: " .   $timeCardInfo->materialNumber .       "<br/>";
+      echo "runTime: " .          $runTime .                            "<br/>";
+      echo "setupTime: " .        $setupTime .                          "<br/>";
+      echo "totalTime: " .        $totalTime .                          "<br/>";
+      echo "partCount: " .        $timeCardInfo->partCount .            "<br/>";
+      echo "scrapCount: " .       $timeCardInfo->scrapCount .           "<br/>";
+      echo "commentCodes:" .      dechex($timeCardInfo->commentCodes) . "<br/>"; 
+      echo "comments: " .         $timeCardInfo->comments .             "<br/>";
+      echo "approvedBy: " .       $timeCardInfo->approvedBy .           "<br/>";
+      echo "approvedDateTime: " . $timeCardInfo->approvedDateTime .     "<br/>";
    }
    else
    {

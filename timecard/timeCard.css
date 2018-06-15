@@ -138,6 +138,18 @@ body {
 	cursor: pointer;
 }
 
+.approved {
+   color: #039603;
+}
+
+.unapproved {
+	color: #ff0000;
+}
+
+.approval-div.no-approval-required {
+   display: none;
+}
+
 .operator-input
 {
    visibility: hidden;
@@ -204,6 +216,12 @@ input:checked + label > div  {
 .adjust-time-button {
 	margin-left:10px;
 	margin-right:10px;
+}
+
+.time-input {
+   width:175px; 
+   margin-left:10px; 
+   margin-right:10px;
 }
 
 /* viewTimeCards.php */

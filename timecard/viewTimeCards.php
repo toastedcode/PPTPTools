@@ -119,8 +119,8 @@ HEREDOC;
                   <th>Job #</th>
                   <th>Machine #</th>
                   <th>Heat #</th>
-                  <th>Setup Time</th>
                   <th>Run Time</th>
+                  <th>Setup Time</th>
                   <th>Basket Count</th>
                   <th>Part Count</th>
                   <th>Scrap Count</th>
@@ -177,6 +177,12 @@ HEREDOC;
                      $wcNumber = $jobInfo->wcNumber;
                   }
                   
+                  $approval = ($timeCardInfo->requiresApproval() ?
+                                  ($timeCardInfo->isApproved() ?
+                                      "approved" :
+                                      "unapproved") :
+                                  "no-approval-required");
+                  
                   $viewEditIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
@@ -201,8 +207,8 @@ HEREDOC;
                         <td>$timeCardInfo->jobNumber</td>
                         <td>$wcNumber</td>
                         <td>$timeCardInfo->materialNumber</td>
-                        <td>{$timeCardInfo->formatSetupTime()}</td>
                         <td>{$timeCardInfo->formatRunTime()}</td>
+                        <td class="$approval">{$timeCardInfo->formatSetupTime()}<div class="approval-div $approval">$approval</div></td>
                         <td>$timeCardInfo->panCount</td>
                         <td>$timeCardInfo->partCount</td>
                         <td>$timeCardInfo->scrapCount</td>

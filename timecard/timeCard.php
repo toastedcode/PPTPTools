@@ -198,14 +198,14 @@ function updateTimeCardInfo()
       $_SESSION["timeCardInfo"]->materialNumber = $_POST['materialNumber'];
    }
    
-   if (isset($_POST['setupTimeHours']) && isset($_POST['setupTimeMinutes']))
-   {
-      $_SESSION["timeCardInfo"]->setupTime = (($_POST['setupTimeHours'] * 60) + $_POST['setupTimeMinutes']);
-   }
-   
    if (isset($_POST['runTimeHours']) && isset($_POST['runTimeMinutes']))
    {
       $_SESSION["timeCardInfo"]->runTime = (($_POST['runTimeHours'] * 60) + $_POST['runTimeMinutes']);
+   }
+   
+   if (isset($_POST['setupTimeHours']) && isset($_POST['setupTimeMinutes']))
+   {
+      $_SESSION["timeCardInfo"]->setupTime = (($_POST['setupTimeHours'] * 60) + $_POST['setupTimeMinutes']);
    }
    
    if (isset($_POST['panCount']))

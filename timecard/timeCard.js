@@ -358,6 +358,8 @@ function changeSetupTimeHour(delta)
    {
       field.validator.validate();
    }
+   
+   autoFillTotalTime();
 }
 
 function changeSetupTimeMinute(delta)
@@ -384,6 +386,8 @@ function changeSetupTimeMinute(delta)
    {
       field.validator.validate();
    }
+   
+   autoFillTotalTime();
 }
 
 function changeRunTimeHour(delta)
@@ -410,6 +414,8 @@ function changeRunTimeHour(delta)
    {
       field.validator.validate();
    }
+   
+   autoFillTotalTime();
 }
 
 function changeRunTimeMinute(delta)
@@ -436,6 +442,8 @@ function changeRunTimeMinute(delta)
    {
       field.validator.validate();
    }
+   
+   autoFillTotalTime();
 }
 
 function filterToday()
@@ -524,5 +532,34 @@ function autoFillEfficiency()
             efficiencyInput.value = efficiency.toFixed(2);
          }
       }
+   }
+}
+
+function autoFillTotalTime()
+{
+   var runTimeHourInput = document.getElementById("runTimeHour-input");
+   var runTimeMinuteInput = document.getElementById("runTimeMinute-input");
+   var setupTimeHourInput = document.getElementById("setupTimeHour-input");
+   var setupTimeMinuteInput = document.getElementById("setupTimeMinute-input");
+   var totalTimeHourInput = document.getElementById("totalTimeHour-input");
+   var totalTimeMinuteInput = document.getElementById("totalTimeMinute-input");
+   
+   if (setupTimeHourInput.validator.isValid() && 
+       setupTimeMinuteInput.validator.isValid() &&
+       runTimeHourInput.validator.isValid() &&
+       runTimeMinuteInput.validator.isValid())
+   {
+      var runTimeMinutes = ((parseInt(runTimeHourInput.value) * 60) + parseInt(runTimeMinuteInput.value));
+      var setupTimeMinutes = ((parseInt(setupTimeHourInput.value) * 60) + parseInt(setupTimeMinuteInput.value));
+      
+      var totalTimeMinutes = runTimeMinutes + setupTimeMinutes;
+        
+      totalTimeHourInput.value = Math.floor(totalTimeMinutes / 60);
+      totalTimeMinuteInput.value = (totalTimeMinutes % 60);
+   }
+   else
+   {
+      totalTimeHourInput.value = 0;
+      totalTimeMinuteInput.value = 0;
    }
 }

@@ -11,13 +11,13 @@ class PrintTimeCard extends ViewTimeCard
       $timeCardInfo = ViewTimeCard::getTimeCardInfo();
       
       $titleDiv = ViewTimeCard::titleDiv();
-      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo, $readOnly);
+      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo, true);
       $operatorDiv = ViewTimeCard::operatorDiv($timeCardInfo);
-      $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, $readOnly);
-      $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, $readOnly);
-      $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
-      $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
-      $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
+      $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, true);
+      $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, true);
+      $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, true);
+      $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, true);
+      $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, true);
       $qrDiv = ViewTimeCard::qrDiv($timeCardInfo);
       
       $html =

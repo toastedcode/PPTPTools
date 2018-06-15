@@ -25,15 +25,15 @@ class EnterTime
       </div>
 
       <script>
-         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
-         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
          var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
+         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
+         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
 
-         setupTimeHourValidator.init();
-         setupTimeMinuteValidator.init();
          runTimeHourValidator.init();
          runTimeMinuteValidator.init();
+         setupTimeHourValidator.init();
+         setupTimeMinuteValidator.init();
       </script>
 HEREDOC;
       
@@ -48,59 +48,28 @@ HEREDOC;
    private static function timeInput()
    {
       $timeCardInfo = EnterTime::getTimeCardInfo();
-      
-      $setupTimeHours = $timeCardInfo->getSetupTimeHours();
-      $setupTimeMinutes = $timeCardInfo->getSetupTimeMinutes();
+
       $runTimeHours = $timeCardInfo->getRunTimeHours();
       $runTimeMinutes = $timeCardInfo->getRunTimeMinutes();
+      $setupTimeHours = $timeCardInfo->getSetupTimeHours();
+      $setupTimeMinutes = $timeCardInfo->getSetupTimeMinutes();
+      $totalTimeHours = $timeCardInfo->getTotalTimeHours();
+      $totalTimeMinutes = $timeCardInfo->getTotalTimeMinutes();
       
       $html =
 <<<HEREDOC
-      <!-- Setup Time -->
-      <div id="setup-time-div" class="flex-vertical">
-         <div>Setup Time</div>
-         <div class="flex-horizontal">
-            <!-- Hours input -->
-            <div id="setup-time-hours-div" class="flex-vertical">
-               <div>Hours</div>
-               <div class="flex-horizontal">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(-1)">
-                     <i class="material-icons">remove</i>
-                  </button>
-                  <input id="setupTimeHour-input" form="input-form" class="large-text-input" name="setupTimeHours" type="number" oninput="this.validator.validate()" value="$setupTimeHours">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(1)">
-                     <i class="material-icons">add</i>
-                  </button> 
-               </div>
-            </div>
-            <!-- Minutes input -->
-            <div class="flex-vertical">
-               <div>Minutes</div>
-               <div class="flex-horizontal">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(-15)">
-                     <i class="material-icons">remove</i>
-                  </button>
-                  <input id="setupTimeMinute-input" form="input-form" class="large-text-input" name="setupTimeMinutes" type="number" oninput="this.validator.validate()" value="$setupTimeMinutes">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(15)">
-                     <i class="material-icons">add</i>
-                  </button>
-               </div>
-            </div>
-         </div>
-      </div>
-
       <!-- Run Time -->
       <div class="flex-vertical">
          <div>Run Time</div>
          <div class="flex-horizontal">
             <!-- Hours input -->
-            <div id="setup-time-hours-div" class="flex-vertical">
+            <div id="run-time-hours-div" class="flex-vertical">
                <div>Hours</div>
                <div class="flex-horizontal">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeHour(-1)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeHour-input" form="input-form" class="large-text-input" name="runTimeHours" type="number" oninput="this.validator.validate()" value="$runTimeHours">
+                  <input id="runTimeHour-input" form="input-form" class="large-text-input time-input" name="runTimeHours" type="number" oninput="this.validator.validate(); autoFillTotalTime();" value="$runTimeHours">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeHour(1)">
                      <i class="material-icons">add</i>
                   </button>
@@ -113,10 +82,64 @@ HEREDOC;
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(-15)">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="runTimeMinute-input" form="input-form" class="large-text-input" name="runTimeMinutes" type="number" oninput="this.validator.validate()" value="$runTimeMinutes">
+                  <input id="runTimeMinute-input" form="input-form" class="large-text-input time-input" name="runTimeMinutes" type="number" oninput="this.validator.validate(); autoFillTotalTime();" value="$runTimeMinutes">
                   <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeRunTimeMinute(15)">
                      <i class="material-icons">add</i>
                   </button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Setup Time -->
+      <div id="setup-time-div" class="flex-vertical">
+         <div>Setup Time</div>
+         <div class="flex-horizontal">
+            <!-- Hours input -->
+            <div id="setup-time-hours-div" class="flex-vertical">
+               <div>Hours</div>
+               <div class="flex-horizontal">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(-1)">
+                     <i class="material-icons">remove</i>
+                  </button>
+                  <input id="setupTimeHour-input" form="input-form" class="large-text-input time-input" name="setupTimeHours" type="number" oninput="this.validator.validate(); autoFillTotalTime();" value="$setupTimeHours">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(1)">
+                     <i class="material-icons">add</i>
+                  </button> 
+               </div>
+            </div>
+            <!-- Minutes input -->
+            <div class="flex-vertical">
+               <div>Minutes</div>
+               <div class="flex-horizontal">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(-15)">
+                     <i class="material-icons">remove</i>
+                  </button>
+                  <input id="setupTimeMinute-input" form="input-form" class="large-text-input time-input" name="setupTimeMinutes" type="number" oninput="this.validator.validate(); autoFillTotalTime();" value="$setupTimeMinutes">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(15)">
+                     <i class="material-icons">add</i>
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Total Time -->
+      <div class="flex-vertical">
+         <div>Total Time</div>
+         <div class="flex-horizontal">
+            <!-- Hours input -->
+            <div class="flex-vertical">
+               <div>Hours</div>
+               <div class="flex-horizontal">
+                  <input id="totalTimeHour-input" class="large-text-input time-input" type="number" value="$totalTimeHours" disabled>
+               </div>
+            </div>
+            <!-- Minutes input -->
+            <div class="flex-vertical">
+               <div>Minutes</div>
+               <div class="flex-horizontal">
+                  <input id="totalTimeMinute-input" class="large-text-input time-input" type="number" value="$totalTimeMinutes" disabled>
                </div>
             </div>
          </div>
