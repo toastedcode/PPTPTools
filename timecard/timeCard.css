@@ -143,11 +143,36 @@ body {
 }
 
 .unapproved {
-	color: #ff0000;
+   color: #ff0000;
 }
 
-.approval-div.no-approval-required {
+.approval.unapproved, .approval.no-approval-required {
+   display: none; 
+}
+
+.unapproval.approved, .unapproval.no-approval-required {
    display: none;
+}
+
+button.approval, button.unapproval {
+   border-width: 0;
+   outline: none;
+   box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+   background-color: #484fb0;
+   
+   cursor: pointer;
+   
+   color: #ffffff;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   font-size: 18px;
+   
+   height: auto;
+
+   padding: 5px 5px;
+   
+   margin-right: 10px;
+   margin-left: 10px;
+}
 }
 
 .operator-input

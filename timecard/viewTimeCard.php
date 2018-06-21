@@ -186,16 +186,42 @@ HEREDOC;
    {
       $disabled = ($readOnly) ? "disabled" : "";
       
-      $approvalText = "";
-      $approval = "";
+      $approval = "no-approval-required";
       if ($timeCardInfo->requiresApproval())
       {
-         $approval = $timeCardInfo->isApproved() ? "approved" : "unapproved";
-         $approvalText = $timeCardInfo->isApproved() ? "Approved by supervisor" : "Requires supervisor approval";
+         if ($timeCardInfo->isApproved())
+         {
+            $approval = "approved";
+            
+         }
+         else
+         {
+            $approval = "unapproved";
+         }
       }
-      else
+      
+      $approvalText = "Approved by supervisor";
+      /*
+      $userInfo = UserInfo::load($timeCardInfo->approvedBy);
+      if ($userInfo)
       {
-         $approval = "no-approval-required";
+         $approvalText = "Approved by " . $userInfo->username;
+      }
+      */
+      
+      $approvalButton = "";
+      $unapprovalButton = "";
+      if (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS))
+      {
+         $approvingUser = Authentication::getAuthenticatedUser();
+         $approvalButton = 
+<<<HEREDOC
+         <button id="approve-button" class="unapproval $approval" onclick="approve($approvingUser->employeeNumber)">Approve</button>
+HEREDOC;
+         $unapprovalButton =
+<<<HEREDOC
+         <button id="unapprove-button" class="approval $approval" onclick="unapprove()">Unapprove</button>
+HEREDOC;
       }
       
       // Pad minutes to 2 digits.
@@ -214,10 +240,19 @@ HEREDOC;
          </div>
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Setup time</h3></div>
-            <input id="setupTimeHour-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
-            <div style="padding: 5px;">:</div>
-            <input id="setupTimeMinute-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate();" value="$setupTimeMinutes" $disabled />
-            <div id="approval-div" class="approval-div $approval">$approvalText</div>
+            <div class="flex-col-top-left">
+               <div class="flex-horizontal">
+                  <input id="setupTimeHour-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate(); updateApproval();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
+                  <div style="padding: 5px;">:</div>
+                  <input id="setupTimeMinute-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate(); updateApproval();" value="$setupTimeMinutes" $disabled />
+                  <input id="approvedBy-input" type="hidden" form="input-form" name="approvedBy" value="$timeCardInfo->approvedBy" />
+                  <input type="hidden" form="input-form" name="approvedDateTime" value="$timeCardInfo->approvedDateTime" />
+                  $approvalButton
+                  $unapprovalButton
+               </div>
+               <div id="approval-div" class="approval $approval">$approvalText</div>
+               <div id="unapproval-div" class="unapproval $approval">Requires supervisor approval</div>
+            </div>
          </div>
       </div>
 HEREDOC;

@@ -124,7 +124,7 @@ HEREDOC;
                   <th>Mfg. Date</th>
                   <th>Work Center #</th>
                   <th>Part #</th>
-                  <th>Pan Count</th>
+                  <th>Basket Count</th>
                   <th>Weight</th>
                   <th></th>
                </tr>

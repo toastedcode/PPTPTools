@@ -147,7 +147,7 @@ class TimeCardInfo
    
    public function requiresApproval()
    {
-      return ($this->setupTime > 0);
+      return (($this->getSetupTimeHours() + $this->getSetupTimeMinutes()) > 0);
    }
    
    public function isApproved()

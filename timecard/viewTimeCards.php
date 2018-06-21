@@ -177,11 +177,29 @@ HEREDOC;
                      $wcNumber = $jobInfo->wcNumber;
                   }
                   
-                  $approval = ($timeCardInfo->requiresApproval() ?
-                                  ($timeCardInfo->isApproved() ?
-                                      "approved" :
-                                      "unapproved") :
-                                  "no-approval-required");
+                  $approval = "no-approval-required";
+                  $tooltip = "";
+                  if ($timeCardInfo->requiresApproval())
+                  {
+                     if ($timeCardInfo->isApproved())
+                     {
+                        $approval = "approved";
+
+                        $user = UserInfo::load($timeCardInfo->approvedBy);
+                        if ($user)
+                        {
+                           $tooltip = "tooltip=\"Approved by " . $user->getFullName() . "\"";
+                        }
+                        else
+                        {
+                           $tooltip = "tooltip=\"Approved\"";
+                        }
+                     }
+                     else
+                     {
+                        $approval = "unapproved";
+                     }
+                  }
                   
                   $viewEditIcon = "";
                   $deleteIcon = "";
@@ -208,7 +226,11 @@ HEREDOC;
                         <td>$wcNumber</td>
                         <td>$timeCardInfo->materialNumber</td>
                         <td>{$timeCardInfo->formatRunTime()}</td>
-                        <td class="$approval">{$timeCardInfo->formatSetupTime()}<div class="approval-div $approval">$approval</div></td>
+                        <td class="$approval">
+                           {$timeCardInfo->formatSetupTime()}
+                           <div class="approval $approval" $tooltip>Approved</div>
+                           <div class="unapproval $approval">Unapproved</div>
+                        </td>
                         <td>$timeCardInfo->panCount</td>
                         <td>$timeCardInfo->partCount</td>
                         <td>$timeCardInfo->scrapCount</td>

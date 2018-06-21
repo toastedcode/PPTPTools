@@ -563,3 +563,64 @@ function autoFillTotalTime()
       totalTimeMinuteInput.value = 0;
    }
 }
+
+function updateApproval()
+{
+   var setupTimeHourInput = document.getElementById("setupTimeHour-input");
+   var setupTimeMinuteInput = document.getElementById("setupTimeMinute-input");  
+   var approvedByInput = document.getElementById("approvedBy-input");
+   
+   var approval = "no-approval-required";
+   
+   if (setupTimeHourInput.validator.isValid() && 
+       setupTimeMinuteInput.validator.isValid())
+   {
+      var setupTimeMinutes = ((parseInt(setupTimeHourInput.value) * 60) + parseInt(setupTimeMinuteInput.value));
+      
+      if (setupTimeMinutes > 0)
+      {
+         approval = (parseInt(approvedByInput.value) > 0) ? "approved" : "unapproved";
+      }
+   }
+   
+   setApproval("setupTimeHour-input", approval);
+   setApproval("setupTimeMinute-input", approval);
+   setApproval("approval-div", approval);
+   setApproval("unapproval-div", approval);
+   setApproval("approve-button", approval);
+   setApproval("unapprove-button", approval);
+}
+
+function setApproval(elementId, approval)
+{
+   var element = document.getElementById(elementId);
+   
+   if (element)
+   {
+      // Clear existing class tags.
+      element.classList.remove('approved');
+      element.classList.remove('unapproved');
+      element.classList.remove('no-approval-required');
+      
+      // Set new approval tag.
+      element.classList.add(approval);
+   }   
+}
+
+function approve(approvedBy)
+{
+   var approvedByInput = document.getElementById("approvedBy-input");
+   
+   approvedByInput.value = approvedBy;
+   
+   updateApproval();
+}
+
+function unapprove(approvedBy)
+{
+   var approvedByInput = document.getElementById("approvedBy-input");
+   
+   approvedByInput.value = 0;
+   
+   updateApproval();
+}
