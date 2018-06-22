@@ -158,11 +158,11 @@ button.approval, button.unapproval {
    border-width: 0;
    outline: none;
    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
-   background-color: #484fb0;
+   background-color: #ebebeb;
    
    cursor: pointer;
    
-   color: #ffffff;
+   color: #000000;
    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
    font-size: 18px;
    
