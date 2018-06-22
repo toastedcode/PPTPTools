@@ -153,7 +153,7 @@ class TimeCardInfo
    public function isApproved()
    {
       // A time card is considered approved if there was no setup time, or if a manager has approved the setup time.
-      return (!$this->requiresApproval()|| ($this->approvedBy > 0));
+      return (!$this->requiresApproval() || ($this->approvedBy > 0));
    }
 }
 

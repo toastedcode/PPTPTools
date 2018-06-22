@@ -250,7 +250,7 @@ function updateTimeCardInfo()
      
    if (isset($_POST['approvedBy']))
    {
-      $_SESSION["timeCardInfo"]->approvedBy = $_POST['approvedBy'];
+      $_SESSION["timeCardInfo"]->approvedBy = intval($_POST['approvedBy']);
    }
 }
 
