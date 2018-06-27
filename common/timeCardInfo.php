@@ -1,4 +1,5 @@
 <?php
+require_once 'commentCodes.php';
 require_once 'database.php';
 require_once 'jobInfo.php';
 require_once 'time.php';
@@ -74,17 +75,38 @@ class TimeCardInfo
    
    public function hasCommentCode($code)
    {
-      return (($this->commentCodes & $code) != 0);
+      $hasCode = false;
+      
+      $commentCode = CommentCode::getCommentCode($code);
+      
+      if ($commentCode)
+      {
+         $hasCode = (($this->commentCodes & $commentCode->bits) != 0);
+      }
+      
+      return ($hasCode);
    }
    
    public function setCommentCode($code)
    {
+      $commentCode = CommentCode::getCommentCode($code);
+      
+      if ($commentCode)
+      {
+         $this->commentCodes |= $commentCode->bits;
+      }
+      
       $this->commentCodes |= $code;
    }
    
    public function clearCommentCode($code)
    {
-      $this->commentCodes &= ~$code;
+      $commentCode = CommentCode::getCommentCode($code);
+      
+      if ($commentCode)
+      {
+         $this->commentCodes &= ~($commentCode->bits);
+      }
    }
    
    public static function load($timeCardId)

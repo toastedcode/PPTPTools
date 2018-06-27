@@ -230,7 +230,7 @@ function updateTimeCardInfo()
    
    if (isset($_POST['commentCodes']))
    {
-      $commentCodes = CommentsPage::getCommentCodes();
+      $commentCodes = CommentCode::getCommentCodes();
       
       foreach ($commentCodes as $commentCode)
       {
@@ -349,6 +349,7 @@ processAction(getAction());
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+<link rel="stylesheet" type="text/css" href="../common/form.css"/>
 <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
 <link rel="stylesheet" type="text/css" href="timeCard.css"/>
 

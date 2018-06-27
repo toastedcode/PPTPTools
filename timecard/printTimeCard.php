@@ -1,4 +1,5 @@
 <?php
+require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once 'viewTimeCard.php';
 
@@ -16,34 +17,32 @@ class PrintTimeCard extends ViewTimeCard
       $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, true);
       $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, true);
       $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, true);
-      $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, true);
-      $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, true);
+      $commentsDiv = PrintTimeCard::commentsDiv($timeCardInfo, true);
+      $commentCodesDiv = PrintTimeCard::commentCodesDiv($timeCardInfo, true);
       $qrDiv = ViewTimeCard::qrDiv($timeCardInfo);
       
       $html =
 <<<HEREDOC
-         <div class="flex-horizontal" style="width:100%">
-            <div class="flex-vertical time-card-div">
-               <div class="flex-horizontal">
-                  $titleDiv
+         <div class="pptp-form" style="height:500px;">
+            <div class="form-row">
+               $titleDiv
+            </div>
+            <div class="form-row">
+               <div class="form-col">
                   $dateDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
                   $operatorDiv
-                  $timeDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
                   $jobDiv
+               </div>
+               <div class="form-col">
+                  $timeDiv
                   $partsDiv
                </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
+               <div class="form-col" style="justify-content:space-around;">
                   $commentCodesDiv
-                  $commentsDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
                   $qrDiv
                </div>
             </div>
+            $commentsDiv
          </div>
 HEREDOC;
       
@@ -53,6 +52,59 @@ HEREDOC;
    public static function render($readOnly)
    {
       echo (PrintTimeCard::getHtml($readOnly));
+   }
+   
+   protected static function commentsDiv($timeCardInfo, $readOnly)
+   {
+      $disabled = ($readOnly) ? "disabled" : "";
+      
+      $html =
+<<<HEREDOC
+      <div class="form-col" style="align-self:center;">
+         <div class="form-section-header">Comments</div>
+         <div class="form-item">
+            <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="2" maxlength="256" style="width:500px" $disabled>$timeCardInfo->comments</textarea>
+         </div>
+      </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function commentCodesDiv($timeCardInfo, $readOnly)
+   {
+      $disabled = ($readOnly) ? "disabled" : "";
+      
+      $commentCodes = CommentCode::getCommentCodes();
+      
+      $codes = "";
+
+      foreach($commentCodes as $commentCode)
+      {
+         if ($timeCardInfo->hasCommentCode($commentCode->code))
+         {
+            $id = "code-" . $commentCode->code . "-input";
+            $name = "code-" . $commentCode->code;
+            $description = $commentCode->description;
+         
+            $codes .=
+<<< HEREDOC
+               <div class="form-item">
+                  <label for="$id" class="comment-code-text">$description</label>
+               </div>
+HEREDOC;
+         }
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="form-col">
+         <div class="form-section-header">Codes</div>
+         $codes
+      </div>
+HEREDOC;
+      
+      return ($html);
    }
 }
 ?>
@@ -64,6 +116,7 @@ HEREDOC;
 <link rel="stylesheet" type="text/css" href="flex.css"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+<link rel="stylesheet" type="text/css" href="../common/form.css"/>
 <link rel="stylesheet" type="text/css" href="timeCard.css"/>
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>

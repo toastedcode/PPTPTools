@@ -40,31 +40,6 @@ HEREDOC;
       echo (CommentsPage::getHtml());
    }
    
-   public static function getCommentCodes()
-   {
-      $commentCodes = array();
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getCommentCodes();
-         
-         while ($result && ($row = $result->fetch_assoc()))
-         {
-            $code = new stdClass();
-            $code->description = $row["description"];
-            $code->code = intval($row["code"]);
-            
-            $commentCodes[] = $code;
-         }
-      }
-      
-      return ($commentCodes);
-   }
-   
    protected static function commentsDiv($timeCardInfo)
    {
       $html = 
@@ -77,7 +52,7 @@ HEREDOC;
    
    protected static function commentCodesDiv($timeCardInfo)
    {
-      $commentCodes = CommentsPage::getCommentCodes();
+      $commentCodes = CommentCode::getCommentCodes();
       
       $leftColumn = "";
       $rightColumn = "";

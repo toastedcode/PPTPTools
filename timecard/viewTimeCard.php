@@ -1,5 +1,6 @@
 <?php
 
+require_once '../common/commentCodes.php';
 require_once '../common/userInfo.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
@@ -35,21 +36,19 @@ class ViewTimeCard
       <div class="flex-vertical card-div">
          <div class="card-header-div">View Time Card</div>
 
-         <div class="flex-vertical content-div">
-            <div class="flex-vertical time-card-div">
-               <div class="flex-horizontal">
-                  $titleDiv
+         <div class="pptp-form" style="height:500px;">
+            $titleDiv
+            <div class="form-row">
+               <div class="form-col">
                   $dateDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
                   $operatorDiv
-                  $timeDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
                   $jobDiv
+               </div>
+               <div class="form-col">
+                  $timeDiv
                   $partsDiv
                </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
+               <div class="form-col">
                   $commentCodesDiv
                   $commentsDiv
                </div>
@@ -61,7 +60,7 @@ class ViewTimeCard
       </div>
 
       <script>
-         var materialNumberValidator = new IntValidator("material-number-input", 5, 1, 10000, false);
+         var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
          var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
          var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
          var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
@@ -95,9 +94,7 @@ HEREDOC;
    {
       $html =
 <<<HEREDOC
-      <div class="flex-horizontal time-card-table-col">
-         <h1>Time Card</h1>
-      </div>
+      <div class="form-title">Time Card</div>
 HEREDOC;
 
       return ($html);
@@ -105,16 +102,15 @@ HEREDOC;
    
    protected static function dateDiv($timeCardInfo)
    {
-      $dateString = Time::toJavascriptDate($timeCardInfo->dateTime);
+      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+      $dateString = $dateTime->format("m-d-Y");
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Date</h3></div>
-            <input type="date" class="medium-text-input" style="width:180px;" value="$dateString" disabled/>
+         <div class="form-item">
+            <div class="form-label">Date</div>
+            <input type="text" class="form-input-medium" name="date" style="width:100px;" value="$dateString" disabled />
          </div>
-      </div>
 HEREDOC;
       return ($html);
    }
@@ -130,15 +126,15 @@ HEREDOC;
       
       $html = 
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Operator</h2></div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Name</h3></div>
-            <input type="text" class="medium-text-input" style="width:200px;" value="$name" disabled>
+      <div class="form-col">
+         <div class="form-section-header">Operator</div>
+         <div class="form-item">
+            <div class="form-label">Name</div>
+            <input type="text" class="form-input-medium" style="width:150px;" value="$name" disabled>
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Employee #</h3></div>
-            <input type="text" class="medium-text-input" style="width:100px;" value="$timeCardInfo->employeeNumber" disabled>
+         <div class="form-item">
+            <div class="form-label">Employee #</div>
+            <input type="text" class="form-input-medium" style="width:100px;" value="$timeCardInfo->employeeNumber" disabled>
          </div>
       </div>
 HEREDOC;
@@ -162,20 +158,25 @@ HEREDOC;
       
       <input id="gross-parts-per-hour-input" type="hidden" value="{$jobInfo->getGrossPartsPerHour()}"/>
 
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Job</h2></div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Job #</h3></div>
-            <input type="text" class="medium-text-input" style="width:150px;" value="$timeCardInfo->jobNumber" disabled />
+      <div class="form-col">
+
+         <div class="form-section-header">Job</div>
+
+         <div class="form-item">
+            <div class="form-label">Job #</div>
+            <input type="text" class="form-input-medium" style="width:150px;" value="$timeCardInfo->jobNumber" disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Work center #</h3></div>
-            <input type="text" class="medium-text-input" style="width:150px;" value="$wcNumber" disabled />
+
+         <div class="form-item">
+            <div class="form-label">Work center #</div>
+            <input type="text" class="form-input-medium" style="width:150px;" value="$wcNumber" disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Heat #</h3></div>
-            <input id="material-number-input" type="number" class="medium-text-input" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled />
+
+         <div class="form-item">
+            <div class="form-label">Heat #</div>
+            <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled />
          </div>
+
       </div>
 HEREDOC;
          
@@ -216,11 +217,11 @@ HEREDOC;
          $approvingUser = Authentication::getAuthenticatedUser();
          $approvalButton = 
 <<<HEREDOC
-         <button id="approve-button" class="unapproval $approval" onclick="approve($approvingUser->employeeNumber)">Approve</button>
+         <button id="approve-button" class="unapproval $approval" onclick="approve($approvingUser->employeeNumber)" style="width: 100px;">Approve</button>
 HEREDOC;
          $unapprovalButton =
 <<<HEREDOC
-         <button id="unapprove-button" class="approval $approval" onclick="unapprove()">Unapprove</button>
+         <button id="unapprove-button" class="approval $approval" onclick="unapprove()" style="width: 100px;">Unapprove</button>
 HEREDOC;
       }
       
@@ -230,21 +231,23 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Time</h2></div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Run time</h3></div>
-            <input id="runTimeHour-input" type="number" class="medium-text-input" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); autoFillEfficiency();" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
+      <div class="form-col">
+         <div class="form-section-header">Time</div>
+         
+         <div class="form-item">
+            <div class="form-label">Run time</div>
+            <input id="runTimeHour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); autoFillEfficiency();" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
             <div style="padding: 5px;">:</div>
-            <input id="runTimeMinute-input" type="number" class="medium-text-input" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate();  autoFillEfficiency();"value="$runTimeMinutes" $disabled />
+            <input id="runTimeMinute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate();  autoFillEfficiency();"value="$runTimeMinutes" $disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Setup time</h3></div>
-            <div class="flex-col-top-left">
-               <div class="flex-horizontal">
-                  <input id="setupTimeHour-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate(); updateApproval();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
+
+         <div class="form-item">
+            <div class="form-label">Setup time</div>
+            <div class="form-col">
+               <div class="form-row">
+                  <input id="setupTimeHour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate(); updateApproval();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
                   <div style="padding: 5px;">:</div>
-                  <input id="setupTimeMinute-input" type="number" class="medium-text-input $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate(); updateApproval();" value="$setupTimeMinutes" $disabled />
+                  <input id="setupTimeMinute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate(); updateApproval();" value="$setupTimeMinutes" $disabled />
                   <input id="approvedBy-input" type="hidden" form="input-form" name="approvedBy" value="$timeCardInfo->approvedBy" />
                   <input type="hidden" form="input-form" name="approvedDateTime" value="$timeCardInfo->approvedDateTime" />
                   $approvalButton
@@ -267,25 +270,31 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Part Counts</h2></div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Basket count</h3></div>
-            <input id="panCount-input" type="number" class="medium-text-input" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="$timeCardInfo->panCount" $disabled />
+      <div class="form-col">
+         
+         <div class="form-section-header">Part Counts</div>
+         
+         <div class="form-item">
+            <div class="form-label">Basket count</div>
+            <input id="panCount-input" type="number" class="form-input-medium" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="$timeCardInfo->panCount" $disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Good count</h3></div>
-            <input id="partsCount-input" type="number" class="medium-text-input" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); autoFillEfficiency();" value="$timeCardInfo->partCount" $disabled />
+
+         <div class="form-item">
+            <div class="form-label">Good count</div>
+            <input id="partsCount-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); autoFillEfficiency();" value="$timeCardInfo->partCount" $disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Scrap count</h3></div>
-            <input id="scrapCount-input" type="number" class="medium-text-input" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="$timeCardInfo->scrapCount" $disabled />
+
+         <div class="form-item">
+            <div class="form-label">Scrap count</div>
+            <input id="scrapCount-input" type="number" class="form-input-medium" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="$timeCardInfo->scrapCount" $disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Efficiency</h3></div>
-            <input id="efficiency-input" type="number" class="medium-text-input" style="width:100px;" value="$efficiency" disabled />
-            <div><h3>&nbsp%</h3></div>
+
+         <div class="form-item">
+            <div class="form-label">Efficiency</div>
+            <input id="efficiency-input" type="number" class="form-input-medium" style="width:100px;" value="$efficiency" disabled />
+            <div>&nbsp%</div>
          </div>
+
       </div>
 HEREDOC;
          
@@ -298,10 +307,10 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Comments</h2></div>
-         <div class="flex-horizontal">
-            <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" $disabled>$timeCardInfo->comments</textarea>
+      <div class="form-col">
+         <div class="form-section-header">Comments</div>
+         <div class="form-item">
+            <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" $disabled>$timeCardInfo->comments</textarea>
          </div>
       </div>
 HEREDOC;
@@ -313,12 +322,12 @@ HEREDOC;
    {
       $disabled = ($readOnly) ? "disabled" : "";
       
-      $commentCodes = CommentsPage::getCommentCodes();
+      $commentCodes = CommentCode::getCommentCodes();
       
       $leftColumn = "";
       $rightColumn = "";
       $index = 0;
-      foreach($commentCodes as $commentCode)
+      foreach ($commentCodes as $commentCode)
       {
          $id = "code-" . $commentCode->code . "-input";
          $name = "code-" . $commentCode->code;
@@ -327,9 +336,9 @@ HEREDOC;
          
          $codeDiv = 
 <<< HEREDOC
-            <div class="flex-horizontal">
+            <div class="form-item">
                <input id="$id" type="checkbox" class="comment-checkbox" form="input-form" name="$name" $checked $disabled/>
-               <label for="$id" class="medium-text-input">$description</label>
+               <label for="$id" class="form-input-medium">$description</label>
             </div>
 HEREDOC;
 
@@ -348,13 +357,13 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <input type="hidden" form="input-form" name="commentCodes" value="true"/>
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Codes</h2></div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="flex-vertical">
+      <div class="form-col">
+         <div class="form-section-header">Codes</div>
+         <div class="form-row">
+            <div class="form-col">
                $leftColumn
             </div>
-            <div class="flex-vertical">
+            <div class="form-col">
                $rightColumn
             </div>
          </div>
@@ -375,7 +384,7 @@ HEREDOC;
          
          $html =
 <<<HEREDOC
-         <div class="flex-vertical time-card-table-col" style="align-items:center">
+         <div class="form-col" style="align-items:center">
             <div><img src="qrCode.png"></image></div>
             <div>TC$timeCardInfo->timeCardId</div>
          </div>
@@ -407,16 +416,6 @@ HEREDOC;
          
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
          
-         if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
-         {
-            $navBar->highlightNavButton("Weigh Parts", "submitForm('input-form', '../partWeightLog/partWeightLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_weight', 'new_part_weight_entry')", true);
-         }
-         
-         if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
-         {
-            $navBar->highlightNavButton("Count Parts", "submitForm('input-form', '../partWasherLog/partWasherLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_part_count', 'new_part_washer_entry')", true);
-         }
-         
          $navBar->highlightNavButton("Ok", "submitForm('input-form', 'timeCard.php', 'view_time_cards', 'no_action')", false);
       }
       else 
@@ -427,16 +426,6 @@ HEREDOC;
          $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
          
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
-         
-         if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
-         {
-            $navBar->highlightNavButton("Weigh Parts", "submitForm('input-form', '../partWeightLog/partWeightLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_weight', 'new_part_weight_entry')", true);
-         }
-         
-         if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
-         {
-            $navBar->highlightNavButton("Count Parts", "submitForm('input-form', '../partWasherLog/partWasherLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_part_count', 'new_part_washer_entry')", true);
-         }
                   
          $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
       }

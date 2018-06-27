@@ -60,8 +60,8 @@ class ViewJob
       </div>
                
       <script>
-         var jobNumberPrefixValidator = new PartNumberValidator("job-number-prefix-input", 5, 1, 9999, false);
-         var jobNumberSuffixValidator = new IntValidator("job-number-suffix-input", 4, 1, 9999, false);
+         var jobNumberPrefixValidator = new PartNumberPrefixValidator("job-number-prefix-input", 5, 1, 9999, false);
+         var jobNumberSuffixValidator = new PartNumberSuffixValidator("job-number-suffix-input", 3, 1, 99, false);
          var cycleTimeValidator = new DecimalValidator("cycle-time-input", 5, 1, 60, 2, false);
          var netPercentageValidator = new DecimalValidator("net-percentage-input", 5, 0, 100, 2, false);
 
@@ -156,7 +156,7 @@ HEREDOC;
          <div class="form-col">
 
             <div class="form-item">
-               <div class="form-label">Job #</div>
+               <div class="form-label-long">Job #</div>
                <div style="display:flex; flex-direction:row; justify-content:flex-start;">
                   <input id="job-number-prefix-input" type="text" class="form-input-medium" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" oninput="{this.validator.validate(); autoFillPartNumber();}" autocomplete="off" $jobDisabled/>
                   <div>&nbsp-&nbsp</div>
@@ -165,38 +165,38 @@ HEREDOC;
             </div>
 
             <div class="form-item">
-               <div class="form-label">Part #</div>
+               <div class="form-label-long">Part #</div>
                <input id="part-number-display-input" type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->partNumber" disabled />
             </div>
 
             <div class="form-item">
-               <div class="form-label">Work center #</div>
+               <div class="form-label-long">Work center #</div>
                <div><select id="work-center-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
             </div>
 
             <div class="form-item">
-               <div class="form-label">Cycle Time</div>
+               <div class="form-label-long">Cycle Time</div>
                <input id="cycle-time-input" type="number" class="medium-text-input" name="cycleTime" form="input-form" style="width:150px;" value="$jobInfo->cycleTime" oninput="this.validator.validate(); autoFillPartStats();" $disabled />
             </div>
    
             <div class="form-item">
-               <div class="form-label">Gross Pieces/Hour</div>
+               <div class="form-label-long">Gross Pieces/Hour</div>
                <input id="gross-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
             </div>
    
             <div class="form-item">
-               <div class="form-label">Net Percentage/Hour</div>
+               <div class="form-label-long">Net Percentage/Hour</div>
                <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
                <div class="form-label">&nbsp%</div>
             </div>
    
             <div class="form-item">
-               <div class="form-label">Net Pieces/Hour</div>
+               <div class="form-label-long">Net Pieces/Hour</div>
                <input id="net-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
             </div>
    
             <div class="form-item">
-               <div class="form-label">Job status</div>
+               <div class="form-label-long">Job status</div>
                <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
             </div>
 

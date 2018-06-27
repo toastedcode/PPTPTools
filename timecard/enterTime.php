@@ -56,6 +56,20 @@ HEREDOC;
       $totalTimeHours = $timeCardInfo->getTotalTimeHours();
       $totalTimeMinutes = $timeCardInfo->getTotalTimeMinutes();
       
+      $approval = "no-approval-required";
+      if ($timeCardInfo->requiresApproval())
+      {
+         if ($timeCardInfo->isApproved())
+         {
+            $approval = "approved";
+            
+         }
+         else
+         {
+            $approval = "unapproved";
+         }
+      }
+            
       $html =
 <<<HEREDOC
       <!-- Run Time -->
@@ -99,11 +113,11 @@ HEREDOC;
             <div id="setup-time-hours-div" class="flex-vertical">
                <div>Hours</div>
                <div class="flex-horizontal">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(-1)">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(-1); updateApproval();">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="setupTimeHour-input" form="input-form" class="large-text-input time-input" name="setupTimeHours" type="number" oninput="this.validator.validate(); autoFillTotalTime();" value="$setupTimeHours">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(1)">
+                  <input id="setupTimeHour-input" form="input-form" class="large-text-input time-input" name="setupTimeHours" type="number" oninput="this.validator.validate(); autoFillTotalTime(); updateApproval();" value="$setupTimeHours">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeHour(1); updateApproval();">
                      <i class="material-icons">add</i>
                   </button> 
                </div>
@@ -112,16 +126,22 @@ HEREDOC;
             <div class="flex-vertical">
                <div>Minutes</div>
                <div class="flex-horizontal">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(-15)">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(-15); updateApproval();">
                      <i class="material-icons">remove</i>
                   </button>
-                  <input id="setupTimeMinute-input" form="input-form" class="large-text-input time-input" name="setupTimeMinutes" type="number" oninput="this.validator.validate(); autoFillTotalTime();" value="$setupTimeMinutes">
-                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(15)">
+                  <input id="setupTimeMinute-input" form="input-form" class="large-text-input time-input" name="setupTimeMinutes" type="number" oninput="this.validator.validate(); autoFillTotalTime(); updateApproval();" value="$setupTimeMinutes">
+                  <button type="button" class="mdl-button mdl-js-button mdl-button--raised adjust-time-button" onclick="changeSetupTimeMinute(15); updateApproval();">
                      <i class="material-icons">add</i>
                   </button>
                </div>
             </div>
          </div>
+      </div>
+
+      <input id="approvedBy-input" type="hidden" value="$timeCardInfo->approvedBy" />
+      <input type="hidden" value="$timeCardInfo->approvedDateTime" />
+      <div style="height:25px;">
+         <div id="approval-div" class="unapproval $approval">Setup time requires approval by a supervisor.</div>
       </div>
 
       <!-- Total Time -->

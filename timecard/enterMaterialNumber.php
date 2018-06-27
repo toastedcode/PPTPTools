@@ -37,7 +37,7 @@ class EnterMaterialNumber
 
          document.getElementById("material-number-input").focus();
          
-         var validator = new IntValidator("material-number-input", 5, 1, 10000, false);
+         var validator = new IntValidator("material-number-input", 4, 1, 9999, false);
          validator.init();
       </script>
 HEREDOC;

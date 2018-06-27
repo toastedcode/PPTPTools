@@ -186,7 +186,7 @@ function autoFillPartStats()
    }
 }
 
-function PartNumberValidator(inputId, maxLength, minValue, maxValue, allowNull)
+function PartNumberPrefixValidator(inputId, maxLength, minValue, maxValue, allowNull)
 {
    this.inputId = inputId;
    this.minValue = minValue;
@@ -194,7 +194,7 @@ function PartNumberValidator(inputId, maxLength, minValue, maxValue, allowNull)
    this.maxLength = maxLength;
    this.allowNull = allowNull;
    
-   PartNumberValidator.prototype.init = function()
+   PartNumberPrefixValidator.prototype.init = function()
    {
       var element = document.getElementById(this.inputId);
       
@@ -208,7 +208,7 @@ function PartNumberValidator(inputId, maxLength, minValue, maxValue, allowNull)
       }
    }
    
-   PartNumberValidator.prototype.isValid = function()
+   PartNumberPrefixValidator.prototype.isValid = function()
    {
       var valid = false;
    
@@ -238,7 +238,7 @@ function PartNumberValidator(inputId, maxLength, minValue, maxValue, allowNull)
       return (valid);
    }
    
-   PartNumberValidator.prototype.color = function(color)
+   PartNumberPrefixValidator.prototype.color = function(color)
    {
       var element = document.getElementById(this.inputId);
       
@@ -248,7 +248,89 @@ function PartNumberValidator(inputId, maxLength, minValue, maxValue, allowNull)
       }
    }
    
-   PartNumberValidator.prototype.validate = function()
+   PartNumberPrefixValidator.prototype.validate = function()
+   {
+      var valid = this.isValid();
+      
+      if (valid)
+      {
+         this.color("#000000");
+      }
+      else
+      {
+         this.color("#FF0000");
+      }
+
+      return (valid);
+   }
+}
+
+function PartNumberSuffixValidator(inputId, maxLength, minValue, maxValue, allowNull)
+{
+   this.inputId = inputId;
+   this.minValue = minValue;
+   this.maxValue = maxValue;
+   this.maxLength = maxLength;
+   this.allowNull = allowNull;
+   
+   PartNumberSuffixValidator.prototype.init = function()
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.maxLength = this.maxLength;
+         
+         element.validator = this;
+         
+         this.validate();
+      }
+   }
+   
+   PartNumberSuffixValidator.prototype.isValid = function()
+   {
+      var valid = false;
+   
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         var value = element.value;
+         
+         var lastChar = "";
+         var remainingChar = value;
+         if (value.length > 2)
+         {
+            lastChar = element.value.charAt(value.length - 1);
+            remainingChar = element.value.substring(0, (value.length - 2));
+         }
+         
+         if ((value == null) || (value == "")) 
+         {
+            valid = this.allowNull;
+         }
+         else
+         {
+            valid = (((lastChar == "") || (lastChar.toUpperCase().match(/[A-Z]/i))) && 
+                     (parseInt(remainingChar) >= this.minValue) && 
+                     (parseInt(remainingChar) <= this.maxValue));
+         }
+      }
+      
+      return (valid);
+   }
+   
+   PartNumberSuffixValidator.prototype.color = function(color)
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.style.color = color;
+      }
+   }
+   
+   PartNumberSuffixValidator.prototype.validate = function()
    {
       var valid = this.isValid();
       

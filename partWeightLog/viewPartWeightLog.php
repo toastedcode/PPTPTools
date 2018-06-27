@@ -121,6 +121,7 @@ HEREDOC;
                   <th>Job #</th>
                   <th>Laborer Name</th>
                   <th>Weigh Date</th>
+                  <th>Weigh Time</th>
                   <th>Mfg. Date</th>
                   <th>Basket Count</th>
                   <th>Weight</th>
@@ -170,6 +171,9 @@ HEREDOC;
                      $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $weighDate = $dateTime->format("m-d-Y");
                      
+                     $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $weighTime = $dateTime->format("h:i a");
+                     
                      $newIndicator = new NewIndicator($dateTime, 60);
                      $new = $newIndicator->getHtml();
                      
@@ -189,6 +193,7 @@ HEREDOC;
                            <td>$jobInfo->jobNumber</td>
                            <td>$laborerName</td>
                            <td>$weighDate $new</td>
+                           <td>$weighTime</td>
                            <td>$mfgDate</td>
                            <td>$timeCardInfo->panCount</td>                           
                            <td>$partWeightEntry->weight</td>

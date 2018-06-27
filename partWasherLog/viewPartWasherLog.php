@@ -119,6 +119,7 @@ HEREDOC;
                   <th>Job #</th>
                   <th>Washer Name</th>
                   <th>Wash Date</th>
+                  <th>Wash Time</th>
                   <th>Mfg. Date</th>
                   <th>Basket Count</th>
                   <th>Part Count</th>
@@ -168,6 +169,9 @@ HEREDOC;
                      $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $washDate = $dateTime->format("m-d-Y");
                      
+                     $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $washTime = $dateTime->format("h:i a");
+                     
                      $newIndicator = new NewIndicator($dateTime, 60);
                      $new = $newIndicator->getHtml();
                                           
@@ -187,6 +191,7 @@ HEREDOC;
                            <td>$jobInfo->jobNumber</td>
                            <td>$partWasherName</td>
                            <td>$washDate $new</td>
+                           <td>$washTime</td>
                            <td>$mfgDate</td>
                            <td>$partWasherEntry->panCount</td>
                            <td>$partWasherEntry->partCount</td>

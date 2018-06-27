@@ -1,10 +1,12 @@
 @CHARSET "ISO-8859-1";
 
 .pptp-form {
+   display: flex;
+   flex-direction: column;	
 }
 
 .form-title {
-   font-size: 40px;
+   font-size: 30px;
    margin: 20px 0px 20px 0px;
    display: flex;
    flex-direction: column;
@@ -24,6 +26,14 @@
    flex-direction: column;
 }
 
+.form-section-header {
+   font-weight:bold;
+   font-size: 18px;
+   display: flex;
+   flex-direction: row;
+   margin-bottom: 10px;
+}
+
 .form-item {
    display: flex;
    flex-direction: row;
@@ -35,6 +45,13 @@
    font-size: 14px;
    margin: 0px 0px 0px 0px;
    display: flex;
+   width: 100px;
+}
+
+.form-label-long {
+   font-size: 14px;
+   margin: 0px 0px 0px 0px;
+   display: flex;
    width: 150px;
 }
 
@@ -43,5 +60,5 @@
 }
 
 .form-input-medium {
-   font-size: 16px;
+   font-size: 18px;
 }

@@ -133,11 +133,12 @@ function updateJobInfo()
 {
    if (isset($_POST['jobNumber']))
    {
-      $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumber'];
+      $_SESSION["jobInfo"]->jobNumber = strtoupper($_POST['jobNumber']);
+      
    }
    else if (isset($_POST['jobNumberPrefix']) && isset($_POST['jobNumberSuffix']))
    {
-      $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumberPrefix'] . "-" . $_POST['jobNumberSuffix'];
+      $_SESSION["jobInfo"]->jobNumber = strtoupper($_POST['jobNumberPrefix'] . "-" . $_POST['jobNumberSuffix'].toUpperCase());
    }
    
    if (isset($_POST['creator']))
