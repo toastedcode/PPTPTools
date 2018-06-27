@@ -118,12 +118,10 @@ HEREDOC;
          <div class="part-weight-log-div">
             <table class="part-weight-log-table">
                <tr>
+                  <th>Job #</th>
                   <th>Laborer Name</th>
                   <th>Weigh Date</th>
-                  <th>Operator Name</th>
                   <th>Mfg. Date</th>
-                  <th>Work Center #</th>
-                  <th>Part #</th>
                   <th>Basket Count</th>
                   <th>Weight</th>
                   <th></th>
@@ -169,13 +167,6 @@ HEREDOC;
                         $laborerName = $operator->getFullName();
                      }
                      
-                     $operatorName = "unknown";
-                     $operator = UserInfo::load($timeCardInfo->employeeNumber);
-                     if ($operator)
-                     {
-                        $operatorName = $operator->getFullName();
-                     }
-                     
                      $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $weighDate = $dateTime->format("m-d-Y");
                      
@@ -195,12 +186,10 @@ HEREDOC;
                      $html .=
 <<<HEREDOC
                         <tr>
+                           <td>$jobInfo->jobNumber</td>
                            <td>$laborerName</td>
                            <td>$weighDate $new</td>
-                           <td>$operatorName</td>
                            <td>$mfgDate</td>
-                           <td>$jobInfo->wcNumber</td>
-                           <td>$jobInfo->partNumber</td>
                            <td>$timeCardInfo->panCount</td>                           
                            <td>$partWeightEntry->weight</td>
                            <td>$deleteIcon</td>

@@ -116,12 +116,10 @@ HEREDOC;
          <div class="part-washer-log-div">
             <table class="part-washer-log-table">
                <tr>
+                  <th>Job #</th>
                   <th>Washer Name</th>
                   <th>Wash Date</th>
-                  <th>Operator Name</th>
                   <th>Mfg. Date</th>
-                  <th>Work Center #</th>
-                  <th>Part #</th>
                   <th>Basket Count</th>
                   <th>Part Count</th>
                   <th></th>
@@ -167,13 +165,6 @@ HEREDOC;
                         $partWasherName= $operator->getFullName();
                      }
                      
-                     $operatorName = "unknown";
-                     $operator = UserInfo::load($timeCardInfo->employeeNumber);
-                     if ($operator)
-                     {
-                        $operatorName = $operator->getFullName();
-                     }
-                     
                      $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $washDate = $dateTime->format("m-d-Y");
                      
@@ -193,12 +184,10 @@ HEREDOC;
                      $html .=
 <<<HEREDOC
                         <tr>
+                           <td>$jobInfo->jobNumber</td>
                            <td>$partWasherName</td>
                            <td>$washDate $new</td>
-                           <td>$operatorName</td>
                            <td>$mfgDate</td>
-                           <td>$jobInfo->wcNumber</td>
-                           <td>$jobInfo->partNumber</td>
                            <td>$partWasherEntry->panCount</td>
                            <td>$partWasherEntry->partCount</td>
                            <td>$deleteIcon</td>
