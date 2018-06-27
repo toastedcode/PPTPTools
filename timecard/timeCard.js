@@ -13,30 +13,15 @@ function onDeleteTimeCard(timeCardId)
       form.appendChild(input);
       
       input = document.createElement('input');
+      input.setAttribute('name', 'view');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', 'view_time_cards');
+      form.appendChild(input);
+      
+      input = document.createElement('input');
       input.setAttribute('name', 'timeCardId');
       input.setAttribute('type', 'hidden');
       input.setAttribute('value', timeCardId);
-      form.appendChild(input);
-      
-      employeeNumber = document.getElementById('employeeNumberInput').value;
-      input = document.createElement('input');
-      input.setAttribute('name', 'employeeNumber');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', employeeNumber);
-      form.appendChild(input);
-      
-      startDate = document.getElementById('startDateInput').value;
-      input = document.createElement('input');
-      input.setAttribute('name', 'startDate');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', startDate);
-      form.appendChild(input);
-      
-      endDate = document.getElementById('endDateInput').value;
-      input = document.createElement('input');
-      input.setAttribute('name', 'endDate');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', endDate);
       form.appendChild(input);
       
       document.body.appendChild(form);

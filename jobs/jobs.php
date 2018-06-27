@@ -246,6 +246,7 @@ processAction(getAction());
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+<link rel="stylesheet" type="text/css" href="../common/form.css"/>
 <link rel="stylesheet" type="text/css" href="jobs.css"/>
 
 

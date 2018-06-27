@@ -213,10 +213,6 @@ class PPTPDatabase extends MySqlDatabase
       
       $result = $this->query($query);
       
-      $query = "DELETE FROM panticket WHERE timeCardId = $timeCardId;";
-      
-      $this->query($query);
-      
       return ($result);
    }
    
@@ -275,6 +271,15 @@ class PPTPDatabase extends MySqlDatabase
       "UPDATE user " .
       "SET username = '$userInfo->username', password = '$userInfo->password', roles = '$userInfo->roles', permissions = '$userInfo->permissions', firstName = '$userInfo->firstName', lastName = '$userInfo->lastName', email = '$userInfo->email' " .
       "WHERE employeeNumber = '$userInfo->employeeNumber';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteUser($employeeNumber)
+   {
+      $query = "DELETE FROM user WHERE employeeNumber = '$employeeNumber';";
       
       $result = $this->query($query);
       
@@ -364,78 +369,6 @@ class PPTPDatabase extends MySqlDatabase
          $this->updatePartCount_Day($sensorId, $partCount);
          $this->updatePartCount_Shift($sensorId, $partCount);
       }
-   }
-   
-   public function getPanTicket(
-         $panTicketId)
-   {
-      $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panTicketId = $panTicketId;";
-
-      $result = $this->query($query);
-      
-      return ($result);
-   }
-   
-   public function getPanTickets(
-         $employeeNumber,
-         $startDate,
-         $endDate)
-   {
-      $result = NULL;
-      if ($employeeNumber == 0)
-      {
-         $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE panticket.date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY panticket.date DESC, panTicketId DESC;";
-         $result = $this->query($query);
-      }
-      else
-      {
-         $query = "SELECT *, panticket.date AS panTicket_date, timecard.date AS timeCard_date FROM panticket INNER JOIN timecard ON panticket.timeCardId=timecard.TimeCard_ID WHERE EmployeeNumber=" . $employeeNumber . " AND panticket.date BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY panticket.date DESC, panTicketId DESC;";
-         $result = $this->query($query);
-      }
-      
-      return ($result);
-   }
-   
-   public function newPanTicket(
-         $panTicket)
-   {
-      $date = Time::toMySqlDate($panTicket->date);
-      
-      $query =
-      "INSERT INTO panticket " .
-      "(date, timeCardId, partNumber, materialNumber) " .
-      "VALUES " .
-      "('$date', '$panTicket->timeCardId', '$panTicket->partNumber', '$panTicket->materialNumber');";
-      
-      $result = $this->query($query);
-      
-      return ($result);
-   }
-   
-   public function updatePanTicket(
-         $panTicketId,
-         $panTicket)
-   {
-      $date = Time::toMySqlDate($panTicket->date);
-      
-      $query =
-      "UPDATE panticket " .
-      "SET date = \"$date\", timeCardId = $panTicket->timeCardId, partNumber = $panTicket->partNumber, materialNumber = $panTicket->materialNumber, weight = $panTicket->weight " .
-      "WHERE panTicketId = $panTicketId;";
-      
-      $result = $this->query($query);
-      
-      return ($result);
-   }
-   
-   public function deletePanTicket(
-         $panTicketId)
-   {
-      $query = "DELETE FROM panticket WHERE panTicketId = $panTicketId;";
-      
-      $result = $this->query($query);
-      
-      return ($result);
    }
    
    public function getIncompleteTimeCards($employeeNumber)

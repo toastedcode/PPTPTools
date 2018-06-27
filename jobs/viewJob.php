@@ -47,15 +47,11 @@ class ViewJob
       <div class="flex-vertical card-div">
          <div class="card-header-div">$title</div>
          
-         <div class="flex-vertical content-div">
-            <div class="flex-vertical time-card-div">
-               <div class="flex-horizontal">
-                  $titleDiv
-                  $creationDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
-                  $jobDiv
-               </div>
+         <div class="pptp-form" style="height:500px;">
+            $titleDiv
+            <div class="form-row">
+               $creationDiv
+               $jobDiv
             </div>
          </div>
          
@@ -91,9 +87,7 @@ HEREDOC;
    {
       $html =
 <<<HEREDOC
-      <div class="flex-horizontal time-card-table-col">
-         <h1>Job</h1>
-      </div>
+      <div class="form-title">Job</div>
 HEREDOC;
       
       return ($html);
@@ -113,14 +107,14 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Creator</h3></div>
-            <input type="text" class="medium-text-input" name="date" style="width:180px;" value="$creatorName" disabled />
+      <div class="form-col">
+         <div class="form-item">
+            <div class="form-label">Creator</div>
+            <input type="text" class="form-input-medium" name="date" style="width:180px;" value="$creatorName" disabled />
          </div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Date</h3></div>
-            <input type="date" class="medium-text-input" name="date" style="width:180px;" value="$date" disabled />
+         <div class="form-item">
+            <div class="form-label">Date</div>
+            <input type="date" class="form-input-medium" name="date" style="width:180px;" value="$date" disabled />
          </div>
       </div>
 HEREDOC;
@@ -159,51 +153,54 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
+         <div class="form-col">
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Job #</h3></div>
-            <input id="job-number-prefix-input" type="text" class="medium-text-input" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" oninput="{this.validator.validate(); autoFillPartNumber();}" autocomplete="off" $jobDisabled/>
-            <div><h3>&nbsp-&nbsp</h3></div>
-            <input id="job-number-suffix-input" type="text" class="medium-text-input" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" oninput="{this.validator.validate(); autoFillJobNumber();}" autocomplete="off" $jobDisabled/>
-         </div>
+            <div class="form-item">
+               <div class="form-label">Job #</div>
+               <div style="display:flex; flex-direction:row; justify-content:flex-start;">
+                  <input id="job-number-prefix-input" type="text" class="form-input-medium" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" oninput="{this.validator.validate(); autoFillPartNumber();}" autocomplete="off" $jobDisabled/>
+                  <div>&nbsp-&nbsp</div>
+                  <input id="job-number-suffix-input" type="text" class="form-input-medium" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" oninput="{this.validator.validate(); autoFillJobNumber();}" autocomplete="off" $jobDisabled/>
+               </div>
+            </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Part #</h3></div>
-            <input id="part-number-display-input" type="text" class="medium-text-input" style="width:150px;" value="$jobInfo->partNumber" disabled />
-         </div>
+            <div class="form-item">
+               <div class="form-label">Part #</div>
+               <input id="part-number-display-input" type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->partNumber" disabled />
+            </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Work center #</h3></div>
-            <div><select id="work-center-input" class="medium-text-input" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
-         </div>
+            <div class="form-item">
+               <div class="form-label">Work center #</div>
+               <div><select id="work-center-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
+            </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Cycle Time</h3></div>
-            <input id="cycle-time-input" type="number" class="medium-text-input" name="cycleTime" form="input-form" style="width:150px;" value="$jobInfo->cycleTime" oninput="this.validator.validate(); autoFillPartStats();" $disabled />
-         </div>
+            <div class="form-item">
+               <div class="form-label">Cycle Time</div>
+               <input id="cycle-time-input" type="number" class="medium-text-input" name="cycleTime" form="input-form" style="width:150px;" value="$jobInfo->cycleTime" oninput="this.validator.validate(); autoFillPartStats();" $disabled />
+            </div>
+   
+            <div class="form-item">
+               <div class="form-label">Gross Pieces/Hour</div>
+               <input id="gross-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
+            </div>
+   
+            <div class="form-item">
+               <div class="form-label">Net Percentage/Hour</div>
+               <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
+               <div class="form-label">&nbsp%</div>
+            </div>
+   
+            <div class="form-item">
+               <div class="form-label">Net Pieces/Hour</div>
+               <input id="net-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
+            </div>
+   
+            <div class="form-item">
+               <div class="form-label">Job status</div>
+               <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
+            </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Gross Pieces/Hour</h3></div>
-            <input id="gross-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
          </div>
-
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Net Percentage</h3></div>
-            <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
-            <div><h3>&nbsp%</h3></div>
-         </div>
-
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Net Pieces/Hour</h3></div>
-            <input id="net-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
-         </div>
-
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Job status</h3></div>
-            <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
-         </div>
-      </div>
 HEREDOC;
       
       return ($html);
