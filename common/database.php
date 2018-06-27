@@ -213,6 +213,14 @@ class PPTPDatabase extends MySqlDatabase
       
       $result = $this->query($query);
       
+      $query = "DELETE FROM partweight WHERE timeCardId = $timeCardId;";
+      
+      $result = $this->query($query);
+      
+      $query = "DELETE FROM partwasher WHERE timeCardId = $timeCardId;";
+      
+      $result = $this->query($query);
+      
       return ($result);
    }
    
