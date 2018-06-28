@@ -1,5 +1,6 @@
 <?php
 
+require_once '../common/commentCodes.php';
 require_once '../common/navigation.php';
 
 class CommentsPage
@@ -57,6 +58,7 @@ HEREDOC;
       $leftColumn = "";
       $rightColumn = "";
       $index = 0;
+      
       foreach($commentCodes as $commentCode)
       {
          $id = "code-" . $commentCode->code . "-input";

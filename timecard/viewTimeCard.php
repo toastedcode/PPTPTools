@@ -11,11 +11,13 @@ require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
 class ViewTimeCard
 {
-   public static function getHtml($readOnly)
+   public static function getHtml($view)
    {
       $html = "";
       
       $timeCardInfo = ViewTimeCard::getTimeCardInfo();
+      
+      $readOnly = (($view == "view_time_card") || ($view == "use_time_card"));
       
       $titleDiv = ViewTimeCard::titleDiv();
       $dateDiv = ViewTimeCard::dateDiv($timeCardInfo);
@@ -26,7 +28,7 @@ class ViewTimeCard
       $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
       $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
       
-      $navBar = ViewTimeCard::navBar($timeCardInfo, $readOnly);
+      $navBar = ViewTimeCard::navBar($timeCardInfo, $view);
       
       $html =
 <<<HEREDOC
@@ -377,7 +379,7 @@ HEREDOC;
    {
       if ($timeCardInfo->timeCardId != 0)
       {
-         $url = "www.roboxes.com/pptp/timecard/timeCard.php?view=view_time_card&timeCardId=$timeCardInfo->timeCardId";
+         $url = "www.roboxes.com/pptp/timecard/timeCard.php?view=use_time_card&timeCardId=$timeCardInfo->timeCardId";
          
          // http://phpqrcode.sourceforge.net/
          QRcode::png($url, "qrCode.png");
@@ -394,40 +396,67 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function navBar($timeCardInfo, $readOnly)
+   protected static function navBar($timeCardInfo, $view)
    {
       $navBar = new Navigation();
       
       $navBar->start();
       
-      if ($timeCardInfo->timeCardId == 0)
+      if ($view == "view_time_card")
       {
          // Case 1
-         // Viewing as last step of creating a new time card.
-         
-         $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-         $navBar->backButton("submitForm('input-form', 'timeCard.php', 'enter_comments', 'update_time_card_info');");
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
-      }
-      else if ($readOnly == true)
-      {
-         // Case 2
          // Viewing single time card selected from table of time cards.
          
          $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
          
          $navBar->highlightNavButton("Ok", "submitForm('input-form', 'timeCard.php', 'view_time_cards', 'no_action')", false);
       }
-      else 
+      else if ($view == "edit_time_card")
       {   
-         // Case 3
-         // Editing a single time card selected from table of time cards.
+         if ($timeCardInfo->timeCardId == 0)
+         {
+            // Case 2
+            // Viewing as last step of creating a new time card.
+            
+            $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+            $navBar->backButton("submitForm('input-form', 'timeCard.php', 'enter_comments', 'update_time_card_info');");
+            $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
+         }
+         else
+         {
+            // Case 3
+            // Editing a single time card selected from table of time cards.
+            
+            $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+            
+            $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
+                     
+            $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
+         }
+      }
+      else if ($view == "use_time_card")
+      {
+         // Case 4
+         // Selecting an action from a scanned time card.
          
-         $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
+         if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
+         {
+            $navBar->highlightNavButton("Edit", "submitForm('input-form', 'timeCard.php', 'edit_time_card', 'update_time_card_info');", false);
+         }
+         else
+         {
+            $navBar->mainMenuButton();
+         }
          
-         $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
-                  
-         $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
+         if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
+         {
+            $navBar->highlightNavButton("Weigh Parts", "submitForm('input-form', '../partWeightLog/partWeightLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_weight', 'new_part_weight_entry')", true);
+         }
+         
+         if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+         {
+            $navBar->highlightNavButton("Count Parts", "submitForm('input-form', '../partWasherLog/partWasherLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_part_count', 'new_part_washer_entry')", true);
+         }
       }
       
       $navBar->end();
