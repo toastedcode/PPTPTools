@@ -99,6 +99,10 @@ class PPTPDatabase extends MySqlDatabase
       parent::__construct($SERVER, $USER, $PASSWORD, $DATABASE);
    }
    
+   // **************************************************************************
+   //                             Operators
+   // **************************************************************************
+   
    public function getOperators()
    {
       $result = $this->query("SELECT * FROM operator ORDER BY LastName ASC");
@@ -120,6 +124,10 @@ class PPTPDatabase extends MySqlDatabase
 
       return ($operator);
    }
+   
+   // **************************************************************************
+   //                              Work Centers
+   // **************************************************************************
 
    public function getWorkCenters()
    {
@@ -138,6 +146,10 @@ class PPTPDatabase extends MySqlDatabase
 
       return ($result);
    }
+   
+   // **************************************************************************
+   //                                Time Cards
+   // **************************************************************************
    
    public function getTimeCard(
       $timeCardId)
@@ -224,6 +236,19 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getIncompleteTimeCards($employeeNumber)
+   {
+      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panticket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                                 Users
+   // **************************************************************************
+   
    public function getUser($employeeNumber)
    {
       $query = "SELECT * FROM user WHERE employeeNumber = \"$employeeNumber\";";
@@ -293,6 +318,10 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   // **************************************************************************
+   //                                 Sensors
+   // **************************************************************************
   
    public function getSensors()
    {
@@ -320,6 +349,10 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   // **************************************************************************
+   //                               Part Counts
+   // **************************************************************************
    
    public function getPartCounts($wcNumber, $startDate, $endDate)
    {
@@ -379,14 +412,9 @@ class PPTPDatabase extends MySqlDatabase
       }
    }
    
-   public function getIncompleteTimeCards($employeeNumber)
-   {
-      $query = "SELECT * FROM timecard WHERE EmployeeNumber=" . $employeeNumber . " AND NOT EXISTS (SELECT * FROM panticket WHERE panticket.timeCardId = timecard.TimeCard_Id) ORDER BY Date DESC, TimeCard_ID DESC;";
-      
-      $result = $this->query($query);
-      
-      return ($result);
-   }
+   // **************************************************************************
+   //                               Part Inspections
+   // **************************************************************************
       
    public function newPartInspection($partInspection)
    {
@@ -434,6 +462,10 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   // **************************************************************************
+   //                              Part Washer Log
+   // **************************************************************************
    
    public function getPartWasherEntry($partWasherEntryId)
    {
@@ -525,6 +557,10 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   // **************************************************************************
+   //                              Part Weight Log
+   // **************************************************************************
    
    public function getPartWeightEntry(
       $partWeightEntryId)
@@ -618,20 +654,9 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
       
-   private function checkForNewSensor($sensorId)
-   {
-      $result = $this->query("SELECT * FROM sensor WHERE sensorId = \"$sensorId\";");
-      
-      if (mysqli_num_rows($result) == 0)
-      {
-         $query = 
-         "INSERT INTO sensor " .
-         "(sensorId, lastContact, partCount, resetTime) " .
-         "VALUES (\"$sensorId\", NOW(), 0, NOW());";
-         
-         $this->query($query);
-      }
-   }
+   // **************************************************************************
+   //                                  Jobs
+   // **************************************************************************
    
    public function getJobs($startDate, $endDate, $onlyActiveJobs)
    {
@@ -732,6 +757,85 @@ class PPTPDatabase extends MySqlDatabase
       $result = $this->query($query);
       
       return ($result);
+   }
+   
+   // **************************************************************************
+   //                                 Signs
+   // **************************************************************************
+   
+   public function getSign(
+      $signId)
+   {
+      $query = "SELECT * FROM sign WHERE signId = \"$signId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getSigns()
+   {
+      $query = "SELECT * FROM sign ORDER BY signId ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newSign(
+      $signInfo)
+   {
+      $query =
+      "INSERT INTO sign " .
+      "(name, description, url) " .
+      "VALUES " .
+      "('$signInfo->name', '$signInfo->description', '$signInfo->url');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateSign(
+      $signInfo)
+   {
+      $query =
+      "UPDATE sign " .
+      "SET name = '$signInfo->name', description = '$signInfo->description', url = '$signInfo->url'" .
+      "WHERE signId = $signInfo->signId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteSign(
+      $signId)
+   {
+      $query = "DELETE FROM sign WHERE signId = $signId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                                  Private
+   // **************************************************************************
+   
+   private function checkForNewSensor($sensorId)
+   {
+      $result = $this->query("SELECT * FROM sensor WHERE sensorId = \"$sensorId\";");
+      
+      if (mysqli_num_rows($result) == 0)
+      {
+         $query =
+         "INSERT INTO sensor " .
+         "(sensorId, lastContact, partCount, resetTime) " .
+         "VALUES (\"$sensorId\", NOW(), 0, NOW());";
+         
+         $this->query($query);
+      }
    }
    
    private function updatePartCount_Hour($sensorId, $partCount)

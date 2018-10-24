@@ -19,7 +19,9 @@ class Permission
    const EDIT_USER               = 13;
    const VIEW_OTHER_USERS        = 14;
    const APPROVE_TIME_CARDS      = 15;
-   const LAST                    = Permission::APPROVE_TIME_CARDS;
+   const VIEW_SIGN               = 16;
+   const EDIT_SIGN               = 17;
+   const LAST                    = Permission::EDIT_SIGN;
    
    const NO_PERMISSIONS = 0x0000;
    const ALL_PERMISSIONS = 0xFFFF;
@@ -49,7 +51,9 @@ class Permission
                   new Permission(Permission::VIEW_USER,               "View user"),
                   new Permission(Permission::EDIT_USER,               "Edit user"),
                   new Permission(Permission::VIEW_OTHER_USERS,        "View other users"),
-                  new Permission(Permission::APPROVE_TIME_CARDS,      "Approve time cards")
+                  new Permission(Permission::APPROVE_TIME_CARDS,      "Approve time cards"),
+                  new Permission(Permission::VIEW_SIGN,               "View digital signs"),
+                  new Permission(Permission::EDIT_SIGN,               "Edit digital signs"),   
             );
       }
       

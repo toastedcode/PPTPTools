@@ -17,7 +17,8 @@ class Activity
    const MACHINE_STATUS = 6;
    const PRODUCTION_SUMMARY = 7;
    const USER = 8;
-   const LAST = Activity::USER;
+   const SIGNAGE = 9;
+   const LAST = Activity::SIGNAGE;
       
    private static $permissionMasks = null;
    
@@ -33,7 +34,8 @@ class Activity
             Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
             Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
             Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
-            Permission::getPermission(Permission::VIEW_USER)->bits);               // USER
+            Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
+            Permission::getPermission(Permission::VIEW_SIGN)->bits);               // SIGNAGE
       }
       
       return (Activity::$permissionMasks);
@@ -242,6 +244,20 @@ HEREDOC;
      </div>
 HEREDOC;
    }
+      
+   // Digital Signage
+   $digitalSignageButton = "";
+   if (Activity::isAllowed(Activity::SIGNAGE, $permissions))
+   {
+      $digitalSignageButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='signage/signage.php?view=view_signs';">
+        <i class="material-icons action-button-icon">tv</i>
+        <div>Digital</div>
+        <div>Signage</div>
+     </div>
+HEREDOC;
+   }
    
    echo
 <<<HEREDOC
@@ -312,7 +328,7 @@ HEREDOC;
    <div class="flex-vertical card-div">
       <div class="flex-vertical select-action-card-header"></div>
 
-      <div class="flex-horizontal content-div" style="justify-content: center; height:400px;">
+      <div class="flex-horizontal content-div" style="justify-content: center; height:400px; flex-wrap: wrap;">
 
          $usersButton
          
@@ -329,6 +345,8 @@ HEREDOC;
          $machineStatusButton
          
          $productionSummaryButton
+         
+         $digitalSignageButton
 
       </div>
    </div>
