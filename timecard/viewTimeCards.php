@@ -118,10 +118,10 @@ HEREDOC;
                   <th>Operator</th>
                   <th>Job #</th>
                   <th>Machine #</th>
-                  <th>Material #</th>
-                  <th>Setup Time</th>
+                  <th>Heat #</th>
                   <th>Run Time</th>
-                  <th>Pan Count</th>
+                  <th>Setup Time</th>
+                  <th>Basket Count</th>
                   <th>Part Count</th>
                   <th>Scrap Count</th>
                   <th/>
@@ -177,6 +177,30 @@ HEREDOC;
                      $wcNumber = $jobInfo->wcNumber;
                   }
                   
+                  $approval = "no-approval-required";
+                  $tooltip = "";
+                  if ($timeCardInfo->requiresApproval())
+                  {
+                     if ($timeCardInfo->isApproved())
+                     {
+                        $approval = "approved";
+
+                        $user = UserInfo::load($timeCardInfo->approvedBy);
+                        if ($user)
+                        {
+                           $tooltip = "tooltip=\"Approved by " . $user->getFullName() . "\"";
+                        }
+                        else
+                        {
+                           $tooltip = "tooltip=\"Approved\"";
+                        }
+                     }
+                     else
+                     {
+                        $approval = "unapproved";
+                     }
+                  }
+                  
                   $viewEditIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
@@ -201,8 +225,12 @@ HEREDOC;
                         <td>$timeCardInfo->jobNumber</td>
                         <td>$wcNumber</td>
                         <td>$timeCardInfo->materialNumber</td>
-                        <td>{$timeCardInfo->formatSetupTime()}</td>
                         <td>{$timeCardInfo->formatRunTime()}</td>
+                        <td class="$approval">
+                           {$timeCardInfo->formatSetupTime()}
+                           <div class="approval $approval" $tooltip>Approved</div>
+                           <div class="unapproval $approval">Unapproved</div>
+                        </td>
                         <td>$timeCardInfo->panCount</td>
                         <td>$timeCardInfo->partCount</td>
                         <td>$timeCardInfo->scrapCount</td>

@@ -138,6 +138,42 @@ body {
 	cursor: pointer;
 }
 
+.approved {
+   color: #039603;
+}
+
+.unapproved {
+   color: #ff0000;
+}
+
+.approval.unapproved, .approval.no-approval-required {
+   display: none; 
+}
+
+.unapproval.approved, .unapproval.no-approval-required {
+   display: none;
+}
+
+button.approval, button.unapproval {
+   border-width: 0;
+   outline: none;
+   box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+   background-color: #ebebeb;
+   
+   cursor: pointer;
+   
+   color: #000000;
+   font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+   font-size: 18px;
+   
+   height: auto;
+
+   padding: 5px 5px;
+   
+   margin-right: 10px;
+   margin-left: 10px;
+}
+
 .operator-input
 {
    visibility: hidden;
@@ -204,6 +240,12 @@ input:checked + label > div  {
 .adjust-time-button {
 	margin-left:10px;
 	margin-right:10px;
+}
+
+.time-input {
+   width:175px; 
+   margin-left:10px; 
+   margin-right:10px;
 }
 
 /* viewTimeCards.php */
@@ -274,4 +316,9 @@ input:checked + label > div  {
    width: 20px;
    height: 20px;
    margin-right: 10px;
+}
+
+.comment-code-text {
+	font-size: 12px;
+	font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
 }

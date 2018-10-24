@@ -187,6 +187,10 @@ function updatePartWasherLog($partWasherEntry)
       }
       else
       {
+         // Delete any existing part count.
+         // TODO: Any reason to preserve old entries?
+         $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
+         
          $database->newPartWasherEntry($partWasherEntry);
       }
       

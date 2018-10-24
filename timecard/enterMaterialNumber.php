@@ -17,7 +17,7 @@ class EnterMaterialNumber
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
       <div class="flex-vertical card-div">
-         <div class="card-header-div">Enter Material Number</div>
+         <div class="card-header-div">Enter Heat Number</div>
          <div class="flex-horizontal content-div">
          
             <div class="flex-horizontal" style="flex-grow: 1">$materialNumberInput</div>
@@ -37,7 +37,7 @@ class EnterMaterialNumber
 
          document.getElementById("material-number-input").focus();
          
-         var validator = new IntValidator("material-number-input", 5, 1, 10000, false);
+         var validator = new IntValidator("material-number-input", 4, 1, 9999, false);
          validator.init();
       </script>
 HEREDOC;
@@ -71,7 +71,7 @@ HEREDOC;
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
          <input id="material-number-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="materialNumber" oninput="this.validator.validate()" value="$materialNumber">
-         <label class="mdl-textfield__label" for="material-number-input">Material #</label>
+         <label class="mdl-textfield__label" for="material-number-input">Heat #</label>
       </div>
 HEREDOC;
 

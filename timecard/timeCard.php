@@ -149,14 +149,10 @@ function processView($view)
       }
       
       case 'view_time_card':
-      {
-         ViewTimeCard::render($readOnly = true);
-         break;
-      }
-      
       case 'edit_time_card':
+      case 'use_time_card':
       {
-         ViewTimeCard::render($readOnly = false);
+         ViewTimeCard::render($view);
          break;
       }
       
@@ -198,14 +194,14 @@ function updateTimeCardInfo()
       $_SESSION["timeCardInfo"]->materialNumber = $_POST['materialNumber'];
    }
    
-   if (isset($_POST['setupTimeHours']) && isset($_POST['setupTimeMinutes']))
-   {
-      $_SESSION["timeCardInfo"]->setupTime = (($_POST['setupTimeHours'] * 60) + $_POST['setupTimeMinutes']);
-   }
-   
    if (isset($_POST['runTimeHours']) && isset($_POST['runTimeMinutes']))
    {
       $_SESSION["timeCardInfo"]->runTime = (($_POST['runTimeHours'] * 60) + $_POST['runTimeMinutes']);
+   }
+   
+   if (isset($_POST['setupTimeHours']) && isset($_POST['setupTimeMinutes']))
+   {
+      $_SESSION["timeCardInfo"]->setupTime = (($_POST['setupTimeHours'] * 60) + $_POST['setupTimeMinutes']);
    }
    
    if (isset($_POST['panCount']))
@@ -230,7 +226,7 @@ function updateTimeCardInfo()
    
    if (isset($_POST['commentCodes']))
    {
-      $commentCodes = CommentsPage::getCommentCodes();
+      $commentCodes = CommentCode::getCommentCodes();
       
       foreach ($commentCodes as $commentCode)
       {
@@ -246,6 +242,11 @@ function updateTimeCardInfo()
             $_SESSION["timeCardInfo"]->clearCommentCode($code);
          }
       }
+   }
+     
+   if (isset($_POST['approvedBy']))
+   {
+      $_SESSION["timeCardInfo"]->approvedBy = intval($_POST['approvedBy']);
    }
 }
 
@@ -344,6 +345,8 @@ processAction(getAction());
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+<link rel="stylesheet" type="text/css" href="../common/form.css"/>
+<link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
 <link rel="stylesheet" type="text/css" href="timeCard.css"/>
 
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>

@@ -1,9 +1,13 @@
 <?php
+require_once 'commentCodes.php';
 require_once 'database.php';
-require_once('time.php');
+require_once 'jobInfo.php';
+require_once 'time.php';
 
 class TimeCardInfo
 {
+   const MINUTES_PER_HOUR = 60;
+   
    public $timeCardId;
    public $dateTime;
    public $employeeNumber;
@@ -16,6 +20,8 @@ class TimeCardInfo
    public $scrapCount;
    public $commentCodes;
    public $comments;
+   public $approvedBy;
+   public $approvedDateTime;
    
    public function formatSetupTime()
    {
@@ -47,19 +53,58 @@ class TimeCardInfo
       return (round($this->runTime % 60));
    }
    
+   public function formatTotalTime()
+   {
+      return($this->getTotalTimeHours() . ":" . sprintf("%02d", $this->getTotalTimeMinutes()));
+   }
+   
+   public function getTotalTime()
+   {
+      return ($this->runTime + $this->setupTime);
+   }
+   
+   public function getTotalTimeHours()
+   {
+      return (round($this->getTotalTime() / 60));
+   }
+   
+   public function getTotalTimeMinutes()
+   {
+      return (round($this->getTotalTime()% 60));
+   }
+   
    public function hasCommentCode($code)
    {
-      return (($this->commentCodes & $code) != 0);
+      $hasCode = false;
+      
+      $commentCode = CommentCode::getCommentCode($code);
+      
+      if ($commentCode)
+      {
+         $hasCode = (($this->commentCodes & $commentCode->bits) != 0);
+      }
+      
+      return ($hasCode);
    }
    
    public function setCommentCode($code)
    {
-      $this->commentCodes |= $code;
+      $commentCode = CommentCode::getCommentCode($code);
+      
+      if ($commentCode)
+      {
+         $this->commentCodes |= $commentCode->bits;
+      }
    }
    
    public function clearCommentCode($code)
    {
-      $this->commentCodes &= ~$code;
+      $commentCode = CommentCode::getCommentCode($code);
+      
+      if ($commentCode)
+      {
+         $this->commentCodes &= ~($commentCode->bits);
+      }
    }
    
    public static function load($timeCardId)
@@ -90,10 +135,45 @@ class TimeCardInfo
             $timeCardInfo->scrapCount = intval($row['scrapCount']);
             $timeCardInfo->commentCodes = intval($row['commentCodes']);
             $timeCardInfo->comments = $row['comments'];
+            $timeCardInfo->approvedBy = intval($row['approvedBy']);
+            $timeCardInfo->approvedDateTime = Time::fromMySqlDate($row['approvedDateTime'], "Y-m-d H:i:s");
          }
       }
       
       return ($timeCardInfo);
+   }
+   
+   public function getEfficiency()
+   {
+      $efficiency = 0.0;
+      
+      // Retrieve the associated job.
+      $jobInfo = JobInfo::load($this->jobNumber);
+      
+      if ($jobInfo)
+      {
+         // Calculate the total number of parts that could be potentially created in the run time.
+         $potentialParts = (($this->runTime / TimeCardInfo::MINUTES_PER_HOUR) * $jobInfo->getGrossPartsPerHour());
+         
+         if ($potentialParts > 0)
+         {
+            // Calculate the efficiency.
+            $efficiency = (($this->partCount / $potentialParts) * 100);
+         }
+      }
+      
+      return ($efficiency);
+   }
+   
+   public function requiresApproval()
+   {
+      return (($this->getSetupTimeHours() + $this->getSetupTimeMinutes()) > 0);
+   }
+   
+   public function isApproved()
+   {
+      // A time card is considered approved if there was no setup time, or if a manager has approved the setup time.
+      return (!$this->requiresApproval() || ($this->approvedBy > 0));
    }
 }
 
@@ -105,20 +185,24 @@ if (isset($_GET["timeCardId"]))
  
    if ($timeCardInfo)
    {
-      $setupTime = $timeCardInfo->getSetupTimeHours() . ":" . $timeCardInfo->getSetupTimeMinutes();
-      $runTime = $timeCardInfo->getRunTimeHours() . ":" . $timeCardInfo->getRunTimeMinutes();
+      $runTime = $timeCardInfo->formatRunTime();
+      $setupTime = $timeCardInfo->formatSetupTime();
+      $totalTime = $timeCardInfo->formatTotalTime();
       
-      echo "timeCardId: " .     $timeCardInfo->timeCardId .           "<br/>";
-      echo "dateTime: " .       $timeCardInfo->dateTime .             "<br/>";
-      echo "employeeNumber: " . $timeCardInfo->employeeNumber .       "<br/>";
-      echo "jobNumber: " .      $timeCardInfo->jobNumber .            "<br/>";
-      echo "materialNumber: " . $timeCardInfo->materialNumber .       "<br/>";
-      echo "setupTime: " .      $setupTime .                          "<br/>";
-      echo "runTime: " .        $runTime .                            "<br/>";
-      echo "partCount: " .      $timeCardInfo->partCount .            "<br/>";
-      echo "scrapCount: " .     $timeCardInfo->scrapCount .           "<br/>";
-      echo "commentCodes:"      dechex($timeCardInfo->commentCodes) . "<br/>"; 
-      echo "comments: " .       $timeCardInfo->comments .             "<br/>";
+      echo "timeCardId: " .       $timeCardInfo->timeCardId .           "<br/>";
+      echo "dateTime: " .         $timeCardInfo->dateTime .             "<br/>";
+      echo "employeeNumber: " .   $timeCardInfo->employeeNumber .       "<br/>";
+      echo "jobNumber: " .        $timeCardInfo->jobNumber .            "<br/>";
+      echo "materialNumber: " .   $timeCardInfo->materialNumber .       "<br/>";
+      echo "runTime: " .          $runTime .                            "<br/>";
+      echo "setupTime: " .        $setupTime .                          "<br/>";
+      echo "totalTime: " .        $totalTime .                          "<br/>";
+      echo "partCount: " .        $timeCardInfo->partCount .            "<br/>";
+      echo "scrapCount: " .       $timeCardInfo->scrapCount .           "<br/>";
+      echo "commentCodes:" .      dechex($timeCardInfo->commentCodes) . "<br/>"; 
+      echo "comments: " .         $timeCardInfo->comments .             "<br/>";
+      echo "approvedBy: " .       $timeCardInfo->approvedBy .           "<br/>";
+      echo "approvedDateTime: " . $timeCardInfo->approvedDateTime .     "<br/>";
    }
    else
    {

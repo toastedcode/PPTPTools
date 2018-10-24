@@ -133,11 +133,12 @@ function updateJobInfo()
 {
    if (isset($_POST['jobNumber']))
    {
-      $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumber'];
+      $_SESSION["jobInfo"]->jobNumber = strtoupper($_POST['jobNumber']);
+      
    }
    else if (isset($_POST['jobNumberPrefix']) && isset($_POST['jobNumberSuffix']))
    {
-      $_SESSION["jobInfo"]->jobNumber = $_POST['jobNumberPrefix'] . "-" . $_POST['jobNumberSuffix'];
+      $_SESSION["jobInfo"]->jobNumber = strtoupper($_POST['jobNumberPrefix'] . "-" . $_POST['jobNumberSuffix'].toUpperCase());
    }
    
    if (isset($_POST['creator']))
@@ -166,9 +167,9 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->cycleTime = $_POST['cycleTime'];
    }
    
-   if (isset($_POST['netPartsPerHour']))
+   if (isset($_POST['netPercentage']))
    {
-      $_SESSION["jobInfo"]->netPartsPerHour = $_POST['netPartsPerHour'];
+      $_SESSION["jobInfo"]->netPercentage = $_POST['netPercentage'];
    }
    
    if (isset($_POST['status']))
@@ -246,6 +247,7 @@ processAction(getAction());
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
 <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
 <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+<link rel="stylesheet" type="text/css" href="../common/form.css"/>
 <link rel="stylesheet" type="text/css" href="jobs.css"/>
 
 

@@ -18,7 +18,8 @@ class Permission
    const VIEW_USER               = 12;
    const EDIT_USER               = 13;
    const VIEW_OTHER_USERS        = 14;
-   const LAST                    = Permission::VIEW_OTHER_USERS;
+   const APPROVE_TIME_CARDS      = 15;
+   const LAST                    = Permission::APPROVE_TIME_CARDS;
    
    const NO_PERMISSIONS = 0x0000;
    const ALL_PERMISSIONS = 0xFFFF;
@@ -47,7 +48,8 @@ class Permission
                   new Permission(Permission::VIEW_PRODUCTION_SUMMARY, "View production summary"),
                   new Permission(Permission::VIEW_USER,               "View user"),
                   new Permission(Permission::EDIT_USER,               "Edit user"),
-                  new Permission(Permission::VIEW_OTHER_USERS,        "View other users")
+                  new Permission(Permission::VIEW_OTHER_USERS,        "View other users"),
+                  new Permission(Permission::APPROVE_TIME_CARDS,      "Approve time cards")
             );
       }
       

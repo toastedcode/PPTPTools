@@ -20,13 +20,17 @@ class JobInfo
 {
    const UNKNOWN_JOB_NUMBER = "";
    
+   const SECONDS_PER_MINUTE = 60;
+   
+   const SECONDS_PER_HOUR = 3600;
+      
    public $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    public $creator;
    public $dateTime;
    public $partNumber;
    public $wcNumber;
    public $cycleTime;
-   public $netPartsPerHour;
+   public $netPercentage;
    public $status = JobStatus::PENDING;
    
    public function isActive()
@@ -55,8 +59,8 @@ class JobInfo
             $jobInfo->dateTime =   Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $jobInfo->partNumber = $row['partNumber'];
             $jobInfo->wcNumber =   $row['wcNumber'];
-            $jobInfo->cycleTime = $row['cycleTime'];
-            $jobInfo->netPartsPerHour = $row['netPartsPerHour'];
+            $jobInfo->cycleTime = doubleval($row['cycleTime']);
+            $jobInfo->netPercentage = doubleval($row['netPercentage']);
             $jobInfo->status =   $row['status'];
          }
       }
@@ -89,6 +93,28 @@ class JobInfo
 
       return ($suffix);
    }
+   
+   public function getGrossPartsPerHour()
+   {
+      $grossPartsPerHour = 0;
+      
+      if (($this->cycleTime > 0) &&
+          ($this->cycleTime <= JobInfo::SECONDS_PER_MINUTE))
+      {
+         $grossPartsPerHour = (JobInfo::SECONDS_PER_HOUR / $this->cycleTime);   
+      }
+      
+      return ($grossPartsPerHour);
+   }
+   
+   public function getNetPartsPerHour()
+   {
+      $grossPartsPerHour = $this->getGrossPartsPerHour();
+      
+      $netPartsPerHour = ($grossPartsPerHour * ($this->netPercentage / 100.0));
+      
+      return ($netPartsPerHour);
+   }
 }
 
 /*
@@ -99,13 +125,13 @@ if (isset($_GET["jobNumber"]))
    
    if ($jobInfo)
    {
-      echo "jobNumber: " .          $jobInfo->jobNumber .       "<br/>";
-      echo "creator: " .            $jobInfo->creator .         "<br/>";
-      echo "dateTime: " .           $jobInfo->dateTime .        "<br/>";
-      echo "partNumber: " .         $jobInfo->partNumber .      "<br/>";
-      echo "wcNumber: " .           $jobInfo->wcNumber .        "<br/>";
-      echo "cycleTime: " .          $jobInfo->cycleTime .       "<br/>";
-      echo "netPartsPerHour: " .    $jobInfo->netPartsPerHour . "<br/>";
+      echo "jobNumber: " .     $jobInfo->jobNumber .       "<br/>";
+      echo "creator: " .       $jobInfo->creator .         "<br/>";
+      echo "dateTime: " .      $jobInfo->dateTime .        "<br/>";
+      echo "partNumber: " .    $jobInfo->partNumber .      "<br/>";
+      echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
+      echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
+      echo "netPercentage: " . $jobInfo->netPercentage . "<br/>";
       
       echo "isActive: " . JobStatus::getName($jobInfo->isActive) . "<br/>";
    }

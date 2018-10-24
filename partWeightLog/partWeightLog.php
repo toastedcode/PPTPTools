@@ -137,11 +137,11 @@ function updatePartWeightEntry()
 
    if (isset($_GET['timeCardId']))  // When called from viewTimeCard.php
    {
-      $_SESSION["partWeightEntry"]->timeCardId= $_GET['timeCardId'];
+      $_SESSION["partWeightEntry"]->timeCardId = $_GET['timeCardId'];
    }
    else if (isset($_POST['timeCardId']))
    {
-      $_SESSION["partWeightEntry"]->timeCardId= $_POST['timeCardId'];
+      $_SESSION["partWeightEntry"]->timeCardId = $_POST['timeCardId'];
    }
    
    if (isset($_POST['weight']))
@@ -182,6 +182,10 @@ function updatePartWeightLog($partWeightEntry)
       }
       else
       {
+         // Delete any existing part weight.
+         // TODO: Any reason to preserve old entries?
+         $database->deleteAllPartWeightEntries($partWeightEntry->timeCardId);
+         
          $database->newPartWeightEntry($partWeightEntry);
       }
       

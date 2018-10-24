@@ -49,7 +49,7 @@ class ViewUser
                </div>
                <div class="flex-horizontal" style="align-items: flex-start;">
                   $userDiv
-                  $permissionsDiv;
+                  $permissionsDiv
                </div>
             </div>
          </div>
@@ -90,6 +90,7 @@ HEREDOC;
       $editable = (($view == "new_user") || ($view == "edit_user"));
       
       $disabled = ($editable) ? "" : "disabled";
+      $employeeNumberDisabled = ($editable && ($view == "new_user")) ? "" : "disabled";
       
       $roleOptions = "";
       foreach (Role::getRoles() as $role)
@@ -106,7 +107,7 @@ HEREDOC;
 
          <div class="flex-horizontal time-card-table-row">
             <div class="label-div"><h3>Employee #</h3></div>
-            <input id="employee-number-input" type="text" class="medium-text-input" name="employeeNumber" form="input-form" style="width:150px;" value="$userInfo->employeeNumber" oninput="this.validator.validate()" $disabled />
+            <input id="employee-number-input" type="text" class="medium-text-input" name="employeeNumber" form="input-form" style="width:150px;" value="$userInfo->employeeNumber" oninput="this.validator.validate()" $employeeNumberDisabled/>
          </div>
 
          <div class="flex-horizontal time-card-table-row">

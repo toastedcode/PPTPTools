@@ -37,7 +37,7 @@ class EnterPartCount
 
          document.getElementById("panCount-input").focus();
 
-         var panCountValidator = new IntValidator("panCount-input", 2, 1, 25, false);
+         var panCountValidator = new IntValidator("panCount-input", 2, 1, 40, false);
          var partsCountValidator = new IntValidator("partCount-input", 6, 1, 100000, false);
 
          panCountValidator.init();
