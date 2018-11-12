@@ -820,6 +820,69 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                          Line Inspections
+   // **************************************************************************
+   
+   public function getLineInspections($employeeNumber, $startDate, $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM lineinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
+
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM lineinspection WHERE inspector =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
+
+         $result = $this->query($query);
+      }
+            
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getLineInspection($entryId)
+   {
+      $query = "SELECT * FROM lineinspection WHERE entryId = \"$entryId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newLineInspection($lineInspectionInfo)
+   {
+      $dateTime = Time::toMySqlDate($lineInspectionInfo->dateTime);
+      
+      $query =
+      "INSERT INTO lineinspection " .
+      "(dateTime, inspector, operator, jobNumber, wcNumber, thread1, thread2, thread3, visual, comments) " .
+      "VALUES " .
+      "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '$lineInspectionInfo->thread1', '$lineInspectionInfo->thread2', '$lineInspectionInfo->thread3', '$lineInspectionInfo->visual', '$lineInspectionInfo->comments');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateLineInspection($lineInspectionInfo)
+   {
+      $dateTime = Time::toMySqlDate($jobInfo->dateTime);
+      
+      $query =
+      "UPDATE lineinspection " .
+      "SET dateTime = '$dateTime',  inspector = '$lineInspectionInfo->inspector', operator = '$lineInspectionInfo->operator', jobNumber = '$lineInspectionInfo->jobNumber', wcNumber = '$lineInspectionInfo->wcNumber', thread1 = '$lineInspectionInfo->thread1', thread2 = '$lineInspectionInfo->thread2', thread3 = '$lineInspectionInfo->thread3', visual = '$lineInspectionInfo->visual', comments = '$lineInspectionInfo->comments' " .
+      "WHERE entryId = '$jobInfo->entryId';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
    //                                  Private
    // **************************************************************************
    

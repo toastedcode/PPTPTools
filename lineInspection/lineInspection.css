@@ -1,0 +1,11 @@
+@CHARSET "ISO-8859-1";
+
+.pass {
+   color: GREEN;
+   font-style: bold;
+}
+
+.fail {
+   color: RED;
+   font-style: bold;	
+}
