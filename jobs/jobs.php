@@ -250,7 +250,6 @@ processAction(getAction());
 <link rel="stylesheet" type="text/css" href="../common/form.css"/>
 <link rel="stylesheet" type="text/css" href="jobs.css"/>
 
-
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script src="jobs.js"></script>
 <script src="/pptp/common/common.js"></script> <!--  use $ROOT variable -->
