@@ -185,7 +185,7 @@ HEREDOC;
             </div>
    
             <div class="form-item">
-               <div class="form-label-long">Net Percentage/Hour</div>
+               <div class="form-label-long">Net Percentage</div>
                <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
                <div class="form-label">&nbsp%</div>
             </div>
