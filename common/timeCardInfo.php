@@ -95,8 +95,6 @@ class TimeCardInfo
       {
          $this->commentCodes |= $commentCode->bits;
       }
-      
-      $this->commentCodes |= $code;
    }
    
    public function clearCommentCode($code)

@@ -49,7 +49,7 @@ class ViewUser
                </div>
                <div class="flex-horizontal" style="align-items: flex-start;">
                   $userDiv
-                  $permissionsDiv;
+                  $permissionsDiv
                </div>
             </div>
          </div>

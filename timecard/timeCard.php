@@ -149,14 +149,10 @@ function processView($view)
       }
       
       case 'view_time_card':
-      {
-         ViewTimeCard::render($readOnly = true);
-         break;
-      }
-      
       case 'edit_time_card':
+      case 'use_time_card':
       {
-         ViewTimeCard::render($readOnly = false);
+         ViewTimeCard::render($view);
          break;
       }
       
