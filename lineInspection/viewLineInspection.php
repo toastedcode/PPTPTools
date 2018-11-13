@@ -1,5 +1,6 @@
 <?php
 
+require_once '../common/jobInfo.php';
 require_once '../common/lineInspectionInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/userInfo.php';
@@ -17,9 +18,7 @@ class ViewLineInspection
       $editable = (($view == "new_line_inspection") || ($view == "edit_line_inspection"));
       
       $titleDiv = ViewLineInspection::titleDiv();
-      //$creationDiv = ViewLineInspection::creationDiv($jobInfo);
-      //$jobDiv = ViewLineInspection::jobDiv($jobInfo, $view);
-      //$partDiv = ViewLineInspection::partDiv($jobInfo, $editable);
+      $inspectionDiv = ViewLineInspection::inspectionDiv($lineInspectionInfo, $view);
       
       $navBar = ViewLineInspection::navBar($view);
       
@@ -47,8 +46,8 @@ class ViewLineInspection
          
          <div class="pptp-form" style="height:500px;">
             $titleDiv
-            <div class="form-row">
-               TODO
+            <div class="form-column">
+               $inspectionDiv
             </div>
          </div>
          
@@ -57,6 +56,7 @@ class ViewLineInspection
       </div>
                
       <script>
+         updateWCNumberInput();
       </script>
 HEREDOC;
       
@@ -68,11 +68,143 @@ HEREDOC;
       echo (ViewLineInspection::getHtml($view));
    }
    
+   public static function getWcNumberInput($jobNumber, $isDisabled)
+   {
+      $disabled = $isDisabled ? "disabled" : "";
+      
+      $options = "";
+      $selected = "";
+      
+      $lineInspectionInfo = ViewLineInspection::getLineInspectionInfo();
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getJob($jobNumber);
+         
+         $i = 0;
+         while ($result && ($row = $result->fetch_assoc()))
+         {
+            $wcNumber = intval($row["wcNumber"]);
+            
+            $selected = "";
+            if ((($lineInspectionInfo->wcNumber == 0) && ($i == 0)) ||  // no selection && first in list
+                ($wcNumber == $lineInspectionInfo->wcNumber))           // selected work center number
+            {
+               $selected = "selected";
+            }
+            
+            $options .= "<option value=\"$wcNumber\" $selected>" . $wcNumber. "</option>";
+            
+            $i++;
+         }
+      }
+      
+      $html =
+<<<HEREDOC
+      <select id="wc-number-input" name="wcNumber" form="input-form" $disabled>
+         $options
+      </select>
+HEREDOC;
+      
+      return ($html);
+   }
+   
    protected static function titleDiv()
    {
       $html =
 <<<HEREDOC
       <div class="form-title">Line Inspection</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function inspectionDiv($lineInspectionInfo, $view)
+   {
+      $isDisabled = ($view == "view_line_inspection");
+      $disabled = $isDisabled? "disabled" : "";
+      
+      $options = "";
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getActiveJobs(null);
+         
+         $i = 0;
+         while ($result && ($row = $result->fetch_assoc()))
+         {
+            $jobNumber = $row["jobNumber"];
+            
+            $selected = "";
+            if ((($lineInspectionInfo->jobNumber == "") && ($i == 0)) ||  // no selection && first in list
+                ($jobNumber == $lineInspectionInfo->jobNumber))           // selected job number
+            {
+               $selected = "selected";
+            }
+            
+            $options .= "<option value=\"$jobNumber\" $selected>" . $jobNumber . "</option>";
+            
+            $i++;
+         }
+      }
+      
+      $wcNumberInput = ViewLineInspection::getWcNumberInput("", $lineInspectionInfo->wcNumber, $isDisabled);
+      
+      $operatorInput = ViewLineInspection::getOperatorInput($lineInspectionInfo, $isDisabled);
+      
+      $checked = array();
+      for ($i = 0; $i < LineInspectionInfo::NUM_THREAD_INSPECTIONS; $i++)
+      {
+         $checked[$i] = $lineInspectionInfo->threadInspections[$i] ? "checked" : "";
+      }
+      
+      $visualInspectionChecked = $lineInspectionInfo->visualInspection ? "checked" : "";
+      
+      $html =
+<<<HEREDOC
+      <!--div class="form-title">Line Inspection</div-->
+      <div class="form-item">
+         <div class="form-label-long">Job Number</div>
+         <select id="job-number-input" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" $disabled>
+            $options
+         </select>
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">WC Number</div>
+         <div id="wc-number-input-div">$wcNumberInput</div>
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">Operator</div>
+         $operatorInput
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">Thread #1</div>
+         <input type="checkbox" form="input-form" name="thread1" value="1" {$checked[0]}"/>
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">Thread #2</div>
+         <input type="checkbox" form="input-form" name="thread2" value="1" {$checked[1]}"/>
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">Thread #3</div>
+         <input type="checkbox" form="input-form" name="thread3" value="1" {$checked[2]}"/>
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">Visual</div>
+         <input type="checkbox" form="input-form" name="visual" value="1" $visualInspectionChecked"/>
+      </div>
+      <div class="form-item">
+         <div class="form-label-long">Operator</div>
+         <textarea form="input-form" class="comments-input" type="text" name="comments" rows="10" maxlength="256" placeholder="Enter comments ...">$lineInspectionInfo->comments</textarea>
+      </div>
 HEREDOC;
       
       return ($html);
@@ -127,6 +259,39 @@ HEREDOC;
       return ($lineInspectionInfo);
    }
    
+   public static function getOperatorInput($lineInspectionInfo, $isDisabled)
+   {
+      $disabled = $isDisabled ? "disabled" : "";
+      
+      $options = "";
+      
+      $operators = UserInfo::getUsersByRole(Role::OPERATOR);
+      
+      $i = 0;
+      foreach ($operators as $operator)
+      {
+         $selected = "";
+         if ((($lineInspectionInfo->operator == UserInfo::UNKNOWN_EMPLOYEE_NUMBER) && ($i == 0)) ||  // no selection && first in list
+             ($operator->employeeNumber == $lineInspectionInfo->operator))                            // selected operator
+         {
+            $selected = "selected";
+         }
+         
+         $options .= "<option value=\"$operator->employeeNumber\"  $selected>" . $operator->getFullName() . "</option>";
+         
+         $i++;
+      }
+      
+      $html =
+<<<HEREDOC
+      <select id="operator-input" name="operator" form="input-form" $disabled>
+         $options
+      </select>
+HEREDOC;
+      
+      return ($html);
+   }
+   
    protected static function getWorkcenters()
    {
       $workcenters = array();
@@ -150,5 +315,20 @@ HEREDOC;
       
       return ($workcenters);
    }
+}
+
+// *****************************************************************************
+//                          AJAX request handling
+// *****************************************************************************
+
+if (isset($_GET["action"]) && 
+    ($_GET["action"] == "get_wc_number_input"))
+{
+   $jobNumber = $_GET["jobNumber"];
+   $isDisabled = filter_var($_GET["isDisabled"], FILTER_VALIDATE_BOOLEAN);
+   
+   $wcNumberInput =  ViewLineInspection::getWcNumberInput($jobNumber, $isDisabled);
+   
+   echo $wcNumberInput;
 }
 ?>

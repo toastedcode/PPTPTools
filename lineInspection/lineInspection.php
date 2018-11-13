@@ -154,28 +154,14 @@ function updateLineInspectionInfo()
    
    if (isset($_POST['wcNumber']))
    {
-      $_SESSION["lineInspectionInfo"]->jobNumber = $_POST['wcNumber'];
+      $_SESSION["lineInspectionInfo"]->wcNumber= $_POST['wcNumber'];
    }
    
-   if (isset($_POST['thread1']))
-   {
-      $_SESSION["lineInspectionInfo"]->threadInspections[0] = $_POST['thread1'];
-   }
+   $_SESSION["lineInspectionInfo"]->threadInspections[0] = (isset($_POST['thread1']) && boolval($_POST['thread1']));
+   $_SESSION["lineInspectionInfo"]->threadInspections[1] = (isset($_POST['thread2']) && boolval($_POST['thread2']));
+   $_SESSION["lineInspectionInfo"]->threadInspections[2] = (isset($_POST['thread3']) && boolval($_POST['thread3']));
    
-   if (isset($_POST['thread2']))
-   {
-      $_SESSION["lineInspectionInfo"]->threadInspections[1] = $_POST['thread2'];
-   }
-
-   if (isset($_POST['thread3']))
-   {
-      $_SESSION["lineInspectionInfo"]->threadInspections[2] = $_POST['thread3'];
-   }
-   
-   if (isset($_POST['visual']))
-   {
-      $_SESSION["lineInspectionInfo"]->visualInspection = $_POST['visual'];
-   }
+   $_SESSION["lineInspectionInfo"]->visualInspection = (isset($_POST['visual']) && boolval($_POST['visual']));
    
    if (isset($_POST['comments']))
    {

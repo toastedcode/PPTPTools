@@ -21,7 +21,14 @@ class LineInspectionInfo
    public function __construct()
    {
       $entryId = LineInspectionInfo::INVALID_ENTRY_ID;
-      $threadInspections = array(false, false, false);
+      
+      $this->inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+      $this->wcNumber = 0;
+      $this->threadInspections = array(false, false, false);
+      $this->visualInspection = false;
+      $this->comments = "";
    }
    
    public static function load($entryId)

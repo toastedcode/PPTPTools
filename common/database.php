@@ -71,6 +71,11 @@ class MySqlDatabase implements Database
       return ($result);
    }
    
+   public static function countResults($result)
+   {
+      return (mysqli_num_rows($result));
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
@@ -684,7 +689,9 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
       
-      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active ORDER BY dateTime DESC;";
+      $wcClause = $wcNumber ? "wcNumber = '$wcNumber' AND" : "";
+      
+      $query = "SELECT * FROM job WHERE $wcClause status = $active ORDER BY dateTime DESC;";
       
       $result = $this->query($query);
       
@@ -861,8 +868,8 @@ class PPTPDatabase extends MySqlDatabase
       "INSERT INTO lineinspection " .
       "(dateTime, inspector, operator, jobNumber, wcNumber, thread1, thread2, thread3, visual, comments) " .
       "VALUES " .
-      "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '$lineInspectionInfo->thread1', '$lineInspectionInfo->thread2', '$lineInspectionInfo->thread3', '$lineInspectionInfo->visual', '$lineInspectionInfo->comments');";
-      
+      "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '{$lineInspectionInfo->threadInspections[0]}', '{$lineInspectionInfo->threadInspections[1]}', '{$lineInspectionInfo->threadInspections[2]}', '$lineInspectionInfo->visualInspection', '$lineInspectionInfo->comments');";
+      echo $query;
       $result = $this->query($query);
       
       return ($result);
@@ -874,8 +881,17 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE lineinspection " .
-      "SET dateTime = '$dateTime',  inspector = '$lineInspectionInfo->inspector', operator = '$lineInspectionInfo->operator', jobNumber = '$lineInspectionInfo->jobNumber', wcNumber = '$lineInspectionInfo->wcNumber', thread1 = '$lineInspectionInfo->thread1', thread2 = '$lineInspectionInfo->thread2', thread3 = '$lineInspectionInfo->thread3', visual = '$lineInspectionInfo->visual', comments = '$lineInspectionInfo->comments' " .
+      "SET dateTime = '$dateTime',  inspector = '$lineInspectionInfo->inspector', operator = '$lineInspectionInfo->operator', jobNumber = '$lineInspectionInfo->jobNumber', wcNumber = '$lineInspectionInfo->wcNumber', thread1 = '{$lineInspectionInfo->threadInspections[0]}', thread2 = '{$lineInspectionInfo->threadInspections[1]}', thread3 = '{$lineInspectionInfo->threadInspections[2]}', visual = '$lineInspectionInfo->visualInspection', comments = '$lineInspectionInfo->comments' " .
       "WHERE entryId = '$jobInfo->entryId';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteLineInspection($entryId)
+   {
+      $query = "DELETE FROM lineinspection WHERE entryId = $entryId;";
       
       $result = $this->query($query);
       
