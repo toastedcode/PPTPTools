@@ -70,9 +70,9 @@ function processAction($action)
       
       case 'edit_job':
       {
-         if (isset($_POST['jobNumber']))
+         if (isset($_POST['jobId']))
          {
-            $_SESSION["jobInfo"] = JobInfo::load($_POST['jobNumber']);
+            $_SESSION["jobInfo"] = JobInfo::load($_POST['jobId']);
          }
          break;
       }
@@ -204,7 +204,7 @@ function updateJob($jobInfo)
    
    if ($database->isConnected())
    {
-      $result = $database->getJob($jobInfo->jobNumber);
+      $result = $database->getJob($jobInfo->jobId);
       
       $jobExists = ($result && ($result->num_rows == 1));
       

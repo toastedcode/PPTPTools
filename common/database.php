@@ -698,10 +698,19 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
-   public function getJob($jobNumber)
+   public function getJob($jobId)
+   {
+      $query = "SELECT * FROM job WHERE jobId = $jobId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getJobsByJobNumber($jobNumber)
    {
       $query = "SELECT * FROM job WHERE jobNumber = \"$jobNumber\";";
-
+      
       $result = $this->query($query);
       
       return ($result);

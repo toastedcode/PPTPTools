@@ -14,10 +14,11 @@ class Activity
    const PART_WEIGHT = 3;
    const PART_WASH = 4;
    const PART_INSPECTION = 5;
-   const MACHINE_STATUS = 6;
-   const PRODUCTION_SUMMARY = 7;
-   const USER = 8;
-   const SIGNAGE = 9;
+   const LINE_INSPECTION = 6;
+   const MACHINE_STATUS = 7;
+   const PRODUCTION_SUMMARY = 8;
+   const USER = 9;
+   const SIGNAGE = 10;
    const LAST = Activity::SIGNAGE;
       
    private static $permissionMasks = null;
@@ -32,6 +33,7 @@ class Activity
             Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
             Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
             Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // LINE_INSPECTION (TODO)
             Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
             Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
             Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
@@ -217,6 +219,20 @@ HEREDOC;
 HEREDOC;
    }
       
+   // Line Inspection
+   $lineInspectionButton = "";
+   if (Activity::isAllowed(Activity::LINE_INSPECTION, $permissions))
+   {
+      $lineInspectionButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='lineInspection/lineInspection.php?view=view_line_inspections';">
+        <i class="material-icons action-button-icon">thumbs_up_down</i>
+        <div>Line</div>
+        <div>Inspections</div>
+     </div>
+HEREDOC;
+   }
+      
    // Machine Status
    $machineStatusButton = "";
    if (Activity::isAllowed(Activity::MACHINE_STATUS, $permissions))
@@ -341,6 +357,8 @@ HEREDOC;
          $partWashButton
          
          $partInspectionButton
+         
+         $lineInspectionButton
          
          $machineStatusButton
          

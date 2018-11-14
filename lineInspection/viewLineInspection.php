@@ -83,7 +83,7 @@ HEREDOC;
       
       if ($database->isConnected())
       {
-         $result = $database->getJob($jobNumber);
+         $result = $database->getJobsByJobNumber($jobNumber);
          
          $i = 0;
          while ($result && ($row = $result->fetch_assoc()))
@@ -184,22 +184,27 @@ HEREDOC;
          <div class="form-label-long">Operator</div>
          $operatorInput
       </div>
-      <div class="form-item">
-         <div class="form-label-long">Thread #1</div>
-         {$inspectionInput[0]}
-      </div>
-      <div class="form-item">
-         <div class="form-label-long">Thread #2</div>
-         {$inspectionInput[1]}
-      </div>
-      <div class="form-item">
-         <div class="form-label-long">Thread #3</div>
-         {$inspectionInput[2]}
-      </div>
-      <div class="form-item">
-         <div class="form-label-long">Visual #3</div>
-         {$inspectionInput[3]}
-      </div>
+      
+      <table>
+         <tr><td></td><td>PASS</td><td>FAIL</td><td>N/A</td><tr>
+         <tr>
+            <td>Thread #1</td>
+            {$inspectionInput[0]}
+         </tr>
+         <tr>
+            <td>Thread #2</td>
+            {$inspectionInput[1]}
+         </tr>
+         <tr>
+            <td>Thread #3</td>
+            {$inspectionInput[2]}
+         </tr>
+         <tr>
+            <td>Visual</td>
+            {$inspectionInput[3]}
+         </tr>
+      </table>
+
       <div class="form-item">
          <div class="form-label-long">Operator</div>
          <textarea form="input-form" class="comments-input" type="text" name="comments" rows="10" maxlength="256" placeholder="Enter comments ...">$lineInspectionInfo->comments</textarea>
@@ -300,9 +305,9 @@ HEREDOC;
       
       $html = 
 <<<HEREDOC
-      <input type="radio" form="input-form" name="$name" value="1" $pass/>
-      <input type="radio" form="input-form" name="$name" value="2" $fail/>
-      <input type="radio" form="input-form" name="$name" value="0" $nonApplicable/>
+      <td><input type="radio" form="input-form" name="$name" value="1" $pass/></td>
+      <td><input type="radio" form="input-form" name="$name" value="2" $fail/></td>
+      <td><input type="radio" form="input-form" name="$name" value="0" $nonApplicable/></td>
 HEREDOC;
       
       return ($html);

@@ -168,7 +168,7 @@ HEREDOC;
          {
             while ($row = $result->fetch_assoc())
             {
-               $jobInfo = JobInfo::load($row["jobNumber"]);
+               $jobInfo = JobInfo::load($row["jobId"]);
                
                if ($jobInfo)
                {
@@ -192,18 +192,18 @@ HEREDOC;
                   if (Authentication::checkPermissions(Permission::EDIT_JOB))
                   {
                      $viewEditIcon =
-                        "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditJob('$jobInfo->jobNumber')\">mode_edit</i>";
+                        "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditJob($jobInfo->jobId)\">mode_edit</i>";
                      
                      if ($jobInfo->status != JobStatus::DELETED)
                      {
                         $deleteIcon =
-                           "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeleteJob('$jobInfo->jobNumber')\">delete</i>";
+                           "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeleteJob($jobInfo->jobId)\">delete</i>";
                      }
                   }
                   else
                   {
                      $viewEditIcon =
-                        "<i class=\"material-icons table-function-button\" onclick=\"onViewJob('$jobInfo->jobNumber')\">visibility</i>";
+                        "<i class=\"material-icons table-function-button\" onclick=\"onViewJob($jobInfo->jobId)\">visibility</i>";
                   }
                   
                   $html .=
