@@ -160,13 +160,12 @@ HEREDOC;
       
       $operatorInput = ViewLineInspection::getOperatorInput($lineInspectionInfo, $isDisabled);
       
-      $checked = array();
-      for ($i = 0; $i < LineInspectionInfo::NUM_THREAD_INSPECTIONS; $i++)
+      $inspectionInput = array();
+      $fail = array();
+      for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
       {
-         $checked[$i] = $lineInspectionInfo->threadInspections[$i] ? "checked" : "";
+         $inspectionInput[$i] = ViewLineInspection::inspectionInput($lineInspectionInfo, $i, $isDisabled);
       }
-      
-      $visualInspectionChecked = $lineInspectionInfo->visualInspection ? "checked" : "";
       
       $html =
 <<<HEREDOC
@@ -187,19 +186,19 @@ HEREDOC;
       </div>
       <div class="form-item">
          <div class="form-label-long">Thread #1</div>
-         <input type="checkbox" form="input-form" name="thread1" value="1" {$checked[0]}"/>
+         {$inspectionInput[0]}
       </div>
       <div class="form-item">
          <div class="form-label-long">Thread #2</div>
-         <input type="checkbox" form="input-form" name="thread2" value="1" {$checked[1]}"/>
+         {$inspectionInput[1]}
       </div>
       <div class="form-item">
          <div class="form-label-long">Thread #3</div>
-         <input type="checkbox" form="input-form" name="thread3" value="1" {$checked[2]}"/>
+         {$inspectionInput[2]}
       </div>
       <div class="form-item">
-         <div class="form-label-long">Visual</div>
-         <input type="checkbox" form="input-form" name="visual" value="1" $visualInspectionChecked"/>
+         <div class="form-label-long">Visual #3</div>
+         {$inspectionInput[3]}
       </div>
       <div class="form-item">
          <div class="form-label-long">Operator</div>
@@ -287,6 +286,23 @@ HEREDOC;
       <select id="operator-input" name="operator" form="input-form" $disabled>
          $options
       </select>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   public static function inspectionInput($lineInspectionInfo, $inspectionIndex, $isDisabled)
+   {
+      $name = LineInspectionInfo::getInspectionName($inspectionIndex);
+      $pass = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::PASS) ? "checked" : "";
+      $fail = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::FAIL) ? "checked" : "";
+      $nonApplicable = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::UNKNOWN) ? "checked" : "";
+      
+      $html = 
+<<<HEREDOC
+      <input type="radio" form="input-form" name="$name" value="1" $pass/>
+      <input type="radio" form="input-form" name="$name" value="2" $fail/>
+      <input type="radio" form="input-form" name="$name" value="0" $nonApplicable/>
 HEREDOC;
       
       return ($html);

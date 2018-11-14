@@ -157,11 +157,15 @@ function updateLineInspectionInfo()
       $_SESSION["lineInspectionInfo"]->wcNumber= $_POST['wcNumber'];
    }
    
-   $_SESSION["lineInspectionInfo"]->threadInspections[0] = (isset($_POST['thread1']) && boolval($_POST['thread1']));
-   $_SESSION["lineInspectionInfo"]->threadInspections[1] = (isset($_POST['thread2']) && boolval($_POST['thread2']));
-   $_SESSION["lineInspectionInfo"]->threadInspections[2] = (isset($_POST['thread3']) && boolval($_POST['thread3']));
-   
-   $_SESSION["lineInspectionInfo"]->visualInspection = (isset($_POST['visual']) && boolval($_POST['visual']));
+   for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
+   {
+      $name = LineInspectionInfo::getInspectionName($i);
+      
+      if (isset($_POST[$name]))
+      {
+         $_SESSION["lineInspectionInfo"]->inspections[$i] = $_POST[$name];
+      }
+   }
    
    if (isset($_POST['comments']))
    {

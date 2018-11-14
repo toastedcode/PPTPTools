@@ -45,6 +45,57 @@ function onNewLineInspection()
    form.submit();  	
 }
 
+function onViewLineInspection(entryId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'lineInspection.php');
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'view_line_inspection');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'entryId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', entryId);
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();
+}
+
+function onEditLineInspection(entryId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'lineInspection.php');
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'edit_line_inspection');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'action');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'edit_line_inspection');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'entryId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', entryId);
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();
+}
+
+
 function onCancel()
 {
    form = document.createElement('form');

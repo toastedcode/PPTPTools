@@ -127,6 +127,7 @@ HEREDOC;
                   <th>Thread #3</th>
                   <th>Visual</th>
                   <th></th>
+                  <th></th>
                </tr>
 HEREDOC;
       
@@ -176,26 +177,21 @@ HEREDOC;
                      $operatorName = $user->getFullName();
                   }
                   
+                  $viewEditIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))  // TODO
                   {
+                     $viewEditIcon =
+                     "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditLineInspection($lineInspectionInfo->entryId)\">mode_edit</i>";
+                    
                      $deleteIcon =
                      "<i class=\"material-icons table-function-button\" onclick=\"onDeleteLineInspection($lineInspectionInfo->entryId)\">delete</i>";
                   }
-                  
-                  $passFail = array();
-                  for ($i = 0; $i < LineInspectionInfo::NUM_THREAD_INSPECTIONS; $i++)
+                  else
                   {
-                     $passFail[$i] = 
-                        $lineInspectionInfo->threadInspections[$i] ? 
-                           "<div class=\"pass\">PASS</div>" : 
-                           "<div class=\"fail\">FAIL</div>";
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onViewLineInspection($lineInspectionInfo->entryId)\">visibility</i>";
                   }
-                  
-                  $visualPassFail =                         
-                     $lineInspectionInfo->visualInspection ?
-                        "<div class=\"pass\">PASS</div>" :
-                        "<div class=\"fail\">FAIL</div>";
                   
                   $html .=
 <<<HEREDOC
@@ -205,10 +201,18 @@ HEREDOC;
                         <td>$operatorName</td>
                         <td>$lineInspectionInfo->jobNumber</td>
                         <td>$lineInspectionInfo->wcNumber</td>
-                        <td>$passFail[0]</td>
-                        <td>$passFail[1]</td>
-                        <td>$passFail[2]</td>
-                        <td>$visualPassFail</td>
+HEREDOC;
+                  for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
+                  {
+                     $label = InspectionStatus::getLabel($lineInspectionInfo->inspections[$i]);
+                     $class = InspectionStatus::getClass($lineInspectionInfo->inspections[$i]);
+                     
+                     $html .= "<td><div class=\"$class\">$label</div></td>";
+                  }
+                        
+                  $html .=
+<<<HEREDOC
+                        <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>
                      </tr>
 HEREDOC;
@@ -225,5 +229,13 @@ HEREDOC;
       
       return ($html);
    }
+   
+   private static function getInspectionStatusLabel($inspectionStatus)
+   {
+      $strings = array("---", "PASS", "FAIL");
+      
+      return ($strings[$inspectionStatus]);
+   }
 }
+
 ?>

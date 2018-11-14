@@ -866,9 +866,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO lineinspection " .
-      "(dateTime, inspector, operator, jobNumber, wcNumber, thread1, thread2, thread3, visual, comments) " .
+      "(dateTime, inspector, operator, jobNumber, wcNumber, inspection1, inspection2, inspection3, inspection4, comments) " .
       "VALUES " .
-      "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '{$lineInspectionInfo->threadInspections[0]}', '{$lineInspectionInfo->threadInspections[1]}', '{$lineInspectionInfo->threadInspections[2]}', '$lineInspectionInfo->visualInspection', '$lineInspectionInfo->comments');";
+      "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '{$lineInspectionInfo->inspections[0]}', '{$lineInspectionInfo->inspections[1]}', '{$lineInspectionInfo->inspections[2]}', '{$lineInspectionInfo->inspections[3]}', '$lineInspectionInfo->comments');";
       echo $query;
       $result = $this->query($query);
       
@@ -877,12 +877,12 @@ class PPTPDatabase extends MySqlDatabase
    
    public function updateLineInspection($lineInspectionInfo)
    {
-      $dateTime = Time::toMySqlDate($jobInfo->dateTime);
+      $dateTime = Time::toMySqlDate($lineInspectionInfo->dateTime);
       
       $query =
       "UPDATE lineinspection " .
-      "SET dateTime = '$dateTime',  inspector = '$lineInspectionInfo->inspector', operator = '$lineInspectionInfo->operator', jobNumber = '$lineInspectionInfo->jobNumber', wcNumber = '$lineInspectionInfo->wcNumber', thread1 = '{$lineInspectionInfo->threadInspections[0]}', thread2 = '{$lineInspectionInfo->threadInspections[1]}', thread3 = '{$lineInspectionInfo->threadInspections[2]}', visual = '$lineInspectionInfo->visualInspection', comments = '$lineInspectionInfo->comments' " .
-      "WHERE entryId = '$jobInfo->entryId';";
+      "SET dateTime = '$dateTime',  inspector = '$lineInspectionInfo->inspector', operator = '$lineInspectionInfo->operator', jobNumber = '$lineInspectionInfo->jobNumber', wcNumber = '$lineInspectionInfo->wcNumber', inspection1 = '{$lineInspectionInfo->inspections[0]}', inspection2 = '{$lineInspectionInfo->inspections[1]}', inspection3 = '{$lineInspectionInfo->inspections[2]}', inspection4 = '{$lineInspectionInfo->inspections[3]}', comments = '$lineInspectionInfo->comments' " .
+      "WHERE entryId = '$lineInspectionInfo->entryId';";
       
       $result = $this->query($query);
       

@@ -2,11 +2,35 @@
 require_once 'database.php';
 require_once 'time.php';
 
+abstract class InspectionStatus
+{
+   const FIRST = 0;
+   const UNKNOWN = InspectionStatus::FIRST;
+   const PASS = 1;
+   const FAIL = 2;
+   const LAST = 3;
+   const COUNT = InspectionStatus::LAST - InspectionStatus::FIRST;
+   
+   public static function getLabel($inspectionStatus)
+   {
+      $labels = array("---", "PASS", "FAIL");
+      
+      return ($labels[$inspectionStatus]);
+   }
+   
+   public static function getClass($inspectionStatus)
+   {
+      $classes = array("", "pass", "fail");
+      
+      return ($classes[$inspectionStatus]);
+   }
+}
+
 class LineInspectionInfo
 {
    const INVALID_ENTRY_ID = 0;
    
-   const NUM_THREAD_INSPECTIONS = 3;
+   const NUM_INSPECTIONS = 4;
    
    public $entryId;
    public $dateTime;
@@ -14,8 +38,7 @@ class LineInspectionInfo
    public $operator;
    public $jobNumber;
    public $wcNumber;
-   public $threadInspections;
-   public $visualInspection;
+   public $inspections;
    public $comments;
    
    public function __construct()
@@ -26,9 +49,14 @@ class LineInspectionInfo
       $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
       $this->wcNumber = 0;
-      $this->threadInspections = array(false, false, false);
+      $this->inspections = array(InspectionStatus::UNKNOWN, InspectionStatus::UNKNOWN, InspectionStatus::UNKNOWN, InspectionStatus::UNKNOWN);
       $this->visualInspection = false;
       $this->comments = "";
+   }
+   
+   public static function getInspectionName($inspectionIndex)
+   {
+      return ("inspection" . ($inspectionIndex + 1));
    }
    
    public static function load($entryId)
@@ -47,16 +75,17 @@ class LineInspectionInfo
          {
             $lineInspectionInfo = new LineInspectionInfo();
             
-            $lineInspectionInfo->entryId= intval($row['entryId']);
-            $lineInspectionInfo->dateTime= Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $lineInspectionInfo->inspector= intval($row['inspector']);
-            $lineInspectionInfo->operator= intval($row['operator']);
-            $lineInspectionInfo->jobNumber= $row['jobNumber'];
-            $lineInspectionInfo->wcNumber= intval($row['wcNumber']);
-            $lineInspectionInfo->threadInspections[0] = boolval($row['thread1']);
-            $lineInspectionInfo->threadInspections[1] = boolval($row['thread2']);
-            $lineInspectionInfo->threadInspections[2] = boolval($row['thread3']);
-            $lineInspectionInfo->visualInspection = boolval($row['visual']);
+            $lineInspectionInfo->entryId = intval($row['entryId']);
+            $lineInspectionInfo->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $lineInspectionInfo->inspector = intval($row['inspector']);
+            $lineInspectionInfo->operator = intval($row['operator']);
+            $lineInspectionInfo->jobNumber = $row['jobNumber'];
+            $lineInspectionInfo->wcNumber = intval($row['wcNumber']);
+            for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
+            {
+               $name = LineInspectionInfo::getInspectionName($i);
+               $lineInspectionInfo->inspections[$i] = intval($row[$name]);
+            }
             $lineInspectionInfo->comments = $row['comments'];
          }
       }
@@ -78,11 +107,11 @@ if (isset($_GET["entryId"]))
       echo "inspector: " . $lineInspectionInfo->inspector.         "<br/>";
       echo "operator: " .  $lineInspectionInfo->operator.          "<br/>";
       echo "jobNumber: " . $lineInspectionInfo->jobNumber.         "<br/>";
-      for ($i = 0; $i < LineInspectionInfo::NUM_THREAD_INSPECTIONS; $i++)
+      for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
       {
-         echo "thread[" . $i . "]: " . $lineInspectionInfo->threadInspections[$i] . "<br/>";
+         $name = "inspection" . ($i + 1);
+         echo $name . "[" . $i . "]: " . $lineInspectionInfo->threadInspections[$i] . "<br/>";
       }
-      echo "visual: " .    $lineInspectionInfo->visualInspection . "<br/>";
       echo "comments: " .  $lineInspectionInfo->comments .         "<br/>";
    }
    else
