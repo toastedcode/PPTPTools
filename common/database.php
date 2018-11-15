@@ -145,8 +145,8 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
 
-      $query = "SELECT * FROM workcenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
-      
+      $query = "SELECT DISTINCT workcenter.wcNumber FROM workcenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
+
       $result = $this->query($query);
 
       return ($result);
@@ -878,7 +878,7 @@ class PPTPDatabase extends MySqlDatabase
       "(dateTime, inspector, operator, jobNumber, wcNumber, inspection1, inspection2, inspection3, inspection4, comments) " .
       "VALUES " .
       "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '{$lineInspectionInfo->inspections[0]}', '{$lineInspectionInfo->inspections[1]}', '{$lineInspectionInfo->inspections[2]}', '{$lineInspectionInfo->inspections[3]}', '$lineInspectionInfo->comments');";
-      echo $query;
+
       $result = $this->query($query);
       
       return ($result);

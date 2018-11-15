@@ -80,7 +80,7 @@ class ViewLineInspections
          
          </div>
 
-         $navBar;
+         $navBar
 
       </div>
 HEREDOC;

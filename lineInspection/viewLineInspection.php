@@ -128,7 +128,9 @@ HEREDOC;
       $isDisabled = ($view == "view_line_inspection");
       $disabled = $isDisabled? "disabled" : "";
       
-      $options = "";
+      $selected= ($lineInspectionInfo->jobNumber == JobInfo::UNKNOWN_JOB_NUMBER) ? "selected" : "";
+      
+      $options = "<option disabled $selected hidden>Select job</option>";
       
       $database = new PPTPDatabase();
       
@@ -144,8 +146,7 @@ HEREDOC;
             $jobNumber = $row["jobNumber"];
             
             $selected = "";
-            if ((($lineInspectionInfo->jobNumber == "") && ($i == 0)) ||  // no selection && first in list
-                ($jobNumber == $lineInspectionInfo->jobNumber))           // selected job number
+            if ($jobNumber == $lineInspectionInfo->jobNumber)
             {
                $selected = "selected";
             }
@@ -267,7 +268,9 @@ HEREDOC;
    {
       $disabled = $isDisabled ? "disabled" : "";
       
-      $options = "";
+      $selected = ($lineInspectionInfo->wcNumber == 0) ? "selected" : ""; 
+      
+      $options = "<option disabled $selected hidden>Select operator</option>";
       
       $operators = UserInfo::getUsersByRole(Role::OPERATOR);
       
@@ -275,8 +278,7 @@ HEREDOC;
       foreach ($operators as $operator)
       {
          $selected = "";
-         if ((($lineInspectionInfo->operator == UserInfo::UNKNOWN_EMPLOYEE_NUMBER) && ($i == 0)) ||  // no selection && first in list
-             ($operator->employeeNumber == $lineInspectionInfo->operator))                            // selected operator
+         if ($operator->employeeNumber == $lineInspectionInfo->operator)
          {
             $selected = "selected";
          }
