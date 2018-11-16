@@ -14,7 +14,7 @@ class TimeCardThumbnail
       
       if ($timeCardInfo)
       {
-         $this->jobInfo = JobInfo::load($this->timeCardInfo->jobNumber);
+         $this->jobInfo = JobInfo::load($this->timeCardInfo->jobId);
          $this->partWeightEntry = PartWeightEntry::getPartWeightEntryForTimeCard($this->timeCardInfo->timeCardId);
          $this->partWasherEntry = PartWasherEntry::getPartWasherEntryForTimeCard($this->timeCardInfo->timeCardId);
       }

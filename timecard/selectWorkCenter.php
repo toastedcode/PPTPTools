@@ -101,7 +101,7 @@ HEREDOC;
 
       if (isset($_SESSION['timeCardInfo']))
       {
-         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobNumber);
+         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobId);
 
          if ($jobInfo)
          {

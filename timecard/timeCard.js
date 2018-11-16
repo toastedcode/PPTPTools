@@ -211,7 +211,7 @@ function validateJob()
 {
    valid = false;
 
-   radioButtons = document.getElementsByName("jobNumber");
+   radioButtons = document.getElementsByName("jobId");
    
    if (radioButtons.length == 0)
    {

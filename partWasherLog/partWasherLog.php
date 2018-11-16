@@ -6,6 +6,7 @@ require_once '../common/header.php';
 require_once '../common/partWasherEntry.php';
 
 require 'viewPartWasherLog.php';
+require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
 require 'enterPartCount.php';
 
@@ -98,6 +99,13 @@ function processView($view)
 {
    switch ($view)
    {
+      case 'select_entry_method':
+      {
+         $page = new SelectEntryMethod();
+         $page->render($view);
+         break;
+      }
+         
       case 'select_time_card':
       {
          $page = new SelectTimeCard();
@@ -151,7 +159,17 @@ function updatePartWasherEntry()
    
    if (isset($_POST['partCount']))
    {
-      $_SESSION["partWasherEntry"]->partCount= $_POST['partCount'];
+      $_SESSION["partWasherEntry"]->partCount = $_POST['partCount'];
+   }
+   
+   if (isset($_POST['jobId']))
+   {
+      $_SESSION["partWasherEntry"]->jobId = $_POST['jobId'];
+   }
+   
+   if (isset($_POST['operator']))
+   {
+      $_SESSION["partWasherEntry"]->operator= $_POST['operator'];
    }
 }
 
@@ -189,7 +207,10 @@ function updatePartWasherLog($partWasherEntry)
       {
          // Delete any existing part count.
          // TODO: Any reason to preserve old entries?
-         $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
+         if ($partWasherEntry->timeCardId != 0)
+         {
+            $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
+         }
          
          $database->newPartWasherEntry($partWasherEntry);
       }

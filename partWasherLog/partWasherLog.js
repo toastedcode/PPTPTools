@@ -32,7 +32,7 @@ function onNewPartWasherEntry()
    input = document.createElement('input');
    input.setAttribute('name', 'view');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'select_time_card');
+   input.setAttribute('value', 'select_entry_method');
    form.appendChild(input);
    
    input = document.createElement('input');

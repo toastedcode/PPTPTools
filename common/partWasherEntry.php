@@ -10,6 +10,10 @@ class PartWasherEntry
    public $timeCardId;
    public $panCount;
    public $partCount;
+   
+   // These attributes were added for manual entry when no time card is available.
+   public $jobId = 0;
+   public $operator = 0;
 
    public static function load($partWasherEntryId)
    {
@@ -32,7 +36,11 @@ class PartWasherEntry
             $partWasherEntry->employeeNumber = intval($row['employeeNumber']);
             $partWasherEntry->timeCardId = intval($row['timeCardId']);
             $partWasherEntry->panCount = intval($row['panCount']);
-            $partWasherEntry->partCount= intval($row['partCount']);
+            $partWasherEntry->partCount = intval($row['partCount']);
+            
+            // These attributes were added for manual entry when no time card is available.
+            $partWasherEntry->jobId = intval($row['jobId']);
+            $partWasherEntry->operator = intval($row['operator']);
          }
       }
       
@@ -74,11 +82,13 @@ class PartWasherEntry
        echo "employeeNumber: " .    $partWasherEntry->employeeNumber .    "<br/>";
        echo "timeCardId: " .        $partWasherEntry->timeCardId .        "<br/>";
        echo "panCount: " .          $partWasherEntry->panCount .          "<br/>";
-       echo "partCount: " .         $partWasherEntry-partCount .          "<br/>";
+       echo "partCount: " .         $partWasherEntry->partCount .         "<br/>";
+       echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
+       echo "operator: " .          $partWasherEntry->operator .          "<br/>";
     }
     else
     {
-       echo "No part entry found.";
+       echo "No part washer entry found.";
     }
  }
  */

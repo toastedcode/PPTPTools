@@ -84,6 +84,7 @@ HEREDOC;
       
       if (isset($_SESSION['timeCardInfo']))
       {
+         echo "Job id: " . $_SESSION['timeCardInfo']->jobId;
          $materialNumber= $_SESSION['timeCardInfo']->materialNumber;
       }
       

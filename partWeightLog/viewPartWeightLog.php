@@ -119,6 +119,8 @@ HEREDOC;
             <table class="part-weight-log-table">
                <tr>
                   <th>Job #</th>
+                  <th>WC #</th>
+                  <th>Operator Name</th>
                   <th>Laborer Name</th>
                   <th>Weigh Date</th>
                   <th>Weigh Time</th>
@@ -157,10 +159,17 @@ HEREDOC;
                {
                   $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
                   
-                  $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
+                  $jobInfo = JobInfo::load($timeCardInfo->jobId);
                   
                   if ($timeCardInfo && $jobInfo)
                   {
+                     $operatorName = "unknown";
+                     $operator = UserInfo::load($timeCardInfo->employeeNumber);
+                     if ($operator)
+                     {
+                        $operatorName= $operator->getFullName();
+                     }
+                     
                      $laborerName = "unknown";
                      $operator = UserInfo::load($partWeightEntry->employeeNumber);
                      if ($operator)
@@ -191,6 +200,8 @@ HEREDOC;
 <<<HEREDOC
                         <tr>
                            <td>$jobInfo->jobNumber</td>
+                           <td>$jobInfo->wcNumber</td>
+                           <td>$operatorName</td>
                            <td>$laborerName</td>
                            <td>$weighDate $new</td>
                            <td>$weighTime</td>

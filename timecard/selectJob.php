@@ -37,7 +37,7 @@ HEREDOC;
    {
       $html = "";
       
-      $selectedJob = SelectJob::getJobNumber();
+      $selectedJob = SelectJob::getJobId();
       
       $wcNumber = SelectJob::getWorkCenter();
       
@@ -52,28 +52,29 @@ HEREDOC;
          // output data of each row
          while ($result && ($row = $result->fetch_assoc()))
          {
+            $jobId = $row["jobId"];
             $jobNumber = $row["jobNumber"];
             
-            $isChecked = ($selectedJob == $jobNumber);
+            $isChecked = ($selectedJob == $jobId);
             
-            $html .= SelectJob::jobDiv($jobNumber, $isChecked);
+            $html .= SelectJob::jobDiv($jobId, $jobNumber, $isChecked);
          }
       }
       
       return ($html);
    }
    
-   private static function jobDiv($jobNumber, $isChecked)
+   private static function jobDiv($jobId, $jobNumber, $isChecked)
    {
       $html = "";
       
       $checked = $isChecked ? "checked" : "";
       
-      $id = "list-option-" + $jobNumber;
+      $id = "list-option-" + $jobId;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="input-form" id="$id" class="operator-input" name="jobNumber" value="$jobNumber" $checked/>
+         <input type="radio" form="input-form" id="$id" class="operator-input" name="jobId" value="$jobId" $checked/>
          <label for="$id">
             <div type="button" class="select-button job-select-button">
                <i class="material-icons button-icon">assignment</i>
@@ -98,16 +99,16 @@ HEREDOC;
       return ($navBar->getHtml());
    }
    
-   private static function getJobNumber()
+   private static function getJobId()
    {
-      $jobNumber = null;
+      $jobId = null;
       
       if (isset($_SESSION['timeCardInfo']))
       {
-         $jobNumber = $_SESSION['timeCardInfo']->jobNumber;
+         $jobId= $_SESSION['timeCardInfo']->jobId;
       }
       
-      return ($jobNumber);
+      return ($jobId);
    }
    
    private static function getWorkCenter()
@@ -120,7 +121,7 @@ HEREDOC;
       }
       else if (isset($_SESSION['timeCardInfo']))
       {
-         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobNumber);
+         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobId);
          
          if ($jobInfo)
          {

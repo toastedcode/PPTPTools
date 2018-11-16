@@ -149,7 +149,7 @@ HEREDOC;
       $disabled = ($readOnly) ? "disabled" : "";
       
       $wcNumber = "unknown";
-      $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
+      $jobInfo = JobInfo::load($timeCardInfo->jobId);
       if ($jobInfo)
       {
          $wcNumber = $jobInfo->wcNumber;
@@ -166,7 +166,7 @@ HEREDOC;
 
          <div class="form-item">
             <div class="form-label">Job #</div>
-            <input type="text" class="form-input-medium" style="width:150px;" value="$timeCardInfo->jobNumber" disabled />
+            <input type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->jobNumber" disabled />
          </div>
 
          <div class="form-item">

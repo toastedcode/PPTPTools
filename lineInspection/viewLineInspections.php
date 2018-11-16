@@ -118,6 +118,7 @@ HEREDOC;
             <table class="line-inspections-table">
                <tr>
                   <th>Date</th>
+                  <th>Time</th>
                   <th>Inspector</th>
                   <th>Operator</th>
                   <th>Job</th>
@@ -158,7 +159,8 @@ HEREDOC;
                if ($lineInspectionInfo)
                {
                   $dateTime = new DateTime($lineInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $inspectionTime = $dateTime->format("m-d-Y");
+                  $inspectionDate = $dateTime->format("m-d-Y");
+                  $inspectionTime = $dateTime->format("h:i A");
                   
                   $newIndicator = new NewIndicator($dateTime, 60);
                   $new = $newIndicator->getHtml();
@@ -196,7 +198,8 @@ HEREDOC;
                   $html .=
 <<<HEREDOC
                      <tr>
-                        <td>$inspectionTime $new</td>
+                        <td>$inspectionDate $new</td>                        
+                        <td>$inspectionTime</td>
                         <td>$inspectorName</td>
                         <td>$operatorName</td>
                         <td>$lineInspectionInfo->jobNumber</td>
