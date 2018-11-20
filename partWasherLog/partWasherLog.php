@@ -9,6 +9,7 @@ require 'viewPartWasherLog.php';
 require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
 require 'selectJob.php';
+require 'selectOperator.php';
 require 'selectWorkCenter.php';
 require 'enterPartCount.php';
 
@@ -118,6 +119,13 @@ function processView($view)
          break;
       }
       
+      case 'select_work_center':
+      {
+         $page = new SelectWorkCenter_PartWasher();
+         $page->render();
+         break;
+      }
+      
       case 'select_job':
       {
          $page = new SelectJob_PartWasher();
@@ -125,12 +133,12 @@ function processView($view)
          break;
       }
       
-      case 'select_work_center':
-         {
-            $page = new SelectWorkCenter_PartWasher();
-            $page->render();
-            break;
-         }
+      case 'select_operator':
+      {
+         $page = new SelectOperator_PartWasher();
+         $page->render();
+         break;
+      }
       
       case 'enter_part_count':
       {
@@ -232,7 +240,7 @@ function updatePartWasherLog($partWasherEntry)
       {
          // Delete any existing part count.
          // TODO: Any reason to preserve old entries?
-         if ($partWasherEntry->timeCardId != 0)
+         if ($partWasherEntry->timeCardId != PartWasherEntry::UNKNOWN_TIME_CARD_ID)
          {
             $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
          }

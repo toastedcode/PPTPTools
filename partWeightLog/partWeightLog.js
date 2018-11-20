@@ -32,7 +32,7 @@ function onNewPartWeightEntry()
    input = document.createElement('input');
    input.setAttribute('name', 'view');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'select_time_card');
+   input.setAttribute('value', 'select_entry_method');
    form.appendChild(input);
    
    input = document.createElement('input');
@@ -110,6 +110,58 @@ function validateTimeCardId()
    else
    {
       valid = true;
+   }
+   
+   return (valid);
+}
+
+function validateWorkCenter()
+{
+   var valid = false;
+   
+   radioButtons = document.getElementsByName("wcNumber"); 
+   
+   if (radioButtons.length == 0)
+   {
+      valid = true;
+   }
+   else
+   {
+      for (var i = 0; i < radioButtons.length; i++)
+      {
+         valid |= radioButtons[i].checked;
+      }
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a work center.")
+   }
+   
+   return (valid);
+}
+
+function validateJob()
+{
+   valid = false;
+
+   radioButtons = document.getElementsByName("jobId");
+   
+   if (radioButtons.length == 0)
+   {
+      valid = true;
+   }
+   else
+   {
+      for (var i = 0; i < radioButtons.length; i++)
+      {
+         valid |= radioButtons[i].checked;
+      }
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a job.")
    }
    
    return (valid);

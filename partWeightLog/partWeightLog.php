@@ -6,6 +6,10 @@ require_once '../common/header.php';
 require_once '../common/partWeightEntry.php';
 
 require 'viewPartWeightLog.php';
+require 'selectEntryMethod.php';
+require 'selectWorkCenter.php';
+require 'selectJob.php';
+require 'selectOperator.php';
 require 'selectTimeCard.php';
 require 'enterWeight.php';
 
@@ -68,6 +72,7 @@ function processAction($action)
       case 'cancel_part_weight_entry':
       {
          unset($_SESSION["partWeightEntry"]);
+         unset($_SESSION["wcNumber"]);
          break;
       }
       
@@ -98,10 +103,40 @@ function processView($view)
 {
    switch ($view)
    {
+      case 'select_entry_method':
+      {
+         unset($_SESSION["wcNumber"]);
+         
+         $page = new SelectEntryMethod();
+         $page->render($view);
+         break;
+      }
+         
       case 'select_time_card':
       {
          $page = new SelectTimeCard();
          $page->render($view);
+         break;
+      }
+      
+      case 'select_job':
+      {
+         $page = new SelectJob_PartWeight();
+         $page->render();
+         break;
+      }
+         
+      case 'select_operator':
+      {
+         $page = new SelectOperator_PartWeight();
+         $page->render();
+         break;
+      }
+         
+      case 'select_work_center':
+      {
+         $page = new SelectWorkCenter_PartWeight();
+         $page->render();
          break;
       }
       
@@ -148,6 +183,22 @@ function updatePartWeightEntry()
    {
       $_SESSION["partWeightEntry"]->weight = $_POST['weight'];
    }
+   
+   // Temporary input variable, part of selecting job.
+   if (isset($_POST['wcNumber']))
+   {
+      $_SESSION["wcNumber"] = $_POST['wcNumber'];
+   }
+   
+   if (isset($_POST['jobId']))
+   {
+      $_SESSION["partWeightEntry"]->jobId = $_POST['jobId'];
+   }
+   
+   if (isset($_POST['operator']))
+   {
+      $_SESSION["partWeightEntry"]->operator= $_POST['operator'];
+   }
 }
 
 function deletePartWeightEntry($partWeightEntryId)
@@ -184,7 +235,10 @@ function updatePartWeightLog($partWeightEntry)
       {
          // Delete any existing part weight.
          // TODO: Any reason to preserve old entries?
-         $database->deleteAllPartWeightEntries($partWeightEntry->timeCardId);
+         if ($partWeightEntry->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
+         {
+            $database->deleteAllPartWeightEntries($partWeightEntry->timeCardId);
+         }
          
          $database->newPartWeightEntry($partWeightEntry);
       }

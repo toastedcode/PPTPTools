@@ -1,16 +1,16 @@
 <?php
 require_once '../common/selectJob.php';
 
-class SelectJob_PartWasher extends SelectJob
+class SelectJob_PartWeight extends SelectJob
 {
    protected function navBar()
    {
       $navBar = new Navigation();
       
       $navBar->start();
-      $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
-      $navBar->backButton("submitForm('input-form', 'partWasherLog.php', 'select_work_center', 'update_part_washer_entry');");
-      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWasherLog.php', 'select_operator', 'update_part_washer_entry');};");
+      $navBar->cancelButton("submitForm('input-form', 'partWeightLog.php', 'view_part_washer_log', 'cancel_part_weight_entry')");
+      $navBar->backButton("submitForm('input-form', 'partWeightLog.php', 'select_work_center', 'update_part_weight_entry');");
+      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWeightLog.php', 'select_operator', 'update_part_weight_entry');};");
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -20,9 +20,9 @@ class SelectJob_PartWasher extends SelectJob
    {
       $jobId = null;
       
-      if (isset($_SESSION['partWasherEntry']))
+      if (isset($_SESSION['partWeightEntry']))
       {
-         $jobId= $_SESSION['partWasherEntry']->jobId;
+         $jobId= $_SESSION['partWeightEntry']->jobId;
       }
       
       return ($jobId);

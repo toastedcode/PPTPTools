@@ -4,16 +4,20 @@ require_once('time.php');
 
 class PartWasherEntry
 {
+   const UNKNOWN_TIME_CARD_ID = 0;
+   const UNKNOWN_JOB_ID = 0;
+   const UNKNOWN_OPERATOR = 0;
+   
    public $partWasherEntryId;
    public $dateTime;
    public $employeeNumber;
-   public $timeCardId;
+   public $timeCardId = PartWasherEntry::UNKNOWN_TIME_CARD_ID;
    public $panCount;
    public $partCount;
    
    // These attributes were added for manual entry when no time card is available.
-   public $jobId = 0;
-   public $operator = 0;
+   public $jobId = PartWasherEntry::UNKNOWN_JOB_ID;
+   public $operator = PartWasherEntry::UNKNOWN_OPERATOR;
 
    public static function load($partWasherEntryId)
    {
