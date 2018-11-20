@@ -115,6 +115,32 @@ function validateTimeCardId()
    return (valid);
 }
 
+function validateJob()
+{
+   valid = false;
+
+   radioButtons = document.getElementsByName("jobId");
+   
+   if (radioButtons.length == 0)
+   {
+      valid = true;
+   }
+   else
+   {
+      for (var i = 0; i < radioButtons.length; i++)
+      {
+         valid |= radioButtons[i].checked;
+      }
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a job.")
+   }
+   
+   return (valid);
+}
+
 function validatePartCount()
 {
    var valid = false;

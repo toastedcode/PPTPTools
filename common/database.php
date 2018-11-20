@@ -152,6 +152,15 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getWorkCentersForJob($jobNumber)
+   {
+      $query = "SELECT DISTINCT wcNumber FROM job WHERE jobNumber = $jobNumber ORDER BY wcNumber ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    // **************************************************************************
    //                                Time Cards
    // **************************************************************************

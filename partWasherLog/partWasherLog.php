@@ -8,6 +8,8 @@ require_once '../common/partWasherEntry.php';
 require 'viewPartWasherLog.php';
 require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
+require 'selectJob.php';
+require 'selectWorkCenter.php';
 require 'enterPartCount.php';
 
 function getAction()
@@ -112,6 +114,20 @@ function processView($view)
          $page->render($view);
          break;
       }
+      
+      case 'select_job':
+      {
+         $page = new SelectJob_PartWasher();
+         $page->render();
+         break;
+      }
+      
+      case 'select_work_center':
+         {
+            $page = new SelectWorkCenter_PartWasher();
+            $page->render();
+            break;
+         }
       
       case 'enter_part_count':
       {
