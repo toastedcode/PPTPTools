@@ -71,6 +71,7 @@ function processAction($action)
       case 'cancel_part_washer_entry':
       {
          unset($_SESSION["partWasherEntry"]);
+         unset($_SESSION["wcNumber"]);
          break;
       }
       
@@ -103,6 +104,8 @@ function processView($view)
    {
       case 'select_entry_method':
       {
+         unset($_SESSION["wcNumber"]);
+         
          $page = new SelectEntryMethod();
          $page->render($view);
          break;
@@ -176,6 +179,12 @@ function updatePartWasherEntry()
    if (isset($_POST['partCount']))
    {
       $_SESSION["partWasherEntry"]->partCount = $_POST['partCount'];
+   }
+   
+   // Temporary input variable, part of selecting job.
+   if (isset($_POST['wcNumber']))
+   {
+      $_SESSION["wcNumber"] = $_POST['wcNumber'];
    }
    
    if (isset($_POST['jobId']))

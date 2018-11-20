@@ -17,7 +17,7 @@ class SelectEntryMethod
                Time Card
             </button>
    
-            <button class="nav-button" onclick="submitForm('input-form', 'partWasherLog.php', 'select_job', 'no_action')">
+            <button class="nav-button" onclick="submitForm('input-form', 'partWasherLog.php', 'select_work_center', 'no_action')">
                Manual Entry
             </button>
 

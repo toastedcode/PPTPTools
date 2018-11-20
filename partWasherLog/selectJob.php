@@ -9,8 +9,8 @@ class SelectJob_PartWasher extends SelectJob
       
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
-      $navBar->backButton("submitForm('input-form', 'partWasherLog.php', 'select_entry_method', 'update_part_washer_entry');");
-      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWasherLog.php', 'select_work_center', 'update_part_washer_entry');};");
+      $navBar->backButton("submitForm('input-form', 'partWasherLog.php', 'select_work_center', 'update_part_washer_entry');");
+      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWasherLog.php', 'enter_part_count', 'update_part_washer_entry');};");
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -26,6 +26,18 @@ class SelectJob_PartWasher extends SelectJob
       }
       
       return ($jobId);
+   }
+   
+   protected function getWorkCenterNumber()
+   {
+      $wcNumber = null;
+      
+      if (isset($_SESSION['wcNumber']))
+      {
+         $wcNumber = $_SESSION['wcNumber'];
+      }
+      
+      return ($wcNumber);
    }
 }
 ?>

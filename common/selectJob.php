@@ -39,11 +39,15 @@ HEREDOC;
    
    abstract protected function navBar();
    
+   abstract protected function getWorkCenterNumber();
+   
    abstract protected function getJobId();
    
    private function jobsDiv()
    {
       $html = "";
+      
+      $wcNumber = $this->getWorkCenterNumber();
       
       $selectedJob = $this->getJobId();
       
@@ -53,7 +57,7 @@ HEREDOC;
       
       if ($database->isConnected())
       {
-         $result = $database->getActiveJobs(null);
+         $result = $database->getActiveJobs($wcNumber);
          
          // output data of each row
          while ($result && ($row = $result->fetch_assoc()))

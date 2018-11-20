@@ -115,6 +115,32 @@ function validateTimeCardId()
    return (valid);
 }
 
+function validateWorkCenter()
+{
+   var valid = false;
+   
+   radioButtons = document.getElementsByName("wcNumber"); 
+   
+   if (radioButtons.length == 0)
+   {
+      valid = true;
+   }
+   else
+   {
+      for (var i = 0; i < radioButtons.length; i++)
+      {
+         valid |= radioButtons[i].checked;
+      }
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a work center.")
+   }
+   
+   return (valid);
+}
+
 function validateJob()
 {
    valid = false;

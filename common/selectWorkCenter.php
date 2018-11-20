@@ -39,17 +39,13 @@ HEREDOC;
       
       $selectedWorkCenter = $this->getWorkCenter();
       
-      $jobId = $this->getJobId();
-      
-      $jobInfo = JobInfo::load($jobId);
-      
       $database = new PPTPDatabase();
       
       $database->connect();
       
       if ($database->isConnected())
       {
-         $result = $database->getWorkCentersForJob($jobInfo->jobNumber);
+         $result = $database->getActiveWorkCenters();
          
          // output data of each row
          while ($result && ($row = $result->fetch_assoc()))
@@ -90,7 +86,5 @@ HEREDOC;
    abstract protected function navBar();
    
    abstract protected function getWorkCenter();
-   
-   abstract protected function getJobId();
 }
 ?>
