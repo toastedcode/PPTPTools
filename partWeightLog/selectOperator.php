@@ -11,7 +11,7 @@ class SelectOperator_PartWeight extends SelectOperator
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'cancel_part_weight_entry')");
       $navBar->backButton("submitForm('input-form', 'partWeightLog.php', 'select_job', 'update_part_weight_entry');");
-      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWeightLog.php', 'enter_weight', 'update_part_weight_entry');};");
+      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWeightLog.php', 'enter_pan_count', 'update_part_weight_entry');};");
       $navBar->end();
       
       return ($navBar->getHtml());

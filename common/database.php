@@ -624,9 +624,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO partweight " .
-      "(dateTime, employeeNumber, timeCardId, weight, jobId, operator) " .
+      "(dateTime, employeeNumber, timeCardId, weight, jobId, operator, panCount) " .
       "VALUES " .
-      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight', '$partWeightEntry->jobId', '$partWeightEntry->operator');";
+      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight', '$partWeightEntry->jobId', '$partWeightEntry->operator', '$partWeightEntry->panCount');";
 
       $result = $this->query($query);
       
@@ -640,7 +640,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE partweight " .
-      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight, jobId = $partWeightEntry->jobId, operator = $partWeightEntry->operator " .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight, jobId = $partWeightEntry->jobId, operator = $partWeightEntry->operator, panCount = $partWeightEntry->panCount " .
       "WHERE partWeightEntryId = $partWeightEntry->partWeightEntryId;";
 
       $result = $this->query($query);
@@ -701,7 +701,7 @@ class PPTPDatabase extends MySqlDatabase
       $wcClause = $wcNumber ? "wcNumber = '$wcNumber' AND" : "";
       
       $query = "SELECT * FROM job WHERE $wcClause status = $active ORDER BY dateTime DESC;";
-      
+
       $result = $this->query($query);
       
       return ($result);

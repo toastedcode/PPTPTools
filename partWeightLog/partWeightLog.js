@@ -167,6 +167,22 @@ function validateJob()
    return (valid);
 }
 
+function validatePanCount()
+{
+   var valid = false;
+
+   if (!(document.getElementById("panCount-input").validator.validate()))
+   {
+      alert("Please enter a valid pan count.")
+   }
+   else
+   {
+      valid = true;
+   }
+
+   return (valid);
+}
+
 function validateWeight()
 {
    var valid = false;

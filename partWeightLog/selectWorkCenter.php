@@ -9,8 +9,8 @@ class SelectWorkCenter_PartWeight extends SelectWorkCenter
       
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'cancel_part_weight_entry')");
-      $navBar->backButton("submitForm('input-form', 'partWeightLog.php', 'select_entry_method', 'update_part_washer_entry');");
-      $navBar->nextButton("if (validateWorkCenter()){submitForm('input-form', 'partWeightLog.php', 'select_job', 'update_part_washer_entry');};");
+      $navBar->backButton("submitForm('input-form', 'partWeightLog.php', 'select_entry_method', 'update_part_weight_entry');");
+      $navBar->nextButton("if (validateWorkCenter()){submitForm('input-form', 'partWeightLog.php', 'select_job', 'update_part_weight_entry');};");
       $navBar->end();
       
       return ($navBar->getHtml());

@@ -10,6 +10,7 @@ require 'selectEntryMethod.php';
 require 'selectWorkCenter.php';
 require 'selectJob.php';
 require 'selectOperator.php';
+require 'enterPanCount.php';
 require 'selectTimeCard.php';
 require 'enterWeight.php';
 
@@ -132,6 +133,13 @@ function processView($view)
          $page->render();
          break;
       }
+      
+      case 'enter_pan_count':
+      {
+         $page = new EnterPanCount();
+         $page->render();
+         break;
+      }
          
       case 'select_work_center':
       {
@@ -197,7 +205,12 @@ function updatePartWeightEntry()
    
    if (isset($_POST['operator']))
    {
-      $_SESSION["partWeightEntry"]->operator= $_POST['operator'];
+      $_SESSION["partWeightEntry"]->operator = $_POST['operator'];
+   }
+   
+   if (isset($_POST['panCount']))
+   {
+      $_SESSION["partWeightEntry"]->panCount= $_POST['panCount'];
    }
 }
 
