@@ -121,10 +121,10 @@ HEREDOC;
                   <th>Job #</th>
                   <th>WC #</th>
                   <th>Operator Name</th>
+                  <th>Mfg. Date</th>
                   <th>Laborer Name</th>
                   <th>Weigh Date</th>
                   <th>Weigh Time</th>
-                  <th>Mfg. Date</th>
                   <th>Basket Count</th>
                   <th>Weight</th>
                   <th></th>
@@ -160,7 +160,7 @@ HEREDOC;
                   // Start with the manually entered values.
                   $jobId = $partWeightEntry->jobId;
                   $operatorEmployeeNumber =  $partWeightEntry->operator;
-                  $panCount = 0;  // TODO
+                  $panCount = $partWeightEntry->panCount;
                   
                   // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
                   $mfgDate = "unknown";
@@ -223,10 +223,10 @@ HEREDOC;
                         <td>$jobNumber</td>
                         <td>$wcNumber</td>
                         <td>$operatorName</td>
+                        <td>$mfgDate</td>
                         <td>$laborerName</td>
                         <td>$weighDate $new</td>
                         <td>$weighTime</td>
-                        <td>$mfgDate</td>
                         <td>$panCount</td>                           
                         <td>$partWeightEntry->weight</td>
                         <td>$deleteIcon</td>

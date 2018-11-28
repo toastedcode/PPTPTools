@@ -17,6 +17,7 @@ class PartWeightEntry
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
    public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
+   public $panCount;
 
    public static function load($partWeightEntryId)
    {
@@ -43,6 +44,7 @@ class PartWeightEntry
             // These attributes were added for manual entry when no time card is available.
             $partWeightEntry->jobId = intval($row['jobId']);
             $partWeightEntry->operator = intval($row['operator']);
+            $partWeightEntry->panCount = intval($row['panCount']);
          }
       }
       
