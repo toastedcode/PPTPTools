@@ -46,7 +46,7 @@ class ViewLineInspection
          
          <div class="pptp-form" style="height:500px;">
             $titleDiv
-            <div class="form-column">
+            <div class="form-row">
                $inspectionDiv
             </div>
          </div>
@@ -72,10 +72,11 @@ HEREDOC;
    {
       $disabled = $isDisabled ? "disabled" : "";
       
-      $options = "";
-      $selected = "";
-      
       $lineInspectionInfo = ViewLineInspection::getLineInspectionInfo();
+      
+      $selected =  ($lineInspectionInfo->wcNumber == 0) ? "selected" : ""; 
+      
+      $options = "<option disabled $selected hidden>Select Work Center</option>";
       
       $database = new PPTPDatabase();
       
@@ -105,7 +106,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <select id="wc-number-input" name="wcNumber" form="input-form" $disabled>
+      <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>
          $options
       </select>
 HEREDOC;
@@ -170,45 +171,52 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <!--div class="form-title">Line Inspection</div-->
-      <div class="form-item">
-         <div class="form-label-long">Job Number</div>
-         <select id="job-number-input" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" $disabled>
-            $options
-         </select>
-      </div>
-      <div class="form-item">
-         <div class="form-label-long">WC Number</div>
-         <div id="wc-number-input-div">$wcNumberInput</div>
-      </div>
-      <div class="form-item">
-         <div class="form-label-long">Operator</div>
-         $operatorInput
-      </div>
-      
-      <table>
-         <tr><td></td><td>PASS</td><td>FAIL</td><td>N/A</td><tr>
-         <tr>
-            <td>Thread #1</td>
-            {$inspectionInput[0]}
-         </tr>
-         <tr>
-            <td>Thread #2</td>
-            {$inspectionInput[1]}
-         </tr>
-         <tr>
-            <td>Thread #3</td>
-            {$inspectionInput[2]}
-         </tr>
-         <tr>
-            <td>Visual</td>
-            {$inspectionInput[3]}
-         </tr>
-      </table>
+      <div class="form-col">
 
-      <div class="form-item">
-         <div class="form-label-long">Operator</div>
-         <textarea form="input-form" class="comments-input" type="text" name="comments" rows="10" maxlength="256" placeholder="Enter comments ...">$lineInspectionInfo->comments</textarea>
+         <div class="form-item">
+            <div class="form-label-long">Job Number</div>
+            <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" $disabled>
+               $options
+            </select>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">WC Number</div>
+            <div id="wc-number-input-div">$wcNumberInput</div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Operator</div>
+            $operatorInput
+         </div>
+         
+         <div class="form-item">
+            <div class="form-label-long">Inspection</div>
+            <table class="inspection-table">
+               <tr>
+                  <td>Thread #1</td>
+                  {$inspectionInput[0]}
+               </tr>
+               <tr>
+                  <td>Thread #2</td>
+                  {$inspectionInput[1]}
+               </tr>
+               <tr>
+                  <td>Thread #3</td>
+                  {$inspectionInput[2]}
+               </tr>
+               <tr>
+                  <td>Visual</td>
+                  {$inspectionInput[3]}
+               </tr>
+            </table>
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Operator</div>
+            <textarea form="input-form" class="comments-input" type="text" name="comments" placeholder="Enter comments ...">$lineInspectionInfo->comments</textarea>
+         </div>
+
       </div>
 HEREDOC;
       
@@ -290,7 +298,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <select id="operator-input" name="operator" form="input-form" $disabled>
+      <select id="operator-input" class="form-input-medium" name="operator" form="input-form" $disabled>
          $options
       </select>
 HEREDOC;
@@ -305,11 +313,30 @@ HEREDOC;
       $fail = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::FAIL) ? "checked" : "";
       $nonApplicable = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::UNKNOWN) ? "checked" : "";
       
+      $passId = $name . "-pass-button";
+      $failId = $name . "-fail-button";
+      $nonApplicableId = $name . "-na-button";
+      
       $html = 
 <<<HEREDOC
-      <td><input type="radio" form="input-form" name="$name" value="1" $pass/></td>
-      <td><input type="radio" form="input-form" name="$name" value="2" $fail/></td>
-      <td><input type="radio" form="input-form" name="$name" value="0" $nonApplicable/></td>
+      <td>
+         <input id="$passId" type="radio" class="invisible-radio-button pass" form="input-form" name="$name" value="1" $pass/>
+         <label for="$passId">
+            <div class="select-button">PASS</div>
+         </label>
+      </td>
+      <td>
+         <input id="$failId" type="radio" class="invisible-radio-button fail" form="input-form" name="$name" value="2" $fail/>
+         <label for="$failId">
+            <div class="select-button">FAIL</div>
+         </label>
+      </td>
+      <td>
+         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="0" $nonApplicable/>
+         <label for="$nonApplicableId">
+            <div class="select-button">N/A</div>
+         </label>
+      </td>
 HEREDOC;
       
       return ($html);
