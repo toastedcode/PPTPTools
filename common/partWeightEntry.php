@@ -17,7 +17,7 @@ class PartWeightEntry
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
    public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
-   public $panCount;
+   public $panCount = 0;
 
    public static function load($partWeightEntryId)
    {

@@ -55,7 +55,7 @@ HEREDOC;
    {
       $partWeightEntry= EnterPanCount::getPartWeightEntry();
       
-      $panCount = $partWeightEntry->panCount;
+      $panCount = ($partWeightEntry->panCount > 0) ? $partWeightEntry->panCount : null;
       
       $html =
 <<<HEREDOC
