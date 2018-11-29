@@ -70,17 +70,23 @@ class ViewLineInspections
 <<<HEREDOC
       <script src="lineInspection.js"></script>
    
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Line Inspections</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
-   
-               $filterDiv
-   
-               $partWasherLogDiv
+      <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
          
-         </div>
+         <div class="flex-horizontal sidebar"></div> 
 
-         $navBar
+         <div class="flex-vertical content">
+
+            <div class="heading">Line Inspections</div>
+
+            <div class="instructions">Line inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
+   
+            $filterDiv
+   
+            $partWasherLogDiv
+         
+            $navBar
+            
+         </div>
 
       </div>
 HEREDOC;

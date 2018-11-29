@@ -41,17 +41,25 @@ class ViewLineInspection
       <form id="input-form" action="#" method="POST">
       </form>
 
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">$title</div>
+      <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
          
-         <div class="pptp-form" style="height:500px;">
-            $titleDiv
-            <div class="form-row">
-               $inspectionDiv
+         <div class="flex-horizontal sidebar hide-on-mobile"></div> 
+
+         <div class="flex-vertical content">
+
+            <div class="heading">Add a New Inspection</div>
+
+            <div class="instructions">Start by selecting a work center, then any of the currently active jobs for that station.  If any of the inspections are not relevant to the part you're inspection, just leave it set to "Not Applicable".</div>
+         
+            <div class="pptp-form" style="height:500px;">
+               <div class="form-row">
+                  $inspectionDiv
+               </div>
             </div>
-         </div>
          
-         $navBar
+            $navBar
+            
+         </div>
                
       </div>
                
@@ -174,24 +182,24 @@ HEREDOC;
       <div class="form-col">
 
          <div class="form-item">
-            <div class="form-label-long">Job Number</div>
+            <div class="form-label">Job Number</div>
             <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" $disabled>
                $options
             </select>
          </div>
 
          <div class="form-item">
-            <div class="form-label-long">WC Number</div>
+            <div class="form-label">WC Number</div>
             <div id="wc-number-input-div">$wcNumberInput</div>
          </div>
 
          <div class="form-item">
-            <div class="form-label-long">Operator</div>
+            <div class="form-label">Operator</div>
             $operatorInput
          </div>
          
          <div class="form-item">
-            <div class="form-label-long">Inspection</div>
+            <div class="form-label hide-on-mobile">Inspection</div>
             <table class="inspection-table">
                <tr>
                   <td>Thread #1</td>
@@ -213,7 +221,7 @@ HEREDOC;
          </div>
    
          <div class="form-item">
-            <div class="form-label-long">Operator</div>
+            <div class="form-label hide-on-mobile">Comments</div>
             <textarea form="input-form" class="comments-input" type="text" name="comments" placeholder="Enter comments ...">$lineInspectionInfo->comments</textarea>
          </div>
 
