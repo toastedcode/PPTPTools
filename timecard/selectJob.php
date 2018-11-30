@@ -21,7 +21,11 @@ class SelectJob
 
          <div class="description">Select one of the following jobs that are active for your station.</div>
 
-         $jobsDiv
+         <div class="flex-vertical inner-content">
+
+            $jobsDiv
+            
+         </div>
          
          $navBar
          

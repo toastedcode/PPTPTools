@@ -14,7 +14,8 @@ body {
 
 .sidebar {
    width: 250px;
-   background-image: url('../images/screwMachine2.png');  
+   background-image: url('../images/screwMachine2.png');
+   background-repeat: no-repeat;  
 }
 
 .content {
@@ -22,6 +23,10 @@ body {
    align-items: flex-start;
    margin-left: 25px;
    margin-top: 50px;
+}
+
+.inner-content {
+   margin-bottom: 50px;
 }
 
 .heading {
@@ -73,7 +78,6 @@ body {
 
 .selection-container {
 	flex-wrap: wrap;
-	margin-bottom: 100px;
 }
 
 .card-div {

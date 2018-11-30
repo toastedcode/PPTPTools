@@ -19,7 +19,8 @@ class ViewTimeCard
       
       $readOnly = (($view == "view_time_card") || ($view == "use_time_card"));
       
-      $titleDiv = ViewTimeCard::titleDiv();
+      $descriptionDiv = ViewTimeCard::descriptionDiv($view);
+      $headingDiv = ViewTimeCard::headingDiv($view);
       $dateDiv = ViewTimeCard::dateDiv($timeCardInfo);
       $operatorDiv = ViewTimeCard::operatorDiv($timeCardInfo);
       $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, $readOnly);
@@ -35,26 +36,33 @@ class ViewTimeCard
       <form id="input-form" action="timeCard.php" method="POST">
          <input type="hidden" name="timeCardId" value="$timeCardInfo->timeCardId"/>
       </form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Time Card</div>
 
-         <div class="pptp-form" style="height:500px;">
-            $titleDiv
-            <div class="form-row">
-               <div class="form-col">
-                  $dateDiv
-                  $operatorDiv
-                  $jobDiv
-               </div>
-               <div class="form-col">
-                  $timeDiv
-                  $partsDiv
-               </div>
-               <div class="form-col">
-                  $commentCodesDiv
-                  $commentsDiv
+      <div class="flex-vertical content">
+
+         $headingDiv
+
+         $descriptionDiv
+
+         <div class="flex-vertical inner-content">
+
+            <div class="pptp-form">
+               <div class="form-row">
+                  <div class="form-col" style="margin-right: 50px">
+                     $dateDiv
+                     $operatorDiv
+                     $jobDiv
+                  </div>
+                  <div class="form-col" style="margin-right: 50px">
+                     $timeDiv
+                     $partsDiv
+                  </div>
+                  <div class="form-col" style="margin-right: 50px">
+                     $commentCodesDiv
+                     $commentsDiv
+                  </div>
                </div>
             </div>
+
          </div>
          
          $navBar
@@ -99,6 +107,54 @@ HEREDOC;
       <div class="form-title">Time Card</div>
 HEREDOC;
 
+      return ($html);
+   }
+   
+   protected static function headingDiv($view)
+   {
+      $heading = "";
+      if ($view == "new_time_card")
+      {
+         $heading = "Review Your New Time Card";
+      }
+      else if ($view == "edit_time_card")
+      {
+         $heading = "Update a Time Card";
+      }
+      else if ($view == "view_time_card")
+      {
+         $heading = "View a Time Card";
+      }
+      
+      $html =
+      <<<HEREDOC
+      <div class="heading">$heading</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function descriptionDiv($view)
+   {
+      $description = "";
+      if ($view == "new_time_card")
+      {
+         $description = "Review all the fields of your time card and make any necessary corrections.  Once you're satisfied, click Save below to add this time card to the system.";
+      }
+      else if ($view == "edit_time_card")
+      {
+         $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
+      }
+      else if ($view == "view_time_card")
+      {
+         $description = "View a previously saved time card in detail.";
+      }
+      
+      $html =
+      <<<HEREDOC
+      <div class="description">$description</div>
+HEREDOC;
+      
       return ($html);
    }
    

@@ -23,13 +23,13 @@ class EnterMaterialNumber
 
          <div class="description">The heat number (sometimes called the material number) can also be found by referring to your Job Sheet.</div>
 
-        <div class="flex-horizontal">
+         <div class="flex-horizontal inner-content">
          
-            <div class="flex-horizontal" style="flex-grow: 1; margin-bottom:50px;">$materialNumberInput</div>
+            <div class="flex-horizontal" style="margin-right:150px;">$materialNumberInput</div>
          
-            <div class="flex-horizontal hide-on-tablet" style="flex-grow: 1">$keypad</div>
+            <div class="flex-horizontal hide-on-tablet">$keypad</div>
 
-       </div>
+         </div>
          
          $navBar
          

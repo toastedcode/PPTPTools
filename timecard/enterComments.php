@@ -25,9 +25,13 @@ class CommentsPage
 
          <div class="description">Supervisors read comments on Time Cards to find patterns in what's impeding your work.  Your comments matter and work towards a safer, more efficient floor.</div>
 
-         $commentCodesDiv
+         <div class="flex-vertical inner-content">
 
-         $commentsDiv
+            $commentCodesDiv
+
+            $commentsDiv
+            
+         </div>
    
          $navBar
     
@@ -90,7 +94,7 @@ HEREDOC;
       $html =
 <<<HEREDOC
          <input type="hidden" form="input-form" name="commentCodes" value="true"/>
-         <div class="flex-horizontal">
+         <div class="flex-horizontal inner-content">
             <div class="flex-col-top-left comment-code-column">
                $leftColumn
             </div>

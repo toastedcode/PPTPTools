@@ -20,8 +20,12 @@ class SelectWorkCenter
          <div class="heading">Select a Work Center</div>
 
          <div class="description">Select one of the following work centers.  You can find the work center number for your assigned station on your Job Sheet.<br/><br/>  If you don't see your work center listed, contact your supervisor.</div>
+
+         <div class="flex-vertical inner-content">
             
-         $workCenters
+            $workCenters
+            
+         </div>   
          
          $navBar
          

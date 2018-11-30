@@ -23,11 +23,11 @@ class EnterPartCount
 
          <div class="description">Record the number of baskets, good parts, and scrap parts, that were made during this run.</div>
 
-        <div class="flex-horizontal">
+        <div class="flex-horizontal inner-content">
 
-            <div class="flex-vertical" style="justify-content: space-evenly; flex-grow: 1">$partCountInput</div>
+            <div class="flex-vertical" style="justify-content: space-evenly; margin-right: 150px;">$partCountInput</div>
          
-            <div class="flex-horizontal hide-on-tablet" style="flex-grow: 1">$keypad</div>
+            <div class="flex-horizontal hide-on-tablet">$keypad</div>
 
         </div>
          
