@@ -186,19 +186,6 @@ input:checked + label > div  {
    font-size: 50px;
 }
 
-.large-text-input {
-   font-size: 40px;
-}
-
-.medium-text-input {
-   font-size: 20px;
-}
-
-.adjust-time-button {
-   margin-left:10px;
-   margin-right:10px;
-}
-
 .part-washer-log-div
 {
    overflow-y: scroll;

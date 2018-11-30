@@ -1,11 +1,5 @@
 @CHARSET "ISO-8859-1";
 
-.line-inspections-div {
-   overflow-y: scroll;
-   height: 400px;
-   margin-bottom: 25px;
-}
-
 form {
 	margin: 0px 0px 0px 0px;
 }
@@ -93,26 +87,4 @@ input.fail:checked + label > div  {
 
 input.nonApplicable:checked + label > div  {
    background-color: background-color: #6496c8;
-}
-
-/* 
-Device = Most of the Smartphones Mobiles (Portrait)
-Screen = B/w 320px to 479px
-*/
-@media (min-width: 320px) and (max-width: 479px) {
-	
-   .line-inspections-div {
-      height: 200px;
-   }
-}
-
-/* 
-Device = Tablets, Ipads (portrait)
-Screen = B/w 768px to 1024px
-*/
-@media (min-width: 480px) and (max-width: 1024px) {
-	
-   .line-inspections-div {
-      height: 400px;
-   }
 }

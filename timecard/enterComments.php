@@ -18,15 +18,16 @@ class CommentsPage
       $html =
 <<<HEREDOC
       <form id="input-form" action="timeCard.php" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Add Comments</div>
-         <div class="flex-vertical content-div" style="height:400px;">
-            
-            $commentCodesDiv
 
-            $commentsDiv
-      
-         </div>
+      <div class="flex-vertical content time-card-comments-content">
+
+         <div class="heading">Add Comments</div>
+
+         <div class="description">Supervisors read comments on Time Cards to find patterns in what's impeding your work.  Your comments matter and work towards a safer, more efficient floor.</div>
+
+         $commentCodesDiv
+
+         $commentsDiv
    
          $navBar
     
@@ -45,7 +46,7 @@ HEREDOC;
    {
       $html = 
 <<< HEREDOC
-         <textarea form="input-form" class="comments-input" type="text" name="comments" rows="10" maxlength="256" placeholder="Enter comments ...">$timeCardInfo->comments</textarea>
+         <textarea form="input-form" class="comments-input" type="text" name="comments" rows="5" maxlength="256" placeholder="Enter comments ...">$timeCardInfo->comments</textarea>
 HEREDOC;
 
       return ($html);

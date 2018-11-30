@@ -6,6 +6,12 @@ body {
    background: #eee;
 }
 
+.main {
+   align-items:stretch; 
+   justify-content: flex-start; 
+   height:100%;
+}
+
 .sidebar {
    width: 250px;
    background-image: url('../images/screwMachine2.png');  
@@ -28,7 +34,7 @@ body {
 
 .description {
    margin-bottom: 30px;
-   width: 50%;
+   width: 500px;
 }
 
 .header-div {
@@ -63,6 +69,11 @@ body {
 
 .nav-link:hover {
    text-decoration: underline;
+}
+
+.selection-container {
+	flex-wrap: wrap;
+	margin-bottom: 100px;
 }
 
 .card-div {
@@ -157,9 +168,10 @@ input:checked + label > div  {
    font-size: 20px;
 }
 
-.adjust-time-button {
-	margin-left:10px;
-	margin-right:10px;
+.table-container {
+	overflow-y: scroll;
+   height: 400px;
+   margin-bottom: 25px;
 }
 
 table {
@@ -181,6 +193,11 @@ th, td {
 tr:hover {
    background: #eeeeee;
    cursor: pointer;
+}
+
+.no-data {
+	color: red;
+	margin-bottom: 100px;
 }
 
 .new-indicator {
@@ -246,7 +263,7 @@ Screen = B/w 320px to 479px
 	
    .description {
       margin-bottom: 30px;
-      width: 100%;
+      width: 350px;
    }
    
    .nav-button {
@@ -259,6 +276,23 @@ Screen = B/w 320px to 479px
    
    .nav-button-wide {
       width: 125px;
+   }
+   
+   .table-container {
+      height: 200px;
+   }
+   
+   th, td {
+	   padding: 10px;
+	   font-size: 8pt;
+   }
+   
+   .large-text-input {
+      font-size: 30px;
+   }
+   
+   .medium-text-input {
+	   font-size: 15px;
    }
    
    .hide-on-mobile {
@@ -282,6 +316,15 @@ Screen = B/w 768px to 1024px
    
    .description {
       margin-bottom: 30px;
-      width: 100%;
+      width: 550px;
+   }
+   
+   .table-container {
+      height: 400px;
+   }
+   
+   th, td {
+      padding: 10px;
+      font-size: 10pt;
    }
 }

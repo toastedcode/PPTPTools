@@ -62,7 +62,7 @@ class ViewLineInspections
    {
       $filterDiv = $this->filterDiv();
       
-      $partWasherLogDiv = $this->lineInspectionsDiv();
+      $lineInspectionsDiv = $this->lineInspectionsDiv();
       
       $navBar = $this->navBar();
       
@@ -82,7 +82,7 @@ class ViewLineInspections
    
             $filterDiv
    
-            $partWasherLogDiv
+            $lineInspectionsDiv
          
             $navBar
             
@@ -118,25 +118,7 @@ HEREDOC;
    
    private function lineInspectionsDiv()
    {
-      $html = 
-<<<HEREDOC
-         <div class="line-inspections-div">
-            <table class="line-inspections-table">
-               <tr>
-                  <th>Date</th>
-                  <th class="hide-on-tablet">Time</th>
-                  <th class="hide-on-tablet">Inspector</th>
-                  <th class="hide-on-tablet">Operator</th>
-                  <th>Job</th>
-                  <th>Work<br/>Center</th>
-                  <th class="hide-on-tablet">Thread #1</th>
-                  <th class="hide-on-tablet">Thread #2</th>
-                  <th class="hide-on-tablet">Thread #3</th>
-                  <th class="hide-on-tablet">Visual</th>
-                  <th></th>
-                  <th></th>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
@@ -156,8 +138,28 @@ HEREDOC;
          
          $result = $database->getLineInspections($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
         
-         if ($result)
+         if ($result && ($database->countResults($result) > 0))
          {
+            $html =
+<<<HEREDOC
+            <div class="table-container">
+               <table class="line-inspections-table">
+                  <tr>
+                     <th>Date</th>
+                     <th class="hide-on-tablet">Time</th>
+                     <th class="hide-on-tablet">Inspector</th>
+                     <th class="hide-on-tablet">Operator</th>
+                     <th>Job</th>
+                     <th>Work<br/>Center</th>
+                     <th class="hide-on-tablet">Thread #1</th>
+                     <th class="hide-on-tablet">Thread #2</th>
+                     <th class="hide-on-tablet">Thread #3</th>
+                     <th class="hide-on-tablet">Visual</th>
+                     <th></th>
+                     <th></th>
+                  </tr>
+HEREDOC;
+            
             while ($row = $result->fetch_assoc())
             {
                $lineInspectionInfo = LineInspectionInfo::load($row["entryId"]);
@@ -227,14 +229,18 @@ HEREDOC;
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }

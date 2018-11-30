@@ -16,15 +16,20 @@ class EnterPartCount
       $html =
 <<<HEREDOC
       <form id="timeCardForm" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Enter Part Count</div>
-         <div class="flex-horizontal content-div">
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Enter Part Counts</div>
+
+         <div class="description">Record the number of baskets, good parts, and scrap parts, that were made during this run.</div>
+
+        <div class="flex-horizontal">
 
             <div class="flex-vertical" style="justify-content: space-evenly; flex-grow: 1">$partCountInput</div>
-            
-            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+         
+            <div class="flex-horizontal hide-on-tablet" style="flex-grow: 1">$keypad</div>
 
-         </div>
+        </div>
          
          $navBar
          

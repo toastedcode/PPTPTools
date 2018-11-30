@@ -14,11 +14,14 @@ class SelectJob
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Job</div>
-         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
-            $jobsDiv
-         </div>
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Select Your Job Number</div>
+
+         <div class="description">Select one of the following jobs that are active for your station.</div>
+
+         $jobsDiv
          
          $navBar
          
@@ -35,7 +38,10 @@ HEREDOC;
    
    private static function jobsDiv()
    {
-      $html = "";
+      $html =
+<<<HEREDOC
+      <div class="flex-horizontal selection-container">
+HEREDOC;
       
       $selectedJob = SelectJob::getJobId();
       
@@ -60,6 +66,11 @@ HEREDOC;
             $html .= SelectJob::jobDiv($jobId, $jobNumber, $isChecked);
          }
       }
+      
+      $html .=
+<<<HEREDOC
+      </div>
+HEREDOC;
       
       return ($html);
    }
