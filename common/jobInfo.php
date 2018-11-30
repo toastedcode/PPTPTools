@@ -18,12 +18,15 @@ abstract class JobStatus
 
 class JobInfo
 {
+   const UNKNOWN_JOB_ID = 0;
+   
    const UNKNOWN_JOB_NUMBER = "";
    
    const SECONDS_PER_MINUTE = 60;
    
    const SECONDS_PER_HOUR = 3600;
       
+   public $jobId = JobInfo::UNKNOWN_JOB_ID;
    public $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    public $creator;
    public $dateTime;
@@ -38,7 +41,7 @@ class JobInfo
       return ($this->status = JobStatus::ACTIVE);
    }
    
-   public static function load($jobNumber)
+   public static function load($jobId)
    {
       $jobInfo = null;
       
@@ -48,12 +51,13 @@ class JobInfo
       
       if ($database->isConnected())
       {
-         $result = $database->getJob($jobNumber);
+         $result = $database->getJob($jobId);
          
          if ($result && ($row = $result->fetch_assoc()))
          {
             $jobInfo = new JobInfo();
             
+            $jobInfo->jobId =      intval($row['jobId']);
             $jobInfo->jobNumber =  $row['jobNumber'];
             $jobInfo->creator =    $row['creator'];
             $jobInfo->dateTime =   Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
@@ -61,7 +65,7 @@ class JobInfo
             $jobInfo->wcNumber =   $row['wcNumber'];
             $jobInfo->cycleTime = doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
-            $jobInfo->status =   $row['status'];
+            $jobInfo->status =     $row['status'];
          }
       }
       
@@ -118,13 +122,14 @@ class JobInfo
 }
 
 /*
-if (isset($_GET["jobNumber"]))
+if (isset($_GET["$jobId"]))
 {
-   $jobNumber = $_GET["jobNumber"];
-   $jobInfo = JobInfo::load($jobNumber);
+   $jobId = $_GET["jobId"];
+   $jobInfo = JobInfo::load($jobId);
    
    if ($jobInfo)
    {
+      echo "jobId: " .         $jobInfo->jobId .           "<br/>";
       echo "jobNumber: " .     $jobInfo->jobNumber .       "<br/>";
       echo "creator: " .       $jobInfo->creator .         "<br/>";
       echo "dateTime: " .      $jobInfo->dateTime .        "<br/>";

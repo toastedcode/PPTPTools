@@ -260,13 +260,13 @@ HEREDOC;
    {
       $jobInfo = new JobInfo();
       
-      if (isset($_GET['jobNumber']))
+      if (isset($_GET['jobId']))
       {
-         $jobInfo = JobInfo::load($_GET['jobNumber']);
+         $jobInfo = JobInfo::load($_GET['jobId']);
       }
-      else if (isset($_POST['jobNumber']))
+      else if (isset($_POST['jobId']))
       {
-         $jobInfo = JobInfo::load($_POST['jobNumber']);
+         $jobInfo = JobInfo::load($_POST['jobId']);
       }
       else if (isset($_SESSION['jobInfo']))
       {

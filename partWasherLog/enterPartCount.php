@@ -84,7 +84,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
-      $navBar->backButton("if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', 'select_pan_ticket', 'update_part_washer_entry');};");
+      $navBar->backButton("if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', 'select_entry_method', 'update_part_washer_entry');};");
       $navBar->highlightNavButton("Save", "if (validatePartCount()){submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');};", false);
       $navBar->end();
       

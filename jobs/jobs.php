@@ -70,9 +70,9 @@ function processAction($action)
       
       case 'edit_job':
       {
-         if (isset($_POST['jobNumber']))
+         if (isset($_POST['jobId']))
          {
-            $_SESSION["jobInfo"] = JobInfo::load($_POST['jobNumber']);
+            $_SESSION["jobInfo"] = JobInfo::load($_POST['jobId']);
          }
          break;
       }
@@ -92,9 +92,9 @@ function processAction($action)
       
       case 'delete_job':
       {
-         if (isset($_POST['jobNumber']))
+         if (isset($_POST['jobId']))
          {
-            deleteJob($_POST['jobNumber']);
+            deleteJob($_POST['jobId']);
          }
          break;
       }
@@ -178,7 +178,7 @@ function updateJobInfo()
    }
 }
 
-function deleteJob($jobNumber)
+function deleteJob($jobId)
 {
    $result = false;
    
@@ -188,7 +188,7 @@ function deleteJob($jobNumber)
    
    if ($database->isConnected())
    {
-      $result = $database->updateJobStatus($jobNumber, JobStatus::DELETED);
+      $result = $database->updateJobStatus($jobId, JobStatus::DELETED);
    }
    
    return ($result);
@@ -204,7 +204,7 @@ function updateJob($jobInfo)
    
    if ($database->isConnected())
    {
-      $result = $database->getJob($jobInfo->jobNumber);
+      $result = $database->getJob($jobInfo->jobId);
       
       $jobExists = ($result && ($result->num_rows == 1));
       

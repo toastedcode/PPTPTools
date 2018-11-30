@@ -184,9 +184,9 @@ function updateTimeCardInfo()
       $_SESSION["timeCardInfo"]->employeeNumber = $_POST['employeeNumber'];
    }
    
-   if (isset($_POST['jobNumber']))
+   if (isset($_POST['jobId']))
    {
-      $_SESSION["timeCardInfo"]->jobNumber = $_POST['jobNumber'];
+      $_SESSION["timeCardInfo"]->jobId = $_POST['jobId'];
    }
    
    if (isset($_POST['materialNumber']))

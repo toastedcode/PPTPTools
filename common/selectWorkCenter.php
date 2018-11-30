@@ -1,15 +1,15 @@
 <?php
-require_once '../common/database.php';
+require_once 'database.php';
 
-class SelectWorkCenter
+abstract class SelectWorkCenter
 {
-   public static function getHtml()
+   public function getHtml()
    {
       $html = "";
       
-      $workCenters = SelectWorkCenter::workCenters();
+      $workCenters = $this->workCenters();
       
-      $navBar = SelectWorkCenter::navBar();
+      $navBar = $this->navBar();
       
       $html =
 <<<HEREDOC
@@ -28,16 +28,16 @@ HEREDOC;
       return ($html);
    }
    
-   public static function render()
+   public function render()
    {
-      echo (SelectWorkCenter::getHtml());
+      echo ($this->getHtml());
    }
    
-   private static function workCenters()
+   private function workCenters()
    {
       $html = "";
       
-      $selectedWorkCenter = SelectWorkCenter::getWorkCenter();
+      $selectedWorkCenter = $this->getWorkCenter();
       
       $database = new PPTPDatabase();
       
@@ -83,33 +83,8 @@ HEREDOC;
       return ($html);
    }
    
-   private static function navBar()
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->nextButton("if (validateWorkCenter()) {submitForm('input-form', 'timeCard.php', 'select_job', 'update_time_card_info');};");
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
+   abstract protected function navBar();
    
-   private static function getWorkCenter()
-   {
-      $wcNumber = null;
-
-      if (isset($_SESSION['timeCardInfo']))
-      {
-         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobId);
-
-         if ($jobInfo)
-         {
-            $wcNumber = $jobInfo->wcNumber;
-         }
-      }
-
-      return ($wcNumber);
-   }
+   abstract protected function getWorkCenter();
 }
 ?>

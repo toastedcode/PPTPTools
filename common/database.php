@@ -71,6 +71,11 @@ class MySqlDatabase implements Database
       return ($result);
    }
    
+   public static function countResults($result)
+   {
+      return (mysqli_num_rows($result));
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
@@ -140,10 +145,19 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
 
-      $query = "SELECT * FROM workcenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
-      
+      $query = "SELECT DISTINCT workcenter.wcNumber FROM workcenter INNER JOIN job ON job.wcNumber = workcenter.wcNumber WHERE job.status = $active ORDER BY workcenter.wcNumber ASC;";
+
       $result = $this->query($query);
 
+      return ($result);
+   }
+   
+   public function getWorkCentersForJob($jobNumber)
+   {
+      $query = "SELECT DISTINCT wcNumber FROM job WHERE jobNumber = $jobNumber ORDER BY wcNumber ASC;";
+      
+      $result = $this->query($query);
+      
       return ($result);
    }
    
@@ -192,9 +206,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "INSERT INTO timecard " .
-         "(employeeNumber, dateTime, jobNumber, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
+         "(employeeNumber, dateTime, jobId, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
          "VALUES " .
-         "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobNumber', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
+         "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
 
       $result = $this->query($query);
       
@@ -210,7 +224,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE timecard " .
-      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", jobNumber = \"$timeCardInfo->jobNumber\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
+      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
       "WHERE timeCardId = $timeCardInfo->timeCardId;";
 
       $result = $this->query($query);
@@ -514,9 +528,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO partwasher " .
-      "(dateTime, employeeNumber, timeCardId, panCount, partCount) " .
+      "(dateTime, employeeNumber, timeCardId, panCount, partCount, jobId, operator) " .
       "VALUES " .
-      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->timeCardId', '$partWasherEntry->panCount', '$partWasherEntry->partCount');";
+      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->timeCardId', '$partWasherEntry->panCount', '$partWasherEntry->partCount', '$partWasherEntry->jobId', '$partWasherEntry->operator');";
 
       $result = $this->query($query);
       
@@ -530,7 +544,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE partwasher " .
-      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount" .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount, jobId = $partWasherEntry->jobId, operator = $partWasherEntry->operator " .
       "WHERE partWasherEntryId = $partWasherEntryId;";
       
       $result = $this->query($query);
@@ -610,9 +624,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO partweight " .
-      "(dateTime, employeeNumber, timeCardId, weight) " .
+      "(dateTime, employeeNumber, timeCardId, weight, jobId, operator, panCount) " .
       "VALUES " .
-      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight');";
+      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight', '$partWeightEntry->jobId', '$partWeightEntry->operator', '$partWeightEntry->panCount');";
 
       $result = $this->query($query);
       
@@ -626,7 +640,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE partweight " .
-      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight" .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight, jobId = $partWeightEntry->jobId, operator = $partWeightEntry->operator, panCount = $partWeightEntry->panCount " .
       "WHERE partWeightEntryId = $partWeightEntry->partWeightEntryId;";
 
       $result = $this->query($query);
@@ -684,17 +698,28 @@ class PPTPDatabase extends MySqlDatabase
    {
       $active = JobStatus::ACTIVE;
       
-      $query = "SELECT * FROM job WHERE wcNumber = '$wcNumber' AND status = $active ORDER BY dateTime DESC;";
+      $wcClause = $wcNumber ? "wcNumber = '$wcNumber' AND" : "";
       
+      $query = "SELECT * FROM job WHERE $wcClause status = $active ORDER BY dateTime DESC;";
+
       $result = $this->query($query);
       
       return ($result);
    }
    
-   public function getJob($jobNumber)
+   public function getJob($jobId)
+   {
+      $query = "SELECT * FROM job WHERE jobId = $jobId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getJobsByJobNumber($jobNumber)
    {
       $query = "SELECT * FROM job WHERE jobNumber = \"$jobNumber\";";
-
+      
       $result = $this->query($query);
       
       return ($result);
@@ -722,28 +747,28 @@ class PPTPDatabase extends MySqlDatabase
       $query =
          "UPDATE job " .
          "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status' " .
-         "WHERE jobNumber = '$jobInfo->jobNumber';";
+         "WHERE jobId = '$jobInfo->jobId';";
 
       $result = $this->query($query);
       
       return ($result);
    }
    
-   public function updateJobStatus($jobNumber, $status)
+   public function updateJobStatus($jobId, $status)
    {
       $query =
          "UPDATE job " .
          "SET status = '$status' " .
-         "WHERE jobNumber = '$jobNumber';";
+         "WHERE jobId = '$jobId';";
 
       $result = $this->query($query);
 
       return ($result);
    }
    
-   public function deleteJob($jobNumber)
+   public function deleteJob($jobId)
    {
-      $query = "DELETE FROM job WHERE jobNumber = '$jobNumber';";
+      $query = "DELETE FROM job WHERE jobId = '$jobId';";
       
       $result = $this->query($query);
       
@@ -813,6 +838,78 @@ class PPTPDatabase extends MySqlDatabase
       $signId)
    {
       $query = "DELETE FROM sign WHERE signId = $signId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                          Line Inspections
+   // **************************************************************************
+   
+   public function getLineInspections($employeeNumber, $startDate, $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM lineinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
+
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM lineinspection WHERE inspector =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
+
+         $result = $this->query($query);
+      }
+            
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getLineInspection($entryId)
+   {
+      $query = "SELECT * FROM lineinspection WHERE entryId = \"$entryId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newLineInspection($lineInspectionInfo)
+   {
+      $dateTime = Time::toMySqlDate($lineInspectionInfo->dateTime);
+      
+      $query =
+      "INSERT INTO lineinspection " .
+      "(dateTime, inspector, operator, jobNumber, wcNumber, inspection1, inspection2, inspection3, inspection4, comments) " .
+      "VALUES " .
+      "('$dateTime', '$lineInspectionInfo->inspector', '$lineInspectionInfo->operator', '$lineInspectionInfo->jobNumber', '$lineInspectionInfo->wcNumber', '{$lineInspectionInfo->inspections[0]}', '{$lineInspectionInfo->inspections[1]}', '{$lineInspectionInfo->inspections[2]}', '{$lineInspectionInfo->inspections[3]}', '$lineInspectionInfo->comments');";
+
+      $result = $this->query($query);
+
+      return ($result);
+   }
+   
+   public function updateLineInspection($lineInspectionInfo)
+   {
+      $dateTime = Time::toMySqlDate($lineInspectionInfo->dateTime);
+      
+      $query =
+      "UPDATE lineinspection " .
+      "SET dateTime = '$dateTime',  inspector = '$lineInspectionInfo->inspector', operator = '$lineInspectionInfo->operator', jobNumber = '$lineInspectionInfo->jobNumber', wcNumber = '$lineInspectionInfo->wcNumber', inspection1 = '{$lineInspectionInfo->inspections[0]}', inspection2 = '{$lineInspectionInfo->inspections[1]}', inspection3 = '{$lineInspectionInfo->inspections[2]}', inspection4 = '{$lineInspectionInfo->inspections[3]}', comments = '$lineInspectionInfo->comments' " .
+      "WHERE entryId = '$lineInspectionInfo->entryId';";
+      
+      $result = $this->query($query);
+
+      return ($result);
+   }
+   
+   public function deleteLineInspection($entryId)
+   {
+      $query = "DELETE FROM lineinspection WHERE entryId = $entryId;";
       
       $result = $this->query($query);
       

@@ -1,15 +1,19 @@
 <?php
-require_once '../common/database.php';
+require_once 'database.php';
 
-class SelectJob
+abstract class SelectJob
 {
-   public static function getHtml()
+   public function __construct()
+   {
+   }
+   
+   public function getHtml()
    {
       $html = "";
       
-      $jobsDiv = SelectJob::jobsDiv();
+      $jobsDiv = $this->jobsDiv();
             
-      $navBar = SelectJob::navBar();
+      $navBar = $this->navBar();
       
       $html =
 <<<HEREDOC
@@ -28,18 +32,24 @@ HEREDOC;
       return ($html);
    }
    
-   public static function render()
+   public function render()
    {
-      echo (SelectJob::getHtml());
+      echo ($this->getHtml());
    }
    
-   private static function jobsDiv()
+   abstract protected function navBar();
+   
+   abstract protected function getWorkCenterNumber();
+   
+   abstract protected function getJobId();
+   
+   private function jobsDiv()
    {
       $html = "";
       
-      $selectedJob = SelectJob::getJobId();
+      $wcNumber = $this->getWorkCenterNumber();
       
-      $wcNumber = SelectJob::getWorkCenter();
+      $selectedJob = $this->getJobId();
       
       $database = new PPTPDatabase();
       
@@ -84,52 +94,6 @@ HEREDOC;
 HEREDOC;
       
       return ($html);
-   }
-   
-   private static function navBar()
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-      $navBar->backButton("submitForm('input-form', 'timeCard.php', 'select_work_center', 'update_time_card_info');");
-      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'timeCard.php', 'enter_material_number', 'update_time_card_info');};");
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
-   
-   private static function getJobId()
-   {
-      $jobId = null;
-      
-      if (isset($_SESSION['timeCardInfo']))
-      {
-         $jobId= $_SESSION['timeCardInfo']->jobId;
-      }
-      
-      return ($jobId);
-   }
-   
-   private static function getWorkCenter()
-   {
-      $wcNumber = null;
-      
-      if (isset($_POST['wcNumber']))
-      {
-         $wcNumber = $_POST['wcNumber'];
-      }
-      else if (isset($_SESSION['timeCardInfo']))
-      {
-         $jobInfo = JobInfo::load($_SESSION['timeCardInfo']->jobId);
-         
-         if ($jobInfo)
-         {
-            $wcNumber = $jobInfo->wcNumber;
-         }
-      }
-      
-      return ($wcNumber);
    }
 }
 ?>

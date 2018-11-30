@@ -4,12 +4,20 @@ require_once('time.php');
 
 class PartWasherEntry
 {
+   const UNKNOWN_TIME_CARD_ID = 0;
+   const UNKNOWN_JOB_ID = 0;
+   const UNKNOWN_OPERATOR = 0;
+   
    public $partWasherEntryId;
    public $dateTime;
    public $employeeNumber;
-   public $timeCardId;
+   public $timeCardId = PartWasherEntry::UNKNOWN_TIME_CARD_ID;
    public $panCount;
    public $partCount;
+   
+   // These attributes were added for manual entry when no time card is available.
+   public $jobId = PartWasherEntry::UNKNOWN_JOB_ID;
+   public $operator = PartWasherEntry::UNKNOWN_OPERATOR;
 
    public static function load($partWasherEntryId)
    {
@@ -32,7 +40,11 @@ class PartWasherEntry
             $partWasherEntry->employeeNumber = intval($row['employeeNumber']);
             $partWasherEntry->timeCardId = intval($row['timeCardId']);
             $partWasherEntry->panCount = intval($row['panCount']);
-            $partWasherEntry->partCount= intval($row['partCount']);
+            $partWasherEntry->partCount = intval($row['partCount']);
+            
+            // These attributes were added for manual entry when no time card is available.
+            $partWasherEntry->jobId = intval($row['jobId']);
+            $partWasherEntry->operator = intval($row['operator']);
          }
       }
       
@@ -74,11 +86,13 @@ class PartWasherEntry
        echo "employeeNumber: " .    $partWasherEntry->employeeNumber .    "<br/>";
        echo "timeCardId: " .        $partWasherEntry->timeCardId .        "<br/>";
        echo "panCount: " .          $partWasherEntry->panCount .          "<br/>";
-       echo "partCount: " .         $partWasherEntry-partCount .          "<br/>";
+       echo "partCount: " .         $partWasherEntry->partCount .         "<br/>";
+       echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
+       echo "operator: " .          $partWasherEntry->operator .          "<br/>";
     }
     else
     {
-       echo "No part entry found.";
+       echo "No part washer entry found.";
     }
  }
  */

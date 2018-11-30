@@ -171,7 +171,7 @@ HEREDOC;
                   $new = $newIndicator->getHtml();
                   
                   $wcNumber = "unknown";
-                  $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
+                  $jobInfo = JobInfo::load($timeCardInfo->jobId);
                   if ($jobInfo)
                   {
                      $wcNumber = $jobInfo->wcNumber;
@@ -222,7 +222,7 @@ HEREDOC;
                      <tr>
                         <td>$date $new</td>
                         <td>$operatorName</td>
-                        <td>$timeCardInfo->jobNumber</td>
+                        <td>$jobInfo->jobNumber</td>
                         <td>$wcNumber</td>
                         <td>$timeCardInfo->materialNumber</td>
                         <td>{$timeCardInfo->formatRunTime()}</td>

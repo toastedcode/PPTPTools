@@ -4,11 +4,20 @@ require_once('time.php');
 
 class PartWeightEntry
 {
+   const UNKNOWN_TIME_CARD_ID = 0;
+   const UNKNOWN_JOB_ID = 0;
+   const UNKNOWN_OPERATOR = 0;
+   
    public $partWeightEntryId;
    public $dateTime;
    public $employeeNumber;
-   public $timeCardId;
+   public $timeCardId = PartWeightEntry::UNKNOWN_TIME_CARD_ID;
    public $weight;
+   
+   // These attributes were added for manual entry when no time card is available.
+   public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
+   public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
+   public $panCount = 0;
 
    public static function load($partWeightEntryId)
    {
@@ -31,6 +40,11 @@ class PartWeightEntry
             $partWeightEntry->employeeNumber = intval($row['employeeNumber']);
             $partWeightEntry->timeCardId = intval($row['timeCardId']);
             $partWeightEntry->weight = doubleval($row['weight']);
+            
+            // These attributes were added for manual entry when no time card is available.
+            $partWeightEntry->jobId = intval($row['jobId']);
+            $partWeightEntry->operator = intval($row['operator']);
+            $partWeightEntry->panCount = intval($row['panCount']);
          }
       }
       

@@ -117,10 +117,12 @@ HEREDOC;
             <table class="part-washer-log-table">
                <tr>
                   <th>Job #</th>
+                  <th>WC #</th>
+                  <th>Operator Name</th>
+                  <th>Mfg. Date</th>
                   <th>Washer Name</th>
                   <th>Wash Date</th>
                   <th>Wash Time</th>
-                  <th>Mfg. Date</th>
                   <th>Basket Count</th>
                   <th>Part Count</th>
                   <th></th>
@@ -153,52 +155,78 @@ HEREDOC;
                
                if ($partWasherEntry)
                {
+                  // Start with the manually entered values.
+                  $jobId = $partWasherEntry->jobId;
+                  $operatorEmployeeNumber =  $partWasherEntry->operator;
+                  
+                  // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
+                  $mfgDate = "unknown";
                   $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
-                  
-                  $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
-                  
-                  if ($timeCardInfo && $jobInfo)
+                  if ($timeCardInfo)
                   {
-                     $partWasherName = "unknown";
-                     $operator = UserInfo::load($partWasherEntry->employeeNumber);
-                     if ($operator)
-                     {
-                        $partWasherName= $operator->getFullName();
-                     }
+                     $jobId = $timeCardInfo->jobId;
                      
-                     $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                     $washDate = $dateTime->format("m-d-Y");
-                     
-                     $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                     $washTime = $dateTime->format("h:i a");
-                     
-                     $newIndicator = new NewIndicator($dateTime, 60);
-                     $new = $newIndicator->getHtml();
-                                          
                      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $mfgDate = $dateTime->format("m-d-Y");
                      
-                     $deleteIcon = "";
-                     if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
-                     {
-                        $deleteIcon =
-                        "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
-                     }
-   
-                     $html .=
-<<<HEREDOC
-                        <tr>
-                           <td>$jobInfo->jobNumber</td>
-                           <td>$partWasherName</td>
-                           <td>$washDate $new</td>
-                           <td>$washTime</td>
-                           <td>$mfgDate</td>
-                           <td>$partWasherEntry->panCount</td>
-                           <td>$partWasherEntry->partCount</td>
-                           <td>$deleteIcon</td>
-                        </tr>
-HEREDOC;
+                     $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
                   }
+                  
+                  // Use the job id to fill in the job number and work center number.
+                  $jobNumber = "unknown";
+                  $wcNumber = "unknown";
+                  $jobInfo = JobInfo::load($jobId);
+                  if ($jobInfo)
+                  {
+                     $jobNumber = $jobInfo->jobNumber;
+                     $wcNumber = $jobInfo->wcNumber;
+                  }
+                  
+                  $operatorName = "unknown";
+                  $operator = UserInfo::load($operatorEmployeeNumber);
+                  if ($operator)
+                  {
+                     $operatorName= $operator->getFullName();
+                  }
+                  
+                  $partWasherName = "unknown";
+                  $washer = UserInfo::load($partWasherEntry->employeeNumber);
+                  if ($washer)
+                  {
+                     $partWasherName= $washer->getFullName();
+                  }
+                  
+                  $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $washDate = $dateTime->format("m-d-Y");
+                  
+                  $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $washTime = $dateTime->format("h:i a");
+                  
+                  $newIndicator = new NewIndicator($dateTime, 60);
+                  $new = $newIndicator->getHtml();
+                                       
+                  $deleteIcon = "";
+                  if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+                  {
+                     $deleteIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
+                  }
+   
+                  $html .=
+<<<HEREDOC
+                     <tr>
+                        <td>$jobNumber</td>
+                        <td>$wcNumber</td>
+                        <td>$operatorName</td>
+                        <td>$mfgDate</td>
+                        <td>$partWasherName</td>
+                        <td>$washDate $new</td>
+                        <td>$washTime</td>
+                        <td>$partWasherEntry->panCount</td>
+                        <td>$partWasherEntry->partCount</td>
+                        <td>$deleteIcon</td>
+                     </tr>
+HEREDOC;
                }
             }
          }

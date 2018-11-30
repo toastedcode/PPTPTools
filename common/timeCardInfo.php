@@ -11,7 +11,7 @@ class TimeCardInfo
    public $timeCardId;
    public $dateTime;
    public $employeeNumber;
-   public $jobNumber;
+   public $jobId;
    public $materialNumber;
    public $setupTime;
    public $runTime;
@@ -126,7 +126,7 @@ class TimeCardInfo
             $timeCardInfo->timeCardId = intval($row['timeCardId']);
             $timeCardInfo->dateTime= Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $timeCardInfo->employeeNumber = intval($row['employeeNumber']);
-            $timeCardInfo->jobNumber = $row['jobNumber'];
+            $timeCardInfo->jobId = $row['jobId'];
             $timeCardInfo->materialNumber = intval($row['materialNumber']);
             $timeCardInfo->setupTime = $row['setupTime'];
             $timeCardInfo->runTime = $row['runTime'];
@@ -148,7 +148,7 @@ class TimeCardInfo
       $efficiency = 0.0;
       
       // Retrieve the associated job.
-      $jobInfo = JobInfo::load($this->jobNumber);
+      $jobInfo = JobInfo::load($this->jobId);
       
       if ($jobInfo)
       {
@@ -192,7 +192,7 @@ if (isset($_GET["timeCardId"]))
       echo "timeCardId: " .       $timeCardInfo->timeCardId .           "<br/>";
       echo "dateTime: " .         $timeCardInfo->dateTime .             "<br/>";
       echo "employeeNumber: " .   $timeCardInfo->employeeNumber .       "<br/>";
-      echo "jobNumber: " .        $timeCardInfo->jobNumber .            "<br/>";
+      echo "jobId: " .            $timeCardInfo->jobId .                "<br/>";
       echo "materialNumber: " .   $timeCardInfo->materialNumber .       "<br/>";
       echo "runTime: " .          $runTime .                            "<br/>";
       echo "setupTime: " .        $setupTime .                          "<br/>";

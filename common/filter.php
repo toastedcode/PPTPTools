@@ -41,7 +41,7 @@ class DateFilterComponent extends FilterComponent
    {
       $html =
 <<<HEREDOC
-      <div class="flex-horizontal filter-component">
+      <div class="flex-horizontal filter-component hide-on-tablet">
          <div>Start Date:&nbsp</div>
          <input type="date" id="start-date-input" name="startDate" value="$this->startDate">
          <div>&nbsp</div>
@@ -100,7 +100,7 @@ class UserFilterComponent extends FilterComponent
       
       $html =
 <<<HEREDOC
-      <div class="flex-horizontal filter-component">
+      <div class="flex-horizontal filter-component hide-on-tablet">
          <div>$this->label:</div>
          <div><select id="employeeNumberInput" name="employeeNumber">$options</select></div>
       </div>
@@ -127,7 +127,7 @@ class FilterButton extends FilterComponent
    {
       $html =
 <<<HEREDOC
-      <div><button class="mdl-button mdl-js-button mdl-button--raised filter-component">Filter</button></div>
+      <div><button class="mdl-button mdl-js-button mdl-button--raised filter-component hide-on-tablet">Filter</button></div>
 HEREDOC;
       
       return ($html);
@@ -204,7 +204,7 @@ class FilterDivider extends FilterComponent
    {
       $html =
 <<<HEREDOC
-      <div class="filter-component">|</div>
+      <div class="filter-component hide-on-tablet">|</div>
 HEREDOC;
       
       return ($html);

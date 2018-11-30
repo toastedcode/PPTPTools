@@ -119,10 +119,12 @@ HEREDOC;
             <table class="part-weight-log-table">
                <tr>
                   <th>Job #</th>
+                  <th>WC #</th>
+                  <th>Operator Name</th>
+                  <th>Mfg. Date</th>
                   <th>Laborer Name</th>
                   <th>Weigh Date</th>
                   <th>Weigh Time</th>
-                  <th>Mfg. Date</th>
                   <th>Basket Count</th>
                   <th>Weight</th>
                   <th></th>
@@ -155,52 +157,81 @@ HEREDOC;
                
                if ($partWeightEntry)
                {
+                  // Start with the manually entered values.
+                  $jobId = $partWeightEntry->jobId;
+                  $operatorEmployeeNumber =  $partWeightEntry->operator;
+                  $panCount = $partWeightEntry->panCount;
+                  
+                  // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
+                  $mfgDate = "unknown";
                   $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
-                  
-                  $jobInfo = JobInfo::load($timeCardInfo->jobNumber);
-                  
-                  if ($timeCardInfo && $jobInfo)
+                  if ($timeCardInfo)
                   {
-                     $laborerName = "unknown";
-                     $operator = UserInfo::load($partWeightEntry->employeeNumber);
-                     if ($operator)
-                     {
-                        $laborerName = $operator->getFullName();
-                     }
-                     
-                     $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                     $weighDate = $dateTime->format("m-d-Y");
-                     
-                     $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                     $weighTime = $dateTime->format("h:i a");
-                     
-                     $newIndicator = new NewIndicator($dateTime, 60);
-                     $new = $newIndicator->getHtml();
+                     $jobId = $timeCardInfo->jobId;
                      
                      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                      $mfgDate = $dateTime->format("m-d-Y");
                      
-                     $deleteIcon = "";
-                     if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
-                     {
-                        $deleteIcon =
-                        "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWeightEntry($partWeightEntry->partWeightEntryId)\">delete</i>";
-                     }
-   
-                     $html .=
-<<<HEREDOC
-                        <tr>
-                           <td>$jobInfo->jobNumber</td>
-                           <td>$laborerName</td>
-                           <td>$weighDate $new</td>
-                           <td>$weighTime</td>
-                           <td>$mfgDate</td>
-                           <td>$timeCardInfo->panCount</td>                           
-                           <td>$partWeightEntry->weight</td>
-                           <td>$deleteIcon</td>
-                        </tr>
-HEREDOC;
+                     $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
+                     
+                     $panCount = $timeCardInfo->panCount;
                   }
+                  
+                  // Use the job id to fill in the job number and work center number.
+                  $jobNumber = "unknown";
+                  $wcNumber = "unknown";
+                  $jobInfo = JobInfo::load($jobId);
+                  if ($jobInfo)
+                  {
+                     $jobNumber = $jobInfo->jobNumber;
+                     $wcNumber = $jobInfo->wcNumber;
+                  }
+                  
+                  $operatorName = "unknown";
+                  $operator = UserInfo::load($operatorEmployeeNumber);
+                  if ($operator)
+                  {
+                     $operatorName = $operator->getFullName();
+                  }
+                     
+                  $laborerName = "unknown";
+                  $operator = UserInfo::load($partWeightEntry->employeeNumber);
+                  if ($operator)
+                  {
+                     $laborerName = $operator->getFullName();
+                  }
+                  
+                  $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $weighDate = $dateTime->format("m-d-Y");
+                     
+                  $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $weighTime = $dateTime->format("h:i a");
+                     
+                  $newIndicator = new NewIndicator($dateTime, 60);
+                  $new = $newIndicator->getHtml();
+                     
+                  $deleteIcon = "";
+                  if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
+                  {
+                     $deleteIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWeightEntry($partWeightEntry->partWeightEntryId)\">delete</i>";
+                  }
+   
+                  $html .=
+<<<HEREDOC
+                     <tr>
+                        <td>$jobNumber</td>
+                        <td>$wcNumber</td>
+                        <td>$operatorName</td>
+                        <td>$mfgDate</td>
+                        <td>$laborerName</td>
+                        <td>$weighDate $new</td>
+                        <td>$weighTime</td>
+                        <td>$panCount</td>                           
+                        <td>$partWeightEntry->weight</td>
+                        <td>$deleteIcon</td>
+                     </tr>
+HEREDOC;
                }
             }
          }

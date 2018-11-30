@@ -6,7 +6,11 @@ require_once '../common/header.php';
 require_once '../common/partWasherEntry.php';
 
 require 'viewPartWasherLog.php';
+require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
+require 'selectJob.php';
+require 'selectOperator.php';
+require 'selectWorkCenter.php';
 require 'enterPartCount.php';
 
 function getAction()
@@ -68,6 +72,7 @@ function processAction($action)
       case 'cancel_part_washer_entry':
       {
          unset($_SESSION["partWasherEntry"]);
+         unset($_SESSION["wcNumber"]);
          break;
       }
       
@@ -98,10 +103,40 @@ function processView($view)
 {
    switch ($view)
    {
+      case 'select_entry_method':
+      {
+         unset($_SESSION["wcNumber"]);
+         
+         $page = new SelectEntryMethod();
+         $page->render($view);
+         break;
+      }
+         
       case 'select_time_card':
       {
          $page = new SelectTimeCard();
          $page->render($view);
+         break;
+      }
+      
+      case 'select_work_center':
+      {
+         $page = new SelectWorkCenter_PartWasher();
+         $page->render();
+         break;
+      }
+      
+      case 'select_job':
+      {
+         $page = new SelectJob_PartWasher();
+         $page->render();
+         break;
+      }
+      
+      case 'select_operator':
+      {
+         $page = new SelectOperator_PartWasher();
+         $page->render();
          break;
       }
       
@@ -151,7 +186,23 @@ function updatePartWasherEntry()
    
    if (isset($_POST['partCount']))
    {
-      $_SESSION["partWasherEntry"]->partCount= $_POST['partCount'];
+      $_SESSION["partWasherEntry"]->partCount = $_POST['partCount'];
+   }
+   
+   // Temporary input variable, part of selecting job.
+   if (isset($_POST['wcNumber']))
+   {
+      $_SESSION["wcNumber"] = $_POST['wcNumber'];
+   }
+   
+   if (isset($_POST['jobId']))
+   {
+      $_SESSION["partWasherEntry"]->jobId = $_POST['jobId'];
+   }
+   
+   if (isset($_POST['operator']))
+   {
+      $_SESSION["partWasherEntry"]->operator= $_POST['operator'];
    }
 }
 
@@ -189,7 +240,10 @@ function updatePartWasherLog($partWasherEntry)
       {
          // Delete any existing part count.
          // TODO: Any reason to preserve old entries?
-         $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
+         if ($partWasherEntry->timeCardId != PartWasherEntry::UNKNOWN_TIME_CARD_ID)
+         {
+            $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
+         }
          
          $database->newPartWasherEntry($partWasherEntry);
       }

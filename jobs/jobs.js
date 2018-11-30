@@ -20,7 +20,7 @@ function onNewJob()
    form.submit();    
 }
 
-function onDeleteJob(jobNumber)
+function onDeleteJob(jobId)
 {
    if (confirm("Are you sure you want to delete this job?"))
    {
@@ -35,9 +35,9 @@ function onDeleteJob(jobNumber)
       form.appendChild(input);
       
       input = document.createElement('input');
-      input.setAttribute('name', 'jobNumber');
+      input.setAttribute('name', 'jobId');
       input.setAttribute('type', 'hidden');
-      input.setAttribute('value', jobNumber);
+      input.setAttribute('value', jobId);
       form.appendChild(input);
       
       document.body.appendChild(form);
@@ -45,7 +45,7 @@ function onDeleteJob(jobNumber)
    }
 }
 
-function onViewJob(jobNumber)
+function onViewJob(jobId)
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
@@ -58,16 +58,16 @@ function onViewJob(jobNumber)
    form.appendChild(input);
    
    input = document.createElement('input');
-   input.setAttribute('name', 'jobNumber');
+   input.setAttribute('name', 'jobId');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', jobNumber);
+   input.setAttribute('value', jobId);
    form.appendChild(input);
    
    document.body.appendChild(form);
    form.submit();
 }
 
-function onEditJob(jobNumber)
+function onEditJob(jobId)
 {
    form = document.createElement('form');
    form.setAttribute('method', 'POST');
@@ -86,9 +86,9 @@ function onEditJob(jobNumber)
    form.appendChild(input);
    
    input = document.createElement('input');
-   input.setAttribute('name', 'jobNumber');
+   input.setAttribute('name', 'jobId');
    input.setAttribute('type', 'hidden');
-   input.setAttribute('value', jobNumber);
+   input.setAttribute('value', jobId);
    form.appendChild(input);
    
    document.body.appendChild(form);
