@@ -72,13 +72,13 @@ class ViewLineInspections
    
       <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
          
-         <div class="flex-horizontal sidebar"></div> 
+         <div class="flex-horizontal sidebar hide-on-mobile"></div> 
 
          <div class="flex-vertical content">
 
             <div class="heading">Line Inspections</div>
 
-            <div class="instructions">Line inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
+            <div class="description">Line inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
    
             $filterDiv
    
@@ -124,15 +124,15 @@ HEREDOC;
             <table class="line-inspections-table">
                <tr>
                   <th>Date</th>
-                  <th>Time</th>
-                  <th>Inspector</th>
-                  <th>Operator</th>
+                  <th class="hide-on-tablet">Time</th>
+                  <th class="hide-on-tablet">Inspector</th>
+                  <th class="hide-on-tablet">Operator</th>
                   <th>Job</th>
-                  <th>Work Center</th>
-                  <th>Thread #1</th>
-                  <th>Thread #2</th>
-                  <th>Thread #3</th>
-                  <th>Visual</th>
+                  <th>Work<br/>Center</th>
+                  <th class="hide-on-tablet">Thread #1</th>
+                  <th class="hide-on-tablet">Thread #2</th>
+                  <th class="hide-on-tablet">Thread #3</th>
+                  <th class="hide-on-tablet">Visual</th>
                   <th></th>
                   <th></th>
                </tr>
@@ -205,9 +205,9 @@ HEREDOC;
 <<<HEREDOC
                      <tr>
                         <td>$inspectionDate $new</td>                        
-                        <td>$inspectionTime</td>
-                        <td>$inspectorName</td>
-                        <td>$operatorName</td>
+                        <td class="hide-on-tablet">$inspectionTime</td>
+                        <td class="hide-on-tablet">$inspectorName</td>
+                        <td class="hide-on-tablet">$operatorName</td>
                         <td>$lineInspectionInfo->jobNumber</td>
                         <td>$lineInspectionInfo->wcNumber</td>
 HEREDOC;
@@ -216,7 +216,7 @@ HEREDOC;
                      $label = InspectionStatus::getLabel($lineInspectionInfo->inspections[$i]);
                      $class = InspectionStatus::getClass($lineInspectionInfo->inspections[$i]);
                      
-                     $html .= "<td><div class=\"$class\">$label</div></td>";
+                     $html .= "<td class=\"hide-on-mobile\"><div class=\"$class\">$label</div></td>";
                   }
                         
                   $html .=

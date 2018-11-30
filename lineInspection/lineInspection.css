@@ -1,75 +1,9 @@
 @CHARSET "ISO-8859-1";
 
-
 .line-inspections-div {
    overflow-y: scroll;
    height: 400px;
-}
-
-/* 
-Device = Tablets, Ipads (portrait)
-Screen = B/w 768px to 1024px
-*/
-@media (min-width: 768px) and (max-width: 1024px) {
-	.line-inspections-div {
-	   height: 400px;
-	}
-}
-
-/* 
-Device = Most of the Smartphones Mobiles (Portrait)
-Screen = B/w 320px to 479px
-*/
-@media (min-width: 320px) and (max-width: 480px) {
-   .line-inspections-div {
-      height: 200px;
-   }
-}
-
-/* 
-Device = Most of the Smartphones Mobiles (Portrait)
-Screen = B/w 320px to 479px
-*/
-@media (min-width: 320px) and (max-width: 480px) {
-   .hide-on-mobile {
-      display: none;
-   }
-}
-
-.sidebar {
-	width: 250px;
-   background-image: url('../images/screwMachine.jpg');
-}
-
-.content {
-   justify-content: flex-start;
-   align-items: flex-start;
-   margin-left: 25px;
-   margin-top: 50px;
-}
-
-.heading {
-	font-weight: bold;
-   font-size: 25px;
-   color: #333333;
    margin-bottom: 25px;
-   align: left;
-}
-
-.instructions {
-   margin-bottom: 30px;
-   width: 50%;
-}
-
-/* 
-Device = Most of the Smartphones Mobiles (Portrait)
-Screen = B/w 320px to 479px
-*/
-@media (min-width: 320px) and (max-width: 480px) {
-	.instructions {
-	   margin-bottom: 30px;
-	   width: 100%;
-	}
 }
 
 form {
@@ -91,11 +25,10 @@ form {
 }
 
 .comments-input {
-   width:600px;
+   width:350px;
    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
    font-size: 16px;
    height: 4em;
-   width: 100%;
 }
 
 .inspection-table {
@@ -160,4 +93,26 @@ input.fail:checked + label > div  {
 
 input.nonApplicable:checked + label > div  {
    background-color: background-color: #6496c8;
+}
+
+/* 
+Device = Most of the Smartphones Mobiles (Portrait)
+Screen = B/w 320px to 479px
+*/
+@media (min-width: 320px) and (max-width: 479px) {
+	
+   .line-inspections-div {
+      height: 200px;
+   }
+}
+
+/* 
+Device = Tablets, Ipads (portrait)
+Screen = B/w 768px to 1024px
+*/
+@media (min-width: 480px) and (max-width: 1024px) {
+	
+   .line-inspections-div {
+      height: 400px;
+   }
 }

@@ -6,6 +6,31 @@ body {
    background: #eee;
 }
 
+.sidebar {
+   width: 250px;
+   background-image: url('../images/screwMachine2.png');  
+}
+
+.content {
+   justify-content: flex-start;
+   align-items: flex-start;
+   margin-left: 25px;
+   margin-top: 50px;
+}
+
+.heading {
+   font-weight: bold;
+   font-size: 25px;
+   color: #333333;
+   margin-bottom: 25px;
+   align: left;
+}
+
+.description {
+   margin-bottom: 30px;
+   width: 50%;
+}
+
 .header-div {
    display: flex;
    flex-direction: row;
@@ -211,4 +236,52 @@ tr:hover {
    
 .label-div {
    width: 100px;
+}
+
+/* 
+Device = Most of the Smartphones Mobiles (Portrait)
+Screen = B/w 320px to 479px
+*/
+@media (min-width: 320px) and (max-width: 479px) {
+	
+   .description {
+      margin-bottom: 30px;
+      width: 100%;
+   }
+   
+   .nav-button {
+      font-size: 15px;
+      width: 100px;
+      margin-right: 10px;
+      margin-left: 10px;
+      padding: 10px 10px;
+   }  
+   
+   .nav-button-wide {
+      width: 125px;
+   }
+   
+   .hide-on-mobile {
+      display: none;
+   }
+   
+   .hide-on-tablet {
+      display: none;
+   }
+}
+
+/* 
+Device = Tablets, Ipads (portrait)
+Screen = B/w 768px to 1024px
+*/
+@media (min-width: 480px) and (max-width: 1024px) {
+   
+   .hide-on-tablet {
+      display: none;
+   }
+   
+   .description {
+      margin-bottom: 30px;
+      width: 100%;
+   }
 }

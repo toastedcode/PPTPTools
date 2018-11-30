@@ -17,24 +17,13 @@ class ViewLineInspection
       
       $editable = (($view == "new_line_inspection") || ($view == "edit_line_inspection"));
       
-      $titleDiv = ViewLineInspection::titleDiv();
+      $headingDiv = ViewLineInspection::headingDiv($view);
+      
+      $descriptionDiv = ViewLineInspection::descriptionDiv($view);
+      
       $inspectionDiv = ViewLineInspection::inspectionDiv($lineInspectionInfo, $view);
       
       $navBar = ViewLineInspection::navBar($view);
-      
-      $title = "";
-      if ($view == "new_line_inspection")
-      {
-         $title = "New Inspection";
-      }
-      else if ($view == "edit_line_inspection")
-      {
-         $title = "Edit Inspection";
-      }
-      else if ($view == "view_line_inspection")
-      {
-         $title = "View Inspection";
-      }
       
       $html =
 <<<HEREDOC
@@ -43,15 +32,15 @@ class ViewLineInspection
 
       <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
          
-         <div class="flex-horizontal sidebar hide-on-mobile"></div> 
+         <div class="flex-horizontal sidebar hide-on-tablet"></div> 
 
          <div class="flex-vertical content">
 
-            <div class="heading">Add a New Inspection</div>
+            $headingDiv
 
-            <div class="instructions">Start by selecting a work center, then any of the currently active jobs for that station.  If any of the inspections are not relevant to the part you're inspection, just leave it set to "Not Applicable".</div>
+            $descriptionDiv
          
-            <div class="pptp-form" style="height:500px;">
+            <div class="pptp-form">
                <div class="form-row">
                   $inspectionDiv
                </div>
@@ -127,6 +116,54 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="form-title">Line Inspection</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function headingDiv($view)
+   {
+      $heading = "";
+      if ($view == "new_line_inspection")
+      {
+         $heading = "Add a New Inspection";
+      }
+      else if ($view == "edit_line_inspection")
+      {
+         $heading = "Update an Inspection";
+      }
+      else if ($view == "view_line_inspection")
+      {
+         $heading = "View an Inspection";
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="heading">$heading</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function descriptionDiv($view)
+   {
+      $description = "";
+      if ($view == "new_line_inspection")
+      {
+         $description = "Start by selecting a work center, then any of the currently active jobs for that station.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
+      }
+      else if ($view == "edit_line_inspection")
+      {
+         $description = "You may revise any of the fields for this inspection and then select save when you're satisfied with the changes.";
+      }
+      else if ($view == "view_line_inspection")
+      {
+         $description = "View a previously saved inspection in detail.";
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="description">$description</div>
 HEREDOC;
       
       return ($html);

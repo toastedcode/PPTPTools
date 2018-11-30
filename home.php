@@ -80,25 +80,6 @@ function loginPage()
 <<<HEREDOC
 
 <!-- Wide card with share menu button -->
-<style>
-.demo-card-wide.mdl-card {
-  width: 512px;
-  margin: auto;
-}
-.demo-card-wide > .mdl-card__title {
-  color: #fff;
-  height: 176px;
-  background: url('./images/parts.jpg') center / cover;
-}
-.demo-card-wide > .mdl-card__menu {
-  color: #fff;
-}
-
-.login-form {
-   margin-left: 50px;
-   margin-bottom: 10px;
-}
-</style>
 
    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
       <div class="mdl-card__title">
@@ -110,7 +91,7 @@ function loginPage()
          daily operations. 
          <br/>
          <br/>
-         Please login to get started.
+         Login and let's get started.
       </div>
       <div class="mdl-card__actions mdl-card--border">
          <div class="login-form">
@@ -294,39 +275,6 @@ HEREDOC;
      height: 176px;
    }
 
-   .action-button {
-      display:flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      width: 150px;
-      height: 150px;
-
-      color: #fff;
-      font-size: 18px;
-      text-shadow: -1px 1px #417cb8;
-
-      margin: 10px;
-
-      background-color: #6496c8;
-      
-   }
-
-   .action-button:hover {
-      background-color: #346392;
-      text-shadow: -1px 1px #27496d;
-   }
-
-   .action-button:active {
-      background-color: #27496d;
-      text-shadow: -1px 1px #193047;
-   }
-
-   .action-button-icon {
-      font-size: 80px;
-   }
-
    .button-container {
       padding-top: 25px;
       padding-right: 25px;
@@ -341,32 +289,42 @@ HEREDOC;
 
    </style>
 
-   <div class="flex-vertical card-div">
-      <div class="flex-vertical select-action-card-header"></div>
+   <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
+      
+      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
 
-      <div class="flex-horizontal content-div" style="justify-content: center; height:400px; flex-wrap: wrap;">
+      <div class="flex-vertical content">
 
-         $usersButton
-         
-         $jobsButton
+         <div class="heading">Let's Get Started!</div>
 
-         $timeCardButton
-         
-         $partWeightButton
-         
-         $partWashButton
-         
-         $partInspectionButton
-         
-         $lineInspectionButton
-         
-         $machineStatusButton
-         
-         $productionSummaryButton
-         
-         $digitalSignageButton
+         <div class="description">PPTP Tools gives you tons of ways to analyze production every step of the way.  Select one of the activity icons below to get a window into how your floor is operating today.</div>
 
+         <div class="flex-horizontal content-div" style="justify-content: center; height:400px; flex-wrap: wrap;">
+   
+            $usersButton
+            
+            $jobsButton
+   
+            $timeCardButton
+            
+            $partWeightButton
+            
+            $partWashButton
+            
+            $partInspectionButton
+            
+            $lineInspectionButton
+            
+            $machineStatusButton
+            
+            $productionSummaryButton
+            
+            $digitalSignageButton
+   
+         </div>
+         
       </div>
+            
    </div>
 HEREDOC;
 }
@@ -434,12 +392,15 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 <html>
 
 <head>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
    <!--  Material Design Lite -->
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
 
    <!-- PPTP -->
    <link rel="stylesheet" type="text/css" href="common/flex.css"/>
+   <link rel="stylesheet" type="text/css" href="common/common.css"/>
    <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
 
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
@@ -447,9 +408,9 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 
 <body style="background: <?php echo $background?>;">
 
-<?php Header::render("Pittsburgh Precision Tools"); ?>
+<?php Header::render("PPTP Tools"); ?>
 
-<div class="flex-horizontal" style="height: 700px;">
+<!--div class="flex-horizontal" style="height: 700px;"-->
 
 <?php 
 if (Authentication::isAuthenticated())
@@ -469,7 +430,7 @@ else
 }
 ?>
 
-</div>
+<!--/div-->
 
 </body>
 
