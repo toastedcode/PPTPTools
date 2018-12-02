@@ -18,9 +18,9 @@ class ViewTimeCard
       $timeCardInfo = ViewTimeCard::getTimeCardInfo();
       
       $readOnly = (($view == "view_time_card") || ($view == "use_time_card"));
-      
-      $descriptionDiv = ViewTimeCard::descriptionDiv($view);
-      $headingDiv = ViewTimeCard::headingDiv($view);
+
+      $headingDiv = ViewTimeCard::headingDiv($timeCardInfo, $view);
+      $descriptionDiv = ViewTimeCard::descriptionDiv($timeCardInfo, $view);
       $dateDiv = ViewTimeCard::dateDiv($timeCardInfo);
       $operatorDiv = ViewTimeCard::operatorDiv($timeCardInfo);
       $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, $readOnly);
@@ -43,24 +43,20 @@ class ViewTimeCard
 
          $descriptionDiv
 
-         <div class="flex-vertical inner-content">
+         <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;">
 
-            <div class="pptp-form">
-               <div class="form-row">
-                  <div class="form-col" style="margin-right: 50px">
-                     $dateDiv
-                     $operatorDiv
-                     $jobDiv
-                  </div>
-                  <div class="form-col" style="margin-right: 50px">
-                     $timeDiv
-                     $partsDiv
-                  </div>
-                  <div class="form-col" style="margin-right: 50px">
-                     $commentCodesDiv
-                     $commentsDiv
-                  </div>
-               </div>
+            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+               $dateDiv
+               $operatorDiv
+               $jobDiv
+            </div>
+            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+               $timeDiv
+               $partsDiv
+            </div>
+            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+               $commentCodesDiv
+               $commentsDiv
             </div>
 
          </div>
@@ -110,16 +106,19 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function headingDiv($view)
+   protected static function headingDiv($timeCardInfo, $view)
    {
       $heading = "";
-      if ($view == "new_time_card")
+      if ($view == "edit_time_card")
       {
-         $heading = "Review Your New Time Card";
-      }
-      else if ($view == "edit_time_card")
-      {
-         $heading = "Update a Time Card";
+         if ($timeCardInfo->timeCardId == 0)
+         {
+            $heading = "Review Your New Time Card";
+         }
+         else
+         {
+            $heading = "Update a Time Card";
+         }
       }
       else if ($view == "view_time_card")
       {
@@ -134,16 +133,19 @@ HEREDOC;
       return ($html);
    }
    
-   protected static function descriptionDiv($view)
+   protected static function descriptionDiv($timeCardInfo, $view)
    {
       $description = "";
-      if ($view == "new_time_card")
+      if ($view == "edit_time_card")
       {
-         $description = "Review all the fields of your time card and make any necessary corrections.  Once you're satisfied, click Save below to add this time card to the system.";
-      }
-      else if ($view == "edit_time_card")
-      {
-         $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
+         if ($timeCardInfo->timeCardId == 0)
+         {
+            $description = "Review all the fields of your time card and make any necessary corrections.  Once you're satisfied, click Save below to add this time card to the system.";
+         }
+         else
+         {
+            $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
+         }
       }
       else if ($view == "view_time_card")
       {
@@ -167,7 +169,7 @@ HEREDOC;
 <<<HEREDOC
          <div class="form-item">
             <div class="form-label">Date</div>
-            <input type="text" class="form-input-medium" name="date" style="width:100px;" value="$dateString" disabled />
+            <input type="text" class="form-input-medium" name="date" style="width:100px;" value="$dateString" disabled>
          </div>
 HEREDOC;
       return ($html);
@@ -214,7 +216,7 @@ HEREDOC;
       $html =
 <<<HEREDOC
       
-      <input id="gross-parts-per-hour-input" type="hidden" value="{$jobInfo->getGrossPartsPerHour()}"/>
+      <input id="gross-parts-per-hour-input" type="hidden" value="{$jobInfo->getGrossPartsPerHour()}">
 
       <div class="form-col">
 
@@ -222,17 +224,17 @@ HEREDOC;
 
          <div class="form-item">
             <div class="form-label">Job #</div>
-            <input type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->jobNumber" disabled />
+            <input type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->jobNumber" disabled>
          </div>
 
          <div class="form-item">
             <div class="form-label">Work center #</div>
-            <input type="text" class="form-input-medium" style="width:150px;" value="$wcNumber" disabled />
+            <input type="text" class="form-input-medium" style="width:150px;" value="$wcNumber" disabled>
          </div>
 
          <div class="form-item">
             <div class="form-label">Heat #</div>
-            <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled />
+            <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled>
          </div>
 
       </div>

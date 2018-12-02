@@ -137,61 +137,6 @@ button.approval, button.unapproval {
    margin-left: 10px;
 }
 
-.operator-input
-{
-   visibility: hidden;
-   position: absolute;
-}
-
-.select-button {
-	display: flex;
-   flex-direction: row;
-   align-items: center;
-	
-   margin: 20px 20px 0 0;
-   padding: 5px 5px;
-
-   font-size: 18px;
-   color: #fff;
-   text-shadow: -1px 1px #417cb8;
-   
-   line-height: 1.8;
-   appearance: none;
-   box-shadow: none;
-   border-radius: 0;
-   background-color: #6496c8;
-   border: none;
-}
-
-.select-button:hover {
-   background-color: #346392;
-   text-shadow: -1px 1px #27496d;
-}
-
-.operator-select-button {
-   width: 180px;
-   height: 50px;
-}
-
-.wc-select-button {
-   width: 100px;
-   height: 50px;
-}
-
-.job-select-button {
-   width: 150px;
-   height: 50px;
-}
-
-input:checked + label > div  {
-   background-color: #27496d;
-   text-shadow: -1px 1px #193047;
-}
-
-.button-icon {
-   font-size: 50px;
-}
-
 .adjust-time-button {
 	display: flex;
 	flex-direction: row;
@@ -214,7 +159,6 @@ input:checked + label > div  {
 	
 	margin-right: 20px;
 }
-
    
 .time-input-container {
    margin-bottom: 20px;

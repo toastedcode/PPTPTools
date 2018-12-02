@@ -17,20 +17,31 @@ class SelectTimeCard
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Time Card</div>
-         <div class="flex-horizontal content-div" style="align-items:stretch;">
+
+      <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
          
-            <div class="flex-vertical" style="flex-grow:1;">
-               <div class="flex-horizontal" style="flex-grow:1; flex-shrink: 0;">$timeCardIdInput</div>
-               <div id="time-card-div" style="flex-grow:1; flex-shrink: 0; width:350px;"></div>
-            </div>
+         <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+
+         <div class="flex-vertical content">
+
+            <div class="heading">Enter a Time Card Code</div>
+
+            <div class="description">Time Card codes can be found on Pan Tickets underneath the QR scancode.</div>
+
+            <div class="flex-horizontal inner-content">
+         
+               <div class="flex-vertical" style="margin-right:150px;">
+                  <div class="flex-horizontal" style="flex-grow:1; flex-shrink: 0;">$timeCardIdInput</div>
+                  <div id="time-card-div" style="flex-grow:1; flex-shrink: 0; width:350px;"></div>
+               </div>
+               
+               <div class="flex-horizontal hide-on-tablet">$keypad</div>
             
-            <div class="flex-horizontal" style="flex-grow:1">$keypad</div>
+            </div>
+         
+            $navBar
             
          </div>
-         
-         $navBar
          
       </div>
 
@@ -77,7 +88,7 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="time-card-id-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="timeCardId" oninput="this.validator.validate()" value="$timeCardId">
+         <input id="time-card-id-input" type="number" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="timeCardId" oninput="this.validator.validate()" value="$timeCardId">
          <label class="mdl-textfield__label" for="time-card-id-input">Time card #</label>
       </div>
 HEREDOC;

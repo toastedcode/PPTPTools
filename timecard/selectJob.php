@@ -89,7 +89,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="input-form" id="$id" class="operator-input" name="jobId" value="$jobId" $checked/>
+         <input type="radio" form="input-form" id="$id" class="invisible-radio-button" name="jobId" value="$jobId" $checked/>
          <label for="$id">
             <div type="button" class="select-button job-select-button">
                <i class="material-icons button-icon">assignment</i>

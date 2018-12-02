@@ -281,26 +281,26 @@ processAction(getAction());
 
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../common/flex.css"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-<link rel="stylesheet" type="text/css" href="../common/common.css"/>
-<link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
 
-<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<script src="partWeightLog.js"></script>
-<script src="../validate.js"></script>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
+   
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="partWeightLog.js"></script>
+   <script src="../validate.js"></script>
+   
 </head>
 
 <body>
 
-<?php Header::render("Part Weight Log"); ?>
+<?php Header::render("PPTP Tools"); ?>
 
-<div class="flex-horizontal" style="height: 700px;">
-
-   <?php processView(getView())?>
-
-</div>
+<?php processView(getView())?>
 
 </body>
 </html>

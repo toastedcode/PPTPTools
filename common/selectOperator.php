@@ -8,6 +8,8 @@ abstract class SelectOperator
    {
       $html = "";
       
+      $description = $this->description();
+      
       $operators = $this->operators();
       
       $navBar = $this->navBar();
@@ -15,12 +17,21 @@ abstract class SelectOperator
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Operator</div>
-         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Select a Machine Operator</div>
+
+         $description
+
+         <div class="flex-vertical inner-content"> 
+
             $operators  
+
          </div>
-         $navBar         
+
+         $navBar     
+    
       </div>
 HEREDOC;
       
@@ -32,13 +43,18 @@ HEREDOC;
       echo ($this->getHtml());
    }
    
+   abstract protected function description();
+   
    abstract protected function navBar();
    
    abstract protected function getEmployeeNumber();
    
    private function operators()
    {
-      $html = "";
+      $html =
+<<<HEREDOC
+      <div class="flex-horizontal selection-container">
+HEREDOC;
       
       $selectedEmployeeNumber = $this->getEmployeeNumber();
       
@@ -64,6 +80,11 @@ HEREDOC;
          }
       }
       
+      $html .=
+<<<HEREDOC
+      </div>
+HEREDOC;
+      
       return ($html);
    }
    
@@ -77,7 +98,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <input type="radio" form="input-form" id="$id" class="operator-input" name="operator" value="$employeeNumber" $checked/>
+      <input type="radio" form="input-form" id="$id" class="invisible-radio-button" name="operator" value="$employeeNumber" $checked/>
       <label for="$id">
          <div type="button" class="select-button operator-select-button">
             <i class="material-icons button-icon">person</i>

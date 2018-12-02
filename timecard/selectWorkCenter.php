@@ -86,7 +86,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="input-form" id="$id" class="operator-input" name="wcNumber" value="$wcNumber" $checked/>
+         <input type="radio" form="input-form" id="$id" class="invisible-radio-button" name="wcNumber" value="$wcNumber" $checked/>
          <label for="$id">
             <div type="button" class="select-button wc-select-button">
                <i class="material-icons button-icon">build</i>
