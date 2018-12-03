@@ -16,7 +16,8 @@ class ViewUser
       
       $editable = (($view == "new_user") || ($view == "edit_user"));
       
-      $titleDiv = ViewUser::titleDiv();
+      $headingDiv = ViewUser::headingDiv($view);
+      $descriptionDiv = ViewUser::descriptionDiv($view);
       $userDiv = ViewUser::userDiv($userInfo, $view);
       $permissionsDiv = ViewUser::permissionsDiv($userInfo, $view);
       $navBar = ViewUser::navBar($userInfo, $view);
@@ -39,19 +40,18 @@ class ViewUser
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
 
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">$title</div>
-         
-         <div class="flex-vertical content-div">
-            <div class="flex-vertical time-card-div">
-               <div class="flex-horizontal">
-                  $titleDiv
-               </div>
-               <div class="flex-horizontal" style="align-items: flex-start;">
-                  $userDiv
-                  $permissionsDiv
-               </div>
-            </div>
+      <div class="flex-vertical content">
+
+         $headingDiv
+
+         $descriptionDiv
+
+         <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;">
+
+            $userDiv
+            
+            $permissionsDiv
+            
          </div>
          
          $navBar
@@ -73,13 +73,49 @@ HEREDOC;
       echo (ViewUser::getHtml($view));
    }
    
-   protected static function titleDiv()
+   protected static function headingDiv($view)
    {
+      $heading = "";
+      if ($view == "new_user")
+      {
+         $heading = "Add a New User";
+      }
+      if ($view == "edit_user")
+      {
+         $heading = "Edit an Existing User";
+      }
+      else if ($view == "view_user")
+      {
+         $heading = "View User Details";
+      }
+      
       $html =
 <<<HEREDOC
-      <div class="flex-horizontal time-card-table-col">
-         <h1>User</h1>
-      </div>
+      <div class="heading">$heading</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function descriptionDiv($view)
+   {
+      $description = "";
+      if ($view == "new_user")
+      {
+         $description = "Users of the PPTP Tools system can be given a variety of roles and permissions.  Here you can set up a new user and give them as much access as their job requires.";
+      }
+      else if ($view == "edit_user")
+      {
+         $description = "You may revise any of the settings associated with this user and then select save when you're satisfied with the changes.";
+      }
+      else if ($view == "view_user")
+      {
+         $description = "View the settings and access permissions of this user.";
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="description">$description</div>
 HEREDOC;
       
       return ($html);
@@ -101,46 +137,47 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
+      <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
 
-         <div class="section-header-div"><h2>Identity</h2></div>
+         <div class="form-section-header">Identity</div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Employee #</h3></div>
-            <input id="employee-number-input" type="text" class="medium-text-input" name="employeeNumber" form="input-form" style="width:150px;" value="$userInfo->employeeNumber" oninput="this.validator.validate()" $employeeNumberDisabled/>
+         <div class="form-item">
+            <div class="form-label">Employee #</div>
+            <input id="employee-number-input" type="text" class="form-input-medium" name="employeeNumber" form="input-form" style="width:150px;" value="$userInfo->employeeNumber" oninput="this.validator.validate()" $employeeNumberDisabled/>
          </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>First Name</h3></div>
-            <input id="first-name-input" type="text" class="medium-text-input" name="firstName" form="input-form" style="width:150px;" value="$userInfo->firstName" $disabled />
+         <div class="form-item">
+            <div class="form-label">First Name</div>
+            <input id="first-name-input" type="text" class="form-input-medium" name="firstName" form="input-form" style="width:150px;" value="$userInfo->firstName" $disabled />
          </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Last Name</h3></div>
-            <input id="last-name-input" type="text" class="medium-text-input" name="lastName" form="input-form" style="width:150px;" value="$userInfo->lastName" $disabled />
+         <div class="form-item">
+            <div class="form-label">Last Name</div>
+            <input id="last-name-input" type="text" class="form-input-medium" name="lastName" form="input-form" style="width:150px;" value="$userInfo->lastName" $disabled />
          </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Email</h3></div>
-            <input id="email-input" type="text" class="medium-text-input" name="email" form="input-form" style="width:300px;" value="$userInfo->email" $disabled />
+         <div class="form-item">
+            <div class="form-label">Email</div>
+            <input id="email-input" type="text" class="form-input-medium" name="email" form="input-form" style="width:300px;" value="$userInfo->email" $disabled />
          </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Role</h3></div>
-            <div><select id="role-input" class="medium-text-input" name="roles" form="input-form" $disabled>$roleOptions</select></div>
+         <div class="form-item">
+            <div class="form-label">Role</div>
+            <div><select id="role-input" class="form-input-medium" name="roles" form="input-form" $disabled>$roleOptions</select></div>
          </div>
 
-         <div class="section-header-div"><h2>Login</h2></div>
+         <div class="form-section-header">Login</div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Username</h3></div>
-            <input id="user-name-input" type="text" class="medium-text-input" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
+         <div class="form-item">
+            <div class="form-label">Username</div>
+            <input id="user-name-input" type="text" class="form-input-medium" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
          </div>
 
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Password</h3></div>
-            <input id="user-name-input" type="password" class="medium-text-input" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
+         <div class="form-item">
+            <div class="form-label">Password</div>
+            <input id="user-name-input" type="password" class="form-input-medium" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
          </div>
+
       </div>
 HEREDOC;
       
@@ -192,8 +229,8 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Permissions</h2></div>
+      <div class="flex-vertical" style="align-items: flex-start;">
+         <div class="form-section-header">Permissions</div>
 HEREDOC;
 
       foreach (Permission::getPermissions() as $permission)
@@ -225,7 +262,7 @@ HEREDOC;
 <<<HEREDOC
       <div class="flex-horizontal">
          <input id="$id" type="checkbox" class="permission-checkbox" form="input-form" name="$name" $checked $disabled/>
-         <label for="$id" class="medium-text-input">$description</label>
+         <label for="$id" class="form-input-medium">$description</label>
       </div>
 HEREDOC;
 

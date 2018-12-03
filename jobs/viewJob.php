@@ -111,7 +111,7 @@ HEREDOC;
       }
       
       $html =
-      <<<HEREDOC
+<<<HEREDOC
       <div class="description">$description</div>
 HEREDOC;
       

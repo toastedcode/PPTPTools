@@ -72,7 +72,7 @@ class ViewPartInspections
          <div class="heading">Oasis Part Inspections</div>
 
          <div class="description">
-            Part inspecctions performed at any of the Oasis inspection stations automatically show up in this log.  Real-time inspection data lets you keep close tabs on the qualitiy control process.<br/>
+            Part inspections performed at any of the Oasis inspection stations automatically show up in this log.  Real-time inspection data lets you keep close tabs on the qualitiy control process.<br/>
             <br/>
             If you feel there are missing inspections from this log, verify that the <b>Folder Watcher</b> application is running at your Oasis inspection station.
          </div>
@@ -140,7 +140,7 @@ HEREDOC;
          {    
             $html = 
 <<<HEREDOC
-            <div class="part-inspections-div">
+            <div class="table-container">
                <table class="part-inspection-table">
                   <tr>
                      <th>Name</th>
