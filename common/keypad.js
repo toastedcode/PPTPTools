@@ -54,10 +54,7 @@ function Keypad()
          }
 	      else if ((typeof ae.maxLength === "undefined") || (ae.maxLength == -1) || (ae.value.length < ae.maxLength))
 	      {
-	         alert(ae.value);
-	         alert(keyValue);
 	         ae.value += keyValue;
-	         alert(ae.value);
 	      }
 	      
          if (!(typeof ae.validator === "undefined"))
