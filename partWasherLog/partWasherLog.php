@@ -114,7 +114,7 @@ function processView($view)
          
       case 'select_time_card':
       {
-         $page = new SelectTimeCard();
+         $page = new SelectTimeCard_PartWasher();
          $page->render($view);
          break;
       }

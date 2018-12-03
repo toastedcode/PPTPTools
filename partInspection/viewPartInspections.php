@@ -67,14 +67,22 @@ class ViewPartInspections
 <<<HEREDOC
       <script src="partInspection.js"></script>
    
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Part Inspections</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
+      <div class="flex-vertical content">
+
+         <div class="heading">Oasis Part Inspections</div>
+
+         <div class="description">
+            Part inspecctions performed at any of the Oasis inspection stations automatically show up in this log.  Real-time inspection data lets you keep close tabs on the qualitiy control process.<br/>
+            <br/>
+            If you feel there are missing inspections from this log, verify that the <b>Folder Watcher</b> application is running at your Oasis inspection station.
+         </div>
+
+         <div class="flex-vertical inner-content"> 
+
+            $filterDiv
    
-               $filterDiv
-   
-               $partInspectionsDiv
-         
+            $partInspectionsDiv
+            
          </div>
 
          $navBar;
@@ -108,21 +116,7 @@ HEREDOC;
    
    private function partInspectionsDiv()
    {
-      $html = 
-<<<HEREDOC
-         <div class="part-inspections-div">
-            <table class="part-inspection-table">
-               <tr>
-                  <th>Name</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Work Center #</th>
-                  <th>Part #</th>
-                  <th>Part Count</th>
-                  <th>Failure Count</th>
-                  <th>Efficiency</th>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
@@ -142,8 +136,24 @@ HEREDOC;
          
          $result = $database->getPartInspections($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
          
-         if ($result)
-         {
+         if ($result && ($database->countResults($result) > 0))
+         {    
+            $html = 
+<<<HEREDOC
+            <div class="part-inspections-div">
+               <table class="part-inspection-table">
+                  <tr>
+                     <th>Name</th>
+                     <th>Date</th>
+                     <th>Time</th>
+                     <th>Work Center #</th>
+                     <th>Part #</th>
+                     <th>Part Count</th>
+                     <th>Failure Count</th>
+                     <th>Efficiency</th>
+                  </tr>
+HEREDOC;
+
             while ($row = $result->fetch_assoc())
             {
                $partInspectionInfo = PartInspectionInfo::load($row["partInspectionId"]);
@@ -180,14 +190,18 @@ HEREDOC;
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }

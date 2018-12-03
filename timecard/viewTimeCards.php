@@ -71,12 +71,16 @@ class ViewTimeCards
          <div class="heading">Time Cards</div>
 
          <div class="description">Time cards record the time a machine operator spends working on a job, as well as a part count for that run.</div>
+
+         <div class="flex-vertical inner-content"> 
       
             $filterDiv
             
             $timeCardsDiv
+            
+         </div>
          
-            $navBar
+         $navBar
          
       </div>
 HEREDOC;

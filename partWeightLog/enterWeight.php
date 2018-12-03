@@ -17,13 +17,18 @@ class EnterWeight
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Enter Weight</div>
-         <div class="flex-horizontal content-div">
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Enter a Part Weight</div>
+
+         <div class="description">Enter the weight of the entire palette of parts associated with you Pan Ticket.</div>
+
+         <div class="flex-horizontal inner-content">
          
-            <div class="flex-horizontal" style="flex-grow: 1">$weightInput</div>
+            <div class="flex-horizontal" style="margin-right: 150px;">$weightInput</div>
             
-            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+            <div class="flex-horizontal hide-on-tablet">$keypad</div>
             
          </div>
          
@@ -38,7 +43,7 @@ class EnterWeight
 
          document.getElementById("weight-input").focus();
          
-         var validator = new IntValidator("weight-input", 7, 1, 10000, false);
+         var validation = new DecimalValidator("weight-input", 7, 1, 10000, 2, false);
          validator.init();
       </script>
 HEREDOC;
@@ -73,7 +78,8 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="weight-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="weight" oninput="this.validator.validate()" value="$weight">
+         <!-- TODO type="number" breaks decimal key in keypad ->
+         <input id="weight-input" type="number" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="weight" oninput="this.validator.validate()" value="$weight">
          <label class="mdl-textfield__label" for="weight-input">Weight</label>
       </div>
 HEREDOC;

@@ -77,9 +77,13 @@ class ViewPartWeightLog
 
          <div class="description">The Part Weight Log provides an up-to-the-minute view into the part weighing process.  Here you can track the weight of your manufactured parts prior to the washing process.</div>
 
-         $filterDiv
+         <div class="flex-vertical inner-content"> 
 
-         $partWeightLogDiv
+            $filterDiv
+
+            $partWeightLogDiv
+            
+         </div>
 
          $navBar;
 
@@ -137,20 +141,20 @@ HEREDOC;
          {
             $html = 
 <<<HEREDOC
-               <div class="table-container">
-                  <table class="part-weight-log-table">
-                     <tr>
-                        <th>Job #</th>
-                        <th class="hide-on-tablet">WC #</th>
-                        <th class="hide-on-tablet">Operator Name</th>
-                        <th class="hide-on-tablet">Mfg. Date</th>
-                        <th>Laborer Name</th>
-                        <th>Weigh Date</th>
-                        <th class="hide-on-tablet">Weigh Time</th>
-                        <th class="hide-on-mobile">Basket Count</th>
-                        <th>Weight</th>
-                        <th></th>
-                     </tr>
+            <div class="table-container">
+               <table class="part-weight-log-table">
+                  <tr>
+                     <th>Job #</th>
+                     <th class="hide-on-tablet">WC #</th>
+                     <th class="hide-on-tablet">Operator Name</th>
+                     <th class="hide-on-tablet">Mfg. Date</th>
+                     <th>Laborer Name</th>
+                     <th>Weigh Date</th>
+                     <th class="hide-on-tablet">Weigh Time</th>
+                     <th class="hide-on-mobile">Basket Count</th>
+                     <th>Weight</th>
+                     <th></th>
+                  </tr>
 HEREDOC;
       
             while ($row = $result->fetch_assoc())
@@ -221,18 +225,18 @@ HEREDOC;
    
                   $html .=
 <<<HEREDOC
-                     <tr>
-                        <td>$jobNumber</td>
-                        <td class="hide-on-tablet">$wcNumber</td>
-                        <td class="hide-on-tablet">$operatorName</td>
-                        <td class="hide-on-tablet">$mfgDate</td>
-                        <td>$laborerName</td>
-                        <td>$weighDate $new</td>
-                        <td class="hide-on-tablet">$weighTime</td>
-                        <td class="hide-on-mobile">$panCount</td>                           
-                        <td>$partWeightEntry->weight</td>
-                        <td>$deleteIcon</td>
-                     </tr>
+                  <tr>
+                     <td>$jobNumber</td>
+                     <td class="hide-on-tablet">$wcNumber</td>
+                     <td class="hide-on-tablet">$operatorName</td>
+                     <td class="hide-on-tablet">$mfgDate</td>
+                     <td>$laborerName</td>
+                     <td>$weighDate $new</td>
+                     <td class="hide-on-tablet">$weighTime</td>
+                     <td class="hide-on-mobile">$panCount</td>                           
+                     <td>$partWeightEntry->weight</td>
+                     <td>$deleteIcon</td>
+                  </tr>
 HEREDOC;
                }
             }
@@ -245,7 +249,7 @@ HEREDOC;
          }
          else
          {
-            $html = "<div class=\"no-data description\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }  
       }
       

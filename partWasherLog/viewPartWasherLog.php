@@ -75,9 +75,13 @@ class ViewPartWasherLog
 
          <div class="description">The Part Washer Log provides an up-to-the-minute view into the part washing process.  Here you can track when your parts come through the wash line, and in what volume.</div>
 
-         $filterDiv
+         <div class="flex-vertical inner-content"> 
 
-         $partWasherLogDiv
+            $filterDiv
+
+            $partWasherLogDiv
+            
+         </div>
       
          $navBar
          

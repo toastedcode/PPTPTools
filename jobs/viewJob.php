@@ -16,26 +16,13 @@ class ViewJob
       
       $editable = (($view == "new_job") || ($view == "edit_job"));
       
-      $titleDiv = ViewJob::titleDiv();
+      $headingDiv = ViewJob::headingDiv($view);
+      $descriptionDiv = ViewJob::descriptionDiv($view);
       $creationDiv = ViewJob::creationDiv($jobInfo);
       $jobDiv = ViewJob::jobDiv($jobInfo, $view);
       $partDiv = ViewJob::partDiv($jobInfo, $editable);
       
       $navBar = ViewJob::navBar($jobInfo, $view);
-      
-      $title = "";
-      if ($view == "new_job")
-      {
-         $title = "New Job";
-      }
-      else if ($view == "edit_job")
-      {
-         $title = "Edit Job";
-      }
-      else if ($view == "view_job")
-      {
-         $title = "View Job";
-      }
       
       $html =
 <<<HEREDOC
@@ -44,15 +31,15 @@ class ViewJob
          <input id="part-number-input" type="hidden" name="partNumber" value="$jobInfo->partNumber"/>
       </form>
 
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">$title</div>
-         
-         <div class="pptp-form" style="height:500px;">
-            $titleDiv
-            <div class="form-row">
-               $creationDiv
-               $jobDiv
-            </div>
+      <div class="flex-vertical content">
+
+         $headingDiv
+
+         $descriptionDiv
+
+         <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;"> 
+            $creationDiv
+            $jobDiv
          </div>
          
          $navBar
@@ -83,11 +70,49 @@ HEREDOC;
       echo (ViewJob::getHtml($view));
    }
    
-   protected static function titleDiv()
+   protected static function headingDiv($view)
    {
+      $heading = "";
+      if ($view == "new_job")
+      {
+         $heading = "Create a New Job";
+      }
+      if ($view == "edit_job")
+      {
+         $heading = "Edit an Existing Job";
+      }
+      else if ($view == "view_job")
+      {
+         $heading = "View a Job";
+      }
+      
       $html =
 <<<HEREDOC
-      <div class="form-title">Job</div>
+      <div class="heading">$heading</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function descriptionDiv($view)
+   {
+      $description = "";
+      if ($view == "new_job")
+      {
+         $description = "Start with a job number and work center.  Cyle time and net percentage can be found in the JobBOSS database for your part.<br/><br/>Once you're satisfied, click Save below to add this time card to the system.";
+      }
+      else if ($view == "edit_job")
+      {
+         $description = "You may revise any of the fields for this job and then select save when you're satisfied with the changes.";
+      }
+      else if ($view == "view_job")
+      {
+         $description = "View a previously saved job in detail.";
+      }
+      
+      $html =
+      <<<HEREDOC
+      <div class="description">$description</div>
 HEREDOC;
       
       return ($html);
@@ -107,7 +132,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-      <div class="form-col">
+      <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
          <div class="form-item">
             <div class="form-label">Creator</div>
             <input type="text" class="form-input-medium" name="date" style="width:180px;" value="$creatorName" disabled />
@@ -153,54 +178,54 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-         <div class="form-col">
+      <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
 
-            <div class="form-item">
-               <div class="form-label-long">Job #</div>
-               <div style="display:flex; flex-direction:row; justify-content:flex-start;">
-                  <input id="job-number-prefix-input" type="text" class="form-input-medium" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" oninput="{this.validator.validate(); autoFillPartNumber();}" autocomplete="off" $jobDisabled/>
-                  <div>&nbsp-&nbsp</div>
-                  <input id="job-number-suffix-input" type="text" class="form-input-medium" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" oninput="{this.validator.validate(); autoFillJobNumber();}" autocomplete="off" $jobDisabled/>
-               </div>
+         <div class="form-item">
+            <div class="form-label-long">Job #</div>
+            <div style="display:flex; flex-direction:row; justify-content:flex-start;">
+               <input id="job-number-prefix-input" type="text" class="form-input-medium" name="jobNumberPrefix" form="input-form" style="width:150px;" value="$prefix" oninput="{this.validator.validate(); autoFillPartNumber();}" autocomplete="off" $jobDisabled/>
+               <div>&nbsp-&nbsp</div>
+               <input id="job-number-suffix-input" type="text" class="form-input-medium" name="jobNumberSuffix" form="input-form" style="width:150px;" value="$suffix" oninput="{this.validator.validate(); autoFillJobNumber();}" autocomplete="off" $jobDisabled/>
             </div>
-
-            <div class="form-item">
-               <div class="form-label-long">Part #</div>
-               <input id="part-number-display-input" type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->partNumber" disabled />
-            </div>
-
-            <div class="form-item">
-               <div class="form-label-long">Work center #</div>
-               <div><select id="work-center-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
-            </div>
-
-            <div class="form-item">
-               <div class="form-label-long">Cycle Time</div>
-               <input id="cycle-time-input" type="number" class="medium-text-input" name="cycleTime" form="input-form" style="width:150px;" value="$jobInfo->cycleTime" oninput="this.validator.validate(); autoFillPartStats();" $disabled />
-            </div>
-   
-            <div class="form-item">
-               <div class="form-label-long">Gross Pieces/Hour</div>
-               <input id="gross-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
-            </div>
-   
-            <div class="form-item">
-               <div class="form-label-long">Net Percentage</div>
-               <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
-               <div class="form-label">&nbsp%</div>
-            </div>
-   
-            <div class="form-item">
-               <div class="form-label-long">Net Pieces/Hour</div>
-               <input id="net-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
-            </div>
-   
-            <div class="form-item">
-               <div class="form-label-long">Job status</div>
-               <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
-            </div>
-
          </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Part #</div>
+            <input id="part-number-display-input" type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->partNumber" disabled />
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Work center #</div>
+            <div><select id="work-center-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Cycle Time</div>
+            <input id="cycle-time-input" type="number" class="medium-text-input" name="cycleTime" form="input-form" style="width:150px;" value="$jobInfo->cycleTime" oninput="this.validator.validate(); autoFillPartStats();" $disabled />
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Gross Pieces/Hour</div>
+            <input id="gross-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Net Percentage</div>
+            <input id="net-percentage-input" type="number" class="medium-text-input" name="netPercentage" form="input-form" style="width:150px;" value="$jobInfo->netPercentage" oninput="this.validator.validate(); autoFillPartStats();" $disabled"/>
+            <div class="form-label">&nbsp%</div>
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Net Pieces/Hour</div>
+            <input id="net-parts-per-hour-input" type="number" class="medium-text-input" style="width:150px;" disabled />
+         </div>
+   
+         <div class="form-item">
+            <div class="form-label-long">Job status</div>
+            <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
+         </div>
+   
+      </div>
 HEREDOC;
       
       return ($html);

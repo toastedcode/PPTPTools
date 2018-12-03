@@ -115,7 +115,7 @@ function processView($view)
          
       case 'select_time_card':
       {
-         $page = new SelectTimeCard();
+         $page = new SelectTimeCard_PartWeight();
          $page->render($view);
          break;
       }
@@ -300,7 +300,13 @@ processAction(getAction());
 
 <?php Header::render("PPTP Tools"); ?>
 
-<?php processView(getView())?>
+<div class="flex-horizontal main">
+   
+   <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+
+      <?php processView(getView())?>
+      
+   </div>
 
 </body>
 </html>

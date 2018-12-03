@@ -76,9 +76,13 @@ class ViewLineInspections
 
          <div class="description">Line inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
 
-         $filterDiv
+         <div class="flex-vertical inner-content"> 
 
-         $lineInspectionsDiv
+            $filterDiv
+   
+            $lineInspectionsDiv
+            
+         </div>
       
          $navBar
 

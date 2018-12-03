@@ -1,41 +1,5 @@
 @CHARSET "ISO-8859-1";
 
-.part-washer-log-div
-{
-   overflow-y: scroll;
-   height: 400px;
-}
-   
-.part-washer-log-table
-{
-   width: 1100px;
-}  
-
-table {
-   background: #ffffff;
-   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
-   border-collapse:collapse;
-}
-
-tr {
-   border: 1px solid #dddddd;
-}
-
-.failed-inspection {
-   background: #EDC5BE;
-}
-
-th, td {
-   text-align: left;
-   padding: 18px;
-   font-size: 10pt;
-}
-
-tr:hover {
-   background: #eeeeee;
-   cursor: pointer;
-}
-
 .pan-ticket-div {
    background: #7988c9;
    margin-bottom: 5px;

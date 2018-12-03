@@ -28,6 +28,7 @@ body {
 
 .inner-content {
    margin-bottom: 50px;
+   align-items: flex-start;
 }
 
 .heading {
@@ -221,7 +222,7 @@ input:checked + label > div  {
 
 .table-container {
 	overflow-y: scroll;
-   height: 400px;
+   max-height: 400px;
    margin-bottom: 25px;
 }
 
@@ -247,8 +248,9 @@ tr:hover {
 }
 
 .no-data {
+	display:flex;
+   flex-direction: row;
 	color: red;
-	margin-bottom: 100px;
 }
 
 .new-indicator {
@@ -330,7 +332,7 @@ Screen = B/w 320px to 479px
    }
    
    .table-container {
-      height: 200px;
+      max-height: 200px;
    }
    
    th, td {
@@ -381,7 +383,7 @@ Screen = B/w 768px to 1024px
    }
    
    .table-container {
-      height: 400px;
+      max-height: 400px;
    }
    
    th, td {

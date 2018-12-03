@@ -16,13 +16,18 @@ class EnterPanCount
       $html =
 <<<HEREDOC
       <form id="input-form" action="timeCard.php" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Enter Part Count</div>
-         <div class="flex-horizontal content-div">
 
-            <div class="flex-vertical" style="justify-content: space-evenly; flex-grow: 1">$panCountInput</div>
+      <div class="flex-vertical content">
+
+         <div class="heading">Enter a Pan Count</div>
+
+         <div class="description">Enter the number of part baskets being weighed.</div>
+
+         <div class="flex-horizontal inner-content">
+
+            <div class="flex-vertical" style="margin-right: 150px;">$panCountInput</div>
             
-            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
+            <div class="flex-horizontal hide-on-tablet" style="hide-on-tablet">$keypad</div>
 
          </div>
          
