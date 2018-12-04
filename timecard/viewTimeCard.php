@@ -437,6 +437,7 @@ HEREDOC;
    {
       if ($timeCardInfo->timeCardId != 0)
       {
+         // TODO: Derive domain name.
          $url = "www.roboxes.com/pptp/timecard/timeCard.php?view=use_time_card&timeCardId=$timeCardInfo->timeCardId";
          
          // http://phpqrcode.sourceforge.net/

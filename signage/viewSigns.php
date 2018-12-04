@@ -22,11 +22,15 @@ class ViewSigns
 <<<HEREDOC
       <script src="signage.js"></script>
    
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Signs</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
+      <div class="flex-vertical content">
+
+         <div class="heading">Digital Signage</div>
+
+         <div class="description">You can use PPTP Tools to set up and configure your Screenly digital signs.</div>
+
+         <div class="flex-vertical inner-content"> 
    
-               $signsDiv
+            $signsDiv
          
          </div>
 
@@ -57,30 +61,33 @@ HEREDOC;
    
    private function signsDiv()
    {
-      $html = 
-<<<HEREDOC
-         <div class="signs-div">
-            <table class="signs-table">
-               <tr>
-                  <th/>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>URL</th>
-                  <th/>
-                  <th/>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
       $database->connect();
       
       if ($database->isConnected())
-      {         
+      {
          $result = $database->getSigns();
          
-         if ($result)
+         if ($result && ($database->countResults($result) > 0))
          {
+         
+            $html = 
+<<<HEREDOC
+            <div class="table-container">
+               <table class="signs-table">
+                  <tr>
+                     <th/>
+                     <th>Name</th>
+                     <th>Description</th>
+                     <th>URL</th>
+                     <th/>
+                     <th/>
+                  </tr>
+HEREDOC;
+
             while ($row = $result->fetch_assoc())
             {
                $signInfo = SignInfo::load($row["signId"]);
@@ -107,25 +114,29 @@ HEREDOC;
                {
                   $html .=
 <<<HEREDOC
-                     <tr>
-                        <td>$signButton</td>
-                        <td>$signInfo->name</td>
-                        <td>$signInfo->description</td>
-                        <td>$signInfo->url</td>
-                        <td>$viewEditIcon</td>
-                        <td>$deleteIcon</td>
-                     </tr>
+                  <tr>
+                     <td>$signButton</td>
+                     <td>$signInfo->name</td>
+                     <td>$signInfo->description</td>
+                     <td>$signInfo->url</td>
+                     <td>$viewEditIcon</td>
+                     <td>$deleteIcon</td>
+                  </tr>
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No signs are currently set up in the system.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }

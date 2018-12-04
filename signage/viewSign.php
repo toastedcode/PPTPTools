@@ -15,7 +15,10 @@ class ViewSign
       
       $editable = (($view == "new_sign") || ($view == "edit_sign"));
       
-      $titleDiv = ViewSign::titleDiv();
+      $headingDiv = ViewSign::headingDiv($view);
+      
+      $descriptionDiv = ViewSign::descriptionDiv($view);
+      
       $signDiv = ViewSign::signDiv($signInfo, $view);
       
       $navBar = ViewSign::navBar($signInfo, $view);
@@ -40,14 +43,18 @@ class ViewSign
          <input id="sign-id-input" type="hidden" name="signId" value="$signInfo->signId"/>
       </form>
 
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">$title</div>
-         <div class="flex-vertical content-div">
-            <div class="pptp-form" style="height:500px;">
-               $titleDiv
-               $signDiv
-            </div>
-         <div>
+      <div class="flex-vertical content">
+
+         $headingDiv
+
+         $descriptionDiv
+         
+         <div class="flex-vertical inner-content"> 
+
+            $signDiv
+
+         </div>
+
          $navBar
                
       </div>
@@ -64,11 +71,49 @@ HEREDOC;
       echo (ViewSign::getHtml($view));
    }
    
-   protected static function titleDiv()
+   protected static function headingDiv($view)
    {
+      $heading = "";
+      if ($view == "new_sign")
+      {
+         $heading = "Add a New Digital Sign";
+      }
+      else if ($view == "edit_sign")
+      {
+         $heading = "Update an Digital Sign";
+      }
+      else if ($view == "view_sign")
+      {
+         $heading = "View an Digital Sign";
+      }
+      
       $html =
 <<<HEREDOC
-      <div class="form-title">Sign</div>
+      <div class="heading">$heading</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   protected static function descriptionDiv($view)
+   {
+      $description = "";
+      if ($view == "new_sign")
+      {
+         $description = "Start by giving your new sign a name (ex. \"Entrance sign\") and meaningful description (ex. \"Main entrance by front doors\").<br><br>Then specify the URL of the Rapsberri Pi computer running the sign.";
+      }
+      else if ($view == "edit_sign")
+      {
+         $description = "You may revise any of the fields for sign and then select save when you're satisfied with the changes.";
+      }
+      else if ($view == "view_sign")
+      {
+         $description = "View this sign's configuration.";
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="description">$description</div>
 HEREDOC;
       
       return ($html);

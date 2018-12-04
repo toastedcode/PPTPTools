@@ -271,7 +271,9 @@ if (!Authentication::isAuthenticated())
 processAction(getAction());
 ?>
 
+<!DOCTYPE html>
 <html>
+
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -284,21 +286,22 @@ processAction(getAction());
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="partWasherLog.js"></script>
-   <script src="../validate.js"></script>
+   <script src="../common/validate.js"></script>
 
 </head>
 
 <body>
 
-<?php Header::render("PPTP Tools"); ?>
-
-<div class="flex-horizontal main">
+   <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal sidebar hide-on-tablet"></div> 
-
-   <?php processView(getView())?>
+   <div class="flex-horizontal main">
+      
+      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-</div>
+      <?php processView(getView())?>
+      
+   </div>
 
 </body>
+
 </html>

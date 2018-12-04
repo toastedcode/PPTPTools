@@ -216,6 +216,7 @@ HEREDOC;
       
    // Machine Status
    $machineStatusButton = "";
+   /*
    if (Activity::isAllowed(Activity::MACHINE_STATUS, $permissions))
    {
       $machineStatusButton =
@@ -227,9 +228,11 @@ HEREDOC;
      </div>
 HEREDOC;
    }
+   */
       
    // Production Summary
    $productionSummaryButton = "";
+   /*
    if (Activity::isAllowed(Activity::PRODUCTION_SUMMARY, $permissions))
    {
       $productionSummaryButton =
@@ -241,6 +244,7 @@ HEREDOC;
      </div>
 HEREDOC;
    }
+   */
       
    // Digital Signage
    $digitalSignageButton = "";
@@ -258,37 +262,6 @@ HEREDOC;
    
    echo
 <<<HEREDOC
-   <!-- Wide card with share menu button -->
-   <style>
-
-   .select-action-card-header {
-     color: #fff;
-     height: 176px;
-     background: url('./images/parts2.jpg') center / cover;
-   }
-
-   .select-action-card {
-     width: 1000px;
-     margin: auto;
-   }
-   .select-action-card > .mdl-card__title {
-     height: 176px;
-   }
-
-   .button-container {
-      padding-top: 25px;
-      padding-right: 25px;
-      padding-bottom: 25px;
-      padding-left: 25px;
-      margin: auto;
-   }
-
-   .select-action-card-header-div {
-
-   }
-
-   </style>
-
    <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
       
       <div class="flex-horizontal sidebar hide-on-tablet"></div> 
@@ -299,7 +272,7 @@ HEREDOC;
 
          <div class="description">PPTP Tools gives you tons of ways to analyze production every step of the way.  Select one of the activity icons below to get a window into how your floor is operating today.</div>
 
-         <div class="flex-horizontal content-div" style="justify-content: center; height:400px; flex-wrap: wrap;">
+         <div class="flex-horizontal inner-content;" style="flex-wrap: wrap; max-width: 900px;">
    
             $usersButton
             
@@ -392,6 +365,7 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 <html>
 
 <head>
+
    <meta name="viewport" content="width=device-width, initial-scale=1">
 
    <!--  Material Design Lite -->
@@ -404,33 +378,30 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
    <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
 
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   
 </head>
 
 <body style="background: <?php echo $background?>;">
 
-<?php Header::render("PPTP Tools"); ?>
-
-<!--div class="flex-horizontal" style="height: 700px;"-->
-
-<?php 
-if (Authentication::isAuthenticated())
-{
-   if (isset($_SESSION["redirect"]))
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <?php 
+   if (Authentication::isAuthenticated())
    {
-      redirect($_SESSION["redirect"]);
+      if (isset($_SESSION["redirect"]))
+      {
+         redirect($_SESSION["redirect"]);
+      }
+      else
+      {
+         selectActivityPage();
+      }
    }
    else
    {
-      selectActivityPage();
+      loginPage();
    }
-}
-else
-{
-   loginPage();
-}
-?>
-
-<!--/div-->
+   ?>
 
 </body>
 

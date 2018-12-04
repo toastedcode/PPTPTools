@@ -103,8 +103,11 @@ if (!Authentication::isAuthenticated())
 processAction(getAction());
 ?>
 
+<!DOCTYPE html>
 <html>
+
 <head>
+
    <meta name="viewport" content="width=device-width, initial-scale=1">
 
    <link rel="stylesheet" type="text/css" href="../common/flex.css"/>   
@@ -119,13 +122,14 @@ processAction(getAction());
 
 <body>
 
-<div class="flex-horizontal main">
+   <div class="flex-horizontal main">
+      
+      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-   <div class="flex-horizontal sidebar hide-on-tablet"></div> 
-
-   <?php processView(getView())?>
-
-</div>
+      <?php processView(getView())?>
+   
+   </div>
 
 </body>
+
 </html>

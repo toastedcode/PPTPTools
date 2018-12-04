@@ -175,7 +175,7 @@ HEREDOC;
 
          <div class="form-item">
             <div class="form-label">Password</div>
-            <input id="user-name-input" type="password" class="form-input-medium" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
+            <input id="user-password-input" type="password" class="form-input-medium" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
          </div>
 
       </div>

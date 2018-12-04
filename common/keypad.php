@@ -1,16 +1,20 @@
 <?php
 
+require_once 'root.php';
+
 class Keypad
 {
    public static function getHtml($decimal)
    {
+      global $ROOT;
+      
       $disabled = $decimal ? "" : "disabled";
       
       $html = 
 <<<HEREDOC
       <head>
-         <link rel="stylesheet" type="text/css" href="/pptp/common/keypad.css">
-         <script type="text/javascript" src="/pptp/common/keypad.js"></script>
+         <link rel="stylesheet" type="text/css" href="$ROOT/common/keypad.css">
+         <script type="text/javascript" src="$ROOT/common/keypad.js"></script>
       </head>
    
       <div class="keypad">
