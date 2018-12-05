@@ -80,11 +80,11 @@ HEREDOC;
       }
       else if ($view == "edit_sign")
       {
-         $heading = "Update an Digital Sign";
+         $heading = "Update a Digital Sign";
       }
       else if ($view == "view_sign")
       {
-         $heading = "View an Digital Sign";
+         $heading = "View a Digital Sign";
       }
       
       $html =

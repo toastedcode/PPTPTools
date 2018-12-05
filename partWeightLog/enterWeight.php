@@ -78,8 +78,7 @@ HEREDOC;
       $html =
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <!-- TODO type="number" breaks decimal key in keypad -->
-         <input id="weight-input" type="number" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="weight" oninput="this.validator.validate()" value="$weight">
+         <input id="weight-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="weight" oninput="this.validator.validate()" value="$weight">
          <label class="mdl-textfield__label" for="weight-input">Weight</label>
       </div>
 HEREDOC;
