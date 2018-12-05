@@ -61,6 +61,11 @@ function Keypad()
          {
             ae.validator.validate();
          }
+         
+         // The MDL input box requires the input event for the fancy effects.
+         var event = document.createEvent("HTMLEvents");
+         event.initEvent("input", false, true);
+         ae.dispatchEvent(event);
 	   }
    }
 }

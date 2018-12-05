@@ -187,16 +187,9 @@ function validateWorkCenter()
    
    radioButtons = document.getElementsByName("wcNumber"); 
    
-   if (radioButtons.length == 0)
+   for (var i = 0; i < radioButtons.length; i++)
    {
-      valid = true;
-   }
-   else
-   {
-      for (var i = 0; i < radioButtons.length; i++)
-      {
-         valid |= radioButtons[i].checked;
-      }
+      valid |= radioButtons[i].checked;
    }
    
    if (!valid)
@@ -213,16 +206,9 @@ function validateJob()
 
    radioButtons = document.getElementsByName("jobId");
    
-   if (radioButtons.length == 0)
+   for (var i = 0; i < radioButtons.length; i++)
    {
-      valid = true;
-   }
-   else
-   {
-      for (var i = 0; i < radioButtons.length; i++)
-      {
-         valid |= radioButtons[i].checked;
-      }
+      valid |= radioButtons[i].checked;
    }
    
    if (!valid)

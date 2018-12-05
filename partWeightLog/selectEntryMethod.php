@@ -9,20 +9,23 @@ class SelectEntryMethod
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Entry Method</div>
-         <div class="flex-horizontal content-div">
-                    
-            <button class="nav-button" onclick="submitForm('input-form', 'partWeightLog.php', 'select_time_card', 'no_action')">
-               Time Card
-            </button>
-   
-            <button class="nav-button" onclick="submitForm('input-form', 'partWeightLog.php', 'select_work_center', 'no_action')">
-               Manual Entry
-            </button>
 
-         </div>
-               
+      <div class="flex-vertical content">
+
+         <div class="heading">Select Your Entry Method</div>
+
+         <div class="description">Using the code from a Time Card is the quickest and most error-proof way to go.  But if you don't have a Pan Ticket handy, select Manual Entry instead.</div>
+
+         <div class="flex-horizontal inner-content">
+                 
+         <button class="nav-button" onclick="submitForm('input-form', 'partWeightLog.php', 'select_time_card', 'no_action')">
+            Time<br/> Card
+         </button>
+
+         <button class="nav-button" onclick="submitForm('input-form', 'partWeightLog.php', 'select_work_center', 'no_action')">
+            Manual<br/>Entry
+         </button>
+
       </div>
 HEREDOC;
       

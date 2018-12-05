@@ -14,10 +14,17 @@ class SelectJob
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Job</div>
-         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Select Your Job Number</div>
+
+         <div class="description">Select one of the following jobs that are active for your station.</div>
+
+         <div class="flex-vertical inner-content">
+
             $jobsDiv
+            
          </div>
          
          $navBar
@@ -35,7 +42,10 @@ HEREDOC;
    
    private static function jobsDiv()
    {
-      $html = "";
+      $html =
+<<<HEREDOC
+      <div class="flex-horizontal selection-container">
+HEREDOC;
       
       $selectedJob = SelectJob::getJobId();
       
@@ -61,6 +71,11 @@ HEREDOC;
          }
       }
       
+      $html .=
+<<<HEREDOC
+      </div>
+HEREDOC;
+      
       return ($html);
    }
    
@@ -74,7 +89,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="input-form" id="$id" class="operator-input" name="jobId" value="$jobId" $checked/>
+         <input type="radio" form="input-form" id="$id" class="invisible-radio-button" name="jobId" value="$jobId" $checked/>
          <label for="$id">
             <div type="button" class="select-button job-select-button">
                <i class="material-icons button-icon">assignment</i>

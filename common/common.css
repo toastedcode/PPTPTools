@@ -1,14 +1,25 @@
 @CHARSET "ISO-8859-1";
 
+html, body {
+	height: 100%;
+}
+
 body {
    margin: 0px;
    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
    background: #eee;
 }
 
+.main {
+   align-items:stretch; 
+   justify-content: flex-start; 
+   min-height: 100%;
+}
+
 .sidebar {
    width: 250px;
-   background-image: url('../images/screwMachine2.png');  
+   background-image: url('../images/screwMachine2.png');
+   background-repeat: no-repeat;  
 }
 
 .content {
@@ -16,6 +27,12 @@ body {
    align-items: flex-start;
    margin-left: 25px;
    margin-top: 50px;
+   margin-bottom: 25px;
+}
+
+.inner-content {
+   margin-bottom: 50px;
+   align-items: flex-start;
 }
 
 .heading {
@@ -28,7 +45,7 @@ body {
 
 .description {
    margin-bottom: 30px;
-   width: 50%;
+   width: 500px;
 }
 
 .header-div {
@@ -63,6 +80,10 @@ body {
 
 .nav-link:hover {
    text-decoration: underline;
+}
+
+.selection-container {
+	flex-wrap: wrap;
 }
 
 .card-div {
@@ -140,6 +161,52 @@ body {
 	cursor: pointer;
 }
 
+.invisible-radio-button
+{
+   visibility: hidden;
+   position: absolute;
+}
+
+.select-button {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   
+   margin: 20px 20px 0 0;
+   padding: 5px 5px;
+
+   font-size: 18px;
+   color: #fff;
+   text-shadow: -1px 1px #417cb8;
+   
+   line-height: 1.8;
+   appearance: none;
+   box-shadow: none;
+   border-radius: 0;
+   background-color: #6496c8;
+   border: none;
+}
+
+.select-button:hover {
+   background-color: #346392;
+   text-shadow: -1px 1px #27496d;
+}
+
+.operator-select-button {
+   width: 180px;
+   height: 50px;
+}
+
+.wc-select-button {
+   width: 100px;
+   height: 50px;
+}
+
+.job-select-button {
+   width: 150px;
+   height: 50px;
+}
+
 input:checked + label > div  {
    background-color: #27496d;
    text-shadow: -1px 1px #193047;
@@ -157,9 +224,10 @@ input:checked + label > div  {
    font-size: 20px;
 }
 
-.adjust-time-button {
-	margin-left:10px;
-	margin-right:10px;
+.table-container {
+	overflow-y: scroll;
+   max-height: 400px;
+   margin-bottom: 25px;
 }
 
 table {
@@ -181,6 +249,12 @@ th, td {
 tr:hover {
    background: #eeeeee;
    cursor: pointer;
+}
+
+.no-data {
+	display:flex;
+   flex-direction: row;
+	color: red;
 }
 
 .new-indicator {
@@ -246,7 +320,7 @@ Screen = B/w 320px to 479px
 	
    .description {
       margin-bottom: 30px;
-      width: 100%;
+      width: 350px;
    }
    
    .nav-button {
@@ -259,6 +333,33 @@ Screen = B/w 320px to 479px
    
    .nav-button-wide {
       width: 125px;
+   }
+   
+   .table-container {
+      max-height: 200px;
+   }
+   
+   th, td {
+	   padding: 10px;
+	   font-size: 8pt;
+   }
+   
+   .large-text-input {
+      font-size: 30px;
+   }
+   
+   .medium-text-input {
+	   font-size: 15px;
+   }
+   
+   .operator-select-button {
+      font-size: 14px;
+      width: 140px;
+      height: 40px;
+   }
+   
+   .operator-select-button .button-icon {
+      font-size: 40px;
    }
    
    .hide-on-mobile {
@@ -282,6 +383,15 @@ Screen = B/w 768px to 1024px
    
    .description {
       margin-bottom: 30px;
-      width: 100%;
+      width: 550px;
+   }
+   
+   .table-container {
+      max-height: 400px;
+   }
+   
+   th, td {
+      padding: 10px;
+      font-size: 10pt;
    }
 }

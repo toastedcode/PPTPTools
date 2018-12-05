@@ -68,19 +68,23 @@ class ViewPartWasherLog
       $html = 
 <<<HEREDOC
       <script src="partWasherLog.js"></script>
-   
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Part Washer Log</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
-   
-               $filterDiv
-   
-               $partWasherLogDiv
-         
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Part Washer Log</div>
+
+         <div class="description">The Part Washer Log provides an up-to-the-minute view into the part washing process.  Here you can track when your parts come through the wash line, and in what volume.</div>
+
+         <div class="flex-vertical inner-content"> 
+
+            $filterDiv
+
+            $partWasherLogDiv
+            
          </div>
-
-         $navBar;
-
+      
+         $navBar
+         
       </div>
 HEREDOC;
       
@@ -111,23 +115,7 @@ HEREDOC;
    
    private function partWasherLogDiv()
    {
-      $html = 
-<<<HEREDOC
-         <div class="part-washer-log-div">
-            <table class="part-washer-log-table">
-               <tr>
-                  <th>Job #</th>
-                  <th>WC #</th>
-                  <th>Operator Name</th>
-                  <th>Mfg. Date</th>
-                  <th>Washer Name</th>
-                  <th>Wash Date</th>
-                  <th>Wash Time</th>
-                  <th>Basket Count</th>
-                  <th>Part Count</th>
-                  <th></th>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
@@ -146,9 +134,27 @@ HEREDOC;
          $endDateString = $endDate->format("Y-m-d");
          
          $result = $database->getPartWasherEntries($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
-        
-         if ($result)
-         {
+         
+         if ($result && ($database->countResults($result) > 0))
+         {            
+            $html = 
+<<<HEREDOC
+            <div class="table-container">
+               <table class="part-washer-log-table">
+                  <tr>
+                     <th>Job #</th>
+                     <th class="hide-on-tablet">WC #</th>
+                     <th class="hide-on-tablet">Operator Name</th>
+                     <th class="hide-on-tablet">Mfg. Date</th>
+                     <th>Washer Name</th>
+                     <th>Wash Date</th>
+                     <th class="hide-on-tablet">Wash Time</th>
+                     <th class="hide-on-mobile">Basket Count</th>
+                     <th>Part Count</th>
+                     <th></th>
+                  </tr>
+HEREDOC;
+
             while ($row = $result->fetch_assoc())
             {
                $partWasherEntry = PartWasherEntry::load($row["partWasherEntryId"]);
@@ -214,29 +220,33 @@ HEREDOC;
    
                   $html .=
 <<<HEREDOC
-                     <tr>
-                        <td>$jobNumber</td>
-                        <td>$wcNumber</td>
-                        <td>$operatorName</td>
-                        <td>$mfgDate</td>
-                        <td>$partWasherName</td>
-                        <td>$washDate $new</td>
-                        <td>$washTime</td>
-                        <td>$partWasherEntry->panCount</td>
-                        <td>$partWasherEntry->partCount</td>
-                        <td>$deleteIcon</td>
-                     </tr>
+                  <tr>
+                     <td>$jobNumber</td>
+                     <td class="hide-on-tablet">$wcNumber</td>
+                     <td class="hide-on-tablet">$operatorName</td>
+                     <td class="hide-on-tablet">$mfgDate</td>
+                     <td>$partWasherName</td>
+                     <td>$washDate $new</td>
+                     <td class="hide-on-tablet">$washTime</td>
+                     <td class="hide-on-mobile">$partWasherEntry->panCount</td>
+                     <td>$partWasherEntry->partCount</td>
+                     <td>$deleteIcon</td>
+                  </tr>
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }

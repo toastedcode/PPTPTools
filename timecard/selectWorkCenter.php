@@ -14,11 +14,18 @@ class SelectWorkCenter
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Select Work Center</div>
-         <div class="flex-horizontal content-div" style="flex-wrap: wrap; align-items: flex-start;">
+      
+      <div class="flex-vertical content">
+
+         <div class="heading">Select a Work Center</div>
+
+         <div class="description">Select one of the following work centers.  You can find the work center number for your assigned station on your Job Sheet.<br/><br/>  If you don't see your work center listed, contact your supervisor.</div>
+
+         <div class="flex-vertical inner-content">
+            
             $workCenters
-         </div>
+            
+         </div>   
          
          $navBar
          
@@ -35,8 +42,11 @@ HEREDOC;
    
    private static function workCenters()
    {
-      $html = "";
-      
+      $html = 
+<<<HEREDOC
+      <div class="flex-horizontal selection-container">
+HEREDOC;
+
       $selectedWorkCenter = SelectWorkCenter::getWorkCenter();
       
       $database = new PPTPDatabase();
@@ -58,6 +68,11 @@ HEREDOC;
          }
       }
       
+      $html .=
+<<<HEREDOC
+      </div>
+HEREDOC;
+      
       return ($html);
    }
    
@@ -71,7 +86,7 @@ HEREDOC;
       
       $html =
 <<<HEREDOC
-         <input type="radio" form="input-form" id="$id" class="operator-input" name="wcNumber" value="$wcNumber" $checked/>
+         <input type="radio" form="input-form" id="$id" class="invisible-radio-button" name="wcNumber" value="$wcNumber" $checked/>
          <label for="$id">
             <div type="button" class="select-button wc-select-button">
                <i class="material-icons button-icon">build</i>

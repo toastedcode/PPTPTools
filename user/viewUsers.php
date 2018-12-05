@@ -6,7 +6,6 @@ require_once '../common/navigation.php';
 require_once '../common/permissions.php';
 require_once '../common/roles.php';
 
-
 class ViewUsers
 {
    private $filter;
@@ -24,11 +23,15 @@ class ViewUsers
       
       $html = 
 <<<HEREDOC
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Users</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
+      <div class="flex-vertical content">
+
+         <div class="heading">Users</div>
+
+         <div class="description">Add, view, and delete users from the PPTP Tools system from here.</div>
+
+         <div class="flex-vertical inner-content"> 
    
-               $usersDiv
+            $usersDiv
          
          </div>
 
@@ -59,21 +62,7 @@ HEREDOC;
    
    private function usersDiv()
    {
-      $html = 
-<<<HEREDOC
-         <div class="users-div">
-            <table class="user-table">
-               <tr>
-                  <th>Employee Number</th>
-                  <th>Name</th>
-                  <th>Username</th>                  
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Permissions</th>
-                  <th/>
-                  <th/>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
@@ -83,8 +72,25 @@ HEREDOC;
       {
          $result = $database->getUsers();
          
-         if ($result)
+         if (($result) && ($database->countResults($result) > 0))
          {
+            
+            $html = 
+<<<HEREDOC
+            <div class="table-container">
+               <table class="user-table">
+                  <tr>
+                     <th>Employee Number</th>
+                     <th>Name</th>
+                     <th>Username</th>                  
+                     <th class="hide-on-tablet">Email</th>
+                     <th>Role</th>
+                     <th class="hide-on-tablet">Permissions</th>
+                     <th/>
+                     <th/>
+                     </tr>
+HEREDOC;
+      
             while ($row = $result->fetch_assoc())
             {
                $userInfo = UserInfo::load($row["employeeNumber"]);
@@ -112,27 +118,31 @@ HEREDOC;
                   
                   $html .=
 <<<HEREDOC
-                     <tr>
-                        <td>$userInfo->employeeNumber</td>
-                        <td>{$userInfo->getFullName()}</td>
-                        <td>$userInfo->username</td>
-                        <td>$userInfo->email</td>
-                        <td>$roleName</td>
-                        <td>$userInfo->permissions</td>
-                        <td>$viewEditIcon</td>
-                        <td>$deleteIcon</td>
-                     </tr>
+                  <tr>
+                     <td>$userInfo->employeeNumber</td>
+                     <td>{$userInfo->getFullName()}</td>
+                     <td>$userInfo->username</td>
+                     <td class="hide-on-tablet">$userInfo->email</td>
+                     <td>$roleName</td>
+                     <td class="hide-on-tablet">$userInfo->permissions</td>
+                     <td>$viewEditIcon</td>
+                     <td>$deleteIcon</td>
+                  </tr>
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }

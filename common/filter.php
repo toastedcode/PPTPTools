@@ -1,5 +1,6 @@
 <?php
 
+require_once 'root.php';
 require_once 'userInfo.php';
 
 // *****************************************************************************
@@ -248,11 +249,11 @@ class Filter
    
    public function getHtml()
    {
+      global $ROOT;
+      
       $html =
 <<<HEREDOC
-      <!-- Use some kind of root path variable -->
-      <link rel="stylesheet" type="text/css" href="/pptp/common/filter.css"/>
-      <script src="/pptp/common/filter.js"></script>
+      <script src="$ROOT/common/filter.js"></script>
       
       <form action="#" method="POST">
       <div class="flex-horizontal">

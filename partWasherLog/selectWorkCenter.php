@@ -3,6 +3,16 @@ require_once '../common/selectWorkCenter.php';
 
 class SelectWorkCenter_PartWasher extends SelectWorkCenter
 {
+   protected function description()
+   {
+      $html = 
+<<<HEREDOC
+      <div class="description">Select one of the following work centers.  You can find the work center number for this run of parts on the accompanying Pan Ticket.</div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
    protected function navBar()
    {
       $navBar = new Navigation();

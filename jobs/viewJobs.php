@@ -84,13 +84,19 @@ class ViewJobs
 <<<HEREDOC
       <script src="jobs.js"></script>
    
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Jobs</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
+      <div class="flex-vertical content">
+
+         <div class="heading">Jobs</div>
+
+         <div class="description">
+            Tracking production all starts with the creation of Job.  Your active jobs are the ones available to your operators for creating Time Sheets
+         </div>
+
+         <div class="flex-vertical inner-content"> 
    
-               $filterDiv
+            $filterDiv
    
-               $jobsDiv
+            $jobsDiv
          
          </div>
 
@@ -126,23 +132,7 @@ HEREDOC;
    
    private function jobsDiv()
    {
-      $html = 
-<<<HEREDOC
-         <div class="jobs-div">
-            <table class="job-table">
-               <tr>
-                  <th>Job Number</th>
-                  <th>Author</th>                  
-                  <th>Date</th>
-                  <th>Part #</th>
-                  <th>Work Center #</th>
-                  <th>Cycle Time</th>
-                  <th>Net Percentage</th>
-                  <th>Status</th>
-                  <th/>
-                  <th/>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
@@ -164,8 +154,26 @@ HEREDOC;
          
          $result = $database->getJobs($startDateString, $endDateString, $onlyActive);
          
-         if ($result)
+         if ($result && ($database->countResults($result) > 0))
          {
+            $html = 
+<<<HEREDOC
+            <div class="table-container">
+               <table class="job-table">
+                  <tr>
+                     <th>Job Number</th>
+                     <th>Author</th>                  
+                     <th>Date</th>
+                     <th class="hide-on-tablet">Part #</th>
+                     <th>Work Center #</th>
+                     <th class="hide-on-tablet">Cycle Time</th>
+                     <th class="hide-on-tablet">Net Percentage</th>
+                     <th>Status</th>
+                     <th/>
+                     <th/>
+                  </tr>
+HEREDOC;
+
             while ($row = $result->fetch_assoc())
             {
                $jobInfo = JobInfo::load($row["jobId"]);
@@ -212,10 +220,10 @@ HEREDOC;
                         <td>$jobInfo->jobNumber</td>
                         <td>$creatorName</td>
                         <td>$date $new</td>
-                        <td>$jobInfo->partNumber</td>
+                        <td class="hide-on-tablet">$jobInfo->partNumber</td>
                         <td>$jobInfo->wcNumber</td>
-                        <td>$jobInfo->cycleTime</td>
-                        <td>$jobInfo->netPercentage</td>
+                        <td class="hide-on-tablet">$jobInfo->cycleTime</td>
+                        <td class="hide-on-tablet">$jobInfo->netPercentage</td>
                         <td>$status</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>
@@ -223,14 +231,18 @@ HEREDOC;
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }

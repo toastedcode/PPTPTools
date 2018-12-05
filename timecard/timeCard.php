@@ -339,30 +339,39 @@ if (!Authentication::isAuthenticated())
 processAction(getAction());
 ?>
 
+<!DOCTYPE html>
 <html>
-<head>
-<link rel="stylesheet" type="text/css" href="../common/flex.css"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-<link rel="stylesheet" type="text/css" href="../common/common.css"/>
-<link rel="stylesheet" type="text/css" href="../common/form.css"/>
-<link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
-<link rel="stylesheet" type="text/css" href="timeCard.css"/>
 
-<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<script src="timeCard.js"></script>
-<script src="../validate.js"></script>
+<head>
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
+   <link rel="stylesheet" type="text/css" href="timeCard.css"/>
+   
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="timeCard.js"></script>
+   <script src="../common/validate.js"></script>
+   
 </head>
 
 <body>
 
-<?php Header::render("Time Cards"); ?>
-
-<div class="flex-horizontal" style="height: 700px;">
-
-   <?php processView(getView())?>
-
-</div>
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="flex-horizontal main">
+      
+      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   
+      <?php processView(getView())?>
+      
+   </div>
 
 </body>
+
 </html>

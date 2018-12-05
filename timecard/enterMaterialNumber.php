@@ -16,14 +16,19 @@ class EnterMaterialNumber
       $html =
 <<<HEREDOC
       <form id="input-form" action="#" method="POST"></form>
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">Enter Heat Number</div>
-         <div class="flex-horizontal content-div">
+
+      <div class="flex-vertical content">
+
+         <div class="heading">Enter the Heat Number</div>
+
+         <div class="description">The heat number (sometimes called the material number) can also be found by referring to your Job Sheet.</div>
+
+         <div class="flex-horizontal inner-content">
          
-            <div class="flex-horizontal" style="flex-grow: 1">$materialNumberInput</div>
-            
-            <div class="flex-horizontal" style="flex-grow: 1">$keypad</div>
-            
+            <div class="flex-horizontal" style="margin-right:150px;">$materialNumberInput</div>
+         
+            <div class="flex-horizontal hide-on-tablet">$keypad</div>
+
          </div>
          
          $navBar
@@ -70,7 +75,7 @@ HEREDOC;
       $html = 
 <<<HEREDOC
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-         <input id="material-number-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="materialNumber" oninput="this.validator.validate()" value="$materialNumber">
+         <input id="material-number-input" type="number" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" name="materialNumber" oninput="this.validator.validate()" value="$materialNumber">
          <label class="mdl-textfield__label" for="material-number-input">Heat #</label>
       </div>
 HEREDOC;

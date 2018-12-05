@@ -30,26 +30,20 @@ class ViewLineInspection
       <form id="input-form" action="#" method="POST">
       </form>
 
-      <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
-         
-         <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+      <div class="flex-vertical content">
 
-         <div class="flex-vertical content">
+         $headingDiv
 
-            $headingDiv
-
-            $descriptionDiv
-         
-            <div class="pptp-form">
-               <div class="form-row">
-                  $inspectionDiv
-               </div>
+         $descriptionDiv
+      
+         <div class="pptp-form">
+            <div class="form-row">
+               $inspectionDiv
             </div>
-         
-            $navBar
-            
          </div>
-               
+      
+         $navBar
+         
       </div>
                
       <script>

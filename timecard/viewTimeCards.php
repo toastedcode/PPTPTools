@@ -66,17 +66,21 @@ class ViewTimeCards
       
       $html =
 <<<HEREDOC
-      <div class="flex-vertical card-div">
-         <div class="card-header-div">View Time Cards</div>
-         <div class="flex-vertical content-div" style="justify-content: flex-start; height:400px;">
-         
-               $filterDiv
-               
-               $timeCardsDiv
-               
+      <div class="flex-vertical content">
+
+         <div class="heading">Time Cards</div>
+
+         <div class="description">Time cards record the time a machine operator spends working on a job, as well as a part count for that run.</div>
+
+         <div class="flex-vertical inner-content"> 
+      
+            $filterDiv
+            
+            $timeCardsDiv
+            
          </div>
          
-         $navBar;
+         $navBar
          
       </div>
 HEREDOC;
@@ -106,28 +110,9 @@ HEREDOC;
       return ($navBar->getHtml());
    }
    
-   
    private function timeCardsDiv()
    {
-      $html =
-<<<HEREDOC
-         <div class="time-cards-div">
-            <table class="time-card-table">
-               <tr>
-                  <th>Date</th>
-                  <th>Operator</th>
-                  <th>Job #</th>
-                  <th>Machine #</th>
-                  <th>Heat #</th>
-                  <th>Run Time</th>
-                  <th>Setup Time</th>
-                  <th>Basket Count</th>
-                  <th>Part Count</th>
-                  <th>Scrap Count</th>
-                  <th/>
-                  <th/>
-               </tr>
-HEREDOC;
+      $html = "";
       
       $database = new PPTPDatabase();
       
@@ -149,8 +134,28 @@ HEREDOC;
          
          $result = $database->getTimeCards($employeeNumber, $startDateString, $endDateString);
          
-         if ($result)
+         if (($result) && ($database->countResults($result) > 0))
          {
+            $html =
+<<<HEREDOC
+            <div class="table-container">
+               <table class="time-card-table">
+                  <tr>
+                     <th>Date</th>
+                     <th>Operator</th>
+                     <th>Job #</th>
+                     <th class="hide-on-mobile">Machine #</th>
+                     <th class="hide-on-tablet">Heat #</th>
+                     <th class="hide-on-tablet">Run Time</th>
+                     <th class="hide-on-tablet">Setup Time</th>
+                     <th class="hide-on-tablet">Basket Count</th>
+                     <th>Part Count</th>
+                     <th class="hide-on-tablet">Scrap Count</th>
+                     <th/>
+                     <th/>
+                  </tr>
+HEREDOC;
+            
             while ($row = $result->fetch_assoc())
             {
                $timeCardInfo = TimeCardInfo::load($row["timeCardId"]);
@@ -223,31 +228,35 @@ HEREDOC;
                         <td>$date $new</td>
                         <td>$operatorName</td>
                         <td>$jobInfo->jobNumber</td>
-                        <td>$wcNumber</td>
-                        <td>$timeCardInfo->materialNumber</td>
-                        <td>{$timeCardInfo->formatRunTime()}</td>
-                        <td class="$approval">
+                        <td class="hide-on-mobile">$wcNumber</td>
+                        <td class="hide-on-tablet">$timeCardInfo->materialNumber</td>
+                        <td class="hide-on-tablet">{$timeCardInfo->formatRunTime()}</td>
+                        <td class="$approval hide-on-tablet">
                            {$timeCardInfo->formatSetupTime()}
                            <div class="approval $approval" $tooltip>Approved</div>
                            <div class="unapproval $approval">Unapproved</div>
                         </td>
-                        <td>$timeCardInfo->panCount</td>
+                        <td class="hide-on-tablet">$timeCardInfo->panCount</td>
                         <td>$timeCardInfo->partCount</td>
-                        <td>$timeCardInfo->scrapCount</td>
+                        <td class="hide-on-tablet">$timeCardInfo->scrapCount</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>
                      </tr>
 HEREDOC;
                }
             }
+            
+            $html .=
+<<<HEREDOC
+               </table>
+            </div>
+HEREDOC;
+         }
+         else
+         {
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
          }
       }
-      
-      $html .=
-<<<HEREDOC
-            </table>
-         </div>
-HEREDOC;
       
       return ($html);
    }
