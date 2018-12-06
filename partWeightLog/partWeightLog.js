@@ -153,6 +153,25 @@ function validateJob()
    return (valid);
 }
 
+function validateOperator()
+{
+   radioButtons = document.getElementsByName("operator"); 
+   
+   var valid = false;
+   
+   for (var i = 0; i < radioButtons.length; i++)
+   {
+      valid |= radioButtons[i].checked;
+   }
+   
+   if (!valid)
+   {
+      alert("Please select an operator.")
+   }
+   
+   return (valid);
+}
+
 function validatePanCount()
 {
    var valid = false;
@@ -166,6 +185,28 @@ function validatePanCount()
       valid = true;
    }
 
+   return (valid);
+}
+
+// TODO: Finish
+function validatePanCountMatch()
+{
+   var valid = false;
+
+   var panCount = document.getElementById("panCount-input").value;
+   var jobId = document.getElementById("jobId-input").value;
+
+   var validator = new PanCountValidator(jobId, panCount);
+   
+   if (validator.validate() == false)
+   {
+      alert("This pan count does not match an associated part washer entry.  Do you still want to use it?")
+   }
+   else
+   {
+      valid = true;
+   }
+   
    return (valid);
 }
 

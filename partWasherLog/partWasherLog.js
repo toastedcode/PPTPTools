@@ -153,6 +153,25 @@ function validateJob()
    return (valid);
 }
 
+function validateOperator()
+{
+   radioButtons = document.getElementsByName("operator"); 
+   
+   var valid = false;
+   
+   for (var i = 0; i < radioButtons.length; i++)
+   {
+      valid |= radioButtons[i].checked;
+   }
+   
+   if (!valid)
+   {
+      alert("Please select an operator.")
+   }
+   
+   return (valid);
+}
+
 function validatePartCount()
 {
    var valid = false;

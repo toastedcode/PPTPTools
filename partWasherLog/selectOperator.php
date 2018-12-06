@@ -21,7 +21,7 @@ HEREDOC;
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
       $navBar->backButton("submitForm('input-form', 'partWasherLog.php', 'select_job', 'update_part_washer_entry');");
-      $navBar->nextButton("if (validateJob()){submitForm('input-form', 'partWasherLog.php', 'enter_part_count', 'update_part_washer_entry');};");
+      $navBar->nextButton("if (validateOperator()){submitForm('input-form', 'partWasherLog.php', 'enter_part_count', 'update_part_washer_entry');};");
       $navBar->end();
       
       return ($navBar->getHtml());
