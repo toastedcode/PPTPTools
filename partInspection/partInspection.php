@@ -122,6 +122,8 @@ processAction(getAction());
 
 <body>
 
+   <?php Header::render("PPTP Tools"); ?>
+
    <div class="flex-horizontal main">
       
       <div class="flex-horizontal sidebar hide-on-tablet"></div> 
