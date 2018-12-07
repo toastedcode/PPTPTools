@@ -521,6 +521,18 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function getPartWasherEntriesByJob($jobId)
+   {
+      // A tricky query because the job might be in the part washer entry, or it might be in the associated time card.
+      $query = "SELECT partWasherEntryId FROM partwasher WHERE jobId = $jobId " .
+               "UNION " .
+               "SELECT partWasherEntryId FROM partwasher INNER JOIN timecard ON partwasher.timeCardId = timecard.timeCardId WHERE timecard.jobId = $jobId";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
    public function newPartWasherEntry(
       $partWasherEntry)
    {
@@ -580,7 +592,7 @@ class PPTPDatabase extends MySqlDatabase
       $partWeightEntryId)
    {
       $query = "SELECT * FROM partweight WHERE partWeightEntryId = \"$partWeightEntryId\";";
-      
+
       $result = $this->query($query);
       
       return ($result);
@@ -612,6 +624,18 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query = "SELECT * FROM partweight WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
       
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartWeightEntriesByJob($jobId)
+   {
+      // A tricky query because the job might be in the part weight entry, or it might be in the associated time card.
+      $query = "SELECT partWeightEntryId FROM partweight WHERE jobId = $jobId " .
+               "UNION " .
+               "SELECT partWeightEntryId FROM partweight INNER JOIN timecard ON partweight.timeCardId = timecard.timeCardId WHERE timecard.jobId = $jobId;";
+
       $result = $this->query($query);
       
       return ($result);

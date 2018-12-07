@@ -1,6 +1,6 @@
 <?php
 require_once 'database.php';
-require_once('time.php');
+require_once 'time.php';
 
 class PartWeightEntry
 {
@@ -18,6 +18,57 @@ class PartWeightEntry
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
    public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
    public $panCount = 0;
+   
+   public function getJobId()
+   {
+      $jobId = $this->jobId;
+      
+      if ($this->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
+      {
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $jobId = $timeCardInfo->jobId;
+         }
+      }
+      
+      return ($jobId);
+   }
+   
+   public function getOperator()
+   {
+      $operator = $this->operator;
+      
+      if ($this->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
+      {
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $operator = $timeCardInfo->employeeNumber;
+         }
+      }
+      
+      return ($operator);
+   }
+   
+   public function getPanCount()
+   {
+      $panCount = $this->panCount;
+      
+      if ($this->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
+      {
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $panCount = $timeCardInfo->panCount;
+         }
+      }
+      
+      return ($panCount);
+   }
 
    public static function load($partWeightEntryId)
    {
@@ -53,7 +104,7 @@ class PartWeightEntry
    
    public static function getPartWeightEntryForTimeCard($timeCardId)
    {
-      $partWeightEntry= null;
+      $partWeightEntry = null;
       
       $database = new PPTPDatabase();
       
@@ -65,6 +116,28 @@ class PartWeightEntry
          
          if ($result && ($row = $result->fetch_assoc()))
          {
+            $partWeightEntry = PartWeightEntry::load(intval($row['partWeightEntryId']));
+         }
+      }
+      
+      return ($partWeightEntry);
+   }
+   
+   public static function getPartWeightEntryForJob($jobId)
+   {
+      $partWeightEntry = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getPartWeightEntriesByJob($jobId);
+         
+         if ($result && ($row = $result->fetch_assoc()))
+         {
+            // Note: Assumes one entry per job.
             $partWeightEntry = PartWeightEntry::load(intval($row['partWeightEntryId']));
          }
       }

@@ -4,6 +4,7 @@ require_once '../common/filter.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
+require_once '../common/partWeightEntry.php';
 require_once '../common/permissions.php';
 require_once '../common/roles.php';
 require_once '../common/timeCardInfo.php';
@@ -161,9 +162,9 @@ HEREDOC;
                
                if ($partWasherEntry)
                {
-                  // Start with the manually entered values.
-                  $jobId = $partWasherEntry->jobId;
-                  $operatorEmployeeNumber =  $partWasherEntry->operator;
+                  $jobId = $partWasherEntry->getJobId();
+                  $operatorEmployeeNumber =  $partWasherEntry->getOperator();
+                  $mismatch = "";
                   
                   // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
                   $mfgDate = "unknown";
@@ -176,6 +177,23 @@ HEREDOC;
                      $mfgDate = $dateTime->format("m-d-Y");
                      
                      $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
+                     
+                     if ($partWasherEntry->panCount != $timeCardInfo->panCount)
+                     {
+                        $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
+                     }
+                  }
+                  
+                  // Check for a mismatch between the part weight pan count and the part washer man count.
+                  $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
+                  if ($partWeightEntry)
+                  {
+                     $otherPanCount = $partWeightEntry->getPanCount();
+                     
+                     if ($partWasherEntry->panCount != $otherPanCount)
+                     {
+                        $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
+                     }
                   }
                   
                   // Use the job id to fill in the job number and work center number.
@@ -228,7 +246,7 @@ HEREDOC;
                      <td>$partWasherName</td>
                      <td>$washDate $new</td>
                      <td class="hide-on-tablet">$washTime</td>
-                     <td class="hide-on-mobile">$partWasherEntry->panCount</td>
+                     <td class="hide-on-mobile">$partWasherEntry->panCount $mismatch</td>
                      <td>$partWasherEntry->partCount</td>
                      <td>$deleteIcon</td>
                   </tr>

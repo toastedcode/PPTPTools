@@ -1,6 +1,6 @@
 <?php
 require_once 'database.php';
-require_once('time.php');
+require_once 'time.php';
 
 class PartWasherEntry
 {
@@ -18,6 +18,57 @@ class PartWasherEntry
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWasherEntry::UNKNOWN_JOB_ID;
    public $operator = PartWasherEntry::UNKNOWN_OPERATOR;
+   
+   public function getJobId()
+   {
+      $jobId = $this->jobId;
+      
+      if ($this->timeCardId != PartWasherEntry::UNKNOWN_TIME_CARD_ID)
+      {
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $jobId= $timeCardInfo->jobId;
+         }
+      }
+      
+      return ($jobId);
+   }
+   
+   public function getOperator()
+   {
+      $operator = $this->operator;
+      
+      if ($this->timeCardId != PartWasherEntry::UNKNOWN_TIME_CARD_ID)
+      {
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $operator= $timeCardInfo->employeeNumber;
+         }
+      }
+      
+      return ($operator);
+   }
+   
+   public function getPanCount()
+   {
+      $panCount = $this->panCount;
+      
+      if ($this->timeCardId != PartWasherEntry::UNKNOWN_TIME_CARD_ID)
+      {
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $panCount = $timeCardInfo->panCount;
+         }
+      }
+      
+      return ($panCount);
+   }
 
    public static function load($partWasherEntryId)
    {
@@ -65,6 +116,28 @@ class PartWasherEntry
          
          if ($result && ($row = $result->fetch_assoc()))
          {
+            $partWasherEntry = PartWasherEntry::load(intval($row['partWasherEntryId']));
+         }
+      }
+      
+      return ($partWasherEntry);
+   }
+   
+   public static function getPartWasherEntryForJob($jobId)
+   {
+      $partWasherEntry = null;
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getPartWasherEntriesByJob($jobId);
+         
+         if ($result && ($row = $result->fetch_assoc()))
+         {
+            // Note: Assumes one entry per job.
             $partWasherEntry = PartWasherEntry::load(intval($row['partWasherEntryId']));
          }
       }

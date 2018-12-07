@@ -188,26 +188,32 @@ function validatePanCount()
    return (valid);
 }
 
-// TODO: Finish
+function onPanCountValidationReply(isValid, otherPanCount)
+{
+   var element = document.getElementById("pan-count-mismatch-warning")
+
+   if (element)
+   {
+      // Hide/show the warning message.
+      element.style.visibility = (isValid ? "hidden" : "visible");
+   }
+}
+
 function validatePanCountMatch()
 {
-   var valid = false;
-
-   var panCount = document.getElementById("panCount-input").value;
-   var jobId = document.getElementById("jobId-input").value;
-
-   var validator = new PanCountValidator(jobId, panCount);
-   
-   if (validator.validate() == false)
+   if (document.getElementById("panCount-input").validator.validate())
    {
-      alert("This pan count does not match an associated part washer entry.  Do you still want to use it?")
+      var panCount = document.getElementById("panCount-input").value;
+      var jobId = document.getElementById("jobId-input").value;
+   
+      var validator = new PanCountValidator("partWeightLog", jobId, panCount, onPanCountValidationReply);
+      
+      validator.validate();
    }
    else
    {
-      valid = true;
+      onPanCountValidationReply(true, 0);
    }
-   
-   return (valid);
 }
 
 function validateWeight()

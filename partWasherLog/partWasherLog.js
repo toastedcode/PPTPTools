@@ -172,6 +172,34 @@ function validateOperator()
    return (valid);
 }
 
+function onPanCountValidationReply(isValid, otherPanCount)
+{
+   var element = document.getElementById("pan-count-mismatch-warning")
+
+   if (element)
+   {
+      // Hide/show the warning message.
+      element.style.visibility = (isValid ? "hidden" : "visible");
+   }
+}
+
+function validatePanCountMatch()
+{
+   if (document.getElementById("panCount-input").validator.validate())
+   {
+      var panCount = document.getElementById("panCount-input").value;
+      var jobId = document.getElementById("jobId-input").value;
+   
+      var validator = new PanCountValidator("partWasherLog", jobId, panCount, onPanCountValidationReply);
+      
+      validator.validate();
+   }
+   else
+   {
+      onPanCountValidationReply(true, 0);
+   }
+}
+
 function validatePartCount()
 {
    var valid = false;

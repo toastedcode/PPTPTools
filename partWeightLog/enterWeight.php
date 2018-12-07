@@ -62,7 +62,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->cancelButton("submitForm('input-form', 'partWeightLog.php', 'view_pan_tickets', 'cancel_part_weight_entry')");
-      $navBar->backButton("submitForm('input-form', 'partWeightLog.php', 'select_time_card', 'update_pan_ticket_info');");
+      $navBar->backButton("if (validateWeight()){submitForm('input-form', 'partWeightLog.php', 'enter_pan_count', 'update_part_weight_entry');};");
       $navBar->highlightNavButton("Save", "if (validateWeight()){submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'save_part_weight_entry');};", false);
       $navBar->end();
       

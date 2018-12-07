@@ -2,26 +2,45 @@
 
 require_once 'partWasherEntry.php';
 require_once 'partWeightEntry.php';
+require_once 'timeCardInfo.php';
 
 // *****************************************************************************
 //                                   Begin
 
-if (isset($_GET["jobId"]) && isset($_GET["panCount"]))
+if (isset($_GET["jobId"]) && 
+    isset($_GET["panCount"]) &&
+    isset($_GET["page"]))
 {
-   $jobId = $_GET["jobId"];
-   $timeCardId = $_GET["panCount"];
+   $isValid = true;
+   $otherPanCount = 0;
    
-   $partWeightEntry = PartWeightEntry::loadForJob($jobId);
-   $partWashEntry = PartWasherEntry::loadForJob($jobId);
+   $jobId = intval($_GET["jobId"]);
+   $panCount = intval($_GET["panCount"]);
+   $page = $_GET["page"];
    
-   if ($partWeightEntry && $partWashEntry && 
-      ($partWeightEntry->panCount == $partWashEntry->panCount))
+   $logEntry = null;
+   
+   if ($page == "partWeightLog")
    {
-      echo "{\"isValidPanCount\":true}";
+      $logEntry = PartWasherEntry::getPartWasherEntryForJob($jobId);
    }
-   else
+   else if ($page == "partWasherLog")
    {
-      echo "{\"isValidPanCount\":false}";
+      $logEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
    }
+   
+   if ($logEntry)
+   {
+      $otherPanCount = $logEntry->getPanCount();
+   }
+   
+   if ($otherPanCount != 0)
+   {
+      $isValid = ($panCount == $otherPanCount);
+   }
+   
+   $result = array('isValidPanCount' => $isValid, 'otherPanCount' => $otherPanCount);
+   
+   echo json_encode($result);
 }
 ?>
