@@ -305,7 +305,6 @@ function PartNumberSuffixValidator(inputId, maxLength, minValue, maxValue, allow
          {
             lastChar = element.value.charAt(value.length - 1);
             remainingChar = element.value.substring(0, (value.length - (MAX_DIGITS - 1)));
-            alert("Last char: " + lastChar + ", remainingChar: " + remainingChar);
          }
          
          if ((value == null) || (value == "")) 
