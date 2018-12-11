@@ -267,6 +267,8 @@ function PartNumberPrefixValidator(inputId, maxLength, minValue, maxValue, allow
 
 function PartNumberSuffixValidator(inputId, maxLength, minValue, maxValue, allowNull)
 {
+   const MAX_DIGITS = 2;
+   
    this.inputId = inputId;
    this.minValue = minValue;
    this.maxValue = maxValue;
@@ -299,10 +301,11 @@ function PartNumberSuffixValidator(inputId, maxLength, minValue, maxValue, allow
          
          var lastChar = "";
          var remainingChar = value;
-         if (value.length > 2)
+         if (value.length > MAX_DIGITS)
          {
             lastChar = element.value.charAt(value.length - 1);
-            remainingChar = element.value.substring(0, (value.length - 2));
+            remainingChar = element.value.substring(0, (value.length - (MAX_DIGITS - 1)));
+            alert("Last char: " + lastChar + ", remainingChar: " + remainingChar);
          }
          
          if ((value == null) || (value == "")) 
