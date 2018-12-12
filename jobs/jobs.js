@@ -102,7 +102,7 @@ function validateJob()
    if (!((document.getElementById("job-number-prefix-input").validator.validate()) &&
          (document.getElementById("job-number-suffix-input").validator.validate())))
    {
-      alert("Please enter a valid job number.  (Format: Mxxxx-xxxx)");      
+      alert("Please enter a valid job number.  (Format: Mxxxx-xxx)");      
    }
    else if (!(document.getElementById("cycle-time-input").validator.validate()))
    {
