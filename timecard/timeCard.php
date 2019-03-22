@@ -326,7 +326,11 @@ function redirectToLogin()
 
 <!-- ********************************** BEGIN ********************************************* -->
 
-<?php 
+<?php
+
+header("Cache-Control: no cache");
+session_cache_limiter("private_no_expire");
+
 Time::init();
 
 session_start();
