@@ -6,12 +6,14 @@ require_once '../common/header.php';
 require_once '../common/partWasherEntry.php';
 
 require 'viewPartWasherLog.php';
+require 'selectEmployeeNumber.php';
 require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
 require 'selectJob.php';
 require 'selectOperator.php';
 require 'selectWorkCenter.php';
 require 'enterPartCount.php';
+require 'viewPartWasherEntry.php';
 
 function getAction()
 {
@@ -56,10 +58,28 @@ function processAction($action)
          
          if ($user = Authentication::getAuthenticatedUser())
          {
-            $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
+            if (($user->roles == Role::ADMIN) || ($user->roles == Role::SUPER_USER))
+            {
+               // For admin users, allow employee number selection
+               $_POST['view'] = 'select_employee_number';
+            }
+            else
+            {
+               // For non-admin users, use the logged in user.
+               $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
+            }
          }
          
          updatePartWasherEntry();
+         break;
+      }
+      
+      case 'edit_part_washer_entry':
+      {
+         if (isset($_POST['entryId']))
+         {
+            $_SESSION["partWasherEntry"] = PartWasherEntry::load($_POST['entryId']);
+         }
          break;
       }
          
@@ -103,6 +123,13 @@ function processView($view)
 {
    switch ($view)
    {
+      case 'select_employee_number':
+      {
+         $page = new SelectEmployeeNumber();
+         $page->render($view);
+         break;
+      }
+         
       case 'select_entry_method':
       {
          unset($_SESSION["wcNumber"]);
@@ -144,6 +171,15 @@ function processView($view)
       {
          $page = new EnterPartCount();
          $page->render();
+         break;
+      }
+      
+      case 'new_part_washer_entry':
+      case 'view_part_washer_entry':
+      case 'edit_part_washer_entry':
+      {
+         $page = new ViewPartWasherEntry();
+         $page->render($view);
          break;
       }
          

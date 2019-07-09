@@ -153,6 +153,7 @@ HEREDOC;
                      <th class="hide-on-mobile">Basket Count</th>
                      <th>Part Count</th>
                      <th></th>
+                     <th></th>
                   </tr>
 HEREDOC;
 
@@ -229,11 +230,20 @@ HEREDOC;
                   $newIndicator = new NewIndicator($dateTime, 60);
                   $new = $newIndicator->getHtml();
                                        
+                  $viewEditIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
                   {
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onEditPartWasherEntry('$partWasherEntry->partWasherEntryId')\">mode_edit</i>";
+                     
                      $deleteIcon =
                      "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
+                  }
+                  else
+                  {
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
                   }
    
                   $html .=
@@ -248,6 +258,7 @@ HEREDOC;
                      <td class="hide-on-tablet">$washTime</td>
                      <td class="hide-on-mobile">$partWasherEntry->panCount $mismatch</td>
                      <td>$partWasherEntry->partCount</td>
+                     <td>$viewEditIcon</td>
                      <td>$deleteIcon</td>
                   </tr>
 HEREDOC;
