@@ -212,6 +212,32 @@ HEREDOC;
    }
 }
 
+// *****************************************************************************
+//                                  PrintButton
+
+class PrintButton extends FilterComponent
+{
+    function __construct($report)
+    {
+        $this->report = $report;
+    }
+    
+    public function getHtml()
+    {
+        $html =
+<<<HEREDOC
+        <div>
+           <button class="mdl-button mdl-js-button mdl-button--raised filter-component" onclick="printReport('{$this->report}')">
+              <i class="material-icons action-button-icon">print</i>
+           </button>
+         </div>
+HEREDOC;
+        
+        return ($html);
+    }
+    
+    private $report;
+}
 
 // *****************************************************************************
 //                                  Filter

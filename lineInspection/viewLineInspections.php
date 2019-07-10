@@ -50,6 +50,8 @@ class ViewLineInspections
          $this->filter->add(new TodayButton());
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("lineInspectionReport.php"));
       }
       
       $this->filter->update();

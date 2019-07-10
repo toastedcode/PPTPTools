@@ -60,14 +60,14 @@ class LineInspectionReport extends Report
       {
          $dateTime = new DateTime($this->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
          
-         $dateString = "from {$dateTime->format("d/m/Y")}";
+         $dateString = "from {$dateTime->format("m/d/Y")}";
       }
       else
       {
          $startDateTime = new DateTime($this->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-         $endDateTime = new DateTime($this->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+         $endDateTime = new DateTime($this->endDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
          
-         $dateString = "from {$startDateTime->format("d/m/Y")} to {$endDateTime->format("d/m/Y")}";
+         $dateString = "from {$startDateTime->format("m/d/Y")} to {$endDateTime->format("m/d/Y")}";
       }
       
       $description = "Reporting $operatorDescription $dateString.";

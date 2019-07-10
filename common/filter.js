@@ -54,3 +54,39 @@ function formattedDate(date)
 
    return (formattedDate);
 }
+
+function printReport(report)
+{
+   var employeeNumberInput = document.querySelector('#employeeNumberInput');
+   var startDateInput = document.querySelector('#start-date-input');
+   var endDateInput = document.querySelector('#end-date-input');
+   
+   if ((employeeNumberInput != null) && (startDateInput != null) && (endDateInput != null))
+   {
+	   form = document.createElement('form');
+	   form.setAttribute('method', 'POST');
+	   form.setAttribute('action', report);
+	   form.setAttribute("target", "_blank");
+	
+	   input = document.createElement('input');
+	   input.setAttribute('name', 'employeeNumber');
+	   input.setAttribute('type', 'hidden');
+	   input.setAttribute('value', employeeNumberInput.selected);
+	   form.appendChild(input);
+	
+	   input = document.createElement('input');
+	   input.setAttribute('name', 'startDate');
+	   input.setAttribute('type', 'hidden');
+	   input.setAttribute('value', startDateInput.value);
+	   form.appendChild(input);
+	
+	   input = document.createElement('input');
+	   input.setAttribute('name', 'endDate');
+	   input.setAttribute('type', 'hidden');
+	   input.setAttribute('value', endDateInput.value);
+	   form.appendChild(input);
+	   
+	   document.body.appendChild(form);
+	   form.submit();	
+   }
+}
