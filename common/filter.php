@@ -102,7 +102,7 @@ class UserFilterComponent extends FilterComponent
       $html =
 <<<HEREDOC
       <div class="flex-horizontal filter-component hide-on-tablet">
-         <div>$this->label:</div>
+         <div>$this->label:&nbsp</div>
          <div><select id="employeeNumberInput" name="employeeNumber">$options</select></div>
       </div>
 HEREDOC;

@@ -43,13 +43,15 @@ class ViewPartWasherLog
          
          $this->filter = new Filter();
          
-         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName("washer", new UserFilterComponent("Washer", $operators, $selectedOperator, $allowAll));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new TodayButton());
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("partWasherReport.php"));
       }
       
       $this->filter->update();
@@ -134,7 +136,7 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWasherEntries($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWasherEntries($this->filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {            

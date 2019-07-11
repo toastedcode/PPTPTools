@@ -43,7 +43,7 @@ class ViewLineInspections
          
          $this->filter = new Filter();
          
-         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName("inspector", new UserFilterComponent("Inspector", $operators, $selectedOperator, $allowAll));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
@@ -142,7 +142,7 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getLineInspections($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
+         $result = $database->getLineInspections($this->filter->get('inspector')->selectedEmployeeNumber, $startDateString, $endDateString);
         
          if ($result && ($database->countResults($result) > 0))
          {
