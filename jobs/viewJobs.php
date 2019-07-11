@@ -65,6 +65,8 @@ class ViewJobs
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("jobsReport.php"));
       }
       
       $this->filter->update();

@@ -2,13 +2,13 @@
 
 require_once '../common/database.php';
 require_once '../common/jobInfo.php';
-require_once '../common/partWasherEntry.php';
+require_once '../common/partWeightEntry.php';
 require_once '../common/report.php';
 require_once '../common/time.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
 
-class PartWasherReport extends Report
+class PartWeightReport extends Report
 {
    function __construct()
    {
@@ -38,7 +38,7 @@ class PartWasherReport extends Report
    
    protected function getTitle()
    {
-      return ("Part Washer Log");
+      return ("Part Weight Log");
    }
    
    protected function getDescription()
@@ -48,12 +48,12 @@ class PartWasherReport extends Report
       $operatorDescription = "";
       if ($this->employeeNumber == 0)
       {
-         $operatorDescription = "all part washer log entries";
+         $operatorDescription = "all part weight log entries";
       }
       else
       {
          $userInfo = UserInfo::load($this->employeeNumber);
-         $operatorDescription = "part washer log entries for {$userInfo->getFullName()}";
+         $operatorDescription = "part weight log entries for {$userInfo->getFullName()}";
       }
       
       $dateString = "";
@@ -78,7 +78,7 @@ class PartWasherReport extends Report
    
    protected function getHeaders()
    {
-      return (array("Job #", "WC #", "Operator", "Mfg. Date", "Part Washer", "Wash Date", "Wash Time", "Basket Count", "Part Count"));
+      return (array("Job #", "WC #", "Operator", "Mfg. Date", "Laborer", "Weigh Date", "Weigh Time", "Basket Count", "Weight"));
    }
    
    protected function getData()
@@ -101,22 +101,22 @@ class PartWasherReport extends Report
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWasherEntries($this->employeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWeightEntries($this->employeeNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {
             while ($row = $result->fetch_assoc())
             {
-               $partWasherEntry = PartWasherEntry::load($row["partWasherEntryId"]);
+               $partWeightEntry = PartWeightEntry::load($row["partWeightEntryId"]);
                
-               if ($partWasherEntry)
+               if ($partWeightEntry)
                {
-                  $jobId = $partWasherEntry->getJobId();
-                  $operatorEmployeeNumber =  $partWasherEntry->getOperator();
+                   $jobId = $partWeightEntry->getJobId();
+                   $operatorEmployeeNumber =  $partWeightEntry->getOperator();
                   
                   // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
                   $mfgDate = "unknown";
-                  $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
+                  $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
                   if ($timeCardInfo)
                   {
                      $jobId = $timeCardInfo->jobId;
@@ -141,23 +141,23 @@ class PartWasherReport extends Report
                   $operator = UserInfo::load($operatorEmployeeNumber);
                   if ($operator)
                   {
-                     $operatorName= $operator->getFullName();
+                     $operatorName = $operator->getFullName();
                   }
                   
-                  $partWasherName = "unknown";
-                  $washer = UserInfo::load($partWasherEntry->employeeNumber);
+                  $laborerName = "unknown";
+                  $washer = UserInfo::load($partWeightEntry->employeeNumber);
                   if ($washer)
                   {
-                     $partWasherName= $washer->getFullName();
+                     $laborerName = $washer->getFullName();
                   }
                   
-                  $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $washDate = $dateTime->format("m-d-Y");
                   
-                  $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $washTime = $dateTime->format("h:i a");
                   
-                  $dataRow = array($jobNumber, $wcNumber, $operatorName, $mfgDate, $partWasherName, $washDate, $washTime, $partWasherEntry->panCount, $partWasherEntry->partCount);
+                  $dataRow = array($jobNumber, $wcNumber, $operatorName, $mfgDate, $laborerName, $washDate, $washTime, $partWeightEntry->panCount, $partWeightEntry->weight);
                     
                   $data[] = $dataRow;
                }
@@ -175,7 +175,7 @@ class PartWasherReport extends Report
    private $endDate;
 }
 
-$report = new PartWasherReport();
+$report = new PartWeightReport();
 
 ?>
 

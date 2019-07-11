@@ -10,7 +10,7 @@ abstract class Report
 
          <div class="heading">{$this->getTitle()}</div>
 
-         <div class="description">{$this->getDescription()}</div>
+         <div class="description" style="width:100%">{$this->getDescription()}</div>
 
          <div class="flex-vertical inner-content"> 
             {$this->getTable()}
