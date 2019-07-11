@@ -6,14 +6,12 @@ require_once '../common/header.php';
 require_once '../common/partWasherEntry.php';
 
 require 'viewPartWasherLog.php';
-require 'selectEmployeeNumber.php';
 require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
 require 'selectJob.php';
 require 'selectOperator.php';
 require 'selectWorkCenter.php';
 require 'enterPartCount.php';
-require 'viewPartWasherEntry.php';
 
 function getAction()
 {
@@ -58,44 +56,26 @@ function processAction($action)
          
          if ($user = Authentication::getAuthenticatedUser())
          {
-            if (($user->roles == Role::ADMIN) || ($user->roles == Role::SUPER_USER))
-            {
-               // For admin users, allow employee number selection
-               $_POST['view'] = 'select_employee_number';
-            }
-            else
-            {
-               // For non-admin users, use the logged in user.
-               $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
-            }
+            $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
          }
          
          updatePartWasherEntry();
          break;
       }
-      
-      case 'edit_part_washer_entry':
-      {
-         if (isset($_POST['entryId']))
-         {
-            $_SESSION["partWasherEntry"] = PartWasherEntry::load($_POST['entryId']);
-         }
-         break;
-      }
-         
+        
       case 'update_part_washer_entry':
       {
          updatePartWasherEntry();
-         break;   
+         break;
       }
-      
+        
       case 'cancel_part_washer_entry':
       {
          unset($_SESSION["partWasherEntry"]);
          unset($_SESSION["wcNumber"]);
          break;
       }
-      
+        
       case 'save_part_washer_entry':
       {
          updatePartWasherEntry();
@@ -105,13 +85,13 @@ function processAction($action)
          $_SESSION["partWasherEntry"] = new PartWasherEntry();
          break;
       }
-      
+        
       case 'delete_part_washer_entry':
       {
          deletePartWasherEntry($_POST['partWasherEntryId']);
          break;
       }
-      
+        
       default:
       {
          // Unhandled action.
@@ -129,7 +109,7 @@ function processView($view)
          $page->render($view);
          break;
       }
-         
+        
       case 'select_entry_method':
       {
          unset($_SESSION["wcNumber"]);
@@ -138,51 +118,42 @@ function processView($view)
          $page->render($view);
          break;
       }
-         
+        
       case 'select_time_card':
       {
          $page = new SelectTimeCard_PartWasher();
          $page->render($view);
          break;
       }
-      
+        
       case 'select_work_center':
       {
          $page = new SelectWorkCenter_PartWasher();
          $page->render();
          break;
       }
-      
+        
       case 'select_job':
       {
          $page = new SelectJob_PartWasher();
          $page->render();
          break;
       }
-      
+        
       case 'select_operator':
       {
          $page = new SelectOperator_PartWasher();
          $page->render();
          break;
       }
-      
+        
       case 'enter_part_count':
-      {
-         $page = new EnterPartCount();
-         $page->render();
-         break;
-      }
-      
-      case 'new_part_washer_entry':
-      case 'view_part_washer_entry':
-      case 'edit_part_washer_entry':
-      {
-         $page = new ViewPartWasherEntry();
-         $page->render($view);
-         break;
-      }
-         
+        {
+           $page = new EnterPartCount();
+           $page->render();
+           break;
+        }
+        
       case 'view_part_washer_log':
       default:
       {
@@ -280,7 +251,7 @@ function updatePartWasherLog($partWasherEntry)
          {
             $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
          }
-         
+        
          $database->newPartWasherEntry($partWasherEntry);
       }
       
@@ -332,11 +303,11 @@ processAction(getAction());
    <?php Header::render("PPTP Tools"); ?>
    
    <div class="flex-horizontal main">
-      
-      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+     
+     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-      <?php processView(getView())?>
-      
+     <?php processView(getView())?>
+     
    </div>
 
 </body>

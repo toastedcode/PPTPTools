@@ -91,7 +91,7 @@ HEREDOC;
       
       $checked = $isChecked ? "checked" : "";
       
-      $id = "list-option-" + $jobId;
+      $id = "list-option-" . $jobId;
       
       $html =
 <<<HEREDOC
