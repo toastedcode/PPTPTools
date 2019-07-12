@@ -77,7 +77,7 @@ class LineInspectionReport extends Report
    
    protected function getHeaders()
    {
-      return (array("Date", "Time", "Inspector", "Operator", "Job", "Work<br/>Center", "Thread 1", "Thread 2", "Thread 3", "Visual"));
+      return (array("Date", "Time", "Inspector", "Operator", "Job", "Work<br/>Center", "Thread 1", "Thread 2", "Thread 3", "Visual", "Undercut", "Depth"));
    }
    
    protected function getData()

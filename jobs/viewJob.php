@@ -26,7 +26,7 @@ class ViewJob
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="#" method="POST">
+      <form id="input-form" action="#" method="POST" enctype="multipart/form-data">
          <input id="job-number-input" type="hidden" name="jobNumber" value="$jobInfo->jobNumber"/>
          <input id="part-number-input" type="hidden" name="partNumber" value="$jobInfo->partNumber"/>
       </form>
@@ -149,6 +149,8 @@ HEREDOC;
    
    protected static function jobDiv($jobInfo, $view)
    {
+      global $ROOT;
+      
       $editable = (($view == "new_job") || ($view == "edit_job"));
       $jobEditable = ($view == "new_job");
       
@@ -175,6 +177,25 @@ HEREDOC;
       $prefix = JobInfo::getJobPrefix($jobInfo->jobNumber);
       $prefix = ($prefix != "") ? $prefix : "M";
       $suffix = JobInfo::getJobSuffix($jobInfo->jobNumber);
+      
+      $customerPrint = "";
+      if ($jobInfo->customerPrint != "")
+      {
+         $customerPrint =
+<<<HEREDOC
+         <div class="flex-vertical" style="align-items: flex-start;">
+            <a href="$ROOT/uploads/$jobInfo->customerPrint" class="medium-text-input" style="margin-bottom: 10px;" target="_blank">$jobInfo->customerPrint</a> 
+            <input type="file" class="medium-text-input" name="customerPrint" form="input-form" $disabled>
+         </div>
+HEREDOC;
+      }
+      else
+      {
+         $customerPrint =
+<<<HEREDOC
+         <input type="file" class="medium-text-input" name="customerPrint" form="input-form" $disabled>
+HEREDOC;
+      }
       
       $html =
 <<<HEREDOC
@@ -223,6 +244,11 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label-long">Job status</div>
             <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Customer print</div>
+             $customerPrint
          </div>
    
       </div>

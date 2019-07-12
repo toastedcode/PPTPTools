@@ -30,7 +30,7 @@ class LineInspectionInfo
 {
    const INVALID_ENTRY_ID = 0;
    
-   const NUM_INSPECTIONS = 4;
+   const NUM_INSPECTIONS = 6;
    
    public $entryId;
    public $dateTime;
@@ -49,8 +49,11 @@ class LineInspectionInfo
       $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
       $this->wcNumber = 0;
-      $this->inspections = array(InspectionStatus::UNKNOWN, InspectionStatus::UNKNOWN, InspectionStatus::UNKNOWN, InspectionStatus::UNKNOWN);
-      $this->visualInspection = false;
+      $this->inspections = array();
+      for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
+      {
+         $this->inspections[] = InspectionStatus::UNKNOWN;
+      }
       $this->comments = "";
    }
    

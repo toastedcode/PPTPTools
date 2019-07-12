@@ -178,3 +178,29 @@ function updateWCNumberInput()
    xhttp.open("GET", requestURl, true);
    xhttp.send(); 
 }
+
+function updateCustomerPrint()
+{
+   input = document.getElementById("job-number-input");
+   
+   // Retrieve the selected job number.
+   jobNumber = input.options[input.selectedIndex].value; 
+   
+   // Build the AJAX query.
+   requestURl = "viewLineInspection.php?action=get_customer_print_link&jobNumber=" + jobNumber;
+   
+   var xhttp = new XMLHttpRequest();
+   xhttp.validator = this;
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {
+         // Update with the customer print link.
+         div = document.getElementById("customer-print-div");
+         div.innerHTML = this.responseText;
+      }
+   };
+   
+   xhttp.open("GET", requestURl, true);
+   xhttp.send(); 
+}

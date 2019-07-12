@@ -161,6 +161,8 @@ HEREDOC;
                      <th class="hide-on-tablet">Thread #2</th>
                      <th class="hide-on-tablet">Thread #3</th>
                      <th class="hide-on-tablet">Visual</th>
+                     <th class="hide-on-tablet">Undercut</th>
+                     <th class="hide-on-tablet">Depth</th>
                      <th></th>
                      <th></th>
                   </tr>

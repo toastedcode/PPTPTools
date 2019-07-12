@@ -35,6 +35,7 @@ class JobInfo
    public $cycleTime;
    public $netPercentage;
    public $status = JobStatus::PENDING;
+   public $customerPrint;
    
    public function isActive()
    {
@@ -57,15 +58,16 @@ class JobInfo
          {
             $jobInfo = new JobInfo();
             
-            $jobInfo->jobId =      intval($row['jobId']);
-            $jobInfo->jobNumber =  $row['jobNumber'];
-            $jobInfo->creator =    $row['creator'];
-            $jobInfo->dateTime =   Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $jobInfo->partNumber = $row['partNumber'];
-            $jobInfo->wcNumber =   $row['wcNumber'];
-            $jobInfo->cycleTime = doubleval($row['cycleTime']);
+            $jobInfo->jobId =         intval($row['jobId']);
+            $jobInfo->jobNumber =     $row['jobNumber'];
+            $jobInfo->creator =       $row['creator'];
+            $jobInfo->dateTime =      Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $jobInfo->partNumber =    $row['partNumber'];
+            $jobInfo->wcNumber =      $row['wcNumber'];
+            $jobInfo->cycleTime =     doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
-            $jobInfo->status =     $row['status'];
+            $jobInfo->status =        $row['status'];
+            $jobInfo->customerPrint = $row['customerPrint'];
          }
       }
       
@@ -136,9 +138,10 @@ if (isset($_GET["$jobId"]))
       echo "partNumber: " .    $jobInfo->partNumber .      "<br/>";
       echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
       echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
-      echo "netPercentage: " . $jobInfo->netPercentage . "<br/>";
+      echo "netPercentage: " . $jobInfo->netPercentage .   "<br/>";
+      echo "customerPrint: " . $jobInfo->customerPrint .   "<br/>";
       
-      echo "isActive: " . JobStatus::getName($jobInfo->isActive) . "<br/>";
+      echo "status: " . JobStatus::getName($jobInfo->status) . "<br/>";
    }
    else
    {

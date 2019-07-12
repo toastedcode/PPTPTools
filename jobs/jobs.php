@@ -5,6 +5,7 @@ require_once '../common/database.php';
 require_once '../common/jobInfo.php';
 require_once '../common/header.php';
 
+require 'upload.php';
 require 'viewJob.php';
 require 'viewJobs.php';
 
@@ -175,6 +176,20 @@ function updateJobInfo()
    if (isset($_POST['status']))
    {
       $_SESSION["jobInfo"]->status = $_POST['status'];
+   }
+   
+   if (isset($_FILES["customerPrint"]))
+   {
+      $uploadStatus = Upload::uploadCustomerPrint($_FILES["customerPrint"]);
+      
+      if ($uploadStatus != Upload::UPLOADED)
+      {
+         echo "<script>alert(\"File upload failed!\");</script>";
+      }
+      else
+      {
+         $_SESSION["jobInfo"]->customerPrint = basename($_FILES["customerPrint"]["name"]);
+      }
    }
 }
 

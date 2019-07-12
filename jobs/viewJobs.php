@@ -134,6 +134,8 @@ HEREDOC;
    
    private function jobsDiv()
    {
+      global $ROOT;
+      
       $html = "";
       
       $database = new PPTPDatabase();
@@ -170,6 +172,7 @@ HEREDOC;
                      <th>Work Center #</th>
                      <th class="hide-on-tablet">Cycle Time</th>
                      <th class="hide-on-tablet">Net Percentage</th>
+                     <th class="hide-on-tablet">Customer Print</th>
                      <th>Status</th>
                      <th/>
                      <th/>
@@ -194,6 +197,13 @@ HEREDOC;
                   
                   $newIndicator = new NewIndicator($dateTime, 60);
                   $new = $newIndicator->getHtml();
+                  
+                  $customerPrint = "";
+                  if ($jobInfo->customerPrint != "")
+                  {
+                     $truncatedFilename = strlen($jobInfo->customerPrint) > 15 ? substr($jobInfo->customerPrint, 0, 15) . "..." : $jobInfo->customerPrint; 
+                     $customerPrint = "<a href=\"$ROOT/uploads/$jobInfo->customerPrint\" target=\"_blank\">$truncatedFilename</a>";
+                  }
                   
                   $status = JobStatus::getName($jobInfo->status);
                   
@@ -226,6 +236,7 @@ HEREDOC;
                         <td>$jobInfo->wcNumber</td>
                         <td class="hide-on-tablet">$jobInfo->cycleTime</td>
                         <td class="hide-on-tablet">$jobInfo->netPercentage</td>
+                        <td class="hide-on-tablet">$customerPrint</td>
                         <td>$status</td>
                         <td>$viewEditIcon</td>
                         <td>$deleteIcon</td>
