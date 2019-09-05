@@ -696,12 +696,29 @@ class PPTPDatabase extends MySqlDatabase
    //                                  Jobs
    // **************************************************************************
    
-   public function getJobs($startDate, $endDate, $onlyActiveJobs)
+   public function getJobNumbers()
+   {
+      $deleted = JobStatus::DELETED;
+      
+      $query = "SELECT DISTINCT jobNumber FROM job WHERE status != $deleted ORDER BY jobNumber DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getJobs($jobNumber, $startDate, $endDate, $onlyActiveJobs)
    {
       $active = JobStatus::ACTIVE;
       $deleted = JobStatus::DELETED;
       
-      $whereClause = "WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+      $jobNumberClause = "";
+      if ($jobNumber != "All")
+      {
+         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
+      }
+      
+      $whereClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       if ($onlyActiveJobs)
       {
          $whereClause .= " AND status = $active";
@@ -711,7 +728,7 @@ class PPTPDatabase extends MySqlDatabase
          $whereClause .= " AND status != $deleted";
       }
       
-      $query = "SELECT * FROM job $whereClause ORDER BY dateTime DESC;";
+      $query = "SELECT * FROM job WHERE $jobNumberClause $whereClause ORDER BY dateTime DESC;";
 
       $result = $this->query($query);
       
@@ -872,22 +889,22 @@ class PPTPDatabase extends MySqlDatabase
    //                          Line Inspections
    // **************************************************************************
    
-   public function getLineInspections($employeeNumber, $startDate, $endDate)
+   public function getLineInspections($employeeNumber, $jobNumber, $startDate, $endDate)
    {
-      $result = NULL;
-      if ($employeeNumber == 0)
+      $operatorClause = "";
+      if ($employeeNumber != 0)
       {
-         $query = "SELECT * FROM lineinspection WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
-
-         $result = $this->query($query);
+         $operatorClause = "operator = $employeeNumber AND ";
       }
-      else
+      
+      $jobNumberClause = "";
+      if ($jobNumber != "All")
       {
-         $query = "SELECT * FROM lineinspection WHERE inspector =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
-
-         $result = $this->query($query);
+         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
       }
-            
+      
+      $query = "SELECT * FROM lineinspection WHERE $operatorClause $jobNumberClause dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, entryId DESC;";
+
       $result = $this->query($query);
       
       return ($result);

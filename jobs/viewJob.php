@@ -167,7 +167,7 @@ HEREDOC;
       }
       
       $statusOptions = "";
-      for ($status = JobStatus::PENDING; $status <= JobStatus::COMPLETE; $status++)
+      for ($status = JobStatus::PENDING; $status <= JobStatus::CLOSED; $status++)
       {
          $statusName = JobStatus::getName($status);
          $selected = ($jobInfo->status == $status) ? "selected" : "";

@@ -6,9 +6,10 @@ abstract class JobStatus
    const PENDING = 0;
    const ACTIVE = 1;
    const COMPLETE = 2;
-   const DELETED = 3;
+   const CLOSED = 3;
+   const DELETED = 4;
    
-   private static $names = array("Pending", "Active", "Complete", "Deleted");
+   private static $names = array("Pending", "Active", "Complete", "Closed", "Deleted");
    
    public static function getName($status)
    {
@@ -120,6 +121,30 @@ class JobInfo
       $netPartsPerHour = ($grossPartsPerHour * ($this->netPercentage / 100.0));
       
       return ($netPartsPerHour);
+   }
+   
+   public static function getJobNumbers()
+   {
+      $jobNumbers = array();
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getJobNumbers();
+         
+         if ($result)
+         {
+            while ($result && ($row = $result->fetch_assoc()))
+            {
+               $jobNumbers[] = $row["jobNumber"];
+            }
+         }
+      }
+      
+      return ($jobNumbers);
    }
 }
 

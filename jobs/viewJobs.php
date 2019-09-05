@@ -60,6 +60,7 @@ class ViewJobs
       {
          $this->filter = new Filter();
       
+         $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(), "All"));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->addByName('onlyActive', new OnlyActiveFilterComponent());
          $this->filter->add(new FilterButton());
@@ -144,6 +145,8 @@ HEREDOC;
       
       if ($database->isConnected())
       {
+         $jobNumber = $this->filter->get("jobNumber")->selectedJobNumber;
+         
          // Start date.
          $startDate = new DateTime($this->filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
          $startDateString = $startDate->format("Y-m-d");
@@ -156,7 +159,7 @@ HEREDOC;
          
          $onlyActive = $this->filter->get("onlyActive")->onlyActive;
          
-         $result = $database->getJobs($startDateString, $endDateString, $onlyActive);
+         $result = $database->getJobs($jobNumber, $startDateString, $endDateString, $onlyActive);
          
          if ($result && ($database->countResults($result) > 0))
          {
