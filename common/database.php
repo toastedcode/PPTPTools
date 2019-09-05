@@ -958,6 +958,97 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                                Inspections
+   // **************************************************************************
+   
+   public function getInspections($jobNumber, $operator, $inspectionType, $startDate, $endDate)
+   {
+      $operatorClause = "";
+      if ($operator != 0)
+      {
+         $operatorClause = "operator = $operator AND ";
+      }
+      
+      $jobNumberClause = "";
+      if ($jobNumber != "All")
+      {
+         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
+      }
+      
+      $typeClause = "";
+      if ($inspectionType != InspectionType::UNKNOWN)
+      {
+         $jobNumberClause = "inspectionType = $inspectionType AND ";
+      }
+      
+      $query = "SELECT * FROM inspection WHERE $operatorClause $jobNumberClause $typeClause dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, inspectionId DESC;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getInspection($inspectionId)
+   {
+      $query = "SELECT * FROM inspection WHERE inspectionId = $inspectionId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getInspectionResults($inspectionId)
+   {
+      $query = "SELECT * FROM inspectionresult " .
+               "INNER JOIN inspectionproperty ON inspectionresult.propertyId = inspectionproperty.propertyId " .
+               "WHERE inspectionresult.inspectionId = $inspectionId ORDER BY inspectionproperty.ordering ASC;";
+      
+      $result = $this->query($query);
+
+      return ($result);
+   }
+   
+   public function newInspection($inspectionInfo)
+   {
+      $dateTime = Time::toMySqlDate($inspectionInfo->dateTime);
+      
+      $query =
+      "INSERT INTO inspection " .
+      "(templateId, dateTime, inspector, operator, jobId, comments) " .
+      "VALUES " .
+      "('$templateId', '$dateTime', '$inspectionInfo->inspector', '$inspectionInfo->operator', '$inspectionInfo->jobId', '$inspectionInfo->comments');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateInspection($inspectionInfo)
+   {
+      $dateTime = Time::toMySqlDate($inspectionInfo->dateTime);
+      
+      $query =
+      "UPDATE inspection " .
+      "SET templateId = '$inspectionInfo->templateId', dateTime = '$dateTime',  inspector = '$inspectionInfo->inspector', operator = '$inspectionInfo->operator', jobId = '$inspectionInfo->jobId', comments = '$inspectionInfo->comments' " .
+      "WHERE inspectionId = '$inspectionInfo->inspectionId';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteInspection($inspectionId)
+   {
+      $query = "DELETE FROM inspection WHERE inspectionId = $inspectionId;";
+      
+      $result = $this->query($query);
+      
+      $query = "DELETE FROM inspectionresult WHERE inspectionId = $inspectionId;";
+      
+      $result = $this->query($query);
+   }
+   
+   // **************************************************************************
    //                                  Private
    // **************************************************************************
    
