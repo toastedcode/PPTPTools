@@ -43,13 +43,15 @@ class ViewPartWasherLog
          
          $this->filter = new Filter();
          
-         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName("washer", new UserFilterComponent("Washer", $operators, $selectedOperator, $allowAll));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new TodayButton());
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("partWasherReport.php"));
       }
       
       $this->filter->update();
@@ -134,7 +136,7 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWasherEntries($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWasherEntries($this->filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {            
@@ -152,6 +154,7 @@ HEREDOC;
                      <th class="hide-on-tablet">Wash Time</th>
                      <th class="hide-on-mobile">Basket Count</th>
                      <th>Part Count</th>
+                     <th></th>
                      <th></th>
                   </tr>
 HEREDOC;
@@ -229,11 +232,20 @@ HEREDOC;
                   $newIndicator = new NewIndicator($dateTime, 60);
                   $new = $newIndicator->getHtml();
                                        
+                  $viewEditIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
                   {
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onEditPartWasherEntry('$partWasherEntry->partWasherEntryId')\">mode_edit</i>";
+                     
                      $deleteIcon =
                      "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
+                  }
+                  else
+                  {
+                     $viewEditIcon =
+                     "<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
                   }
    
                   $html .=
@@ -248,6 +260,7 @@ HEREDOC;
                      <td class="hide-on-tablet">$washTime</td>
                      <td class="hide-on-mobile">$partWasherEntry->panCount $mismatch</td>
                      <td>$partWasherEntry->partCount</td>
+                     <td>$viewEditIcon</td>
                      <td>$deleteIcon</td>
                   </tr>
 HEREDOC;

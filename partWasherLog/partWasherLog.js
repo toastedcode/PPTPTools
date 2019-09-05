@@ -45,6 +45,56 @@ function onNewPartWasherEntry()
    form.submit();  	
 }
 
+function onViewPartWasherEntry(entryId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'partWasherLog.php');
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'view_part_washer_entry');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'entryId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', entryId);
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();
+}
+
+function onEditPartWasherEntry(entryId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'partWasherLog.php');
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'edit_part_washer_entry');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'action');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'edit_part_washer_entry');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'entryId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', entryId);
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();
+}
+
 function onCancel()
 {
    form = document.createElement('form');
@@ -97,6 +147,25 @@ function submitForm(form, page, view, action)
    form.appendChild(input);
    
    form.submit();
+}
+
+function validateEmployeeNumber()
+{
+   radioButtons = document.getElementsByName("employeeNumber"); 
+   
+   var valid = false;
+   
+   for (var i = 0; i < radioButtons.length; i++)
+   {
+      valid |= radioButtons[i].checked;
+   }
+   
+   if (!valid)
+   {
+      alert("Please select a parts washer.")
+   }
+   
+   return (valid);
 }
 
 function validateTimeCardId()

@@ -3,6 +3,7 @@
 require_once '../common/jobInfo.php';
 require_once '../common/lineInspectionInfo.php';
 require_once '../common/navigation.php';
+require_once '../common/root.php';
 require_once '../common/userInfo.php';
 
 class ViewLineInspection
@@ -214,9 +215,11 @@ HEREDOC;
 
          <div class="form-item">
             <div class="form-label">Job Number</div>
-            <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" $disabled>
+            <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput(); updateCustomerPrint();" $disabled>
                $options
             </select>
+            &nbsp;&nbsp;
+            <div id="customer-print-div"></div>
          </div>
 
          <div class="form-item">
@@ -247,6 +250,14 @@ HEREDOC;
                <tr>
                   <td>Visual</td>
                   {$inspectionInput[3]}
+               </tr>
+               <tr>
+                  <td>Undercut</td>
+                  {$inspectionInput[4]}
+               </tr>
+               <tr>
+                  <td>Depth</td>
+                  {$inspectionInput[5]}
                </tr>
             </table>
          </div>
@@ -410,14 +421,55 @@ HEREDOC;
 //                          AJAX request handling
 // *****************************************************************************
 
-if (isset($_GET["action"]) && 
-    ($_GET["action"] == "get_wc_number_input"))
+global $ROOT;
+
+if (isset($_GET["action"]))
 {
-   $jobNumber = $_GET["jobNumber"];
-   $isDisabled = filter_var($_GET["isDisabled"], FILTER_VALIDATE_BOOLEAN);
-   
-   $wcNumberInput =  ViewLineInspection::getWcNumberInput($jobNumber, $isDisabled);
-   
-   echo $wcNumberInput;
+   switch ($_GET["action"])
+   {
+      case "get_wc_number_input":
+      {
+         $jobNumber = $_GET["jobNumber"];
+         $isDisabled = filter_var($_GET["isDisabled"], FILTER_VALIDATE_BOOLEAN);
+         
+         $wcNumberInput =  ViewLineInspection::getWcNumberInput($jobNumber, $isDisabled);
+         
+         echo $wcNumberInput;
+         break;
+      }
+      
+      case "get_customer_print_link":
+      {
+         $jobNumber = $_GET["jobNumber"];
+         
+         $database = new PPTPDatabase();
+         
+         $database->connect();
+         
+         if ($database->isConnected())
+         {
+            $customerPrint = null;
+
+            $result = $database->getJobsByJobNumber($jobNumber);
+            
+            while ($result && ($row = $result->fetch_assoc()))
+            {
+               $jobInfo = JobInfo::load($row["jobId"]);
+               
+               if (($jobInfo) && ($jobInfo->customerPrint))
+               {
+                  $customerPrint = $jobInfo->customerPrint;
+                  break;
+               }
+            }
+            
+            if ($customerPrint)
+            {
+               echo "<a href=\"$ROOT/uploads/$customerPrint\" target=\"_blank\">$customerPrint</a>";
+            }
+         }
+         break;
+      }
+   }
 }
 ?>

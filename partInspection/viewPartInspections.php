@@ -41,13 +41,15 @@ class ViewPartInspections
          
          $this->filter = new Filter();
          
-         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName("inspector", new UserFilterComponent("Inspector", $operators, $selectedOperator, $allowAll));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new TodayButton());
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("partInspectionReport.php"));
       }
       
       $this->filter->update();
@@ -134,7 +136,7 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartInspections($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartInspections($this->filter->get('inspector')->selectedEmployeeNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {    
@@ -143,7 +145,7 @@ HEREDOC;
             <div class="table-container">
                <table class="part-inspection-table">
                   <tr>
-                     <th>Name</th>
+                     <th>Inspector</th>
                      <th>Date</th>
                      <th>Time</th>
                      <th>Work Center #</th>

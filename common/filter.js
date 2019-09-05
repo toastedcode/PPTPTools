@@ -54,3 +54,62 @@ function formattedDate(date)
 
    return (formattedDate);
 }
+
+function printReport(report)
+{
+   // TODO: This function assumes the input id for various filter componets, including some that are not even defined
+   //       in this file.  Rework to make this more agnostic to what components are part of this filter.
+   
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', report);
+   form.setAttribute("target", "_blank");
+
+   // Employee number
+   var employeeNumberInput = document.querySelector('#employeeNumberInput');
+   if (employeeNumberInput != null)
+   {
+	   input = document.createElement('input');
+	   input.setAttribute('name', 'employeeNumber');
+	   input.setAttribute('type', 'hidden');
+	   input.setAttribute('value', employeeNumberInput.value);
+	   form.appendChild(input);
+   }
+   
+   // Start date
+   var startDateInput = document.querySelector('#start-date-input');
+   if (startDateInput != null)
+   {
+	   input = document.createElement('input');
+	   input.setAttribute('name', 'startDate');
+	   input.setAttribute('type', 'hidden');
+	   input.setAttribute('value', startDateInput.value);
+	   form.appendChild(input);
+   }
+   
+   // End date
+   var endDateInput = document.querySelector('#end-date-input');
+   if (endDateInput != null)
+   {
+	   input = document.createElement('input');
+	   input.setAttribute('name', 'endDate');
+	   input.setAttribute('type', 'hidden');
+	   input.setAttribute('value', endDateInput.value);
+	   form.appendChild(input);	   
+   }
+   
+   // Only active.
+   // Note: For ViewJobs filter.
+   var onlyActiveInput = document.querySelector('#only-active-input');
+   if (onlyActiveInput != null)
+   {
+      input = document.createElement('input');
+      input.setAttribute('name', 'onlyActive');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('value', onlyActiveInput.checked);
+      form.appendChild(input);	       
+   }
+   
+   document.body.appendChild(form);
+   form.submit();	
+}

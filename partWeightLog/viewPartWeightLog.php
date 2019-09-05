@@ -45,13 +45,15 @@ class ViewPartWeightLog
          
          $this->filter = new Filter();
          
-         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName("laborer", new UserFilterComponent("Laborer", $operators, $selectedOperator, $allowAll));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new TodayButton());
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("partWeightReport.php"));
       }
       
       $this->filter->update();
@@ -136,7 +138,7 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWeightEntries($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWeightEntries($this->filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {

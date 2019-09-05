@@ -4,11 +4,12 @@ require_once 'time.php';
 
 class PartWasherEntry
 {
+   const UNKNOWN_ENTRY_ID = 0;
    const UNKNOWN_TIME_CARD_ID = 0;
    const UNKNOWN_JOB_ID = 0;
    const UNKNOWN_OPERATOR = 0;
    
-   public $partWasherEntryId;
+   public $partWasherEntryId = PartWasherEntry::UNKNOWN_ENTRY_ID;
    public $dateTime;
    public $employeeNumber;
    public $timeCardId = PartWasherEntry::UNKNOWN_TIME_CARD_ID;

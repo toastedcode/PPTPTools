@@ -62,20 +62,20 @@ function processAction($action)
          updatePartWasherEntry();
          break;
       }
-         
+        
       case 'update_part_washer_entry':
       {
          updatePartWasherEntry();
-         break;   
+         break;
       }
-      
+        
       case 'cancel_part_washer_entry':
       {
          unset($_SESSION["partWasherEntry"]);
          unset($_SESSION["wcNumber"]);
          break;
       }
-      
+        
       case 'save_part_washer_entry':
       {
          updatePartWasherEntry();
@@ -85,13 +85,13 @@ function processAction($action)
          $_SESSION["partWasherEntry"] = new PartWasherEntry();
          break;
       }
-      
+        
       case 'delete_part_washer_entry':
       {
          deletePartWasherEntry($_POST['partWasherEntryId']);
          break;
       }
-      
+        
       default:
       {
          // Unhandled action.
@@ -103,6 +103,13 @@ function processView($view)
 {
    switch ($view)
    {
+      case 'select_employee_number':
+      {
+         $page = new SelectEmployeeNumber();
+         $page->render($view);
+         break;
+      }
+        
       case 'select_entry_method':
       {
          unset($_SESSION["wcNumber"]);
@@ -111,42 +118,42 @@ function processView($view)
          $page->render($view);
          break;
       }
-         
+        
       case 'select_time_card':
       {
          $page = new SelectTimeCard_PartWasher();
          $page->render($view);
          break;
       }
-      
+        
       case 'select_work_center':
       {
          $page = new SelectWorkCenter_PartWasher();
          $page->render();
          break;
       }
-      
+        
       case 'select_job':
       {
          $page = new SelectJob_PartWasher();
          $page->render();
          break;
       }
-      
+        
       case 'select_operator':
       {
          $page = new SelectOperator_PartWasher();
          $page->render();
          break;
       }
-      
+        
       case 'enter_part_count':
-      {
-         $page = new EnterPartCount();
-         $page->render();
-         break;
-      }
-         
+        {
+           $page = new EnterPartCount();
+           $page->render();
+           break;
+        }
+        
       case 'view_part_washer_log':
       default:
       {
@@ -244,7 +251,7 @@ function updatePartWasherLog($partWasherEntry)
          {
             $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
          }
-         
+        
          $database->newPartWasherEntry($partWasherEntry);
       }
       
@@ -296,11 +303,11 @@ processAction(getAction());
    <?php Header::render("PPTP Tools"); ?>
    
    <div class="flex-horizontal main">
-      
-      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+     
+     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-      <?php processView(getView())?>
-      
+     <?php processView(getView())?>
+     
    </div>
 
 </body>

@@ -43,13 +43,15 @@ class ViewLineInspections
          
          $this->filter = new Filter();
          
-         $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+         $this->filter->addByName("inspector", new UserFilterComponent("Inspector", $operators, $selectedOperator, $allowAll));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new TodayButton());
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
+         $this->filter->add(new FilterDivider());
+         $this->filter->add(new PrintButton("lineInspectionReport.php"));
       }
       
       $this->filter->update();
@@ -107,8 +109,14 @@ HEREDOC;
       $navBar = new Navigation();
       
       $navBar->start();
+      
       $navBar->mainMenuButton();
-      $navBar->highlightNavButton("New Inspection", "onNewLineInspection()", true);
+      
+      if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
+      {
+         $navBar->highlightNavButton("New Inspection", "onNewLineInspection()", true);
+      }
+      
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -134,7 +142,7 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getLineInspections($this->filter->get('operator')->selectedEmployeeNumber, $startDateString, $endDateString);
+         $result = $database->getLineInspections($this->filter->get('inspector')->selectedEmployeeNumber, $startDateString, $endDateString);
         
          if ($result && ($database->countResults($result) > 0))
          {
@@ -153,6 +161,8 @@ HEREDOC;
                      <th class="hide-on-tablet">Thread #2</th>
                      <th class="hide-on-tablet">Thread #3</th>
                      <th class="hide-on-tablet">Visual</th>
+                     <th class="hide-on-tablet">Undercut</th>
+                     <th class="hide-on-tablet">Depth</th>
                      <th></th>
                      <th></th>
                   </tr>
@@ -187,7 +197,7 @@ HEREDOC;
                   
                   $viewEditIcon = "";
                   $deleteIcon = "";
-                  if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))  // TODO
+                  if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
                   {
                      $viewEditIcon =
                      "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditLineInspection($lineInspectionInfo->entryId)\">mode_edit</i>";

@@ -102,7 +102,7 @@ class UserFilterComponent extends FilterComponent
       $html =
 <<<HEREDOC
       <div class="flex-horizontal filter-component hide-on-tablet">
-         <div>$this->label:</div>
+         <div>$this->label:&nbsp</div>
          <div><select id="employeeNumberInput" name="employeeNumber">$options</select></div>
       </div>
 HEREDOC;
@@ -212,6 +212,32 @@ HEREDOC;
    }
 }
 
+// *****************************************************************************
+//                                  PrintButton
+
+class PrintButton extends FilterComponent
+{
+    function __construct($report)
+    {
+        $this->report = $report;
+    }
+    
+    public function getHtml()
+    {
+        $html =
+<<<HEREDOC
+        <div>
+           <button class="mdl-button mdl-js-button mdl-button--raised filter-component" onclick="printReport('{$this->report}')">
+              <i class="material-icons action-button-icon">print</i>
+           </button>
+         </div>
+HEREDOC;
+        
+        return ($html);
+    }
+    
+    private $report;
+}
 
 // *****************************************************************************
 //                                  Filter
