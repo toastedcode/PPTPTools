@@ -11,7 +11,8 @@ class LineInspectionReport extends Report
 {
    function __construct()
    {
-      $this->employeeNumber = 0;
+      $this->employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->jobNumber = "All";
       $this->startDate = Time::now("Y-m-d H:i:s");
       $this->endDate = Time::now("Y-m-d H:i:s");
       
@@ -22,6 +23,11 @@ class LineInspectionReport extends Report
       else if (isset($_GET["employeeNumber"]))
       {
          $this->employeeNumber = $_GET["employeeNumber"];
+      }
+      
+      if (isset($_POST["filterJobNumber"]))
+      {
+         $this->jobNumber = $_POST["filterJobNumber"];
       }
       
       if (isset($_POST["startDate"]))
@@ -100,7 +106,7 @@ class LineInspectionReport extends Report
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getLineInspections($this->employeeNumber, $startDateString, $endDateString);
+         $result = $database->getLineInspections($this->employeeNumber, $this->jobNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {

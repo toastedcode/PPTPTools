@@ -55,6 +55,7 @@ function formattedDate(date)
    return (formattedDate);
 }
 
+/*
 function printReport(report)
 {
    // TODO: This function assumes the input id for various filter componets, including some that are not even defined
@@ -112,4 +113,21 @@ function printReport(report)
    
    document.body.appendChild(form);
    form.submit();	
+}
+*/
+
+function printReport(report)
+{
+   form = document.getElementById("filter-form");
+   if (form)
+   {
+      form.setAttribute('method', 'POST');
+      form.setAttribute('action', report);
+      form.setAttribute("target", "_blank");
+      
+      form.submit(); 
+      
+      form.setAttribute('action', "");
+      form.setAttribute("target", "");
+   } 
 }

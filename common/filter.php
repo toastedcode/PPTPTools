@@ -151,7 +151,7 @@ class JobNumberFilterComponent extends FilterComponent
 <<<HEREDOC
       <div class="flex-horizontal filter-component hide-on-tablet">
          <div>$this->label:&nbsp</div>
-         <div><select id="jobNumberInput" name="jobNumber">$options</select></div>
+         <div><select id="filter-job-number-input" name="filterJobNumber">$options</select></div>
       </div>
 HEREDOC;
       
@@ -160,10 +160,15 @@ HEREDOC;
    
    public function update()
    {
-      if (isset($_POST['jobNumber']))
+      if (isset($_POST['filterJobNumber']))
       {
-         $this->selectedJobNumber = $_POST['jobNumber'];
+         $this->selectedJobNumber = $_POST['filterJobNumber'];
       }
+   }
+   
+   public function updateJobNumbers($jobNumbers)
+   {
+      $this->jobNumbers = $jobNumbers;
    }
 }
 
@@ -329,7 +334,7 @@ class Filter
 <<<HEREDOC
       <script src="$ROOT/common/filter.js"></script>
       
-      <form action="#" method="POST">
+      <form id="filter-form" action="#" method="POST">
       <div class="flex-horizontal">
 HEREDOC;
 

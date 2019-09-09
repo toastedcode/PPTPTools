@@ -707,7 +707,7 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
-   public function getJobs($jobNumber, $startDate, $endDate, $onlyActiveJobs)
+   public function getJobs($jobNumber, $jobStatuses)
    {
       $active = JobStatus::ACTIVE;
       $deleted = JobStatus::DELETED;
@@ -718,17 +718,26 @@ class PPTPDatabase extends MySqlDatabase
          $jobNumberClause = "jobNumber = '$jobNumber' AND ";
       }
       
-      $whereClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
-      if ($onlyActiveJobs)
+      $jobStatusClause = "(";
+      $or = false;
+      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
       {
-         $whereClause .= " AND status = $active";
+         if ($jobStatuses[$jobStatus])
+         {
+            if ($or)
+            {
+               $jobStatusClause .= " OR ";
+            }
+            
+            $jobStatusClause .= "status = $jobStatus";
+               
+            $or = true;
+         }
       }
-      else
-      {
-         $whereClause .= " AND status != $deleted";
-      }
+      $jobStatusClause .= ")";
       
-      $query = "SELECT * FROM job WHERE $jobNumberClause $whereClause ORDER BY dateTime DESC;";
+      
+      $query = "SELECT * FROM job WHERE $jobNumberClause $jobStatusClause ORDER BY dateTime DESC;";
 
       $result = $this->query($query);
       
