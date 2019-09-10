@@ -185,6 +185,7 @@ HEREDOC;
                      <th>Author</th>                  
                      <th>Date</th>
                      <th class="hide-on-tablet">Part #</th>
+                     <th>Sample Weight</th>
                      <th>Work Center #</th>
                      <th class="hide-on-tablet">Cycle Time</th>
                      <th class="hide-on-tablet">Net Percentage</th>
@@ -255,6 +256,7 @@ HEREDOC;
                         <td>$creatorName</td>
                         <td>$date $new</td>
                         <td class="hide-on-tablet">$jobInfo->partNumber</td>
+                        <td class="hide-on-tablet">$jobInfo->sampleWeight</td>
                         <td>$jobInfo->wcNumber</td>
                         <td class="hide-on-tablet">$jobInfo->cycleTime</td>
                         <td class="hide-on-tablet">$jobInfo->netPercentage</td>

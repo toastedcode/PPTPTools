@@ -700,7 +700,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $deleted = JobStatus::DELETED;
       
-      $query = "SELECT DISTINCT jobNumber FROM job WHERE status != $deleted ORDER BY jobNumber DESC;";
+      $query = "SELECT DISTINCT jobNumber FROM job WHERE status != $deleted ORDER BY jobNumber ASC;";
       
       $result = $this->query($query);
       
@@ -737,7 +737,7 @@ class PPTPDatabase extends MySqlDatabase
       $jobStatusClause .= ")";
       
       
-      $query = "SELECT * FROM job WHERE $jobNumberClause $jobStatusClause ORDER BY dateTime DESC;";
+      $query = "SELECT * FROM job WHERE $jobNumberClause $jobStatusClause ORDER BY jobNumber ASC;";
 
       $result = $this->query($query);
       
@@ -750,7 +750,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $wcClause = $wcNumber ? "wcNumber = '$wcNumber' AND" : "";
       
-      $query = "SELECT * FROM job WHERE $wcClause status = $active ORDER BY dateTime DESC;";
+      $query = "SELECT * FROM job WHERE $wcClause status = $active ORDER BY jobNumber ASC;";
 
       $result = $this->query($query);
       
@@ -781,9 +781,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO job " .
-      "(jobNumber, creator, dateTime, partNumber, wcNumber, cycleTime, netPercentage, status, customerPrint) " .
+      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, cycleTime, netPercentage, status, customerPrint) " .
       "VALUES " .
-      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint');";
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint');";
 
       $result = $this->query($query);
       
@@ -796,7 +796,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "UPDATE job " .
-         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint' " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint' " .
          "WHERE jobId = '$jobInfo->jobId';";
 
       $result = $this->query($query);

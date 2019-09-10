@@ -49,10 +49,12 @@ class ViewJob
       <script>
          var jobNumberPrefixValidator = new PartNumberPrefixValidator("job-number-prefix-input", 5, 1, 9999, false);
          var jobNumberSuffixValidator = new PartNumberSuffixValidator("job-number-suffix-input", 3, 1, 99, false);
+         var sampleWeightValidator = new DecimalValidator("sample-weight-input", 6, 0.001, 10, 3, false);         
          var cycleTimeValidator = new DecimalValidator("cycle-time-input", 5, 1, 60, 2, false);
          var netPercentageValidator = new DecimalValidator("net-percentage-input", 5, 0, 100, 2, false);
 
          jobNumberPrefixValidator.init();
+         sampleWeightValidator.init();
          jobNumberSuffixValidator.init();
          cycleTimeValidator.init();
          netPercentageValidator.init();
@@ -218,6 +220,11 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label-long">Work center #</div>
             <div><select id="work-center-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Sample weight</div>
+            <input id="sample-weight-input" type="number" class="medium-text-input" name="sampleWeight" form="input-form" style="width:150px;" value="$jobInfo->sampleWeight" oninput="this.validator.validate();" $disabled"/>
          </div>
    
          <div class="form-item">

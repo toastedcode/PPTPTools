@@ -132,6 +132,10 @@ function validateJob()
    {
       alert("Please enter a valid job number.  (Format: Mxxxx-xxx)");      
    }
+   else if (!(document.getElementById("sample-weight-input").validator.validate()))
+   {
+      alert("Please enter a sample weight.");
+   }
    else if (!(document.getElementById("cycle-time-input").validator.validate()))
    {
       alert("Please enter a valid cycle time.");

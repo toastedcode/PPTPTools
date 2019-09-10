@@ -182,6 +182,11 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->partNumber = $_POST['partNumber'];
    }
    
+   if (isset($_POST['sampleWeight']))
+   {
+      $_SESSION["jobInfo"]->sampleWeight = doubleval($_POST['sampleWeight']);
+   }
+   
    if (isset($_POST['wcNumber']))
    {
       $_SESSION["jobInfo"]->wcNumber = $_POST['wcNumber'];
@@ -189,12 +194,12 @@ function updateJobInfo()
    
    if (isset($_POST['cycleTime']))
    {
-      $_SESSION["jobInfo"]->cycleTime = $_POST['cycleTime'];
+      $_SESSION["jobInfo"]->cycleTime = doubleval($_POST['cycleTime']);
    }
    
    if (isset($_POST['netPercentage']))
    {
-      $_SESSION["jobInfo"]->netPercentage = $_POST['netPercentage'];
+      $_SESSION["jobInfo"]->netPercentage = doubleval($_POST['netPercentage']);
    }
    
    if (isset($_POST['status']))

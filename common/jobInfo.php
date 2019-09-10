@@ -35,6 +35,7 @@ class JobInfo
    public $creator;
    public $dateTime;
    public $partNumber;
+   public $sampleWeight = 0.0;
    public $wcNumber;
    public $cycleTime;
    public $netPercentage;
@@ -67,6 +68,7 @@ class JobInfo
             $jobInfo->creator =       $row['creator'];
             $jobInfo->dateTime =      Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $jobInfo->partNumber =    $row['partNumber'];
+            $jobInfo->sampleWeight =  doubleval($row['sampleWeight']);
             $jobInfo->wcNumber =      $row['wcNumber'];
             $jobInfo->cycleTime =     doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
@@ -164,6 +166,7 @@ if (isset($_GET["$jobId"]))
       echo "creator: " .       $jobInfo->creator .         "<br/>";
       echo "dateTime: " .      $jobInfo->dateTime .        "<br/>";
       echo "partNumber: " .    $jobInfo->partNumber .      "<br/>";
+      echo "sampleWeight: " .  $jobInfo->sampleWeight .    "<br/>";
       echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
       echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
       echo "netPercentage: " . $jobInfo->netPercentage .   "<br/>";

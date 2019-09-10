@@ -63,7 +63,7 @@ class JobsReport extends Report
     
     protected function getHeaders()
     {
-        return (array("Job Number", "Author", "Date", "Part #", "Work Center #", "Cycle Time", "Net Percentage", "Status"));
+        return (array("Job Number", "Author", "Date", "Part #", "Sample Weight", "Work Center #", "Cycle Time", "Net Percentage", "Status"));
     }
     
     protected function getData()
@@ -98,7 +98,7 @@ class JobsReport extends Report
                         
                         $status = JobStatus::getName($jobInfo->status);
                         
-                        $dataRow = array($jobInfo->jobNumber, $creatorName, $date, $jobInfo->partNumber, $jobInfo->wcNumber, $jobInfo->cycleTime, $jobInfo->netPercentage, $status);
+                        $dataRow = array($jobInfo->jobNumber, $creatorName, $date, $jobInfo->partNumber, $jobInfo->sampleWeight, $jobInfo->wcNumber, $jobInfo->cycleTime, $jobInfo->netPercentage, $status);
                         
                         $data[] = $dataRow;
                     }
