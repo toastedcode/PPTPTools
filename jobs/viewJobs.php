@@ -2,6 +2,7 @@
 
 require_once '../common/database.php';
 require_once '../common/filter.php';
+require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
 require_once '../common/permissions.php';
@@ -9,36 +10,63 @@ require_once '../common/permissions.php';
 require_once '../common/userInfo.php';
 
 // *****************************************************************************
-//                              OnlyActiveFilterComponent
+//                              JobStatusFilterComponent
 
-class OnlyActiveFilterComponent extends FilterComponent
+class JobStatusFilterComponent extends FilterComponent
 {
-   public $onlyActive = false;
+   public $jobStatusChecked = array();
+   
+   public function __construct()
+   {
+      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
+      {
+         $this->jobStatusChecked[] = false;
+      }
+      
+      $this->jobStatusChecked[JobStatus::PENDING] = true;
+      $this->jobStatusChecked[JobStatus::ACTIVE] = true;
+   }
    
    public function getHtml()
    {
-      $checked = $this->onlyActive ? "checked" : ""; 
+      $html = "<div class=\"filter-component\">";
       
-      $html =
+      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
+      {
+         if ($jobStatus != JobStatus::DELETED)
+         {
+            $checked = $this->jobStatusChecked[$jobStatus] ? "checked" : "";
+            
+            $label = JobStatus::getName($jobStatus);
+            
+            $name = strtolower($label);
+            
+            $id = "filter-" . $name . "-input";
+            
+            $html .=
 <<<HEREDOC
-      <div class="filter-component">
-         <input id="only-active-input" type="checkbox" name="onlyActive" value="true" $checked>
-         <label for="only-active-input">Active jobs</label>
-      </div>
+               <input type="hidden" name="$name" value="0"/>
+               <input id="$id" type="checkbox" name="$name" value="true" $checked/>
+               <label for="$id">$label</label>
 HEREDOC;
+         }
+      }
+      
+      $html .= "</div>";
       
       return ($html);
    }
    
    public function update()
    {
-      if (isset($_POST['onlyActive']))
+      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
       {
-         $this->onlyActive = boolval($_POST['onlyActive']);
-      }
-      else
-      {
-         $this->onlyActive = false;
+         $name = strtolower(JobStatus::getName($jobStatus));
+         
+         if (isset($_POST[$name]))
+         {
+            $this->jobStatusChecked[$jobStatus] = boolval($_POST[$name]);
+         }
       }
    }
 }
@@ -61,16 +89,14 @@ class ViewJobs
          $this->filter = new Filter();
       
          $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(), "All"));
-         $this->filter->addByName('date', new DateFilterComponent());
-         $this->filter->addByName('onlyActive', new OnlyActiveFilterComponent());
+         $this->filter->addByName('jobStatus', new JobStatusFilterComponent());
          $this->filter->add(new FilterButton());
-         $this->filter->add(new FilterDivider());
-         $this->filter->add(new ThisWeekButton());
          $this->filter->add(new FilterDivider());
          $this->filter->add(new PrintButton("jobsReport.php"));
       }
       
       $this->filter->update();
+      $this->filter->get("jobNumber")->updateJobNumbers(JobInfo::getJobNumbers());
       
       $_SESSION["jobFilter"] = $this->filter;
    }
@@ -145,21 +171,8 @@ HEREDOC;
       
       if ($database->isConnected())
       {
-         $jobNumber = $this->filter->get("jobNumber")->selectedJobNumber;
-         
-         // Start date.
-         $startDate = new DateTime($this->filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-         $startDateString = $startDate->format("Y-m-d");
-         
-         // End date.
-         // Increment the end date by a day to make it inclusive.
-         $endDate = new DateTime($this->filter->get('date')->endDate, new DateTimeZone('America/New_York'));
-         $endDate->modify('+1 day');
-         $endDateString = $endDate->format("Y-m-d");
-         
-         $onlyActive = $this->filter->get("onlyActive")->onlyActive;
-         
-         $result = $database->getJobs($jobNumber, $startDateString, $endDateString, $onlyActive);
+         $result = $database->getJobs($this->filter->get("jobNumber")->selectedJobNumber,
+                                      $this->filter->get("jobStatus")->jobStatusChecked);
          
          if ($result && ($database->countResults($result) > 0))
          {
@@ -177,6 +190,7 @@ HEREDOC;
                      <th class="hide-on-tablet">Net Percentage</th>
                      <th class="hide-on-tablet">Customer Print</th>
                      <th>Status</th>
+                     <th/>
                      <th/>
                      <th/>
                   </tr>
@@ -211,11 +225,16 @@ HEREDOC;
                   $status = JobStatus::getName($jobInfo->status);
                   
                   $viewEditIcon = "";
+                  $copyIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_JOB))
                   {
                      $viewEditIcon =
                         "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditJob($jobInfo->jobId)\">mode_edit</i>";
+                     
+                     $copyIcon =
+                     "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onCopyJob($jobInfo->jobId)\">file_copy</i>";
+                     
                      
                      if ($jobInfo->status != JobStatus::DELETED)
                      {
@@ -242,6 +261,7 @@ HEREDOC;
                         <td class="hide-on-tablet">$customerPrint</td>
                         <td>$status</td>
                         <td>$viewEditIcon</td>
+                        <td>$copyIcon</td>
                         <td>$deleteIcon</td>
                      </tr>
 HEREDOC;
@@ -256,7 +276,7 @@ HEREDOC;
          }
          else
          {
-            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
+            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a different job or status.</div>";
          }
       }
       

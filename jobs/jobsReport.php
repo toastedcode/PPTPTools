@@ -10,23 +10,16 @@ class JobsReport extends Report
 {
     function __construct()
     {
-       $this->startDate = Time::now("Y-m-d H:i:s");
-       $this->endDate = Time::now("Y-m-d H:i:s");
-       $this->onlyActive = false;
-        
-       if (isset($_POST["startDate"]))
+       if (isset($_POST['filterJobNumber']))
        {
-           $this->startDate = $_POST["startDate"];
+          $this->jobNumber = $_POST['filterJobNumber'];
        }
-        
-       if (isset($_POST["endDate"]))
+       
+       for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
        {
-           $this->endDate = $_POST["endDate"];
-       }
-        
-       if (isset($_POST["onlyActive"]))
-       {
-           $this->onlyActive = json_decode($_POST["onlyActive"]);
+          $name = strtolower(JobStatus::getName($jobStatus));
+          
+          $this->jobStatuses[$jobStatus] = (isset($_POST[$name]) && boolval($_POST[$name]));
        }
    }
     
@@ -36,35 +29,34 @@ class JobsReport extends Report
     }
     
     protected function getDescription()
-    {
-        $description = "";
+    {        
+        $description = "Reporting all ";
         
-        $activeJobsDescription = "";
-        if ($this->onlyActive)
+        $slash = false;
+        
+        for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
         {
-            $activeJobsDescription = "all active jobs";
+           if ($this->jobStatuses[$jobStatus])
+           {
+              $name = JobStatus::getName($jobStatus);
+              
+              $description .= $slash ? "/" : "";
+              $description .= $name;
+              
+              $slash = true;
+           }
+        }
+        
+        $description .= " jobs";
+        
+        if ($this->jobNumber != "All")
+        {
+           $description .= " matching $this->jobNumber.";
         }
         else
         {
-            $activeJobsDescription = "all jobs";
+           $description .= ".";
         }
-        
-        $dateString = "";
-        if ($this->startDate == $this->endDate)
-        {
-            $dateTime = new DateTime($this->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-            
-            $dateString = "created on {$dateTime->format("m/d/Y")}";
-        }
-        else
-        {
-            $startDateTime = new DateTime($this->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-            $endDateTime = new DateTime($this->endDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-            
-            $dateString = "created between {$startDateTime->format("m/d/Y")} to {$endDateTime->format("m/d/Y")}";
-        }
-        
-        $description = "Reporting $activeJobsDescription $dateString.";
         
         return ($description);
     }
@@ -83,18 +75,8 @@ class JobsReport extends Report
         $database->connect();
         
         if ($database->isConnected())
-        {
-            // Start date.
-            $startDate = new DateTime($this->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-            $startDateString = $startDate->format("Y-m-d");
-            
-            // End date.
-            // Increment the end date by a day to make it inclusive.
-            $endDate = new DateTime($this->endDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-            $endDate->modify('+1 day');
-            $endDateString = $endDate->format("Y-m-d");
-            
-            $result = $database->getJobs($startDateString, $endDateString, $this->onlyActive);
+        {            
+           $result = $database->getJobs($this->jobNumber, $this->jobStatuses);
             
             if ($result && ($database->countResults($result) > 0))
             {
@@ -127,11 +109,9 @@ class JobsReport extends Report
         return ($data);
     }
     
-    private $startDate;
+    private $jobNumber = "All";
     
-    private $endDate;
-    
-    private $onlyActive;
+    private $jobStatuses = array();
 }
 
 $report = new JobsReport();

@@ -3,11 +3,14 @@ require_once 'database.php';
 
 abstract class JobStatus
 {
-   const PENDING = 0;
+   const FIRST = 0;
+   const PENDING = JobStatus::FIRST;
    const ACTIVE = 1;
    const COMPLETE = 2;
    const CLOSED = 3;
    const DELETED = 4;
+   const LAST = 5;
+   const COUNT = JobStatus::LAST - JobStatus::FIRST;
    
    private static $names = array("Pending", "Active", "Complete", "Closed", "Deleted");
    
