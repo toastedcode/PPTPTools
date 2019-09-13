@@ -321,7 +321,7 @@ function getPartCount()
    <link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWasherLog.js"></script>
+   <script src="pw.js"></script>
    <script src="../common/validate.js"></script>
 
 </head>
@@ -348,12 +348,12 @@ function getPartCount()
                
                   <div class="form-item">
                      <div class="form-label">Time Card ID</div>
-                     <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" oninput="" value="<?php echo getTimeCardId(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" onChange="onTimeCardIdChange()" value="<?php echo getTimeCardId(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
                   </div>               
                
                   <div class="form-item">
                      <div class="form-label">Job Number</div>
-                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="onJobNumberChange()" <?php echo !isEditable() ? "disabled" : ""; ?>>
                         <?php echo getJobNumberOptions(); ?>
                      </select>
                   </div>
@@ -370,8 +370,8 @@ function getPartCount()
                         <div class="form-label">Manufacture Date</div>
                         <div class="flex-horizontal">
                            <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                           <button onclick="">Today</button>
-                           <button onclick="">Yesterday</button>
+                           <button id="today-button" form="" onclick="onTodayButton()">Today</button>
+                           <button id="yesterday-button" form="" onclick="onYesterdayButton()">Yesterday</button>
                         </div>
                      </div>
                   </div>
@@ -411,7 +411,7 @@ function getPartCount()
       </form>
       
       <script>
-         updateWCNumberInput();
+
       </script>
      
    </div>

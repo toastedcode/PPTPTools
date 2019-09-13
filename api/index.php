@@ -1,7 +1,9 @@
 <?php
 
 require_once 'rest.php';
+require_once '../common/jobInfo.php';
 require_once '../common/timeCardInfo.php';
+require_once '../common/userInfo.php';
 
 // *****************************************************************************
 //                                   Begin
@@ -20,18 +22,36 @@ $router->add("timeCardInfo", function($params) {
       
       if ($timeCardInfo)
       {
-         $result->status = true;
+         $result->success = true;
          $result->timeCardInfo = $timeCardInfo;
+         
+         if ($params->getBool("expandedProperties"))
+         {
+            $jobInfo = JobInfo::load($timeCardInfo->jobId);
+            
+            if ($jobInfo)
+            {
+               $result->jobNumber = $jobInfo->jobNumber;
+               $result->wcNumber = $jobInfo->wcNumber;
+            }
+            
+            $userInfo = UserInfo::load($timeCardInfo->employeeNumber);
+            
+            if ($userInfo)
+            {
+               $result->operatorName = $userInfo->getFullName();
+            }
+         }
       }
       else
       {
-         $result->status = false;
+         $result->success = false;
          $result->error = "Invalid time card ID.";
       }
    }
    else
    {
-      $result->status = false;
+      $result->success = false;
       $result->error = "No time card ID specified.";
    }
    

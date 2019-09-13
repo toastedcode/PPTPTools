@@ -45,4 +45,9 @@ class Params extends ArrayObject
    {
       return (intval($this->get($key)));
    }
+   
+   public function getBool($key)
+   {
+      return (boolval($this->get($key)));
+   }
 }
