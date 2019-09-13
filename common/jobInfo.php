@@ -128,7 +128,7 @@ class JobInfo
       return ($netPartsPerHour);
    }
    
-   public static function getJobNumbers()
+   public static function getJobNumbers($onlyActive)
    {
       $jobNumbers = array();
       
@@ -138,7 +138,7 @@ class JobInfo
       
       if ($database->isConnected())
       {
-         $result = $database->getJobNumbers();
+         $result = $database->getJobNumbers($onlyActive);
          
          if ($result)
          {

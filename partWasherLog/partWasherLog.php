@@ -6,6 +6,7 @@ require_once '../common/header.php';
 require_once '../common/partWasherEntry.php';
 
 require 'viewPartWasherLog.php';
+require 'viewPartWasherEntry.php';
 require 'selectEntryMethod.php';
 require 'selectTimeCard.php';
 require 'selectJob.php';
@@ -148,11 +149,19 @@ function processView($view)
       }
         
       case 'enter_part_count':
-        {
-           $page = new EnterPartCount();
-           $page->render();
-           break;
-        }
+      {
+        $page = new EnterPartCount();
+        $page->render();
+        break;
+      }
+     
+      case 'edit_part_washer_entry':
+      case 'view_part_washer_entry':
+      {
+         $page = new ViewPartWasherEntry();
+         $page->render($view);
+         break;
+      }
         
       case 'view_part_washer_log':
       default:

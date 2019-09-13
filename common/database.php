@@ -696,12 +696,19 @@ class PPTPDatabase extends MySqlDatabase
    //                                  Jobs
    // **************************************************************************
    
-   public function getJobNumbers()
+   public function getJobNumbers($onlyActive)
    {
+      $active = JobStatus::ACTIVE;
       $deleted = JobStatus::DELETED;
       
-      $query = "SELECT DISTINCT jobNumber FROM job WHERE status != $deleted ORDER BY jobNumber ASC;";
+      $statusClause = "status != $deleted";
+      if ($onlyActive)
+      {
+         $statusClause = "status = $active";
+      }
       
+      $query = "SELECT DISTINCT jobNumber FROM job WHERE $statusClause ORDER BY jobNumber ASC;";
+
       $result = $this->query($query);
       
       return ($result);

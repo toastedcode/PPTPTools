@@ -7,7 +7,7 @@ class SelectOperator_PartWeight extends SelectOperator
    protected function description()
    {
       $html =
-      <<<HEREDOC
+<<<HEREDOC
       <div class="description">Select the machine operator responsible for the creation of the parts being washed.  You can find the operator on the accompanying Pan Ticket.</div>
 HEREDOC;
       

@@ -44,7 +44,7 @@ class ViewLineInspections
          $this->filter = new Filter();
          
          $this->filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
-         $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(), "All"));
+         $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(false), "All"));
          $this->filter->addByName('date', new DateFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());

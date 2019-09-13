@@ -88,7 +88,7 @@ class ViewJobs
       {
          $this->filter = new Filter();
       
-         $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(), "All"));
+         $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(false), "All"));
          $this->filter->addByName('jobStatus', new JobStatusFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
@@ -96,7 +96,7 @@ class ViewJobs
       }
       
       $this->filter->update();
-      $this->filter->get("jobNumber")->updateJobNumbers(JobInfo::getJobNumbers());
+      $this->filter->get("jobNumber")->updateJobNumbers(JobInfo::getJobNumbers(false));
       
       $_SESSION["jobFilter"] = $this->filter;
    }
