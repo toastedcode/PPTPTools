@@ -1,6 +1,7 @@
 <?php
 
 require_once 'databaseKey.php';
+require_once 'jobInfo.php';
 require_once 'time.php';
 
 interface Database
@@ -96,7 +97,18 @@ class MySqlDatabase implements Database
 
 class PPTPDatabase extends MySqlDatabase
 {
-  
+   public static function getInstance()
+   {
+      if (!PPTPDatabase::$databaseInstance)
+      {
+         self::$databaseInstance = new PPTPDatabase();
+         
+         self::$databaseInstance->connect();
+      }
+      
+      return (self::$databaseInstance);
+   }
+   
    public function __construct()
    {
       global $SERVER, $USER, $PASSWORD, $DATABASE;
@@ -154,8 +166,8 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getWorkCentersForJob($jobNumber)
    {
-      $query = "SELECT DISTINCT wcNumber FROM job WHERE jobNumber = $jobNumber ORDER BY wcNumber ASC;";
-      
+      $query = "SELECT DISTINCT wcNumber FROM job WHERE jobNumber = \"$jobNumber\" ORDER BY wcNumber ASC;";
+
       $result = $this->query($query);
       
       return ($result);
@@ -1096,6 +1108,8 @@ class PPTPDatabase extends MySqlDatabase
    {
       
    }
+   
+   private static $databaseInstance = null;
 }
 
 ?>
