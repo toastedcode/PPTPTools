@@ -1,6 +1,9 @@
 <?php
 class Time
 {
+   // Date format required for initializing date inputs.
+   static public $javascriptDateFormat = "Y-m-d";
+   
    static public function init()
    {
       date_default_timezone_set('America/New_York');

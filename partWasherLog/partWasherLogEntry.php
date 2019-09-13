@@ -8,6 +8,8 @@ require_once '../common/params.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/timeCardInfo.php';
 
+const ONLY_ACTIVE = true;
+
 function getView()
 {
    $params = Params::parse();
@@ -120,18 +122,18 @@ function getDescription()
 }
 
 function getJobNumberOptions()
-{
+{   
    $options = "";
    
-   $jobNumbers = PPTPDatabase::getInstance()->getJobNumbers();  // TODO: Active only
+   $jobNumbers = JobInfo::getJobNumbers(ONLY_ACTIVE);
    
    $selectedJobNumber = getJobNumber();
    
    foreach ($jobNumbers as $jobNumber)
    {
-      $selected = ($jobNumber["jobNumber"] == $selectedJobNumber) ? "selected" : "";
+      $selected = ($jobNumber == $selectedJobNumber) ? "selected" : "";
       
-      $options .= "<option value=\"{$jobNumber["jobNumber"]}\" $selected>{$jobNumber["jobNumber"]}</option>";
+      $options .= "<option value=\"{$jobNumber}\" $selected>{$jobNumber}</option>";
    }
    
    return ($options);
@@ -151,6 +153,36 @@ function getWcNumberOptions()
    }
    
    return ($options);
+}
+
+function getManufactureDate()
+{
+   $manufactureDate = Time::now(Time::$javascriptDateFormat);
+   
+   $partWasherEntry = getPartWasherEntry();
+   
+   if ($partWasherEntry)
+   {
+      $timeCardId = $partWasherEntry->timeCardId;
+      
+      if (getTimeCardId() != 0)
+      {
+         $timeCardInfo = TimeCardInfo::load($timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+            $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
+         }
+      }
+      else if ($partWasherEntry->manufactureDate)
+      {
+         $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));
+         $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
+      }
+   }
+   
+   return ($manufactureDate);
 }
 
 function getOperatorOptions()
@@ -331,6 +363,17 @@ function getPartCount()
                      <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="" <?php echo !isEditable() ? "disabled" : ""; ?>>
                         <?php echo getWcNumberOptions(); ?>
                      </select>
+                  </div>
+                  
+                  <div class="flex-horizontal">
+                     <div class="form-item">
+                        <div class="form-label">Manufacture Date</div>
+                        <div class="flex-horizontal">
+                           <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                           <button onclick="">Today</button>
+                           <button onclick="">Yesterday</button>
+                        </div>
+                     </div>
                   </div>
                   
                   <div class="form-item">
