@@ -7,6 +7,8 @@ require_once '../common/newIndicator.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/permissions.php';
 require_once '../common/roles.php';
+require_once '../common/root.php';
+
 require_once '../common/timeCardInfo.php';
 
 class ViewPartWasherLog
@@ -119,6 +121,8 @@ HEREDOC;
    private function partWasherLogDiv()
    {
       $html = "";
+      
+      global $ROOT;
       
       $database = new PPTPDatabase();
       
@@ -237,15 +241,16 @@ HEREDOC;
                   if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
                   {
                      $viewEditIcon =
-                     "<i class=\"material-icons table-function-button\" onclick=\"onEditPartWasherEntry('$partWasherEntry->partWasherEntryId')\">mode_edit</i>";
-                     
+                     //"<i class=\"material-icons table-function-button\" onclick=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\">mode_edit</i>";
+                     "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                      $deleteIcon =
                      "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
                   }
                   else
                   {
                      $viewEditIcon =
-                     "<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
+                     //"<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
+                     "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=view_part_washer_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
                   }
    
                   $html .=

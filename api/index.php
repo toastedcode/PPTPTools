@@ -92,5 +92,93 @@ $router->add("wcNumbers", function($params) {
    echo json_encode($result);
 });
 
+$router->add("savePartWasherLogEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   if (isset($params["partWasherEntryId"]))
+   {
+      //
+      //  Updated entry
+      //
+      
+      $partWasherEntry = PartWasherEntry::load($params["partWasherEntryId"])
+      
+      if ($partWasherEntry)
+      {
+         if (isset($params["timeCardId"]))
+         {
+            // Time card entry
+            $partWasherEntry->timeCardId = params["timeCardId"];
+         }
+         else if (isset($params["jobNumber"]) &&
+                  isset($params["wcNumber"]) &&
+                  isset($params["manufactureDate"]) &&
+                  isset($params["operator"]))
+         {
+            // Manual entry
+            $partWasherEntry->jobNumber = params["jobNumber"];
+            $partWasherEntry->wcNumber = params["wcNumber"];
+            $partWasherEntry->manufactureDate = params["manufactureDate"];
+            $partWasherEntry->operator = params["operator"];
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Missing parameters.";
+         }
+         
+         if (($result->success) &&
+             isset($params["panCount"]) &&
+             isset($params["partCount"]))
+         {
+            $partWasherEntry->panCount = params["panCount"];
+            $partWasherEntry->partCount = params["partCount"];
+            
+            $database->newPartWasherEntry($partWasherEntry);
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $resut->partWasherEntryId = $params["partWasherEntryId"];
+         $result->error = "No existing part entry found.";
+      }
+      
+      $dbaseResult = $database->getWorkCentersForJob($params["jobNumber"]);
+   }
+   else
+   {
+      //
+      // New entry.
+      //
+      
+      $partWasherEntry = new PartWasherEntry();
+      
+      
+   }
+   
+   if ($dbaseResult)
+   {
+      $result->success = true;
+      $result->wcNumbers = array();
+      
+      while ($row = $dbaseResult->fetch_assoc())
+      {
+         $result->wcNumbers[] = $row["wcNumber"];
+      }
+   }
+   else
+   {
+      $result->status = false;
+      $result->error = "No work centers found.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->route();
 ?>

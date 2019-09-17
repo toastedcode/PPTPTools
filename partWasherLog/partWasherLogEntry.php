@@ -322,6 +322,7 @@ function getPartCount()
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="pw.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
 
 </head>
@@ -334,7 +335,8 @@ function getPartCount()
      
      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-      <form id="input-form" action="#" method="POST">
+      <form id="input-form" action="" method="POST">
+      </form>
       
       <div class="flex-vertical content">
       
@@ -348,7 +350,7 @@ function getPartCount()
                
                   <div class="form-item">
                      <div class="form-label">Time Card ID</div>
-                     <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" onChange="onTimeCardIdChange()" value="<?php echo getTimeCardId(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" onChange="onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
                   </div>               
                
                   <div class="form-item">
@@ -407,8 +409,6 @@ function getPartCount()
          <?php echo getNavBar(); ?>
          
       </div>
-      
-      </form>
       
       <script>
 
