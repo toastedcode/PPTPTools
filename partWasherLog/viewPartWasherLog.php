@@ -112,7 +112,7 @@ HEREDOC;
       
       $navBar->start();
       $navBar->mainMenuButton();
-      $navBar->highlightNavButton("New Log Entry", "onNewPartWasherEntry()", true);
+      $navBar->highlightNavButton("New Log Entry", "location.replace('partWasherLogEntry.php?view=new_part_washer_entry');", true);
       $navBar->end();
       
       return ($navBar->getHtml());
@@ -187,7 +187,7 @@ HEREDOC;
                      
                      if ($partWasherEntry->panCount != $timeCardInfo->panCount)
                      {
-                        $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
+                        $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
                      }
                   }
                   

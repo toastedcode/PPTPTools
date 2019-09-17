@@ -29,10 +29,6 @@ function getPartWasherEntry()
       {
          $partWasherEntry = PartWasherEntry::load($params->get("entryId"));
       }
-      else if (isset($_SESSION['partWasherEntry']))
-      {
-         $partWasherEntry = $_SESSION['partWasherEntry'];
-      }
    }
    
    return ($partWasherEntry);
@@ -54,7 +50,8 @@ function getNavBar()
       // Editing an existing entry.
       
       $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
-      $navBar->highlightNavButton("Save", "submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');", false);
+      //$navBar->highlightNavButton("Save", "submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');", false);
+      $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
    else if ($view == "view_part_washer_entry")
    {
@@ -123,7 +120,7 @@ function getDescription()
 
 function getJobNumberOptions()
 {   
-   $options = "";
+   $options = "<option style=\"display:none\">";
    
    $jobNumbers = JobInfo::getJobNumbers(ONLY_ACTIVE);
    
@@ -141,13 +138,15 @@ function getJobNumberOptions()
 
 function getWcNumberOptions()
 {
-   $options = "";
+   $options = "<option style=\"display:none\">";
    
    $workCenters = PPTPDatabase::getInstance()->getWorkCenters();
    
+   $selectedWcNumber = getWcNumber();
+   
    foreach ($workCenters as $workCenter)
    {
-      $selected = "";  // TODO
+      $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
       
       $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
    }
@@ -253,27 +252,68 @@ function getJobNumber()
    {
       $timeCardId = $partWasherEntry->timeCardId;
       
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
+      
       if (getTimeCardId() != 0)
       {
          $timeCardInfo = TimeCardInfo::load($timeCardId);
          
          if ($timeCardInfo)
          {
-            $jobInfo = JobInfo::load($timeCardInfo->jobId);
-            
-            if ($jobInfo)
-            {
-               $jobNumber = $jobInfo->jobNumber;
-            }
+            $jobId = $timeCardInfo->jobId;
          }
       }
       else
       {
-         $jobNumber = $partWasherEntry->jobNumber;
+         $jobId = $partWasherEntry->jobId;
+      }
+
+      $jobInfo = JobInfo::load($jobId);
+            
+      if ($jobInfo)
+      {
+         $jobNumber = $jobInfo->jobNumber;
       }
    }
    
    return ($jobNumber);
+}
+
+function getWcNumber()
+{
+   $wcNumber = 0;
+   
+   $partWasherEntry = getPartWasherEntry();
+   
+   if ($partWasherEntry)
+   {
+      $timeCardId = $partWasherEntry->timeCardId;
+      
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
+      
+      if (getTimeCardId() != 0)
+      {
+         $timeCardInfo = TimeCardInfo::load($timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $jobId = $timeCardInfo->jobId;
+         }
+      }
+      else
+      {
+         $jobId = $partWasherEntry->jobId;
+      }
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo)
+      {
+         $wcNumber = $jobInfo->wcNumber;
+      }
+   }
+   
+   return ($wcNumber);
 }
 
 function getPanCount()

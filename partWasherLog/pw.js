@@ -115,6 +115,33 @@ function onYesterdayButton()
    document.querySelector('#manufacture-date-input').value = formattedDate(yesterday); 
 }
 
+function onSubmit()
+{
+   var form = document.querySelector('#input-form');
+   
+   var xhttp = new XMLHttpRequest();
+
+   // Bind the form data.
+   var formData = new FormData(form);
+
+   // Define what happens on successful data submission.
+   xhttp.addEventListener("load", function(event) {
+     alert(event.target.responseText);
+   });
+
+   // Define what happens on successful data submission.
+   xhttp.addEventListener("error", function(event) {
+     alert('Oops! Something went wrong.');
+   });
+
+   // Set up our request
+   requestUrl = "../api/savePartWasherEntry/"
+   xhttp.open("POST", requestUrl);
+
+   // The data sent is what the user provided in the form
+   xhttp.send(formData);
+}
+
 function set(elementId, value)
 {
    document.getElementById(elementId).value = value;
