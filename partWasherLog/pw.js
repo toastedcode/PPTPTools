@@ -42,7 +42,7 @@ function onTimeCardIdChange()
             
             if (json.success == true)
             {
-               updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber);               
+               updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber);                   
             }
             else
             {
@@ -126,7 +126,16 @@ function onSubmit()
 
    // Define what happens on successful data submission.
    xhttp.addEventListener("load", function(event) {
-     alert(event.target.responseText);
+      var json = JSON.parse(event.target.responseText);
+      
+      if (json.success == true)
+      {
+         location.href = "partWasherLog.php?view=view_part_washer_log";
+      }
+      else
+      {
+         alert(json.error);
+      }
    });
 
    // Define what happens on successful data submission.

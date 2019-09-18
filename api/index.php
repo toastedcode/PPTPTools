@@ -34,6 +34,7 @@ $router->add("timeCardInfo", function($params) {
             {
                $result->jobNumber = $jobInfo->jobNumber;
                $result->wcNumber = $jobInfo->wcNumber;
+               $result->isActiveJob = ($jobInfo->status == JobStatus::ACTIVE);
             }
             
             $userInfo = UserInfo::load($timeCardInfo->employeeNumber);
@@ -101,11 +102,13 @@ $router->add("savePartWasherEntry", function($params) {
    $dbaseResult = null;
    
    $partWasherEntry = null;
-   
-   if (isset($params["partWasherEntryId"]))
+
+   if (isset($params["entryId"]) && 
+       is_numeric($params["entryId"]) && 
+       (intval($params["entryId"]) != PartWasherEntry::UNKNOWN_ENTRY_ID))
    {
       //  Updated entry
-      $partWasherEntry = PartWasherEntry::load($params["partWasherEntryId"]);
+      $partWasherEntry = PartWasherEntry::load($params["entryId"]);
       
       if (!$partWasherEntry)
       {
@@ -117,16 +120,19 @@ $router->add("savePartWasherEntry", function($params) {
    {
       // New entry.
       $partWasherEntry = new PartWasherEntry();
+      
+      // Use current date/time as entry time.
+      $partWasherEntry->dateTime = Time::now("Y-m-d h:i:s A");
    }
    
    if ($result->success)
-   {
-      // Use current date/time as entry time.
-      $partWasherEntry->dateTime = Time::now("Y-m-d h:i:s A");
-      
-      if (isset($params["timeCardId"]))
+   {      
+      if (isset($params["timeCardId"]) && is_int($params["timeCardId"]))
       {
+         //
          // Time card entry
+         //
+         
          $partWasherEntry->timeCardId = intval($params["timeCardId"]);
       }
       else if (isset($params["jobNumber"]) &&
@@ -134,11 +140,23 @@ $router->add("savePartWasherEntry", function($params) {
                isset($params["manufactureDate"]) &&
                isset($params["operator"]))
       {
+         //
          // Manual entry
-         $partWasherEntry->jobNumber = $params["jobNumber"];
-         $partWasherEntry->wcNumber = $params["wcNumber"];
-         $partWasherEntry->manufactureDate = $params["manufactureDate"];
-         $partWasherEntry->operator = intval($params["operator"]);
+         //
+
+         $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
+         
+         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         {
+            $partWasherEntry->jobId = $jobId;
+            $partWasherEntry->manufactureDate = $params["manufactureDate"];
+            $partWasherEntry->operator = intval($params["operator"]);
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Failed to lookup job ID.";
+         }
       }
       else
       {
@@ -148,11 +166,11 @@ $router->add("savePartWasherEntry", function($params) {
       
       if ($result->success)
       {
-         if (isset($params["laborer"]) &&
+         if (isset($params["washer"]) &&
              isset($params["panCount"]) &&
              isset($params["partCount"]))
          {
-            $partWasherEntry->employeeNumber = intval($params["laborer"]);
+            $partWasherEntry->employeeNumber = intval($params["washer"]);
             $partWasherEntry->panCount = intval($params["panCount"]);
             $partWasherEntry->partCount = intval($params["partCount"]);
             

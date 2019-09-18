@@ -7,6 +7,7 @@ require_once '../common/navigation.php';
 require_once '../common/params.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/timeCardInfo.php';
+require_once '../common/userInfo.php';
 
 const ONLY_ACTIVE = true;
 
@@ -32,6 +33,20 @@ function getPartWasherEntry()
    }
    
    return ($partWasherEntry);
+}
+
+function getEntryId()
+{
+   $entryId = PartWasherEntry::UNKNOWN_ENTRY_ID;
+   
+   $partWasherEntry = getPartWasherEntry();
+   
+   if ($partWasherEntry)
+   {
+      $entryId = $partWasherEntry->partWasherEntryId;
+   }
+   
+   return ($entryId);
 }
 
 function getNavBar()
@@ -140,15 +155,20 @@ function getWcNumberOptions()
 {
    $options = "<option style=\"display:none\">";
    
-   $workCenters = PPTPDatabase::getInstance()->getWorkCenters();
+   $jobNumber = getJobNumber();
    
-   $selectedWcNumber = getWcNumber();
-   
-   foreach ($workCenters as $workCenter)
+   if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
    {
-      $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
+      $workCenters = PPTPDatabase::getInstance()->getWorkCentersForJob($jobNumber);
       
-      $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
+      $selectedWcNumber = getWcNumber();
+      
+      foreach ($workCenters as $workCenter)
+      {
+         $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
+         
+         $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
+      }
    }
    
    return ($options);
@@ -164,7 +184,7 @@ function getManufactureDate()
    {
       $timeCardId = $partWasherEntry->timeCardId;
       
-      if (getTimeCardId() != 0)
+      if (getTimeCardId() != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
       {
          $timeCardInfo = TimeCardInfo::load($timeCardId);
          
@@ -184,18 +204,35 @@ function getManufactureDate()
    return ($manufactureDate);
 }
 
+function getWashDate()
+{
+   $washDate = Time::now(Time::$javascriptDateFormat);
+   
+   $partWasherEntry = getPartWasherEntry();
+   
+   if ($partWasherEntry)
+   {   
+      $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));
+      $washDate = $dateTime->format(Time::$javascriptDateFormat);
+   }
+   
+   return ($washDate);
+}
+
 function getOperatorOptions()
 {
-   $options = "";
+   $options = "<option style=\"display:none\">";
    
    $operators = PPTPDatabase::getInstance()->getUsersByRole(Role::OPERATOR);
+   
+   $selectedOperator = getOperator();
    
    foreach ($operators as $operator)
    {
       $userInfo = UserInfo::load($operator["employeeNumber"]);
       if ($userInfo)
       {
-         $selected = "";  // TODO
+         $selected = ($userInfo->employeeNumber == $selectedOperator) ? "selected" : "";
          
          $name = $userInfo->employeeNumber . " - " . $userInfo->getFullName();
          
@@ -206,18 +243,20 @@ function getOperatorOptions()
    return ($options);
 }
 
-function getLaborerOptions()
+function getWasherOptions()
 {
-   $options = "";
+   $options = "<option style=\"display:none\">";
    
-   $operators = PPTPDatabase::getInstance()->getUsersByRole(Role::LABORER);
+   $washers = PPTPDatabase::getInstance()->getUsersByRole(Role::PART_WASHER);
    
-   foreach ($operators as $operator)
+   $selectedWasher = getWasher();
+   
+   foreach ($washers as $washer)
    {
-      $userInfo = UserInfo::load($operator["employeeNumber"]);
+      $userInfo = UserInfo::load($washer["employeeNumber"]);
       if ($userInfo)
       {
-         $selected = "";  // TODO
+         $selected = ($userInfo->employeeNumber == $selectedWasher) ? "selected" : "";
          
          $name = $userInfo->employeeNumber . " - " . $userInfo->getFullName();
          
@@ -316,6 +355,50 @@ function getWcNumber()
    return ($wcNumber);
 }
 
+function getOperator()
+{
+   $operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+   
+   $partWasherEntry = getPartWasherEntry();
+   
+   if ($partWasherEntry)
+   {
+      $timeCardId = $partWasherEntry->timeCardId;
+      
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
+      
+      if (getTimeCardId() != 0)
+      {
+         $timeCardInfo = TimeCardInfo::load($timeCardId);
+         
+         if ($timeCardInfo)
+         {
+            $operator = $timeCardInfo->employeeNumber;
+         }
+      }
+      else
+      {
+         $operator = $partWasherEntry->operator;
+      }
+   }
+   
+   return ($operator);
+}
+
+function getWasher()
+{
+   $washer = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+   
+   $partWasherEntry = getPartWasherEntry();
+   
+   if ($partWasherEntry)
+   {
+      $washer = $partWasherEntry->employeeNumber;
+   }      
+   
+   return ($washer);
+}
+
 function getPanCount()
 {
    $panCount = null;
@@ -376,6 +459,7 @@ function getPartCount()
      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
       <form id="input-form" action="" method="POST">
+         <input id="entry-id-input" type="hidden" name="entryId" value="<?php echo getEntryId(); ?>">
       </form>
       
       <div class="flex-vertical content">
@@ -426,10 +510,16 @@ function getPartCount()
                   </div>
                   
                   <div class="form-item">
-                     <div class="form-label">Laborer</div>
-                     <select id="laborer-input" class="form-input-medium" name="laborer" form="input-form" oninput="" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                        <?php echo getLaborerOptions(); ?>
+                     <div class="form-label">Part Washer</div>
+                     <select id="part-washer-input" class="form-input-medium" name="washer" form="input-form" oninput="" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                        <?php echo getWasherOptions(); ?>
                      </select>
+                  </div>
+                  
+                  <!--  Purely for display -->
+                  <div class="form-item">
+                     <div class="form-label">Wash Date</div>
+                     <input class="form-input-medium" type="date" value="<?php echo getWashDate(); ?>" disabled>
                   </div>
                   
                   <div class="form-item">

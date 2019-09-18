@@ -151,6 +151,22 @@ class JobInfo
       
       return ($jobNumbers);
    }
+   
+   public static function getJobIdByComponents($jobNumber, $wcNumber)
+   {
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
+      
+      $database = PPTPDatabase::getInstance();
+      
+      $result = $database->getJobByComponents($jobNumber, $wcNumber);
+
+      if ($result && ($row = $result->fetch_assoc()))
+      {
+         $jobId = intval($row["jobId"]);
+      }
+      
+      return ($jobId);
+   }
 }
 
 /*

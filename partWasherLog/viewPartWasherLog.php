@@ -169,8 +169,8 @@ HEREDOC;
                
                if ($partWasherEntry)
                {
-                  $jobId = $partWasherEntry->getJobId();
-                  $operatorEmployeeNumber =  $partWasherEntry->getOperator();
+                  $jobId = JobInfo::UNKNOWN_JOB_ID;
+                  $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
                   $mismatch = "";
                   
                   // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
@@ -189,6 +189,14 @@ HEREDOC;
                      {
                         $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
                      }
+                  }
+                  else
+                  {
+                     $jobId = $partWasherEntry->getJobId();
+                     $operatorEmployeeNumber =  $partWasherEntry->getOperator();
+                     
+                     $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                     $mfgDate = $dateTime->format("m-d-Y");
                   }
                   
                   // Check for a mismatch between the part weight pan count and the part washer man count.
