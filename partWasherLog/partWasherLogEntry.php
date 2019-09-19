@@ -119,7 +119,7 @@ function getDescription()
    
    if ($view == "new_part_washer_entry")
    {
-      $description = "<TODO>Start by selecting a work center, then any of the currently active jobs for that station.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
+      $description = "Create a new entry in the part washer log.  Starting with the time card ID is the fastest and most accurate way of entering the required job information, or simply enter the information manually if a time card is not available.";
    }
    else if ($view == "edit_part_washer_entry")
    {
@@ -141,6 +141,15 @@ function getJobNumberOptions()
    
    $selectedJobNumber = getJobNumber();
    
+   // Add selected job number, if not already in the array.
+   // Note: This handles the case of viewing an entry that references a non-active job.
+   if (($selectedJobNumber != "") &&
+       (!in_array($selectedJobNumber, $jobNumbers)))
+   {
+      $jobNumbers[] = $selectedJobNumber;
+      sort($jobNumbers);
+   }
+   
    foreach ($jobNumbers as $jobNumber)
    {
       $selected = ($jobNumber == $selectedJobNumber) ? "selected" : "";
@@ -157,18 +166,23 @@ function getWcNumberOptions()
    
    $jobNumber = getJobNumber();
    
+   $workCenters = null;
    if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
    {
       $workCenters = PPTPDatabase::getInstance()->getWorkCentersForJob($jobNumber);
+   }
+   else
+   {
+      $workCenters = PPTPDatabase::getInstance()->getWorkCenters();
+   }
       
-      $selectedWcNumber = getWcNumber();
+   $selectedWcNumber = getWcNumber();
+   
+   foreach ($workCenters as $workCenter)
+   {
+      $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
       
-      foreach ($workCenters as $workCenter)
-      {
-         $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
-         
-         $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
-      }
+      $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
    }
    
    return ($options);
@@ -225,18 +239,34 @@ function getOperatorOptions()
    
    $operators = PPTPDatabase::getInstance()->getUsersByRole(Role::OPERATOR);
    
-   $selectedOperator = getOperator();
-   
+   // Create an array of employee numbers.
+   $employeeNumbers = array();
    foreach ($operators as $operator)
    {
-      $userInfo = UserInfo::load($operator["employeeNumber"]);
+      $employeeNumbers[] = intval($operator["employeeNumber"]);
+   }
+   
+   $selectedOperator = getOperator();
+   
+   // Add selected job number, if not already in the array.
+   // Note: This handles the case of viewing an entry with an operator that is not assigned to the OPERATOR role.
+   if (($selectedOperator != UserInfo::UNKNOWN_EMPLOYEE_NUMBER) &&
+       (!in_array($selectedOperator, $employeeNumbers)))
+   {
+      $employeeNumbers[] = $selectedOperator;
+      sort($employeeNumbers);
+   }
+     
+   foreach ($employeeNumbers as $employeeNumber)
+   {
+      $userInfo = UserInfo::load($employeeNumber);
       if ($userInfo)
       {
-         $selected = ($userInfo->employeeNumber == $selectedOperator) ? "selected" : "";
+         $selected = ($employeeNumber == $selectedOperator) ? "selected" : "";
          
-         $name = $userInfo->employeeNumber . " - " . $userInfo->getFullName();
+         $name = $employeeNumber . " - " . $userInfo->getFullName();
          
-         $options .= "<option value=\"$userInfo->employeeNumber\" $selected>$name</option>";
+         $options .= "<option value=\"$employeeNumber\" $selected>$name</option>";
       }
    }
    
@@ -249,18 +279,34 @@ function getWasherOptions()
    
    $washers = PPTPDatabase::getInstance()->getUsersByRole(Role::PART_WASHER);
    
-   $selectedWasher = getWasher();
-   
+   // Create an array of employee numbers.
+   $employeeNumbers = array();
    foreach ($washers as $washer)
    {
-      $userInfo = UserInfo::load($washer["employeeNumber"]);
+      $employeeNumbers[] = intval($washer["employeeNumber"]);
+   }
+   
+   $selectedWasher = getWasher();
+   
+   // Add selected washer, if not already in the array.
+   // Note: This handles the case of viewing an entry with a washer that is not assigned to the PART_WASHER role.
+   if (($selectedWasher != UserInfo::UNKNOWN_EMPLOYEE_NUMBER) &&
+       (!in_array($selectedWasher, $employeeNumbers)))
+   {
+      $employeeNumbers[] = $selectedWasher;
+      sort($employeeNumbers);
+   }
+   
+   foreach ($employeeNumbers as $employeeNumber)
+   {
+      $userInfo = UserInfo::load($employeeNumber);
       if ($userInfo)
       {
-         $selected = ($userInfo->employeeNumber == $selectedWasher) ? "selected" : "";
+         $selected = ($employeeNumber == $selectedWasher) ? "selected" : "";
          
-         $name = $userInfo->employeeNumber . " - " . $userInfo->getFullName();
+         $name = $employeeNumber . " - " . $userInfo->getFullName();
          
-         $options .= "<option value=\"$userInfo->employeeNumber\" $selected>$name</option>";
+         $options .= "<option value=\"$employeeNumber\" $selected>$name</option>";
       }
    }
    
@@ -394,7 +440,16 @@ function getWasher()
    if ($partWasherEntry)
    {
       $washer = $partWasherEntry->employeeNumber;
-   }      
+   }
+   else
+   {
+      $userInfo = Authentication::getAuthenticatedUser();
+      
+      if ($userInfo)
+      {
+         $washer = $userInfo->employeeNumber;
+      }
+   }
    
    return ($washer);
 }
@@ -427,6 +482,18 @@ function getPartCount()
    return ($partCount);
 }
 
+// *****************************************************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../pptpTools.php');
+   exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -440,6 +507,7 @@ function getPartCount()
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    <link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
    
@@ -470,70 +538,73 @@ function getPartCount()
          
          <div class="pptp-form">
             <div class="form-row">
-               <div class="form-col">
+            <div class="form-col" style="margin-right: 20px;">  
+               <div class="form-section-header">Time Card Entry</div>               
+               <div class="form-item">
+                  <div class="form-label">Time Card ID</div>
+                  <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" onChange="onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+               </div>               
+            
+               <div class="form-section-header">Manual Entry</div>
+               <div class="form-item">
+                  <div class="form-label">Job Number</div>
+                  <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <?php echo getJobNumberOptions(); ?>
+                  </select>
+               </div>
                
-                  <div class="form-item">
-                     <div class="form-label">Time Card ID</div>
-                     <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" onChange="onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                  </div>               
+               <div class="form-item">
+                  <div class="form-label">Work Center</div>
+                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <?php echo getWcNumberOptions(); ?>
+                  </select>
+               </div>
                
+               <div class="flex-horizontal">
                   <div class="form-item">
-                     <div class="form-label">Job Number</div>
-                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="onJobNumberChange()" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                        <?php echo getJobNumberOptions(); ?>
-                     </select>
-                  </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Work Center</div>
-                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                        <?php echo getWcNumberOptions(); ?>
-                     </select>
-                  </div>
-                  
-                  <div class="flex-horizontal">
-                     <div class="form-item">
-                        <div class="form-label">Manufacture Date</div>
-                        <div class="flex-horizontal">
-                           <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                           <button id="today-button" form="" onclick="onTodayButton()">Today</button>
-                           <button id="yesterday-button" form="" onclick="onYesterdayButton()">Yesterday</button>
-                        </div>
+                     <div class="form-label">Manufacture Date</div>
+                     <div class="flex-horizontal">
+                        <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                        &nbsp<button id="today-button" form="" onclick="onTodayButton()">Today</button>
+                        &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()">Yesterday</button>
                      </div>
                   </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Operator</div>
-                     <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                        <?php echo getOperatorOptions(); ?>
-                     </select>
-                  </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Part Washer</div>
-                     <select id="part-washer-input" class="form-input-medium" name="washer" form="input-form" oninput="" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                        <?php echo getWasherOptions(); ?>
-                     </select>
-                  </div>
-                  
-                  <!--  Purely for display -->
-                  <div class="form-item">
-                     <div class="form-label">Wash Date</div>
-                     <input class="form-input-medium" type="date" value="<?php echo getWashDate(); ?>" disabled>
-                  </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Pan Count</div>
-                     <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="" value="<?php echo getPanCount(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                  </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Part Count</div>
-                     <input id="part-count-input" class="form-input-medium" type="number" name="partCount" form="input-form" oninput="" value="<?php echo getPartCount(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
-                  </div>
-                  
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Operator</div>
+                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <?php echo getOperatorOptions(); ?>
+                  </select>
                </div>
             </div>
+            
+            <div class="form-col">
+               <!--  Purely for display -->
+               <div class="form-item">
+                  <div class="form-label">Wash Date</div>
+                  <input class="form-input-medium" type="date" value="<?php echo getWashDate(); ?>" disabled>
+               </div>
+                           
+               <div class="form-item">
+                  <div class="form-label">Part Washer</div>
+                  <select id="part-washer-input" class="form-input-medium" name="washer" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                     <?php echo getWasherOptions(); ?>
+                  </select>
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Pan Count</div>
+                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Part Count</div>
+                  <input id="part-count-input" class="form-input-medium" type="number" name="partCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPartCount(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+               </div>
+            </div>
+            </div>
+                     
          </div>
          
          <?php echo getNavBar(); ?>
@@ -541,7 +612,19 @@ function getPartCount()
       </div>
       
       <script>
-
+         var jobNumberValidator = new SelectValidator("job-number-input");
+         var wcNumberValidator = new SelectValidator("wc-number-input");
+         var operatorValidator = new SelectValidator("operator-input");
+         var partWasherValidator = new SelectValidator("part-washer-input");
+         var panCountValidator = new IntValidator("pan-count-input", 2, 1, 40, false);
+         var partCountValidator = new IntValidator("part-count-input", 6, 1, 100000, false);
+   
+         jobNumberValidator.init();
+         wcNumberValidator.init();
+         operatorValidator.init();
+         partWasherValidator.init();
+         panCountValidator.init();
+         partCountValidator.init();
       </script>
      
    </div>

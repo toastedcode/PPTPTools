@@ -38,6 +38,7 @@ function onTimeCardIdChange()
       {
          if (this.readyState == 4 && this.status == 200)
          {
+            console.log(this.responseText);
             var json = JSON.parse(this.responseText);
             
             if (json.success == true)
@@ -117,38 +118,41 @@ function onYesterdayButton()
 
 function onSubmit()
 {
-   var form = document.querySelector('#input-form');
-   
-   var xhttp = new XMLHttpRequest();
-
-   // Bind the form data.
-   var formData = new FormData(form);
-
-   // Define what happens on successful data submission.
-   xhttp.addEventListener("load", function(event) {
-      var json = JSON.parse(event.target.responseText);
+   if (validatePartWasherEntry())
+   {
+      var form = document.querySelector('#input-form');
       
-      if (json.success == true)
-      {
-         location.href = "partWasherLog.php?view=view_part_washer_log";
-      }
-      else
-      {
-         alert(json.error);
-      }
-   });
-
-   // Define what happens on successful data submission.
-   xhttp.addEventListener("error", function(event) {
-     alert('Oops! Something went wrong.');
-   });
-
-   // Set up our request
-   requestUrl = "../api/savePartWasherEntry/"
-   xhttp.open("POST", requestUrl);
-
-   // The data sent is what the user provided in the form
-   xhttp.send(formData);
+      var xhttp = new XMLHttpRequest();
+   
+      // Bind the form data.
+      var formData = new FormData(form);
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         var json = JSON.parse(event.target.responseText);
+         
+         if (json.success == true)
+         {
+            location.href = "partWasherLog.php?view=view_part_washer_log";
+         }
+         else
+         {
+            alert(json.error);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/savePartWasherEntry/"
+      xhttp.open("POST", requestUrl);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);
+   }
 }
 
 function set(elementId, value)
@@ -202,10 +206,17 @@ function updateTimeCardInfo(timeCardInfo, jobNumber, wcNumber)
    var date = new Date(timeCardInfo.dateTime);
    var manufactureDate = formattedDate(date);
    
+   // TODO: Add missing options.
+   //updateJobNumberOptions(jobNumber);
+   //updateOperatorOptions(operator);
+   //updateWcNumberOptions(wcNumber);
+   
    set("job-number-input", jobNumber);
    set("wc-number-input", wcNumber);
    set("operator-input", operator);
    set("manufacture-date-input", manufactureDate);
+   
+   onJobNumberChange();
 }
 
 function formattedDate(date)
@@ -218,4 +229,46 @@ function formattedDate(date)
    var formattedDate = date.getFullYear() + "-" + (month) + "-" + (day);
 
    return (formattedDate);
+}
+
+function validatePartWasherEntry()
+{
+   valid = false;
+
+   /*
+   if (!validateTimeCardId())
+   {
+      alert("Please enter a valid time card ID.");      
+   }
+   */
+   if (!(document.getElementById("job-number-input").validator.validate()))
+   {
+      alert("Please select a job.");    
+   }
+   else if (!(document.getElementById("wc-number-input").validator.validate()))
+   {
+      alert("Please select a work center.");    
+   }
+   else if (!(document.getElementById("operator-input").validator.validate()))
+   {
+      alert("Please select an operator.");    
+   }
+   else if (!(document.getElementById("part-washer-input").validator.validate()))
+   {
+      alert("Please select a part washer.");    
+   }
+   else if (!(document.getElementById("pan-count-input").validator.validate()))
+   {
+      alert("Please enter a valid pan count.");
+   }
+   else if (!(document.getElementById("part-count-input").validator.validate()))
+   {
+      alert("Please enter a valid part count.");
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);   
 }
