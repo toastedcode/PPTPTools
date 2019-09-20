@@ -550,17 +550,17 @@ class PPTPDatabase extends MySqlDatabase
    {
       $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
       
-      $manufactureDate = null;
+      $manufactureDate = "null";  // Note: Must use "null" for dates, rather than "".
       if ($partWasherEntry->manufactureDate)
       {
-         $manufactureDate = Time::toMySqlDate($partWasherEntry->manufactureDate);
+         $manufactureDate = "'" . Time::toMySqlDate($partWasherEntry->manufactureDate) . "'";
       }
       
       $query =
       "INSERT INTO partwasher " .
       "(dateTime, employeeNumber, timeCardId, panCount, partCount, jobId, operator, manufactureDate) " .
       "VALUES " .
-      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->timeCardId', '$partWasherEntry->panCount', '$partWasherEntry->partCount', '$partWasherEntry->jobId', '$partWasherEntry->operator', '$manufactureDate');";
+      "('$dateTime', '$partWasherEntry->employeeNumber', '$partWasherEntry->timeCardId', '$partWasherEntry->panCount', '$partWasherEntry->partCount', '$partWasherEntry->jobId', '$partWasherEntry->operator', $manufactureDate);";
 
       $result = $this->query($query);
       
@@ -572,17 +572,17 @@ class PPTPDatabase extends MySqlDatabase
    {
       $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
       
-      $manufactureDate = null;
+      $manufactureDate = "null";  // Note: Must use "null" for dates, rather than "".
       if ($partWasherEntry->manufactureDate)
       {
-         $manufactureDate = Time::toMySqlDate($partWasherEntry->manufactureDate);
+         $manufactureDate = "'" . Time::toMySqlDate($partWasherEntry->manufactureDate) . "'";
       }
       
       $query =
       "UPDATE partwasher " .
-      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount, jobId = $partWasherEntry->jobId, operator = $partWasherEntry->operator, manufactureDate = '$manufactureDate' " .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, panCount = $partWasherEntry->panCount, partCount = $partWasherEntry->partCount, jobId = $partWasherEntry->jobId, operator = $partWasherEntry->operator, manufactureDate = $manufactureDate " .
       "WHERE partWasherEntryId = $partWasherEntry->partWasherEntryId;";
-      
+
       $result = $this->query($query);
       
       return ($result);

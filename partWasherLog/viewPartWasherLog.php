@@ -185,21 +185,27 @@ HEREDOC;
                      
                      $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
                      
+                     /*
                      if ($partWasherEntry->panCount != $timeCardInfo->panCount)
                      {
                         $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
                      }
+                     */
                   }
                   else
                   {
                      $jobId = $partWasherEntry->getJobId();
                      $operatorEmployeeNumber =  $partWasherEntry->getOperator();
                      
-                     $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                     $mfgDate = $dateTime->format("m-d-Y");
+                     if ($partWasherEntry->manufactureDate)
+                     {
+                        $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                        $mfgDate = $dateTime->format("m-d-Y");
+                     }
                   }
                   
                   // Check for a mismatch between the part weight pan count and the part washer man count.
+                  /*
                   $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
                   if ($partWeightEntry)
                   {
@@ -210,6 +216,7 @@ HEREDOC;
                         $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
                      }
                   }
+                  */
                   
                   // Use the job id to fill in the job number and work center number.
                   $jobNumber = "unknown";

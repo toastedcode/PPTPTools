@@ -60,6 +60,15 @@ $router->add("timeCardInfo", function($params) {
    echo json_encode($result);
 });
 
+$router->add("jobs", function($params) {
+   $result = new stdClass();
+   
+   $result->success = true;
+   $result->jobs = JobInfo::getJobNumbers(true);  // only active
+   
+   echo json_encode($result);
+});
+
 $router->add("wcNumbers", function($params) {
    $result = new stdClass();
    
@@ -89,6 +98,48 @@ $router->add("wcNumbers", function($params) {
    {
       $result->status = false;
       $result->error = "No work centers found.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("users", function($params) {
+   $result = new stdClass();
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   if (isset($params["role"]))
+   {
+      $dbaseResult = $database->getUsersByRole(intval($params["role"]));
+   }
+   else
+   {
+      $dbaseResult = $database->getUsers();
+   }
+   
+   if ($dbaseResult)
+   {
+      $result->success = true;
+      $result->operators = array();
+      
+      while ($row = $dbaseResult->fetch_assoc())
+      {
+         $userInfo = UserInfo::load($row["employeeNumber"]);
+         
+         if ($userInfo)
+         {
+            $operatorInfo = new stdClass();
+            $operatorInfo->employeeNumber = $userInfo->employeeNumber;
+            $operatorInfo->name = $userInfo->getFullName();
+            $result->operators[] = $operatorInfo;
+         }
+      }
+   }
+   else
+   {
+      $result->status = false;
+      $result->error = "No users found.";
    }
    
    echo json_encode($result);
@@ -127,7 +178,7 @@ $router->add("savePartWasherEntry", function($params) {
    
    if ($result->success)
    {      
-      if (isset($params["timeCardId"]) && is_int($params["timeCardId"]))
+      if (isset($params["timeCardId"]) && is_numeric($params["timeCardId"]))
       {
          //
          // Time card entry

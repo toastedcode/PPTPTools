@@ -11,6 +11,23 @@ require_once '../common/userInfo.php';
 
 const ONLY_ACTIVE = true;
 
+abstract class PartWasherLogInputField
+{
+   const FIRST = 0;
+   const TIME_CARD_ID = PartWasherLogInputField::FIRST;
+   const JOB_NUMBER = 1;
+   const WC_NUMBER = 2;
+   const MANUFACTURE_DATE = 3;
+   const OPERATOR = 4;
+   const WASH_DATE = 5;
+   const WASHER = 6;
+   const PAN_COUNT = 7;
+   const PART_COUNT = 8;
+   const LAST = 9;
+   const COUNT = PartWasherLogInputField::LAST - PartWasherLogInputField::FIRST;
+}
+
+
 function getView()
 {
    $params = Params::parse();
@@ -81,12 +98,62 @@ function getNavBar()
    return ($navBar->getHtml());
 }
 
-function isEditable()
+function isEditable($field)
 {
    $view = getView();
    
-   return (($view == "new_part_washer_entry") ||
-           ($view == "edit_part_washer_entry"));
+   // Start with the edit mode, as dictated by the view.
+   $isEditable = (($view == "new_part_washer_entry") ||
+                  ($view == "edit_part_washer_entry"));
+   
+   switch ($field)
+   {      
+      case PartWasherLogInputField::JOB_NUMBER:
+      case PartWasherLogInputField::OPERATOR:
+      case PartWasherLogInputField::MANUFACTURE_DATE:
+      {
+         // Edit status disabled by time card ID.
+         $isEditable &= (getTimeCardId() == TimeCardInfo::UNKNOWN_TIME_CARD_ID);
+         break;
+      }
+      
+      case PartWasherLogInputField::WC_NUMBER:
+      {
+         // Edit status determined by job number selection.
+         $isEditable &= (getJobNumber() != JobInfo::UNKNOWN_JOB_NUMBER);
+         break;
+      }
+      
+      case PartWasherLogInputField::WASH_DATE:
+      {
+         // Wash date is restricted to current date/time.
+         $isEditable = false;
+         break;
+      }
+      
+      case PartWasherLogInputField::WASHER:
+      {
+         // Only administrative users can make an entry under another user's name.
+         $userInfo = Authentication::getAuthenticatedUser();
+         if ($userInfo)
+         {
+            $isEditable &= (($userInfo->roles == Role::SUPER_USER) ||
+                            ($userInfo->roles == Role::ADMIN));
+         }
+         break;
+      }
+      
+      case PartWasherLogInputField::TIME_CARD_ID:
+      case PartWasherLogInputField::PAN_COUNT:
+      case PartWasherLogInputField::PART_COUNT:
+      default:
+      {
+         // Edit status based solely on view.
+         break;
+      }
+   }
+
+   return ($isEditable);
 }
 
 function getHeading()
@@ -190,7 +257,7 @@ function getWcNumberOptions()
 
 function getManufactureDate()
 {
-   $manufactureDate = Time::now(Time::$javascriptDateFormat);
+   $manufactureDate = null;
    
    $partWasherEntry = getPartWasherEntry();
    
@@ -512,7 +579,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="pw.js"></script>
+   <script src="partWasherLog.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
 
@@ -528,6 +595,8 @@ if (!Authentication::isAuthenticated())
    
       <form id="input-form" action="" method="POST">
          <input id="entry-id-input" type="hidden" name="entryId" value="<?php echo getEntryId(); ?>">
+         <input type="hidden" name="washer" value="<?php echo getWasher(); ?>">
+         <input type="hidden" name="washDate" value="<?php echo getWashDate(); ?>">
       </form>
       
       <div class="flex-vertical content">
@@ -542,20 +611,20 @@ if (!Authentication::isAuthenticated())
                <div class="form-section-header">Time Card Entry</div>               
                <div class="form-item">
                   <div class="form-label">Time Card ID</div>
-                  <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" onChange="onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" oninput="this.validator.validate(); onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable(PartWasherLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
                </div>               
             
                <div class="form-section-header">Manual Entry</div>
                <div class="form-item">
                   <div class="form-label">Job Number</div>
-                  <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(PartWasherLogInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
                      <?php echo getJobNumberOptions(); ?>
                   </select>
                </div>
                
                <div class="form-item">
                   <div class="form-label">Work Center</div>
-                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWasherLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                      <?php echo getWcNumberOptions(); ?>
                   </select>
                </div>
@@ -564,7 +633,7 @@ if (!Authentication::isAuthenticated())
                   <div class="form-item">
                      <div class="form-label">Manufacture Date</div>
                      <div class="flex-horizontal">
-                        <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                        <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable(PartWasherLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>
                         &nbsp<button id="today-button" form="" onclick="onTodayButton()">Today</button>
                         &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()">Yesterday</button>
                      </div>
@@ -573,7 +642,7 @@ if (!Authentication::isAuthenticated())
                
                <div class="form-item">
                   <div class="form-label">Operator</div>
-                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWasherLogInputField::OPERATOR) ? "disabled" : ""; ?>>
                      <?php echo getOperatorOptions(); ?>
                   </select>
                </div>
@@ -583,24 +652,24 @@ if (!Authentication::isAuthenticated())
                <!--  Purely for display -->
                <div class="form-item">
                   <div class="form-label">Wash Date</div>
-                  <input class="form-input-medium" type="date" value="<?php echo getWashDate(); ?>" disabled>
+                  <input class="form-input-medium" type="date" value="<?php echo getWashDate(); ?>" <?php echo !isEditable(PartWasherLogInputField::WASH_DATE) ? "disabled" : ""; ?>>
                </div>
                            
                <div class="form-item">
                   <div class="form-label">Part Washer</div>
-                  <select id="part-washer-input" class="form-input-medium" name="washer" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <select id="part-washer-input" class="form-input-medium" name="washer" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWasherLogInputField::WASHER) ? "disabled" : ""; ?>>
                      <?php echo getWasherOptions(); ?>
                   </select>
                </div>
                
                <div class="form-item">
                   <div class="form-label">Pan Count</div>
-                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWasherLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                
                <div class="form-item">
                   <div class="form-label">Part Count</div>
-                  <input id="part-count-input" class="form-input-medium" type="number" name="partCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPartCount(); ?>" <?php echo !isEditable() ? "disabled" : ""; ?>>
+                  <input id="part-count-input" class="form-input-medium" type="number" name="partCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPartCount(); ?>" <?php echo !isEditable(PartWasherLogInputField::PART_COUNT) ? "disabled" : ""; ?>>
                </div>
             </div>
             </div>
@@ -612,13 +681,15 @@ if (!Authentication::isAuthenticated())
       </div>
       
       <script>
+         var timeCardIdValidator = new IntValidator("time-card-id-input", 7, 1, 1000000, true);
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
          var operatorValidator = new SelectValidator("operator-input");
          var partWasherValidator = new SelectValidator("part-washer-input");
          var panCountValidator = new IntValidator("pan-count-input", 2, 1, 40, false);
          var partCountValidator = new IntValidator("part-count-input", 6, 1, 100000, false);
-   
+
+         timeCardIdValidator.init();
          jobNumberValidator.init();
          wcNumberValidator.init();
          operatorValidator.init();

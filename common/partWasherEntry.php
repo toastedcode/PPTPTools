@@ -98,7 +98,10 @@ class PartWasherEntry
             // These attributes were added for manual entry when no time card is available.
             $partWasherEntry->jobId = intval($row['jobId']);
             $partWasherEntry->operator = intval($row['operator']);
-            $partWasherEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+            if ($row['manufactureDate'])
+            {
+               $partWasherEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+            }
          }
       }
       
