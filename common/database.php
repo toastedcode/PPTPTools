@@ -670,11 +670,17 @@ class PPTPDatabase extends MySqlDatabase
    {
       $dateTime = Time::toMySqlDate($partWeightEntry->dateTime);
       
+      $manufactureDate = "null";  // Note: Must use "null" for dates, rather than "".
+      if ($partWeightEntry->manufactureDate)
+      {
+         $manufactureDate = "'" . Time::toMySqlDate($partWeightEntry->manufactureDate) . "'";
+      }
+
       $query =
       "INSERT INTO partweight " .
-      "(dateTime, employeeNumber, timeCardId, weight, jobId, operator, panCount) " .
+      "(dateTime, employeeNumber, timeCardId, weight, jobId, operator, manufactureDate, panCount) " .
       "VALUES " .
-      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight', '$partWeightEntry->jobId', '$partWeightEntry->operator', '$partWeightEntry->panCount');";
+      "('$dateTime', '$partWeightEntry->employeeNumber', '$partWeightEntry->timeCardId', '$partWeightEntry->weight', '$partWeightEntry->jobId', '$partWeightEntry->operator', $manufactureDate, '$partWeightEntry->panCount');";
 
       $result = $this->query($query);
       
@@ -684,11 +690,17 @@ class PPTPDatabase extends MySqlDatabase
    public function updatePartWeightEntry(
       $partWeightEntry)
    {
-      $dateTime = Time::toMySqlDate($partWasherEntry->dateTime);
+      $dateTime = Time::toMySqlDate($partWeightEntry->dateTime);
       
+      $manufactureDate = "null";  // Note: Must use "null" for dates, rather than "".
+      if ($partWeightEntry->manufactureDate)
+      {
+         $manufactureDate = "'" . Time::toMySqlDate($partWeightEntry->manufactureDate) . "'";
+      }
+            
       $query =
       "UPDATE partweight " .
-      "SET dateTime = \"$dateTime\", employeeNumber = $partWasherEntry->employeeNumber, timeCardId = $partWasherEntry->timeCardId, weight = $partWasherEntry->weight, jobId = $partWeightEntry->jobId, operator = $partWeightEntry->operator, panCount = $partWeightEntry->panCount " .
+      "SET dateTime = \"$dateTime\", employeeNumber = $partWeightEntry->employeeNumber, timeCardId = $partWeightEntry->timeCardId, weight = $partWeightEntry->weight, jobId = $partWeightEntry->jobId, operator = $partWeightEntry->operator, manufactureDate = $manufactureDate, panCount = $partWeightEntry->panCount " .
       "WHERE partWeightEntryId = $partWeightEntry->partWeightEntryId;";
 
       $result = $this->query($query);

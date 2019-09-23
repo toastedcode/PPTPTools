@@ -3,6 +3,7 @@
 require_once 'rest.php';
 require_once '../common/jobInfo.php';
 require_once '../common/partWasherEntry.php';
+require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
 
@@ -164,7 +165,7 @@ $router->add("savePartWasherEntry", function($params) {
       if (!$partWasherEntry)
       {
          $result->success = false;
-         $result->error = "No existing part entry found.";
+         $result->error = "No existing part washer entry found.";
       }
    }
    else
@@ -248,6 +249,151 @@ $router->add("savePartWasherEntry", function($params) {
       }
    }
 
+   echo json_encode($result);
+});
+
+$router->add("savePartWeightEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $partWeightEntry = null;
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != PartWasherEntry::UNKNOWN_ENTRY_ID))
+   {
+      //  Updated entry
+      $partWeightEntry = PartWeightEntry::load($params["entryId"]);
+      
+      if (!$partWeightEntry)
+      {
+         $result->success = false;
+         $result->error = "No existing part weight entry found.";
+      }
+   }
+   else
+   {
+      // New entry.
+      $partWeightEntry = new PartWeightEntry();
+      
+      // Use current date/time as entry time.
+      $partWeightEntry->dateTime = Time::now("Y-m-d h:i:s A");
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["timeCardId"]) && is_numeric($params["timeCardId"]))
+      {
+         //
+         // Time card entry
+         //
+         
+         $partWeightEntry->timeCardId = intval($params["timeCardId"]);
+      }
+      else if (isset($params["jobNumber"]) &&
+               isset($params["wcNumber"]) &&
+               isset($params["manufactureDate"]) &&
+               isset($params["operator"]) &&
+               isset($params["panCount"]))
+      {
+         //
+         // Manual entry
+         //
+         
+         $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
+         
+         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         {
+            $partWeightEntry->jobId = $jobId;
+            $partWeightEntry->manufactureDate = $params["manufactureDate"];
+            $partWeightEntry->operator = intval($params["operator"]);
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Failed to lookup job ID.";
+         }
+         
+         $partWeightEntry->panCount = intval($params["panCount"]);
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+      
+      if ($result->success)
+      {
+         if (isset($params["laborer"]) &&
+             isset($params["partWeight"]))
+         {
+            $partWeightEntry->employeeNumber = intval($params["laborer"]);
+            $partWeightEntry->weight = floatval($params["partWeight"]);
+            
+            if ($partWeightEntry->partWeightEntryId == PartWeightEntry::UNKNOWN_ENTRY_ID)
+            {
+               $dbaseResult = $database->newPartWeightEntry($partWeightEntry);
+            }
+            else
+            {
+               $dbaseResult = $database->updatePartWeightEntry($partWeightEntry);
+            }
+            
+            if (!$dbaseResult)
+            {
+               $result->success = false;
+               $result->error = "Database query failed.";
+            }
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Missing parameters.";
+         }
+      }
+   }
+   
+   echo json_encode($result);
+});
+   
+$router->add("deletePartWeightEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != PartWeightEntry::UNKNOWN_ENTRY_ID))
+   {
+      $entryId = intval($params["entryId"]);
+      
+      $partWeightEntry = PartWeightEntry::load($entryId);
+      
+      if ($partWeightEntry)
+      {
+         $dbaseResult = $database->deletePartWeightEntry($entryId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing part weight entry found.";
+      }
+   }
+   
    echo json_encode($result);
 });
 

@@ -4,6 +4,7 @@ require_once 'time.php';
 
 class PartWeightEntry
 {
+   const UNKNOWN_ENTRY_ID = 0;
    const UNKNOWN_TIME_CARD_ID = 0;
    const UNKNOWN_JOB_ID = 0;
    const UNKNOWN_OPERATOR = 0;
@@ -17,6 +18,7 @@ class PartWeightEntry
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
    public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
+   public $manufactureDate = null;
    public $panCount = 0;
    
    public function getJobId()
@@ -95,6 +97,10 @@ class PartWeightEntry
             // These attributes were added for manual entry when no time card is available.
             $partWeightEntry->jobId = intval($row['jobId']);
             $partWeightEntry->operator = intval($row['operator']);
+            if ($row['manufactureDate'])
+            {
+               $partWeightEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+            }
             $partWeightEntry->panCount = intval($row['panCount']);
          }
       }
@@ -155,10 +161,14 @@ if (isset($_GET["id"]))
    if ($partWeightEntry)
    {
       echo "partWeightEntryId: " . $partWeightEntry->partWeightEntryId . "<br/>";
-      echo "dateTime: " .           $partWeightEntry->dateTime .          "<br/>";
-      echo "employeeNumber: " .     $partWeightEntry->employeeNumber .    "<br/>";
-      echo "timeCardId: " .         $partWeightEntry->timeCardId .        "<br/>";
-      echo "weight: " .             $partWeightEntry->weight .            "<br/>";
+      echo "dateTime: " .          $partWeightEntry->dateTime .          "<br/>";
+      echo "employeeNumber: " .    $partWeightEntry->employeeNumber .    "<br/>";
+      echo "timeCardId: " .        $partWeightEntry->timeCardId .        "<br/>";
+      echo "weight: " .            $partWeightEntry->weight .            "<br/>";
+      echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
+      echo "operator: " .          $partWasherEntry->operator .          "<br/>";
+      echo "manufactureDate: " .   $partWasherEntry->manufactureDate .   "<br/>";
+      echo "panCount: " .          $partWasherEntry->panCount .          "<br/>";
    }
    else
    {

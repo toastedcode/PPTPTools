@@ -2,207 +2,252 @@
 
 require_once '../common/authentication.php';
 require_once '../common/database.php';
+require_once '../common/filter.php';
 require_once '../common/header.php';
+require_once '../common/navigation.php';
+require_once '../common/newIndicator.php';
 require_once '../common/partWasherEntry.php';
+require_once '../common/timeCardInfo.php';
 
-require 'viewPartWasherLog.php';
-
-function getAction()
+function getNavBar()
 {
-   $action = '';
+   $navBar = new Navigation();
    
-   if (isset($_POST['action']))
-   {
-      $action = $_POST['action'];
-   }
-   else if (isset($_GET['action']))
-   {
-      $action = $_GET['action'];
-   }
+   $navBar->start();
+   $navBar->mainMenuButton();
+   $navBar->highlightNavButton("New Log Entry", "location.replace('partWasherLogEntry.php?view=new_part_washer_entry');", true);
+   $navBar->end();
    
-   return ($action);
+   return ($navBar->getHtml());
 }
 
-function getView()
+function getFilter()
 {
-   $view = '';
+   $filter = null;
    
-   if (isset($_POST['view']))
+   if (isset($_SESSION["partWasherFilter"]))
    {
-      $view = $_POST['view'];
+      $filter = $_SESSION["partWasherFilter"];
    }
-   else if (isset($_GET['view']))
+   else
    {
-      $view = $_GET['view'];
-   }
-   
-   return ($view);
-}
-
-function processAction($action)
-{
-   switch ($action)
-   {
-      case 'new_part_washer_entry':
+      $user = Authentication::getAuthenticatedUser();
+      
+      $operators = null;
+      $selectedOperator = null;
+      $allowAll = false;
+      if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
       {
-         $_SESSION["partWasherEntry"] = new PartWasherEntry();
-         $_SESSION["partWasherEntry"]->dateTime = Time::now("Y-m-d h:i:s A");
-         
-         if ($user = Authentication::getAuthenticatedUser())
-         {
-            $_SESSION["partWasherEntry"]->employeeNumber = $user->employeeNumber;
-         }
-         
-         updatePartWasherEntry();
-         break;
-      }
-        
-      case 'update_part_washer_entry':
-      {
-         updatePartWasherEntry();
-         break;
-      }
-        
-      case 'cancel_part_washer_entry':
-      {
-         unset($_SESSION["partWasherEntry"]);
-         unset($_SESSION["wcNumber"]);
-         break;
-      }
-        
-      case 'save_part_washer_entry':
-      {
-         updatePartWasherEntry();
-         
-         updatePartWasherLog($_SESSION['partWasherEntry']);
-         
-         $_SESSION["partWasherEntry"] = new PartWasherEntry();
-         break;
-      }
-        
-      case 'delete_part_washer_entry':
-      {
-         deletePartWasherEntry($_POST['partWasherEntryId']);
-         break;
-      }
-        
-      default:
-      {
-         // Unhandled action.
-      }
-   }
-}
-
-function processView($view)
-{
-   switch ($view)
-   {
-      case 'view_part_washer_log':
-      default:
-      {
-         $page = new ViewPartWasherLog();
-         $page->render();
-         break;
-      }
-   }
-}
-
-function updatePartWasherEntry()
-{
-   if (isset($_POST['dateTime']))
-   {
-      $dateTime = new DateTime($_POST['dateTime']);
-      $_SESSION["partWasherEntry"]->dateTime = $dateTime->format("Y-m-d h:i:s");
-   }
-   
-   if (isset($_POST['employeeNumber']))
-   {
-      $_SESSION["partWasherEntry"]->employeeNumber = $_POST['employeeNumber'];
-   }
-   
-   if (isset($_GET['timeCardId']))  // When called from viewTimeCard.php
-   {
-      $_SESSION["partWasherEntry"]->timeCardId= $_GET['timeCardId'];
-   }
-   else if (isset($_POST['timeCardId']))
-   {
-      $_SESSION["partWasherEntry"]->timeCardId= $_POST['timeCardId'];
-   }
-   
-   if (isset($_POST['panCount']))
-   {
-      $_SESSION["partWasherEntry"]->panCount = $_POST['panCount'];
-   }
-   
-   if (isset($_POST['partCount']))
-   {
-      $_SESSION["partWasherEntry"]->partCount = $_POST['partCount'];
-   }
-   
-   // Temporary input variable, part of selecting job.
-   if (isset($_POST['wcNumber']))
-   {
-      $_SESSION["wcNumber"] = $_POST['wcNumber'];
-   }
-   
-   if (isset($_POST['jobId']))
-   {
-      $_SESSION["partWasherEntry"]->jobId = $_POST['jobId'];
-   }
-   
-   if (isset($_POST['operator']))
-   {
-      $_SESSION["partWasherEntry"]->operator= $_POST['operator'];
-   }
-}
-
-function deletePartWasherEntry($partWasherEntryId)
-{
-   $result = false;
-   
-   $database = new PPTPDatabase();
-   
-   $database->connect();
-   
-   if ($database->isConnected())
-   {
-      $result = $database->deletePartWasherEntry($partWasherEntryId);
-   }
-   
-   return ($result);
-}
-
-function updatePartWasherLog($partWasherEntry)
-{
-   $success = false;
-   
-   $database = new PPTPDatabase();
-   
-   $database->connect();
-   
-   if ($database->isConnected())
-   {
-      if ($partWasherEntry->partWasherEntryId != 0)
-      {
-         $database->updatePartWasherEntry($partWasherEntry->partWasherEntryId, $partWasherEntry);
+         // Allow selection from all operators.
+         $operators = UserInfo::getUsersByRole(Role::PART_WASHER);
+         $selectedOperator = "All";
+         $allowAll = true;
       }
       else
       {
-         // Delete any existing part count.
-         // TODO: Any reason to preserve old entries?
-         if ($partWasherEntry->timeCardId != PartWasherEntry::UNKNOWN_TIME_CARD_ID)
-         {
-            $database->deleteAllPartWasherEntries($partWasherEntry->timeCardId);
-         }
-        
-         $database->newPartWasherEntry($partWasherEntry);
+         // Limit to own logs.
+         $operators = array($user);
+         $selectedOperator = $user->employeeNumber;
+         $allowAll = false;
       }
       
-      $success = true;
+      $filter = new Filter();
+      
+      $filter->addByName("washer", new UserFilterComponent("Washer", $operators, $selectedOperator, $allowAll));
+      $filter->addByName('date', new DateFilterComponent());
+      $filter->add(new FilterButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new TodayButton());
+      $filter->add(new YesterdayButton());
+      $filter->add(new ThisWeekButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new PrintButton("partWasherReport.php"));
+      
+      $_SESSION["partWasherFilter"] = $filter;
    }
    
-   return ($success);
+   $filter->update();
+   
+   return ($filter);
 }
+
+function getTable($filter)
+{
+   $html = "";
+   
+   global $ROOT;
+
+   // Start date.
+   $startDate = new DateTime($filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+   $startDateString = $startDate->format("Y-m-d");
+   
+   // End date.
+   // Increment the end date by a day to make it inclusive.
+   $endDate = new DateTime($filter->get('date')->endDate, new DateTimeZone('America/New_York'));
+   $endDate->modify('+1 day');
+   $endDateString = $endDate->format("Y-m-d");
+   
+   $result = PPTPDatabase::getInstance()->getPartWasherEntries($filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString);
+   
+   if ($result && (MySqlDatabase::countResults($result) > 0))
+   {
+      $html =
+<<<HEREDOC
+         <div class="table-container">
+            <table class="part-washer-log-table">
+               <tr>
+                  <th>Job #</th>
+                  <th class="hide-on-tablet">WC #</th>
+                  <th class="hide-on-tablet">Operator Name</th>
+                  <th class="hide-on-tablet">Mfg. Date</th>
+                  <th>Washer Name</th>
+                  <th>Wash Date</th>
+                  <th class="hide-on-tablet">Wash Time</th>
+                  <th class="hide-on-mobile">Basket Count</th>
+                  <th>Part Count</th>
+                  <th></th>
+                  <th></th>
+               </tr>
+HEREDOC;
+         
+      while ($row = $result->fetch_assoc())
+      {
+         $partWasherEntry = PartWasherEntry::load($row["partWasherEntryId"]);
+         
+         if ($partWasherEntry)
+         {
+            $jobId = JobInfo::UNKNOWN_JOB_ID;
+            $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+            $mismatch = "";
+            
+            // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
+            $mfgDate = "unknown";
+            $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
+            if ($timeCardInfo)
+            {
+               $jobId = $timeCardInfo->jobId;
+               
+               $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+               $mfgDate = $dateTime->format("m-d-Y");
+               
+               $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
+               
+               /*
+                if ($partWasherEntry->panCount != $timeCardInfo->panCount)
+                {
+                $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
+                }
+                */
+            }
+            else
+            {
+               $jobId = $partWasherEntry->getJobId();
+               $operatorEmployeeNumber =  $partWasherEntry->getOperator();
+               
+               if ($partWasherEntry->manufactureDate)
+               {
+                  $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $mfgDate = $dateTime->format("m-d-Y");
+               }
+            }
+            
+            // Check for a mismatch between the part weight pan count and the part washer man count.
+            /*
+             $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
+             if ($partWeightEntry)
+             {
+             $otherPanCount = $partWeightEntry->getPanCount();
+             
+             if ($partWasherEntry->panCount != $otherPanCount)
+             {
+             $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
+             }
+             }
+             */
+            
+            // Use the job id to fill in the job number and work center number.
+            $jobNumber = "unknown";
+            $wcNumber = "unknown";
+            $jobInfo = JobInfo::load($jobId);
+            if ($jobInfo)
+            {
+               $jobNumber = $jobInfo->jobNumber;
+               $wcNumber = $jobInfo->wcNumber;
+            }
+            
+            $operatorName = "unknown";
+            $operator = UserInfo::load($operatorEmployeeNumber);
+            if ($operator)
+            {
+               $operatorName= $operator->getFullName();
+            }
+            
+            $partWasherName = "unknown";
+            $washer = UserInfo::load($partWasherEntry->employeeNumber);
+            if ($washer)
+            {
+               $partWasherName= $washer->getFullName();
+            }
+            
+            $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+            $washDate = $dateTime->format("m-d-Y");
+            
+            $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+            $washTime = $dateTime->format("h:i a");
+            
+            $newIndicator = new NewIndicator($dateTime, 60);
+            $new = $newIndicator->getHtml();
+            
+            $viewEditIcon = "";
+            $deleteIcon = "";
+            if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+            {
+               $viewEditIcon =
+               //"<i class=\"material-icons table-function-button\" onclick=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\">mode_edit</i>";
+               "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+               $deleteIcon =
+               "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
+            }
+            else
+            {
+               $viewEditIcon =
+               //"<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
+               "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=view_part_washer_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+            }
+            
+            $html .=
+<<<HEREDOC
+               <tr>
+                  <td>$jobNumber</td>
+                  <td class="hide-on-tablet">$wcNumber</td>
+                  <td class="hide-on-tablet">$operatorName</td>
+                  <td class="hide-on-tablet">$mfgDate</td>
+                  <td>$partWasherName</td>
+                  <td>$washDate $new</td>
+                  <td class="hide-on-tablet">$washTime</td>
+                  <td class="hide-on-mobile">$partWasherEntry->panCount $mismatch</td>
+                  <td>$partWasherEntry->partCount</td>
+                  <td>$viewEditIcon</td>
+                  <td>$deleteIcon</td>
+               </tr>
+HEREDOC;
+         }  // end if ($partWasherEntry)
+      }  // end while ($row = $result->fetch_assoc())
+         
+      $html .=
+<<<HEREDOC
+         </table>
+      </div>
+HEREDOC;
+   }
+   else
+   {
+      $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
+   }  // end if ($result && (Database::countResults($result) > 0))
+   
+   return ($html);
+}
+
 ?>
 
 <!-- ********************************** BEGIN ********************************************* -->
@@ -218,7 +263,7 @@ if (!Authentication::isAuthenticated())
    exit;
 }
 
-processAction(getAction());
+$filter = getFilter();
 ?>
 
 <!DOCTYPE html>
@@ -238,6 +283,7 @@ processAction(getAction());
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="partWasherLog.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="partWasherLog.js"></script>
 
 </head>
 
@@ -249,7 +295,23 @@ processAction(getAction());
      
      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-     <?php processView(getView())?>
+     <div class="flex-vertical content">
+
+        <div class="heading">Part Washer Log</div>
+
+        <div class="description">The Part Washer Log provides an up-to-the-minute view into the part washing process.  Here you can track when your parts come through the wash line, and in what volume.</div>
+
+        <div class="flex-vertical inner-content">
+        
+           <?php echo $filter->getHtml(); ?>
+           
+           <?php echo getTable($filter); ?>
+      
+        </div>
+         
+        <?php echo getNavBar(); ?>
+         
+     </div>
      
    </div>
 
