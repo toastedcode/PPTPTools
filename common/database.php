@@ -1019,6 +1019,43 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                            Inspection Templates
+   // **************************************************************************
+   
+   public function getInspectionTemplates($inspectionType)
+   {
+      $typeClause = "";
+      if ($inspectionType != InspectionType::UNKNOWN)
+      {
+         $typeClause = "WHERE inspectionType = $inspectionType ";
+      }
+      
+      $query = "SELECT * FROM inspectiontemplate $typeClause ORDER BY templateId ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getInspectionTemplate($templateId)
+   {
+      $query = "SELECT * FROM inspectiontemplate WHERE templateId = $templateId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getInspectionProperties($templateId)
+   {
+      $query = "SELECT * FROM inspectionproperty WHERE templateId = $templateId ORDER BY ordering ASC;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
    //                                Inspections
    // **************************************************************************
    
