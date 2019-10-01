@@ -120,6 +120,59 @@ HEREDOC;
 }
 
 // *****************************************************************************
+//                            JobNumberFilterComponent
+
+class JobNumberFilterComponent extends FilterComponent
+{
+   public $jobNumbers;
+   
+   public $selectedJobNumber;
+   
+   function __construct($label, $jobNumbers, $selectedJobNumber)
+   {
+      $this->label = $label;
+      $this->jobNumbers = $jobNumbers;
+      $this->selectedJobNumber = $selectedJobNumber;
+   }
+   
+   public function getHtml()
+   {
+      $selected = "";
+      
+      $options = "<option $selected value=\"All\">All</option>";
+      
+      foreach ($this->jobNumbers as $jobNumber)
+      {
+         $selected = ($jobNumber == $this->selectedJobNumber) ? "selected" : "";
+         $options .= "<option $selected value=\"" . $jobNumber . "\">" . $jobNumber . "</option>";
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="flex-horizontal filter-component hide-on-tablet">
+         <div>$this->label:&nbsp</div>
+         <div><select id="filter-job-number-input" name="filterJobNumber">$options</select></div>
+      </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   public function update()
+   {
+      if (isset($_POST['filterJobNumber']))
+      {
+         $this->selectedJobNumber = $_POST['filterJobNumber'];
+      }
+   }
+   
+   public function updateJobNumbers($jobNumbers)
+   {
+      $this->jobNumbers = $jobNumbers;
+   }
+}
+
+// *****************************************************************************
 //                                  FilterButton
 
 class FilterButton extends FilterComponent
@@ -281,7 +334,7 @@ class Filter
 <<<HEREDOC
       <script src="$ROOT/common/filter.js"></script>
       
-      <form action="#" method="POST">
+      <form id="filter-form" action="#" method="POST">
       <div class="flex-horizontal">
 HEREDOC;
 

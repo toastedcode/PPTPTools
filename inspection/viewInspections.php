@@ -1,23 +1,23 @@
 <?php
 
 require_once '../common/filter.php';
-require_once '../common/lineInspectionInfo.php';
+require_once '../common/inspectionInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
 require_once '../common/permissions.php';
 require_once '../common/roles.php';
 
-require 'viewLineInspection.php';
+//require 'viewInspection.php';
 
-class ViewLineInspections
+class ViewInspections
 {
    private $filter;
    
    public function __construct()
    {
-      if (isset($_SESSION["lineInspectionFilter"]))
+      if (isset($_SESSION["inspectionFilter"]))
       {
-         $this->filter = $_SESSION["lineInspectionFilter"];
+         $this->filter = $_SESSION["inspectionFilter"];
       }
       else
       {
@@ -52,12 +52,12 @@ class ViewLineInspections
          $this->filter->add(new YesterdayButton());
          //$this->filter->add(new ThisWeekButton());
          $this->filter->add(new FilterDivider());
-         $this->filter->add(new PrintButton("lineInspectionReport.php"));
+         $this->filter->add(new PrintButton("inspectionReport.php"));
       }
       
       $this->filter->update();
       
-      $_SESSION["lineInspectionFilter"] = $this->filter;
+      $_SESSION["inspectionFilter"] = $this->filter;
    }
    
 
@@ -65,25 +65,25 @@ class ViewLineInspections
    {
       $filterDiv = $this->filterDiv();
       
-      $lineInspectionsDiv = $this->lineInspectionsDiv();
+      $inspectionsDiv = $this->inspectionsDiv();
       
       $navBar = $this->navBar();
       
       $html = 
 <<<HEREDOC
-      <script src="lineInspection.js"></script>
+      <script src="inspection.js"></script>
    
       <div class="flex-vertical content">
 
-         <div class="heading">Line Inspections</div>
+         <div class="heading">Inspections</div>
 
-         <div class="description">Line inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
+         <div class="description">Part inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
 
          <div class="flex-vertical inner-content"> 
 
             $filterDiv
    
-            $lineInspectionsDiv
+            $inspectionsDiv
             
          </div>
       
@@ -115,7 +115,7 @@ HEREDOC;
       
       if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
       {
-         $navBar->highlightNavButton("New Inspection", "onNewLineInspection()", true);
+         $navBar->highlightNavButton("New Inspection", "onNewInspection()", true);
       }
       
       $navBar->end();
@@ -123,7 +123,7 @@ HEREDOC;
       return ($navBar->getHtml());
    }
    
-   private function lineInspectionsDiv()
+   private function inspectionsDiv()
    {
       $html = "";
       
@@ -143,10 +143,11 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getLineInspections($this->filter->get('operator')->selectedEmployeeNumber, 
-                                                 $this->filter->get('jobNumber')->selectedJobNumber,
-                                                 $startDateString, 
-                                                 $endDateString);
+         $result = $database->getInspections($this->filter->get('operator')->selectedEmployeeNumber, 
+                                             $this->filter->get('jobNumber')->selectedJobNumber,
+                                             InspectionType::UNKNOWN,  // TODO: Use filter value.
+                                             $startDateString, 
+                                             $endDateString);
         
          if ($result && ($database->countResults($result) > 0))
          {
@@ -157,16 +158,17 @@ HEREDOC;
                   <tr>
                      <th>Date</th>
                      <th class="hide-on-tablet">Time</th>
+                     <th class="hide-on-tablet">Type</th>
                      <th class="hide-on-tablet">Inspector</th>
                      <th class="hide-on-tablet">Operator</th>
                      <th>Job</th>
                      <th>Work<br/>Center</th>
-                     <th class="hide-on-tablet">Thread #1</th>
+                     <!--th class="hide-on-tablet">Thread #1</th>
                      <th class="hide-on-tablet">Thread #2</th>
                      <th class="hide-on-tablet">Thread #3</th>
                      <th class="hide-on-tablet">Visual</th>
                      <th class="hide-on-tablet">Undercut</th>
-                     <th class="hide-on-tablet">Depth</th>
+                     <th class="hide-on-tablet">Depth</th-->
                      <th></th>
                      <th></th>
                   </tr>
@@ -174,11 +176,11 @@ HEREDOC;
             
             while ($row = $result->fetch_assoc())
             {
-               $lineInspectionInfo = LineInspectionInfo::load($row["entryId"]);
+               $inspectionInfo = InspectionInfo::load($row["inspectionId"]);
                
-               if ($lineInspectionInfo)
+               if ($inspectionInfo)
                {
-                  $dateTime = new DateTime($lineInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $dateTime = new DateTime($inspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $inspectionDate = $dateTime->format("m-d-Y");
                   $inspectionTime = $dateTime->format("h:i A");
                   
@@ -186,33 +188,44 @@ HEREDOC;
                   $new = $newIndicator->getHtml();
                   
                   $inspectorName = "unknown";
-                  $user = UserInfo::load($lineInspectionInfo->inspector);
+                  $user = UserInfo::load($inspectionInfo->inspector);
                   if ($user)
                   {
                      $inspectorName = $user->getFullName();
                   }
                   
                   $operatorName = "unknown";
-                  $user = UserInfo::load($lineInspectionInfo->operator);
+                  $user = UserInfo::load($inspectionInfo->operator);
                   if ($user)
                   {
                      $operatorName = $user->getFullName();
                   }
+                  
+                  $jobNumber = "";
+                  $wcNumber = "";
+                  $jobInfo = JobInfo::load($inspectionInfo->jobId);
+                  if ($jobInfo)
+                  {
+                     $jobNumber = $jobInfo->jobNumber;
+                     $wcNumber = $jobInfo->wcNumber;
+                  }
+                  
+                  $inspectionType = InspectionType::getLabel($inspectionInfo->inspectionType);
                   
                   $viewEditIcon = "";
                   $deleteIcon = "";
                   if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
                   {
                      $viewEditIcon =
-                     "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditLineInspection($lineInspectionInfo->entryId)\">mode_edit</i>";
+                     "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditInspection($inspectionInfo->inspectionId)\">mode_edit</i>";
                     
                      $deleteIcon =
-                     "<i class=\"material-icons table-function-button\" onclick=\"onDeleteLineInspection($lineInspectionInfo->entryId)\">delete</i>";
+                     "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspection($inspectionInfo->inspectionId)\">delete</i>";
                   }
                   else
                   {
                      $viewEditIcon =
-                     "<i class=\"material-icons table-function-button\" onclick=\"onViewLineInspection($lineInspectionInfo->entryId)\">visibility</i>";
+                     "<i class=\"material-icons table-function-button\" onclick=\"onViewInspection($inspectionInfo->inspectionId)\">visibility</i>";
                   }
                   
                   $html .=
@@ -220,18 +233,21 @@ HEREDOC;
                      <tr>
                         <td>$inspectionDate $new</td>                        
                         <td class="hide-on-tablet">$inspectionTime</td>
+                        <td>$inspectionType</td>
                         <td class="hide-on-tablet">$inspectorName</td>
                         <td class="hide-on-tablet">$operatorName</td>
-                        <td>$lineInspectionInfo->jobNumber</td>
-                        <td>$lineInspectionInfo->wcNumber</td>
+                        <td>$jobNumber</td>
+                        <td>$wcNumber</td>
 HEREDOC;
-                  for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
+                  /*
+                  for ($i = 0; $i < InspectionInfo::NUM_INSPECTIONS; $i++)
                   {
-                     $label = InspectionStatus::getLabel($lineInspectionInfo->inspections[$i]);
-                     $class = InspectionStatus::getClass($lineInspectionInfo->inspections[$i]);
+                     $label = InspectionStatus::getLabel($inspectionInfo->inspections[$i]);
+                     $class = InspectionStatus::getClass($inspectionInfo->inspections[$i]);
                      
                      $html .= "<td class=\"hide-on-mobile\"><div class=\"$class\">$label</div></td>";
                   }
+                  */
                         
                   $html .=
 <<<HEREDOC
@@ -255,13 +271,6 @@ HEREDOC;
       }
       
       return ($html);
-   }
-   
-   private static function getInspectionStatusLabel($inspectionStatus)
-   {
-      $strings = array("---", "PASS", "FAIL");
-      
-      return ($strings[$inspectionStatus]);
    }
 }
 

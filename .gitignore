@@ -46,9 +46,11 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-#Eclipse
+# Eclipse
 .buildpath
 .project
 .settings
 
+# Uploads
 uploads/
+*.pdf
