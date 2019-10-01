@@ -1068,10 +1068,12 @@ class PPTPDatabase extends MySqlDatabase
       }
       
       $jobNumberClause = "";
+      /*
       if ($jobNumber != "All")
       {
          $jobNumberClause = "jobNumber = '$jobNumber' AND ";
       }
+      */
       
       $typeClause = "";
       if ($inspectionType != InspectionType::UNKNOWN)

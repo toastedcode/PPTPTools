@@ -4,8 +4,10 @@ require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/filter.php';
 require_once '../common/header.php';
+require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/navigation.php';
+require_once '../common/newIndicator.php';
 
 // *****************************************************************************
 //                            InspectionTypeFilterComponent
@@ -64,7 +66,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Template", "location.replace('inspectionTemplate.php?view=new_template');", true);
+   $navBar->highlightNavButton("New Inspection", "location.replace('inspection.php?view=new_inspection');", true);
    $navBar->end();
    
    return ($navBar->getHtml());
@@ -74,18 +76,49 @@ function getFilter()
 {
    $filter = null;
    
-   if (isset($_SESSION["inspectionTemplateFilter"]))
+   if (isset($_SESSION["inspectionFilter"]))
    {
-      $filter = $_SESSION["inspectionTemplateFilter"];
+      $filter = $_SESSION["inspectionFilter"];
    }
    else
-   {  
+   {
+      $user = Authentication::getAuthenticatedUser();
+      
+      $operators = null;
+      $selectedOperator = null;
+      $allowAll = false;
+      if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
+      {
+         // Allow selection from all operators.
+         $operators = UserInfo::getUsersByRole(Role::OPERATOR);
+         $selectedOperator = "All";
+         $allowAll = true;
+      }
+      else
+      {
+         // Limit to own logs.
+         $operators = array($user);
+         $selectedOperator = $user->employeeNumber;
+         $allowAll = false;
+      }
+      
       $filter = new Filter();
       
       $filter->addByName("inspectionType", new InspectionTypeFilterComponent("Inspection Type"));
+      $filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
+      $filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(false), "All"));
+      $filter->addByName('date', new DateFilterComponent());
+      $filter->add(new FilterButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new TodayButton());
+      $filter->add(new YesterdayButton());
+      //$filter->add(new ThisWeekButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new PrintButton("inspectionReport.php"));
+      
       $filter->add(new FilterButton());
       
-      $_SESSION["inspectionTemplateFilter"] = $filter;
+      $_SESSION["inspectionFilter"] = $filter;
    }
    
    $filter->update();
@@ -99,7 +132,24 @@ function getTable($filter)
    
    global $ROOT;
    
-   $result = PPTPDatabase::getInstance()->getInspectionTemplates($filter->get('inspectionType')->selectedInspectionType);
+   $filter = getFilter();
+   
+   // Start date.
+   $startDate = new DateTime($filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+   $startDateString = $startDate->format("Y-m-d");
+   
+   // End date.
+   // Increment the end date by a day to make it inclusive.
+   $endDate = new DateTime($filter->get('date')->endDate, new DateTimeZone('America/New_York'));
+   $endDate->modify('+1 day');
+   $endDateString = $endDate->format("Y-m-d");
+   
+   $result = PPTPDatabase::getInstance()->getInspections(
+      $filter->get('operator')->selectedEmployeeNumber,
+      $filter->get('jobNumber')->selectedJobNumber,
+      $filter->get('inspectionType')->selectedInspectionType,
+      $startDateString,
+      $endDateString);
    
    if ($result && (MySqlDatabase::countResults($result) > 0))
    {
@@ -108,10 +158,15 @@ function getTable($filter)
       <div class="table-container">
          <table class="part-weight-log-table">
             <tr>
-               <th>Name</th>
-               <th>Inspection Type</th>
-               <th>Description</th>
-               <th>Property Count</th>
+               <th>Inspection<br/>Type</th>               
+               <th>Date</th>
+               <th>Time</th>
+               <th>Inspector</th>
+               <th>Operator</th>
+               <th>Job</th>
+               <th>Work<br/>Center</th>
+               <th>Success Rate</th>
+               <th>PASS/FAIL</th>
                <th></th>
                <th></th>
             </tr>
@@ -119,14 +174,39 @@ HEREDOC;
       
       while ($row = $result->fetch_assoc())
       {
+         $inspection = Inspection::load($row["inspectionId"]);
+         
          $inspectionTemplate = InspectionTemplate::load($row["templateId"]);
          
-         $inspectionTypeLabel = InspectionType::getLabel($inspectionTemplate->inspectionType);
+         $jobInfo = JobInfo::load($row["jobId"]);
          
-         $propertyCount = count($inspectionTemplate->inspectionProperties);
-         
-         if ($inspectionTemplate)
+         if ($inspection && $inspectionTemplate && $jobInfo)
          {
+            $inspectionTypeLabel = InspectionType::getLabel($inspectionTemplate->inspectionType);
+            
+            $dateTime = new DateTime($inspection->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+            $inspectionDate = $dateTime->format("m-d-Y");
+            $inspectionTime = $dateTime->format("h:i A");
+            
+            $newIndicator = new NewIndicator($dateTime, 60);
+            $new = $newIndicator->getHtml();
+            
+            $inspectorName = "unknown";
+            $user = UserInfo::load($inspection->inspector);
+            if ($user)
+            {
+               $inspectorName = $user->getFullName();
+            }
+            
+            $operatorName = "unknown";
+            $user = UserInfo::load($inspection->operator);
+            if ($user)
+            {
+               $operatorName = $user->getFullName();
+            }
+            
+            $passFail = ($inspection->pass() ? "PASS" : "FAIL");
+            
             $viewEditIcon = "";
             $deleteIcon = "";
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
@@ -145,15 +225,20 @@ HEREDOC;
             $html .=
 <<<HEREDOC
             <tr>
-               <td>$inspectionTemplate->name</td>
                <td>$inspectionTypeLabel</td>
-               <td>$inspectionTemplate->description</td>
-               <td>$propertyCount</td>
+               <td>$inspectionDate $new</td>                        
+               <td class="hide-on-tablet">$inspectionTime</td>
+               <td class="hide-on-tablet">$inspectorName</td>
+               <td class="hide-on-tablet">$operatorName</td>
+               <td>$jobInfo->jobNumber</td>
+               <td>$jobInfo->wcNumber</td>
+               <td>{$inspection->getPassCount()}/{$inspection->getCount()}</td>
+               <td>$passFail</td>
                <td>$viewEditIcon</td>
                <td>$deleteIcon</td>
             </tr>
 HEREDOC;
-         }  // end if ($partWeightEntry)
+         }  // end if ($inspection && $inspectionTemplate)
       }  // end while ($row = $result->fetch_assoc())
       
       $html .=
@@ -219,7 +304,7 @@ $filter = getFilter();
    
      <div class="flex-vertical content">
 
-        <div class="heading">Inspection Templates</div>
+        <div class="heading">Inspection</div>
 
         <div class="description">Blah blah blah</div>
 

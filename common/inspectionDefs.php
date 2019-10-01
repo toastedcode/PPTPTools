@@ -4,6 +4,9 @@ require_once 'jobInfo.php';
 require_once 'time.php';
 require_once 'userInfo.php';
 
+const PASS = 1;
+const FAIL = 0;
+
 abstract class InspectionStatus
 {
    const FIRST = 0;

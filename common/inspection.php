@@ -31,6 +31,32 @@ class InspectionResult
       
       return ($inspectionResult);
    }
+   
+   public function pass()
+   {
+      $pass = true;
+      
+      switch ($this->dataType)
+      {
+         case InspectionDataType::PASS_FAIL:
+         {
+            $pass = (intval($this->value) != FAIL);
+            break;
+         }
+         
+         default:
+         {
+            break;
+         }
+      }
+      
+      return ($pass);
+   }
+      
+   public function fail()
+   {
+      return (!$this->pass());
+   }
 }
 
 class Inspection
@@ -91,6 +117,41 @@ class Inspection
       }
       
       return ($inspection);
+   }
+   
+   public function getCount()
+   {
+      return (count($this->inspectionResults));
+   }
+   
+   public function getPassCount()
+   {
+      $count = 0;
+      
+      foreach ($this->inspectionResults as $inspectionResult)
+      {
+         if ($inspectionResult->pass())
+         {
+            $count++;
+         }
+      }
+      
+      return ($count);
+   }
+   
+   public function getFailCount()
+   {
+      return ($this->getCount() - $this->getPassCount());
+   }
+   
+   public function pass()
+   {
+      return ($this->getFailCount() == 0);
+   }
+   
+   public function fail()
+   {
+      return (!$this->pass());
    }
 }
 
