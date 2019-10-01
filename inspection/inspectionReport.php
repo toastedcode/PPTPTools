@@ -2,13 +2,12 @@
 
 require_once '../common/database.php';
 require_once '../common/jobInfo.php';
-require_once '../common/partWasherEntry.php';
+require_once '../common/lineInspectionInfo.php';
 require_once '../common/report.php';
 require_once '../common/time.php';
-require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
 
-class PartWasherReport extends Report
+class LineInspectionReport extends Report
 {
    function __construct()
    {
@@ -38,7 +37,7 @@ class PartWasherReport extends Report
    
    protected function getTitle()
    {
-      return ("Part Washer Log");
+      return ("Line Inspections");
    }
    
    protected function getDescription()
@@ -48,12 +47,12 @@ class PartWasherReport extends Report
       $operatorDescription = "";
       if ($this->employeeNumber == 0)
       {
-         $operatorDescription = "all part washer log entries";
+         $operatorDescription = "all line inspections";
       }
       else
       {
          $userInfo = UserInfo::load($this->employeeNumber);
-         $operatorDescription = "part washer log entries for {$userInfo->getFullName()}";
+         $operatorDescription = "line inspections for {$userInfo->getFullName()}";
       }
       
       $dateString = "";
@@ -78,13 +77,13 @@ class PartWasherReport extends Report
    
    protected function getHeaders()
    {
-      return (array("Job #", "WC #", "Operator", "Mfg. Date", "Part Washer", "Wash Date", "Wash Time", "Basket Count", "Part Count"));
+      return (array("Date", "Time", "Inspector", "Operator", "Job", "Work<br/>Center", "Thread 1", "Thread 2", "Thread 3", "Visual", "Undercut", "Depth"));
    }
    
    protected function getData()
    {
       $data = array();
-      
+
       $database = new PPTPDatabase();
       
       $database->connect();
@@ -101,76 +100,47 @@ class PartWasherReport extends Report
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWasherEntries($this->employeeNumber, $startDateString, $endDateString);
+         $result = $database->getLineInspections($this->employeeNumber, $startDateString, $endDateString);
          
          if ($result && ($database->countResults($result) > 0))
          {
             while ($row = $result->fetch_assoc())
             {
-               $partWasherEntry = PartWasherEntry::load($row["partWasherEntryId"]);
+               $lineInspectionInfo = LineInspectionInfo::load($row["entryId"]);
                
-               if ($partWasherEntry)
+               if ($lineInspectionInfo)
                {
-                  $jobId = JobInfo::UNKNOWN_JOB_ID;
-                  $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
-                  $mismatch = "";
+                  $dateTime = new DateTime($lineInspectionInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+                  $inspectionDate = $dateTime->format("m-d-Y");
+                  $inspectionTime = $dateTime->format("h:i A");
                   
-                  // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
-                  $mfgDate = "unknown";
-                  $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
-                  if ($timeCardInfo)
+                  $inspectorName = "unknown";
+                  $user = UserInfo::load($lineInspectionInfo->inspector);
+                  if ($user)
                   {
-                     $jobId = $timeCardInfo->jobId;
-                     
-                     $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                     $mfgDate = $dateTime->format("m-d-Y");
-                     
-                     $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
-                  }
-                  else
-                  {
-                     $jobId = $partWasherEntry->getJobId();
-                     $operatorEmployeeNumber =  $partWasherEntry->getOperator();
-                     
-                     if ($partWasherEntry->manufactureDate)
-                     {
-                        $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                        $mfgDate = $dateTime->format("m-d-Y");
-                     }
-                  }
-                  
-                  // Use the job id to fill in the job number and work center number.
-                  $jobNumber = "unknown";
-                  $wcNumber = "unknown";
-                  $jobInfo = JobInfo::load($jobId);
-                  if ($jobInfo)
-                  {
-                     $jobNumber = $jobInfo->jobNumber;
-                     $wcNumber = $jobInfo->wcNumber;
+                     $inspectorName = $user->getFullName();
                   }
                   
                   $operatorName = "unknown";
-                  $operator = UserInfo::load($operatorEmployeeNumber);
-                  if ($operator)
+                  $user = UserInfo::load($lineInspectionInfo->operator);
+                  if ($user)
                   {
-                     $operatorName= $operator->getFullName();
+                     $operatorName = $user->getFullName();
                   }
                   
-                  $partWasherName = "unknown";
-                  $washer = UserInfo::load($partWasherEntry->employeeNumber);
-                  if ($washer)
+                  $dataRow = array();
+                  $dataRow[] = $inspectionDate;
+                  $dataRow[] = $inspectionTime;
+                  $dataRow[] = $inspectorName;
+                  $dataRow[] = $operatorName;
+                  $dataRow[] = $lineInspectionInfo->jobNumber;
+                  $dataRow[] = $lineInspectionInfo->wcNumber;
+                  
+                  for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
                   {
-                     $partWasherName= $washer->getFullName();
+                     $dataRow[] = InspectionStatus::getLabel($lineInspectionInfo->inspections[$i]);
                   }
                   
-                  $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $washDate = $dateTime->format("m-d-Y");
-                  
-                  $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $washTime = $dateTime->format("h:i a");
-                  
-                  $dataRow = array($jobNumber, $wcNumber, $operatorName, $mfgDate, $partWasherName, $washDate, $washTime, $partWasherEntry->panCount, $partWasherEntry->partCount);
-                    
                   $data[] = $dataRow;
                }
             }
@@ -187,7 +157,7 @@ class PartWasherReport extends Report
    private $endDate;
 }
 
-$report = new PartWasherReport();
+$report = new LineInspectionReport();
 
 ?>
 

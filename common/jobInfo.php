@@ -3,12 +3,16 @@ require_once 'database.php';
 
 abstract class JobStatus
 {
-   const PENDING = 0;
+   const FIRST = 0;
+   const PENDING = JobStatus::FIRST;
    const ACTIVE = 1;
    const COMPLETE = 2;
-   const DELETED = 3;
+   const CLOSED = 3;
+   const DELETED = 4;
+   const LAST = 5;
+   const COUNT = JobStatus::LAST - JobStatus::FIRST;
    
-   private static $names = array("Pending", "Active", "Complete", "Deleted");
+   private static $names = array("Pending", "Active", "Complete", "Closed", "Deleted");
    
    public static function getName($status)
    {
@@ -31,6 +35,7 @@ class JobInfo
    public $creator;
    public $dateTime;
    public $partNumber;
+   public $sampleWeight = 0.0;
    public $wcNumber;
    public $cycleTime;
    public $netPercentage;
@@ -63,6 +68,7 @@ class JobInfo
             $jobInfo->creator =       $row['creator'];
             $jobInfo->dateTime =      Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $jobInfo->partNumber =    $row['partNumber'];
+            $jobInfo->sampleWeight =  doubleval($row['sampleWeight']);
             $jobInfo->wcNumber =      $row['wcNumber'];
             $jobInfo->cycleTime =     doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
@@ -121,6 +127,46 @@ class JobInfo
       
       return ($netPartsPerHour);
    }
+   
+   public static function getJobNumbers($onlyActive)
+   {
+      $jobNumbers = array();
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getJobNumbers($onlyActive);
+         
+         if ($result)
+         {
+            while ($result && ($row = $result->fetch_assoc()))
+            {
+               $jobNumbers[] = $row["jobNumber"];
+            }
+         }
+      }
+      
+      return ($jobNumbers);
+   }
+   
+   public static function getJobIdByComponents($jobNumber, $wcNumber)
+   {
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
+      
+      $database = PPTPDatabase::getInstance();
+      
+      $result = $database->getJobByComponents($jobNumber, $wcNumber);
+
+      if ($result && ($row = $result->fetch_assoc()))
+      {
+         $jobId = intval($row["jobId"]);
+      }
+      
+      return ($jobId);
+   }
 }
 
 /*
@@ -136,6 +182,7 @@ if (isset($_GET["$jobId"]))
       echo "creator: " .       $jobInfo->creator .         "<br/>";
       echo "dateTime: " .      $jobInfo->dateTime .        "<br/>";
       echo "partNumber: " .    $jobInfo->partNumber .      "<br/>";
+      echo "sampleWeight: " .  $jobInfo->sampleWeight .    "<br/>";
       echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
       echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
       echo "netPercentage: " . $jobInfo->netPercentage .   "<br/>";

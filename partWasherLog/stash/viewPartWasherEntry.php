@@ -54,41 +54,83 @@ HEREDOC;
       echo (ViewPartWasherEntry::getHtml($view));
    }
    
-   public static function getWcNumberInput($jobNumber, $isDisabled)
+   public static function getJobNumberInput($partWasherEntry, $isDisabled)
    {
       $disabled = $isDisabled ? "disabled" : "";
       
-      $partWasherEntry = ViewPartWasherEntry::getPartWasherEntry();
+      $jobInfo = null;
+      if ($partWasherEntry->jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         $jobInfo = JobInfo::load($partWasherEntry->jobId);
+      }
       
-      $selected =  ($partWasherEntry->wcNumber == 0) ? "selected" : "";
+      $selected =  ($partWasherEntry->jobId == JobInfo::UNKNOWN_JOB_ID) ? "selected" : "";
       
       $options = "<option disabled $selected hidden>Select Work Center</option>";
       
-      $database = new PPTPDatabase();
+      $jobNumbers = JobInfo::getJobNumbers(true);
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      foreach ($jobNumbers as $jobNumber)
       {
-         $result = $database->getJobsByJobNumber($jobNumber);
+         $selected =  ($jobInfo && ($jobInfo->jobNumber == $jobNumber)) ? "selected" : "";
          
-         $i = 0;
-         while ($result && ($row = $result->fetch_assoc()))
+         $options .= "<option value=\"$jobNumber\" $selected>" . $jobNumber . "</option>";
+      }
+      
+      $html =
+<<<HEREDOC
+      <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" $disabled>
+         $options
+      </select>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   public static function getWcNumberInput($partWasherEntry, $isDisabled)
+   {
+      $disabled = $isDisabled ? "disabled" : "";
+      
+      $jobInfo = null;
+      if ($partWasherEntry->jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         $jobInfo = JobInfo::load($partWasherEntry->jobId);
+      }
+      
+      $selected = ($partWasherEntry->jobId != JobInfo::UNKNOWN_JOB_ID) ? "selected" : "";
+      
+      $options = "<option disabled $selected hidden>Select Work Center</option>";
+      
+      /*
+      if ($jobInfo)
+      {
+         $database = new PPTPDatabase();
+         
+         $database->connect();
+         
+         if ($database->isConnected())
          {
-            $wcNumber = intval($row["wcNumber"]);
+            $result = $database->getJobsByJobNumber($jobInfo->jobNumber);
             
-            $selected = "";
-            if ((($partWasherEntry->wcNumber == 0) && ($i == 0)) ||  // no selection && first in list
-                ($wcNumber == $partWasherEntry->wcNumber))           // selected work center number
+            $i = 0;
+            while ($result && ($row = $result->fetch_assoc()))
             {
-               $selected = "selected";
+               $wcNumber = intval($row["wcNumber"]);
+               
+               $selected = "";
+               if ((($partWasherEntry->wcNumber == 0) && ($i == 0)) ||  // no selection && first in list
+                   ($wcNumber == $partWasherEntry->wcNumber))           // selected work center number
+               {
+                  $selected = "selected";
+               }
+               
+               $options .= "<option value=\"$wcNumber\" $selected>" . $wcNumber. "</option>";
+               
+               $i++;
             }
-            
-            $options .= "<option value=\"$wcNumber\" $selected>" . $wcNumber. "</option>";
-            
-            $i++;
          }
       }
+      */
       
       $html =
 <<<HEREDOC
@@ -163,36 +205,9 @@ HEREDOC;
       $isDisabled = ($view == "view_part_washer_entry");
       $disabled = $isDisabled? "disabled" : "";
       
-      $selected = ($partWasherEntry->jobNumber == JobInfo::UNKNOWN_JOB_NUMBER) ? "selected" : "";  //  <--- Start here!  jobId vs jobNumber
+      $jobNumberInput = ViewPartWasherEntry::getJobNumberInput($partWasherEntry, $isDisabled);
       
-      $options = "<option disabled $selected hidden>Select job</option>";
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getActiveJobs(null);
-         
-         $i = 0;
-         while ($result && ($row = $result->fetch_assoc()))
-         {
-            $jobNumber = $row["jobNumber"];
-            
-            $selected = "";
-            if ($jobNumber == $partWasherEntry->jobNumber)
-            {
-               $selected = "selected";
-            }
-            
-            $options .= "<option value=\"$jobNumber\" $selected>" . $jobNumber . "</option>";
-            
-            $i++;
-         }
-      }
-      
-      $wcNumberInput = ViewPartWasherEntry::getWcNumberInput("", $partWasherEntry->wcNumber, $isDisabled);
+      $wcNumberInput = ViewPartWasherEntry::getWcNumberInput($partWasherEntry, $isDisabled);
       
       $operatorInput = ViewPartWasherEntry::getOperatorInput($partWasherEntry, $isDisabled);
       
@@ -202,9 +217,7 @@ HEREDOC;
       
          <div class="form-item">
             <div class="form-label">Job Number</div>
-            <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput();" $disabled>
-               $options
-            </select>
+            $jobNumberInput
          </div>
          
          <div class="form-item">
@@ -215,6 +228,18 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label">Operator</div>
             $operatorInput
+         </div>
+
+         <div class="form-item">
+            <div class="form-label">Pan Count</div>
+            <input id="panCount-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="panCount" oninput="this.validator.validate(); validatePanCountMatch();" value="$partWasherEntry->panCount">
+            <label class="mdl-textfield__label" for="panCount-input">Pan count</label>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label">Part Count</div>
+            <input id="partCount-input" form="input-form" class="mdl-textfield__input keypadInputCapable large-text-input" type="number" name="panCount" oninput="this.validator.validate(); validatePanCountMatch();" value="$partWasherEntry->partCount">
+            <label class="mdl-textfield__label" for="partCount-input">Part count</label>
          </div>
          
       </div>
@@ -276,7 +301,7 @@ HEREDOC;
    {
       $disabled = $isDisabled ? "disabled" : "";
       
-      $selected = ($partWasherEntry->wcNumber == 0) ? "selected" : "";
+      $selected = ($partWasherEntry->operator == UserInfo::UNKNOWN_EMPLOYEE_NUMBER) ? "selected" : "";
       
       $options = "<option disabled $selected hidden>Select operator</option>";
       

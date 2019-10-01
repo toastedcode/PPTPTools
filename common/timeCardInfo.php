@@ -6,9 +6,11 @@ require_once 'time.php';
 
 class TimeCardInfo
 {
+   const UNKNOWN_TIME_CARD_ID = 0;
+   
    const MINUTES_PER_HOUR = 60;
    
-   public $timeCardId;
+   public $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    public $dateTime;
    public $employeeNumber;
    public $jobId;

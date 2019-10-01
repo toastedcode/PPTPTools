@@ -69,6 +69,30 @@ function processAction($action)
          break;
       }
       
+      case 'copy_job':
+      {
+         if (isset($_POST['jobId']))
+         {
+            // Start with the copy-from job.
+            $_SESSION["jobInfo"] = JobInfo::load($_POST['jobId']);
+            
+            // Clear out key fields.
+            unset($_POST['jobId']);
+            $_SESSION["jobInfo"]->jobId = JobInfo::UNKNOWN_JOB_ID;
+            
+            // Set up new fields.
+            $_SESSION["jobInfo"]->jobNumber = JobInfo::getJobPrefix($_SESSION["jobInfo"]->jobNumber);
+            $_SESSION["jobInfo"]->dateTime = Time::now("Y-m-d h:i:s A");
+            $_SESSION["jobInfo"]->status = JobStatus::PENDING;
+            
+            if ($user = Authentication::getAuthenticatedUser())
+            {
+               $_SESSION["jobInfo"]->creator = $user->employeeNumber;
+            }
+         }
+         break;
+      }
+      
       case 'edit_job':
       {
          if (isset($_POST['jobId']))
@@ -158,6 +182,11 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->partNumber = $_POST['partNumber'];
    }
    
+   if (isset($_POST['sampleWeight']))
+   {
+      $_SESSION["jobInfo"]->sampleWeight = doubleval($_POST['sampleWeight']);
+   }
+   
    if (isset($_POST['wcNumber']))
    {
       $_SESSION["jobInfo"]->wcNumber = $_POST['wcNumber'];
@@ -165,12 +194,12 @@ function updateJobInfo()
    
    if (isset($_POST['cycleTime']))
    {
-      $_SESSION["jobInfo"]->cycleTime = $_POST['cycleTime'];
+      $_SESSION["jobInfo"]->cycleTime = doubleval($_POST['cycleTime']);
    }
    
    if (isset($_POST['netPercentage']))
    {
-      $_SESSION["jobInfo"]->netPercentage = $_POST['netPercentage'];
+      $_SESSION["jobInfo"]->netPercentage = doubleval($_POST['netPercentage']);
    }
    
    if (isset($_POST['status']))
@@ -178,13 +207,15 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->status = $_POST['status'];
    }
    
-   if (isset($_FILES["customerPrint"]))
+   if (isset($_FILES["customerPrint"]) && ($_FILES["customerPrint"]["name"] != ""))
    {
       $uploadStatus = Upload::uploadCustomerPrint($_FILES["customerPrint"]);
       
-      if ($uploadStatus != Upload::UPLOADED)
+      if ($uploadStatus != UploadStatus::UPLOADED)
       {
-         echo "<script>alert(\"File upload failed!\");</script>";
+         $error = UploadStatus::toString($uploadStatus);
+         
+         echo "<script>alert(\"File upload failed! $error\");</script>";
       }
       else
       {

@@ -19,6 +19,7 @@ class PartWasherEntry
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWasherEntry::UNKNOWN_JOB_ID;
    public $operator = PartWasherEntry::UNKNOWN_OPERATOR;
+   public $manufactureDate = null;
    
    public function getJobId()
    {
@@ -97,6 +98,10 @@ class PartWasherEntry
             // These attributes were added for manual entry when no time card is available.
             $partWasherEntry->jobId = intval($row['jobId']);
             $partWasherEntry->operator = intval($row['operator']);
+            if ($row['manufactureDate'])
+            {
+               $partWasherEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+            }
          }
       }
       
@@ -163,6 +168,7 @@ class PartWasherEntry
        echo "partCount: " .         $partWasherEntry->partCount .         "<br/>";
        echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
        echo "operator: " .          $partWasherEntry->operator .          "<br/>";
+       echo "manufactureDate: " .   $partWasherEntry->manufactureDate .   "<br/>";
     }
     else
     {

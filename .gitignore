@@ -50,3 +50,6 @@ Temporary Items
 .buildpath
 .project
 .settings
+
+#PDF files
+*.pdf

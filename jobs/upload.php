@@ -2,32 +2,51 @@
 
 require_once '../common/root.php';
 
-class Upload
+abstract class UploadStatus
 {
-   const UPLOADED      = 0;
+   const FIRST         = 0;
+   const UPLOADED      = UploadStatus::FIRST;
    const BAD_FILE_TYPE = 1;
    const BAD_FILE_SIZE = 2;
    const FILE_ERROR    = 3;
+   const LAST          = 4;
    
+   static function toString($uploadStatus)
+   {
+      $strings = array("UPLOADED", "BAD_FILE_TYPE", "BAD_FILE_SIZE", "FILE_ERROR");
+      
+      $stringVal = "UNKNOWN";
+      
+      if (($uploadStatus >= UploadStatus::FIRST) && ($uploadStatus < UploadStatus::LAST))
+      {
+         $stringVal = $strings[$uploadStatus];
+      }
+      
+      return ($stringVal);
+   }
+}
+
+class Upload
+{
    static function uploadCustomerPrint($file)
    {
       global $UPLOADS;
       
-      $returnStatus = Upload::UPLOADED;
+      $returnStatus = UploadStatus::UPLOADED;
       
       $target = $UPLOADS . basename($file["name"]);
       
       if (!Upload::validateFileFormat($file, array("pdf")))
       {
-         $returnStatus = Upload::BAD_FILE_TYPE;
+         $returnStatus = UploadStatus::BAD_FILE_TYPE;
       }
       else if (!Upload::validateFileSize($file, 500000))  // 500Kb
       {
-         $returnStatus = Upload::BAD_FILE_SIZE;
+         $returnStatus = UploadStatus::BAD_FILE_SIZE;
       }
       else if (!move_uploaded_file($file["tmp_name"], $target))
       {
-         $returnStatus = Upload::FILE_ERROR;
+         $returnStatus = UploadStatus::FILE_ERROR;
       }
       
       return ($returnStatus);
