@@ -1,169 +1,310 @@
 <?php
 
+require_once '../common/authentication.php';
+require_once '../common/header.php';
+require_once '../common/inspection.php';
+require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
-require_once '../common/lineInspectionInfo.php';
 require_once '../common/navigation.php';
+require_once '../common/params.php';
 require_once '../common/root.php';
 require_once '../common/userInfo.php';
 
-class ViewLineInspection
+const ONLY_ACTIVE = true;
+
+abstract class InspectionInputField
 {
-   public function getHtml($view)
+   const FIRST = 0;
+   const INSPECTION_TYPE = InspectionInputField::FIRST;
+   const JOB_NUMBER = 1;
+   const WC_NUMBER = 2;
+   const OPERATOR = 3;
+   const INSPECTION = 4;
+   const COMMENTS = 5;
+   const LAST = 6;
+   const COUNT = InspectionInputField::LAST - InspectionInputField::FIRST;
+}
+
+function getParams()
+{
+   static $params = null;
+   
+   if (!$params)
    {
-      $html = "";
-      
-      $lineInspectionInfo = ViewLineInspection::getLineInspectionInfo();
-      
-      $newInspection = ($lineInspectionInfo->entryId == LineInspectionInfo::INVALID_ENTRY_ID);
-      
-      $editable = (($view == "new_line_inspection") || ($view == "edit_line_inspection"));
-      
-      $headingDiv = ViewLineInspection::headingDiv($view);
-      
-      $descriptionDiv = ViewLineInspection::descriptionDiv($view);
-      
-      $inspectionDiv = ViewLineInspection::inspectionDiv($lineInspectionInfo, $view);
-      
-      $navBar = ViewLineInspection::navBar($view);
-      
-      $html =
-<<<HEREDOC
-      <form id="input-form" action="#" method="POST">
-      </form>
+      $params = Params::parse();
+   }
+   
+   return ($params);
+}
 
-      <div class="flex-vertical content">
+function getView()
+{
+   $params = getParams();
+   
+   return ($params->keyExists("view") ? $params->get("view") : "");
+}
 
-         $headingDiv
+function getInspectionId()
+{
+   $params = getParams();
+   
+   return ($params->keyExists("inspectionId") ? $params->get("inspectionId") : Inspection::UNKNOWN_INSPECTION_ID);
+}
 
-         $descriptionDiv
+function getInspection()
+{
+   static $inspection = null;
+   
+   if ($inspection == null)
+   {
+      $inspectionId = getInspectionId();
       
-         <div class="pptp-form">
-            <div class="form-row">
-               $inspectionDiv
-            </div>
-         </div>
+      if ($inspectionId != Inspection::UNKNOWN_INSPECTION_ID)
+      {
+         $inspection = Inspection::load($inspectionId);
+      }
+   }
+   
+   return ($inspection);
+}
+
+function getInspectionTemplate()
+{
+   static $inspectionTemplate = null;
+   
+   if ($inspectionTemplate == null)
+   {
+      $inspection = getInspection();
       
-         $navBar
+      if ($inspection)
+      {
+         $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
+      }
+   }
+   
+   return ($inspectionTemplate);
+}
+
+function getInspectionType()
+{
+   $inspectionType = 0;
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $inspectionType = $inspectionTemplate->inspectionType;
+   }
+   
+   return ($inspectionType);
+}
+
+function getJobNumber()
+{
+   $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+   
+   $inspection = getInspection();
+   
+   if ($inspection)
+   {
+      $jobInfo = JobInfo::load($inspection->jobId);
+      
+      if ($jobInfo)
+      {
+         $jobNumber = $jobInfo->jobNumber;
+      }
+   }
+   
+   return ($jobNumber);
+}
+
+function getWcNumber()
+{
+   $wcNumber = 0;
+   
+   $inspection = getInspection();
+   
+   if ($inspection)
+   {
+      $jobInfo = JobInfo::load($inspection->jobId);
+      
+      if ($jobInfo)
+      {
+         $wcNumber = $jobInfo->wcNumber;
+      }
+   }
+   
+   return ($wcNumber);
+}
+
+function getOperator()
+{
+   $operator = 0;
+   
+   $inspection = getInspection();
+   
+   if ($inspection)
+   {
+      $operator = $inspection->operator;      
+   }
+   
+   return ($operator);
+}
+
+function getComments()
+{
+   $comments = "";
+   
+   $inspection = getInspection();
+   
+   if ($inspection)
+   {
+      $comments = $inspection->comments;
+   }
+   
+   return ($comments);
+}
+
+function getJobNumberOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $jobNumbers = JobInfo::getJobNumbers(ONLY_ACTIVE);
+   
+   $selectedJobNumber = getJobNumber();
+   
+   // Add selected job number, if not already in the array.
+   // Note: This handles the case of viewing an entry that references a non-active job.
+   if (($selectedJobNumber != "") &&
+      (!in_array($selectedJobNumber, $jobNumbers)))
+   {
+      $jobNumbers[] = $selectedJobNumber;
+      sort($jobNumbers);
+   }
+   
+   foreach ($jobNumbers as $jobNumber)
+   {
+      $selected = ($jobNumber == $selectedJobNumber) ? "selected" : "";
+      
+      $options .= "<option value=\"{$jobNumber}\" $selected>{$jobNumber}</option>";
+   }
+   
+   return ($options);
+}
+
+function getWcNumberOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $jobNumber = getJobNumber();
+   
+   $workCenters = null;
+   if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
+   {
+      $workCenters = PPTPDatabase::getInstance()->getWorkCentersForJob($jobNumber);
+   }
+   else
+   {
+      $workCenters = PPTPDatabase::getInstance()->getWorkCenters();
+   }
+   
+   $selectedWcNumber = getWcNumber();
+   
+   foreach ($workCenters as $workCenter)
+   {
+      $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
+      
+      $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
+   }
+   
+   return ($options);
+}
+
+function getOperatorOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $operators = PPTPDatabase::getInstance()->getUsersByRole(Role::OPERATOR);
+   
+   // Create an array of employee numbers.
+   $employeeNumbers = array();
+   foreach ($operators as $operator)
+   {
+      $employeeNumbers[] = intval($operator["employeeNumber"]);
+   }
+   
+   $selectedOperator = getOperator();
+   
+   // Add selected job number, if not already in the array.
+   // Note: This handles the case of viewing an entry with an operator that is not assigned to the OPERATOR role.
+   if (($selectedOperator != UserInfo::UNKNOWN_EMPLOYEE_NUMBER) &&
+       (!in_array($selectedOperator, $employeeNumbers)))
+   {
+      $employeeNumbers[] = $selectedOperator;
+      sort($employeeNumbers);
+   }
+   
+   foreach ($employeeNumbers as $employeeNumber)
+   {
+      $userInfo = UserInfo::load($employeeNumber);
+      if ($userInfo)
+      {
+         $selected = ($employeeNumber == $selectedOperator) ? "selected" : "";
          
-      </div>
-               
-      <script>
-         updateWCNumberInput();
-      </script>
-HEREDOC;
-      
-      return ($html);
-   }
-   
-   public function render($view)
-   {
-      echo (ViewLineInspection::getHtml($view));
-   }
-   
-   public static function getWcNumberInput($jobNumber, $isDisabled)
-   {
-      $disabled = $isDisabled ? "disabled" : "";
-      
-      $lineInspectionInfo = ViewLineInspection::getLineInspectionInfo();
-      
-      $selected =  ($lineInspectionInfo->wcNumber == 0) ? "selected" : ""; 
-      
-      $options = "<option disabled $selected hidden>Select Work Center</option>";
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getJobsByJobNumber($jobNumber);
+         $name = $employeeNumber . " - " . $userInfo->getFullName();
          
-         $i = 0;
-         while ($result && ($row = $result->fetch_assoc()))
-         {
-            $wcNumber = intval($row["wcNumber"]);
-            
-            $selected = "";
-            if ((($lineInspectionInfo->wcNumber == 0) && ($i == 0)) ||  // no selection && first in list
-                ($wcNumber == $lineInspectionInfo->wcNumber))           // selected work center number
-            {
-               $selected = "selected";
-            }
-            
-            $options .= "<option value=\"$wcNumber\" $selected>" . $wcNumber. "</option>";
-            
-            $i++;
-         }
+         $options .= "<option value=\"$employeeNumber\" $selected>$name</option>";
       }
-      
-      $html =
-<<<HEREDOC
-      <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>
-         $options
-      </select>
-HEREDOC;
-      
-      return ($html);
    }
    
-   protected static function titleDiv()
+   return ($options);
+}
+
+function getHeading()
+{
+   $heading = "";
+   
+   $view = getView();
+   
+   if ($view == "new_inspection")
    {
-      $html =
-<<<HEREDOC
-      <div class="form-title">Line Inspection</div>
-HEREDOC;
-      
-      return ($html);
+      $heading = "Add a New Inspection";
    }
-   
-   protected static function headingDiv($view)
+   else if ($view == "edit_inspection")
    {
-      $heading = "";
-      if ($view == "new_line_inspection")
-      {
-         $heading = "Add a New Inspection";
-      }
-      else if ($view == "edit_line_inspection")
-      {
-         $heading = "Update an Inspection";
-      }
-      else if ($view == "view_line_inspection")
-      {
-         $heading = "View an Inspection";
-      }
-      
-      $html =
-<<<HEREDOC
-      <div class="heading">$heading</div>
-HEREDOC;
-      
-      return ($html);
+      $heading = "Update an Inspection";
    }
-   
-   protected static function descriptionDiv($view)
+   else if ($view == "view_inspection")
    {
-      $description = "";
-      if ($view == "new_line_inspection")
-      {
-         $description = "Start by selecting a work center, then any of the currently active jobs for that station.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
-      }
-      else if ($view == "edit_line_inspection")
-      {
-         $description = "You may revise any of the fields for this inspection and then select save when you're satisfied with the changes.";
-      }
-      else if ($view == "view_line_inspection")
-      {
-         $description = "View a previously saved inspection in detail.";
-      }
+      $heading = "View an Inspection";
+   }
       
-      $html =
-<<<HEREDOC
-      <div class="description">$description</div>
-HEREDOC;
-      
-      return ($html);
+   return ($heading);
+}
+
+function getDescription()
+{
+   $description = "";
+   
+   $view = getView();
+   
+   if ($view == "new_inspection")
+   {
+      $description = "Start by selecting a work center, then any of the currently active jobs for that station.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
+   }
+   else if ($view == "edit_inspection")
+   {
+      $description = "You may revise any of the fields for this inspection and then select save when you're satisfied with the changes.";
+   }
+   else if ($view == "view_inspection")
+   {
+      $description = "View a previously saved inspection in detail.";
    }
    
+   return ($description);
+}
+   
+/*
    protected static function inspectionDiv($lineInspectionInfo, $view)
    {
       $isDisabled = ($view == "view_line_inspection");
@@ -272,89 +413,136 @@ HEREDOC;
       
       return ($html);
    }
+   */
+
+function getNavBar()
+{
+   $view = getView();
    
-   protected static function navBar($view)
+   $navBar = new Navigation();
+   
+   $navBar->start();
+   
+   if (($view == "new_inspection") ||
+       ($view == "edit_inspection"))
    {
-      $navBar = new Navigation();
+      // Case 1
+      // Creating a new inspection.
+      // Editing an existing inspection.
       
-      $navBar->start();
+      $navBar->cancelButton("submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'cancel_line_inspection')");
+      $navBar->highlightNavButton("Save", "submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'save_line_inspection');", false);
+   }
+   else if ($view == "view_line_inspection")
+   {
+      // Case 2
+      // Viewing an existing job.
       
-      if (($view == "new_line_inspection") ||
-          ($view == "edit_line_inspection"))
-      {
-         // Case 1
-         // Creating a new inspection.
-         // Editing an existing inspection.
-         
-         $navBar->cancelButton("submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'cancel_line_inspection')");
-         $navBar->highlightNavButton("Save", "submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'save_line_inspection');", false);
-      }
-      else if ($view == "view_line_inspection")
-      {
-         // Case 2
-         // Viewing an existing job.
-         
-         $navBar->highlightNavButton("Ok", "submitForm('input-form', 'jobs.php', 'view_line_inspections', 'no_action')", false);
-      }
-      
-      $navBar->end();
-      
-      return ($navBar->getHtml());
+      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'jobs.php', 'view_line_inspections', 'no_action')", false);
    }
    
-   protected static function getLineInspectionInfo()
+   $navBar->end();
+   
+   return ($navBar->getHtml());
+}
+
+function isEditable($field)
+{
+   $view = getView();
+   
+   // Start with the edit mode, as dictated by the view.
+   $isEditable = (($view == "new_inspection") ||
+                  ($view == "edit_inspection"));
+   
+   switch ($field)
    {
-      $lineInspectionInfo = new LineInspectionInfo();
-      
-      if (isset($_GET['entryId']))
+      case InspectionInputField::INSPECTION_TYPE:
       {
-         $lineInspectionInfo= LineInspectionInfo::load($_GET['entryId']);
+         $isEditable = false;
+         break;
       }
-      else if (isset($_POST['entryId']))
+
+      default:
       {
-         $lineInspectionInfo= LineInspectionInfo::load($_POST['entryId']);
+         // Edit status based solely on view.
+         break;
       }
-      else if (isset($_SESSION['lineInspectionInfo']))
-      {
-         $lineInspectionInfo= $_SESSION['lineInspectionInfo'];
-      }
-      
-      return ($lineInspectionInfo);
    }
    
-   public static function getOperatorInput($lineInspectionInfo, $isDisabled)
+   return ($isEditable);
+}
+
+function getInspections()
+{
+   $html = "";
+   
+   $inspection = getInspection();
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspection && $inspectionTemplate)
    {
-      $disabled = $isDisabled ? "disabled" : "";
-      
-      $selected = ($lineInspectionInfo->wcNumber == 0) ? "selected" : ""; 
-      
-      $options = "<option disabled $selected hidden>Select operator</option>";
-      
-      $operators = UserInfo::getUsersByRole(Role::OPERATOR);
-      
       $i = 0;
-      foreach ($operators as $operator)
+      foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {
-         $selected = "";
-         if ($operator->employeeNumber == $lineInspectionInfo->operator)
-         {
-            $selected = "selected";
-         }
+         $inspectionResult = $inspection->inspectionResults[$i];
          
-         $options .= "<option value=\"$operator->employeeNumber\"  $selected>" . $operator->getFullName() . "</option>";
+         $inspectionInput = getInspectionInput($inspectionProperty, $inspectionResult);
+         
+         $html .= 
+<<<HEREDOC
+         <tr>
+            <td>$inspectionProperty->propertyName</td>
+            $inspectionInput
+         </tr>\n
+HEREDOC;
          
          $i++;
       }
-      
-      $html =
-<<<HEREDOC
-      <select id="operator-input" class="form-input-medium" name="operator" form="input-form" $disabled>
-         $options
-      </select>
-HEREDOC;
-      
-      return ($html);
    }
+   
+   return ($html);
+}
+
+function getInspectionInput($inspectionProperty, $inspectionResult)
+{
+   $html = "";
+   
+   $name = "inspectionProperty_" . $inspectionProperty->propertyName;
+   $pass = ($inspectionResult->pass()) ? "checked" : "";
+   $fail = ($inspectionResult->fail()) ? "checked" : "";
+   $nonApplicable = "";  // TODO
+   
+   $passId = $name . "-pass-button";
+   $failId = $name . "-fail-button";
+   $nonApplicableId = $name . "-na-button";
+   
+   $html =
+<<<HEREDOC
+      <td>
+         <input id="$passId" type="radio" class="invisible-radio-button pass" form="input-form" name="$name" value="1" $pass/>
+         <label for="$passId">
+            <div class="select-button">PASS</div>
+         </label>
+      </td>
+      <td>
+         <input id="$failId" type="radio" class="invisible-radio-button fail" form="input-form" name="$name" value="2" $fail/>
+         <label for="$failId">
+            <div class="select-button">FAIL</div>
+         </label>
+      </td>
+      <td>
+         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="0" $nonApplicable/>
+         <label for="$nonApplicableId">
+            <div class="select-button">N/A</div>
+         </label>
+      </td>
+HEREDOC;
+   
+   return ($html);
+}
+   
+/*
    
    public static function inspectionInput($lineInspectionInfo, $inspectionIndex, $isDisabled)
    {
@@ -391,31 +579,7 @@ HEREDOC;
       
       return ($html);
    }
-   
-   protected static function getWorkcenters()
-   {
-      $workcenters = array();
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getWorkCenters();
-         
-         if ($result)
-         {
-            while ($row = $result->fetch_assoc())
-            {
-               $workcenters[] = $row["wcNumber"];
-            }
-         }
-      }
-      
-      return ($workcenters);
-   }
-}
+*/
 
 // *****************************************************************************
 //                          AJAX request handling
@@ -472,4 +636,121 @@ if (isset($_GET["action"]))
       }
    }
 }
+
+// *****************************************************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../pptpTools.php');
+   exit;
+}
+
 ?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
+   <link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
+   
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="partWasherLog.js"></script>
+   <script src="../common/common.js"></script>
+   <script src="../common/validate.js"></script>
+
+</head>
+
+<body>
+
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="flex-horizontal main">
+     
+     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   
+      <form id="input-form" action="" method="POST">
+         <input id="inspection-id-input" type="hidden" name="inspectionId" value="<?php echo getInspectionId(); ?>">
+      </form>
+      
+      <div class="flex-vertical content">
+      
+         <div class="heading"><?php echo getHeading(); ?></div>
+         
+         <div class="description"><?php echo getDescription(); ?></div>
+      
+         <div class="pptp-form">
+            <div class="form-row">
+
+               <div class="form-col">
+               
+                  <div class="form-item">
+                     <div class="form-label">Inspection Type</div>
+                     <input id="inspection-type-input" class="form-input-medium" type="text" name="inspectionType" form="input-form" oninput="this.validator.validate();" value="<?php echo InspectionType::getLabel(getInspectionType()); ?>" <?php echo !isEditable(InspectionInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
+                  </div>
+         
+                  <div class="form-item">
+                     <div class="form-label">Job Number</div>
+                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput(); updateCustomerPrint();" <?php echo !isEditable(InspectionInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
+                         <?php echo getJobNumberOptions(); ?>
+                     </select>
+                     &nbsp;&nbsp;
+                     <div id="customer-print-div"></div>
+                  </div>
+         
+                  <div class="form-item">
+                     <div class="form-label">WC Number</div>
+                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                        <?php echo getWcNumberOptions(); ?>
+                     </select>
+                  </div>
+         
+                  <div class="form-item">
+                     <div class="form-label">Operator</div>
+                     <select id="operator-input" class="form-input-medium" name="operator" form="input-form" $disabled>
+                        <?php echo getOperatorOptions(); ?>
+                     </select>
+                  </div>
+                  
+                  <div class="form-item">
+                     <div class="form-label hide-on-mobile">Inspection</div>
+                     <table class="inspection-table">
+                        <?php echo getInspections(); ?>
+                     </table>
+                  </div>
+            
+                  <div class="form-item">
+                     <div class="form-label hide-on-mobile">Comments</div>
+                     <textarea form="input-form" class="comments-input" type="text" name="comments" placeholder="Enter comments ..." <?php echo !isEditable(InspectionInputField::COMMENTS) ? "disabled" : ""; ?>><?php echo getComments(); ?></textarea>
+                  </div>
+         
+               </div>
+
+            </div>
+         </div>
+      
+         <?php echo getNavBar(); ?>
+         
+      </div>
+               
+      <script>
+         updateWCNumberInput();
+      </script>
+     
+   </div>
+
+</body>
+
+</html>
