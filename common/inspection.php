@@ -32,30 +32,40 @@ class InspectionResult
       return ($inspectionResult);
    }
    
-   public function pass()
+   public function getStatus()
    {
-      $pass = true;
+      $inspectionStatus = InspectionStatus::NON_APPLICABLE;
       
       switch ($this->dataType)
       {
          case InspectionDataType::PASS_FAIL:
          {
-            $pass = (intval($this->value) != FAIL);
+            $inspectionStatus = intval($this->value);
             break;
          }
-         
+            
          default:
          {
             break;
          }
       }
       
-      return ($pass);
+      return ($inspectionStatus);
    }
-      
+   
+   public function pass()
+   {
+      return ($this->getStatus() == InspectionStatus::PASS);
+   }
+   
    public function fail()
    {
-      return (!$this->pass());
+      return ($this->getStatus() == InspectionStatus::FAIL);
+   }
+   
+   public function nonApplicable()
+   {
+      return ($this->getStatus() == InspectionStatus::NON_APPLICABLE);
    }
 }
 

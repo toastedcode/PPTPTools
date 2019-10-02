@@ -4,28 +4,26 @@ require_once 'jobInfo.php';
 require_once 'time.php';
 require_once 'userInfo.php';
 
-const PASS = 1;
-const FAIL = 0;
-
 abstract class InspectionStatus
 {
    const FIRST = 0;
    const UNKNOWN = InspectionStatus::FIRST;
    const PASS = 1;
    const FAIL = 2;
-   const LAST = 3;
+   const NON_APPLICABLE = 3;
+   const LAST = 4;
    const COUNT = InspectionStatus::LAST - InspectionStatus::FIRST;
    
    public static function getLabel($inspectionStatus)
    {
-      $labels = array("---", "PASS", "FAIL");
+      $labels = array("---", "PASS", "FAIL", "N/A");
       
       return ($labels[$inspectionStatus]);
    }
    
    public static function getClass($inspectionStatus)
    {
-      $classes = array("", "pass", "fail");
+      $classes = array("", "pass", "fail", "n/a");
       
       return ($classes[$inspectionStatus]);
    }
@@ -38,12 +36,13 @@ abstract class InspectionType
    const OASIS = InspectionStatus::FIRST;
    const LINE = 2;
    const QCP = 3;
-   const LAST = 4;
+   const IN_PROCESS = 4;
+   const LAST = 5;
    const COUNT = InspectionType::LAST - InspectionType::FIRST;
    
    public static function getLabel($inspectionType)
    {
-      $labels = array("---", "Oasis Inspection", "Line Inspection", "QCP Inspection");
+      $labels = array("---", "Oasis Inspection", "Line Inspection", "QCP Inspection", "In Process");
       
       return ($labels[$inspectionType]);
    }

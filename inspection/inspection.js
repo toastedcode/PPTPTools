@@ -1,3 +1,4 @@
+/*
 function onDeleteLineInspection(entryId)
 {
    if (confirm("Are you sure you want to delete this line inspection?"))
@@ -203,4 +204,84 @@ function updateCustomerPrint()
    
    xhttp.open("GET", requestURl, true);
    xhttp.send(); 
+}
+*/
+
+function set(elementId, value)
+{
+   document.getElementById(elementId).value = value;
+}
+
+function clear(elementId)
+{
+   document.getElementById(elementId).value = null;
+}
+
+function enable(elementId)
+{
+   document.getElementById(elementId).disabled = false;
+}
+
+function disable(elementId)
+{
+   document.getElementById(elementId).disabled = true;
+}
+
+function onJobNumberChange()
+{
+   jobNumber = document.getElementById("job-number-input").value;
+   
+   if (jobNumber == null)
+   {
+      disable("wc-number-input");
+   }
+   else
+   {
+      enable("wc-number-input");
+      
+      // Populate WC numbers based on selected job number.
+      
+      // AJAX call to populate WC numbers based on selected job number.
+      requestUrl = "../api/wcNumbers/?jobNumber=" + jobNumber;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               updateWcOptions(json.wcNumbers);               
+            }
+            else
+            {
+               console.log("API call to retrieve WC numbers failed.");
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();  
+   }
+}
+
+function updateWcOptions(wcNumbers)
+{
+   element = document.getElementById("wc-number-input");
+   
+   while (element.firstChild)
+   {
+      element.removeChild(element.firstChild);
+   }
+
+   for (var wcNumber of wcNumbers)
+   {
+      var option = document.createElement('option');
+      option.innerHTML = wcNumber;
+      option.value = wcNumber;
+      element.appendChild(option);
+   }
+   
+   element.value = null;
 }

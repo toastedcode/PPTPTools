@@ -41,7 +41,7 @@ function getView()
 {
    $params = getParams();
    
-   return ($params->keyExists("view") ? $params->get("view") : "");
+   return ($params->keyExists("view") ? $params->get("view") : "view_inspection");
 }
 
 function getInspectionId()
@@ -163,6 +163,24 @@ function getComments()
    }
    
    return ($comments);
+}
+
+function getInspectionTypeOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $selectedInspectionType = getInspectionType();
+   
+   for ($inspectionType = InspectionType::FIRST; $inspectionType != InspectionType::LAST; $inspectionType++)
+   {
+      $selected = ($inspectionType == $selectedInspectionType) ? "selected" : "";
+      
+      $label = InspectionType::getLabel($inspectionType);
+      
+      $options .= "<option value=\"$inspectionType\" $selected>$label</option>";
+   }
+   
+   return ($options);
 }
 
 function getJobNumberOptions()
@@ -456,12 +474,6 @@ function isEditable($field)
    
    switch ($field)
    {
-      case InspectionInputField::INSPECTION_TYPE:
-      {
-         $isEditable = false;
-         break;
-      }
-
       default:
       {
          // Edit status based solely on view.
@@ -511,7 +523,7 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
    $name = "inspectionProperty_" . $inspectionProperty->propertyName;
    $pass = ($inspectionResult->pass()) ? "checked" : "";
    $fail = ($inspectionResult->fail()) ? "checked" : "";
-   $nonApplicable = "";  // TODO
+   $nonApplicable = ($inspectionResult->nonApplicable()) ? "checked" : "";
    
    $passId = $name . "-pass-button";
    $failId = $name . "-fail-button";
@@ -532,7 +544,7 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
          </label>
       </td>
       <td>
-         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="0" $nonApplicable/>
+         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="3" $nonApplicable/>
          <label for="$nonApplicableId">
             <div class="select-button">N/A</div>
          </label>
@@ -664,10 +676,10 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/form.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
-   <link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
+   <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWasherLog.js"></script>
+   <script src="inspection.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
 
@@ -698,12 +710,14 @@ if (!Authentication::isAuthenticated())
                
                   <div class="form-item">
                      <div class="form-label">Inspection Type</div>
-                     <input id="inspection-type-input" class="form-input-medium" type="text" name="inspectionType" form="input-form" oninput="this.validator.validate();" value="<?php echo InspectionType::getLabel(getInspectionType()); ?>" <?php echo !isEditable(InspectionInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
+                     <select id="inspection-type-input" class="form-input-medium" name="inspectionType" form="input-form" oninput="" <?php echo !isEditable(InspectionInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
+                         <?php echo getInspectionTypeOptions(); ?>
+                     </select>
                   </div>
          
                   <div class="form-item">
                      <div class="form-label">Job Number</div>
-                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput(); updateCustomerPrint();" <?php echo !isEditable(InspectionInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
+                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(InspectionInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
                          <?php echo getJobNumberOptions(); ?>
                      </select>
                      &nbsp;&nbsp;
@@ -746,7 +760,9 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
-         updateWCNumberInput();
+         var jobNumberValidator = new SelectValidator("job-number-input");
+
+         jobNumberValidator.init();
       </script>
      
    </div>
