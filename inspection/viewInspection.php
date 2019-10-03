@@ -68,18 +68,35 @@ function getInspection()
    return ($inspection);
 }
 
+function getTemplateId()
+{
+   $templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   
+   $inspection = getInspection();
+   
+   if ($inspection)
+   {
+      $templateId = $inspection->templateId;
+   }
+   else
+   {
+      $params = getParams();
+      
+      $templateId = ($params->keyExists("templateId") ? $params->get("templateId") : Inspection::UNKNOWN_INSPECTION_ID);
+   }
+
+   return ($templateId);
+}
+
 function getInspectionTemplate()
 {
    static $inspectionTemplate = null;
    
-   if ($inspectionTemplate == null)
+   $templateId = getTemplateId();
+   
+   if ($templateId != Inspection::UNKNOWN_INSPECTION_ID)
    {
-      $inspection = getInspection();
-      
-      if ($inspection)
-      {
-         $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
-      }
+      $inspectionTemplate = InspectionTemplate::load($templateId);
    }
    
    return ($inspectionTemplate);
@@ -87,13 +104,19 @@ function getInspectionTemplate()
 
 function getInspectionType()
 {
-   $inspectionType = 0;
+   $inspectionType = InspectionType::UNKNOWN;
    
    $inspectionTemplate = getInspectionTemplate();
    
    if ($inspectionTemplate)
    {
       $inspectionType = $inspectionTemplate->inspectionType;
+   }
+   else
+   {
+      $params = getParams();
+      
+      $inspectionType = ($params->keyExists("inspectionType") ? $params->getInt("inspectionType") : InspectionType::UNKNOWN);
    }
    
    return ($inspectionType);
@@ -114,6 +137,12 @@ function getJobNumber()
          $jobNumber = $jobInfo->jobNumber;
       }
    }
+   else
+   {
+      $params = getParams();
+      
+      $jobNumber = ($params->keyExists("jobNumber") ? $params->get("jobNumber") : JobInfo::UNKNOWN_JOB_NUMBER);
+   }
    
    return ($jobNumber);
 }
@@ -132,6 +161,12 @@ function getWcNumber()
       {
          $wcNumber = $jobInfo->wcNumber;
       }
+   }
+   else
+   {
+      $params = getParams();
+      
+      $wcNumber = ($params->keyExists("wcNumber") ? $params->get("wcNumber") : JobInfo::UNKNOWN_JOB_NUMBER);
    }
    
    return ($wcNumber);
@@ -474,6 +509,14 @@ function isEditable($field)
    
    switch ($field)
    {
+      case InspectionInputField::INSPECTION_TYPE:
+      case InspectionInputField::JOB_NUMBER:
+      case InspectionInputField::WC_NUMBER:
+      {
+         $isEditable = false;
+         break;
+      }
+      
       default:
       {
          // Edit status based solely on view.

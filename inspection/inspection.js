@@ -266,6 +266,42 @@ function onJobNumberChange()
    }
 }
 
+function updateTemplateId()
+{
+   console.log("here");
+   inspectionType = document.getElementById("inspection-type-input").value;
+   jobNumber = document.getElementById("job-number-input").value;
+   wcNumber = document.getElementById("wc-number-input").value;
+   
+   if ((inspectionType != "") && (jobNumber != "") && (wcNumber != ""))
+   {
+      // AJAX call to populate template id based on selected inspection type, job number, and WC number.
+      requestUrl = "../api/inspectionTemplate/?inspectionType=" + inspectionType + "&jobNumber=" + jobNumber + "&wcNumber=" + wcNumber;
+      console.log(requestUrl);
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               console.log("Selecting template id: " + json.templateId);
+               document.getElementById("template-id-input").value = json.templateId;
+            }
+            else
+            {
+               console.log("API call to retrieve inspection template id failed.");
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();
+   }
+}
+
 function updateWcOptions(wcNumbers)
 {
    element = document.getElementById("wc-number-input");

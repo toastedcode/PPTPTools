@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rest.php';
+require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
@@ -392,6 +393,42 @@ $router->add("deletePartWeightEntry", function($params) {
          $result->success = false;
          $result->error = "No existing part weight entry found.";
       }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("inspectionTemplate", function($params) {
+   $result = new stdClass();
+   $result->success = false;
+   
+   if (is_numeric($params["inspectionType"]) &&
+       isset($params["jobNumber"]) &&
+       is_numeric($params["wcNumber"]))
+   {
+      $inspectionType = intval($params["inspectionType"]);
+      $jobNumber = $params["jobNumber"];
+      $wcNumber = intval($params["wcNumber"]);
+      
+      $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+      
+      $inspectionTemplate = InspectionTemplate::getInspectionTemplate($inspectionType, $jobId);
+      
+      if ($inspectionTemplate)
+      {
+         $result->templateId = $inspectionTemplate->templateId;
+      }
+      else
+      {
+         $result->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+      }
+
+      $result->success = true;
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
    }
    
    echo json_encode($result);

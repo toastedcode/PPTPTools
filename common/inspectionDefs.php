@@ -33,7 +33,7 @@ abstract class InspectionType
 {
    const UNKNOWN = 0;
    const FIRST = 1;
-   const OASIS = InspectionStatus::FIRST;
+   const OASIS = InspectionType::FIRST;
    const LINE = 2;
    const QCP = 3;
    const IN_PROCESS = 4;

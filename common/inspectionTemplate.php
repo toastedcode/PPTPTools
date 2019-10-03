@@ -44,6 +44,9 @@ class InspectionTemplate
 {
    const UNKNOWN_TEMPLATE_ID = 0;
    
+   const OASIS_INSPECTION_TEMPLATE_ID = 1;
+   const LINE_INSPECTION_TEMPLATE_ID = 2;
+   
    public $templateId;
    public $inspectionType;
    public $name;
@@ -89,6 +92,53 @@ class InspectionTemplate
       
       return ($inspectionTemplate);
    }
+   
+   public static function getInspectionTemplate($inspectionType, $jobId)
+   {
+      $inspectionTemplate = null;
+      
+      $templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+
+      switch ($inspectionType)
+      {
+         case InspectionType::OASIS:
+         {
+            $templateId = InspectionTemplate::OASIS_INSPECTION_TEMPLATE_ID;
+            break;
+         }
+            
+         case InspectionType::LINE:
+         {
+            $templateId = InspectionTemplate::LINE_INSPECTION_TEMPLATE_ID;
+            break;
+         }
+            
+         case InspectionType::QCP:
+         {
+            // TODO: Get from job.
+            break;
+         }
+            
+         case InspectionType::IN_PROCESS:
+         {
+            // TODO: Get from job.
+            break;
+         }
+            
+         default:
+         {
+            break;
+         }
+      }
+      
+      if ($templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+      }
+      
+      return ($inspectionTemplate);
+   }
+   
 }
 
 /*
