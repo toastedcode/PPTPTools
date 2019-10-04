@@ -34,13 +34,6 @@ function getParams()
    return ($params);
 }
 
-function getView()
-{
-   $params = getParams();
-   
-   return ($params->keyExists("view") ? $params->get("view") : "view_inspection");
-}
-
 function getInspectionTypeOptions()
 {
    $options = "<option style=\"display:none\">";
@@ -78,73 +71,26 @@ function getWcNumberOptions()
 
 function getHeading()
 {
-   $heading = "";
-   
-   $view = getView();
-   
-   if ($view == "new_inspection")
-   {
-      $heading = "Add a New Inspection";
-   }
-   else if ($view == "edit_inspection")
-   {
-      $heading = "Update an Inspection";
-   }
-   else if ($view == "view_inspection")
-   {
-      $heading = "View an Inspection";
-   }
+   $heading = "Add a New Inspection";
       
    return ($heading);
 }
 
 function getDescription()
 {
-   $description = "";
-   
-   $view = getView();
-   
-   if ($view == "new_inspection")
-   {
-      $description = "Start by selecting a work center, then any of the currently active jobs for that station.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
-   }
-   else if ($view == "edit_inspection")
-   {
-      $description = "You may revise any of the fields for this inspection and then select save when you're satisfied with the changes.";
-   }
-   else if ($view == "view_inspection")
-   {
-      $description = "View a previously saved inspection in detail.";
-   }
+   $description = "Start by selecting a work center, then any of the currently active jobs for that station.";
    
    return ($description);
 }
    
 function getNavBar()
 {
-   $view = getView();
-   
    $navBar = new Navigation();
    
    $navBar->start();
    
-   if (($view == "new_inspection") ||
-       ($view == "edit_inspection"))
-   {
-      // Case 1
-      // Creating a new inspection.
-      // Editing an existing inspection.
-      
-      $navBar->cancelButton("submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'cancel_line_inspection')");
-      $navBar->nextButton("submitForm('input-form', 'viewInspection.php', 'new_inspection', '')");
-   }
-   else if ($view == "view_line_inspection")
-   {
-      // Case 2
-      // Viewing an existing job.
-      
-      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'jobs.php', 'view_line_inspections', 'no_action')", false);
-   }
+   $navBar->cancelButton("submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'cancel_line_inspection')");
+   $navBar->nextButton("submitForm('input-form', 'viewInspection.php', 'new_inspection', '')");
    
    $navBar->end();
    
@@ -153,22 +99,7 @@ function getNavBar()
 
 function isEditable($field)
 {
-   $view = getView();
-   
-   // Start with the edit mode, as dictated by the view.
-   $isEditable = (($view == "new_inspection") ||
-                  ($view == "edit_inspection"));
-   
-   switch ($field)
-   {
-      default:
-      {
-         // Edit status based solely on view.
-         break;
-      }
-   }
-   
-   return ($isEditable);
+   return (true);
 }
 
 // *****************************************************************************

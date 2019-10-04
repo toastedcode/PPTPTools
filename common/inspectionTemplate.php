@@ -141,7 +141,7 @@ class InspectionTemplate
    
 }
 
-/*
+
 if (isset($_GET["templateId"]))
 {
    $templateId = $_GET["templateId"];
@@ -163,5 +163,5 @@ if (isset($_GET["templateId"]))
       echo "No inspection template found.";
    }
 }
-*/
+
 ?>

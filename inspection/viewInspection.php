@@ -63,8 +63,63 @@ function getInspection()
       {
          $inspection = Inspection::load($inspectionId);
       }
+      else
+      {
+         $inspection = getNewInspection();
+      }
    }
    
+   return ($inspection);
+}
+
+function getNewInspection()
+{
+   $inspection = new Inspection();
+   
+   $params = getParams();
+   
+   $inspection->templateId = 
+      ($params->keyExists("templateId") ? $params->get("templateId") : Inspection::UNKNOWN_INSPECTION_ID);
+   
+   $jobNumber = 
+      ($params->keyExists("jobNumber") ? $params->get("jobNumber") : JobInfo::UNKNOWN_JOB_NUMBER);
+   
+   $wcNumber = 
+      ($params->keyExists("wcNumber") ? $params->get("wcNumber") : 0);
+   
+   $jobInfo = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+   
+   if ($jobInfo)
+   {
+      $inspection->jobId = $jobInfo->jobId;
+   }
+   
+   $userInfo = Authentication::getAuthenticatedUser();
+   if ($userInfo)
+   {
+      $inspection->inspector = $userInfo->employeeNumber;
+   }
+   
+   $inspection->dateTime = Time::now("Y-m-d h:i:s A");
+   
+   if ($inspection->templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
+   {
+      $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
+      
+      if ($inspectionTemplate)
+      {
+         foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+         {
+            $inspectionResult = new InspectionResult();
+            $inspectionResult->propertyId = $inspectionProperty->propertyId;
+            $inspectionResult->status = InspectionStatus::NON_APPLICABLE;
+            
+            $inspection->inspectionResults[$inspectionProperty->propertyId] = $inspectionResult;
+         }
+      }
+      
+   }
+ 
    return ($inspection);
 }
 
@@ -72,11 +127,16 @@ function getTemplateId()
 {
    $templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    
-   $inspection = getInspection();
+   $inspectionId = getInspectionId();
    
-   if ($inspection)
+   if ($inspectionId != Inspection::UNKNOWN_INSPECTION_ID)
    {
-      $templateId = $inspection->templateId;
+      $inspection = getInspection();
+      
+      if ($inspection)
+      {
+         $templateId = $inspection->templateId;
+      }
    }
    else
    {
@@ -92,11 +152,14 @@ function getInspectionTemplate()
 {
    static $inspectionTemplate = null;
    
-   $templateId = getTemplateId();
-   
-   if ($templateId != Inspection::UNKNOWN_INSPECTION_ID)
+   if ($inspectionTemplate == null)
    {
-      $inspectionTemplate = InspectionTemplate::load($templateId);
+      $templateId = getTemplateId();
+
+      if ($templateId != Inspection::UNKNOWN_INSPECTION_ID)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+      }
    }
    
    return ($inspectionTemplate);
@@ -126,15 +189,18 @@ function getJobNumber()
 {
    $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    
-   $inspection = getInspection();
-   
-   if ($inspection)
+   if (getInspectionId() != Inspection::UNKNOWN_INSPECTION_ID)
    {
-      $jobInfo = JobInfo::load($inspection->jobId);
-      
-      if ($jobInfo)
+      $inspection = getInspection();
+
+      if ($inspection)
       {
-         $jobNumber = $jobInfo->jobNumber;
+         $jobInfo = JobInfo::load($inspection->jobId);
+         
+         if ($jobInfo)
+         {
+            $jobNumber = $jobInfo->jobNumber;
+         }
       }
    }
    else
@@ -151,15 +217,18 @@ function getWcNumber()
 {
    $wcNumber = 0;
    
-   $inspection = getInspection();
-   
-   if ($inspection)
+   if (getInspectionId() != Inspection::UNKNOWN_INSPECTION_ID)
    {
-      $jobInfo = JobInfo::load($inspection->jobId);
+      $inspection = getInspection();
       
-      if ($jobInfo)
+      if ($inspection)
       {
-         $wcNumber = $jobInfo->wcNumber;
+         $jobInfo = JobInfo::load($inspection->jobId);
+         
+         if ($jobInfo)
+         {
+            $wcNumber = $jobInfo->wcNumber;
+         }
       }
    }
    else
@@ -540,7 +609,7 @@ function getInspections()
       $i = 0;
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {
-         $inspectionResult = $inspection->inspectionResults[$i];
+         $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId];
          
          $inspectionInput = getInspectionInput($inspectionProperty, $inspectionResult);
          
@@ -563,14 +632,15 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
 {
    $html = "";
    
-   $name = "inspectionProperty_" . $inspectionProperty->propertyName;
+   $id = "inspectionProperty-" . $inspectionProperty->propertyId;
+   $name = "inspectionProperty" . $inspectionProperty->propertyId;
    $pass = ($inspectionResult->pass()) ? "checked" : "";
    $fail = ($inspectionResult->fail()) ? "checked" : "";
    $nonApplicable = ($inspectionResult->nonApplicable()) ? "checked" : "";
    
-   $passId = $name . "-pass-button";
-   $failId = $name . "-fail-button";
-   $nonApplicableId = $name . "-na-button";
+   $passId = $id . "-pass-button";
+   $failId = $id . "-fail-button";
+   $nonApplicableId = $id . "-na-button";
    
    $html =
 <<<HEREDOC
@@ -652,8 +722,6 @@ if (isset($_GET["action"]))
          $isDisabled = filter_var($_GET["isDisabled"], FILTER_VALIDATE_BOOLEAN);
          
          $wcNumberInput =  ViewLineInspection::getWcNumberInput($jobNumber, $isDisabled);
-         
-         echo $wcNumberInput;
          break;
       }
       

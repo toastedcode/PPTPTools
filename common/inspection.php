@@ -5,15 +5,21 @@ require_once 'inspectionTemplate.php';
 
 class InspectionResult
 {
-   public $propertyName;
-   public $dataType;
-   public $value;
+   const UNKNOWN_INSPECTION_ID = 0;
+   
+   const UNKNOWN_PROPERTY_ID = 0;
+   
+   public $inspectionId;
+   public $propertyId;
+   public $status;
+   public $data;
    
    public function __construct()
    {
-      $this->propertyName = "";
-      $this->dataType = InspectionDataType::UNKNOWN;
-      $value = "";
+      $this->inspectionId = InspectionResult::UNKNOWN_INSPECTION_ID;
+      $this->propertyId = InspectionResult::UNKNOWN_PROPERTY_ID;
+      $this->status = InspectionStatus::UNKNOWN;
+      $this->data = null;
    }
    
    public static function load($row)
@@ -24,48 +30,28 @@ class InspectionResult
       {
          $inspectionResult = new InspectionResult();
          
-         $inspectionResult->propertyName = $row['propertyName'];
-         $inspectionResult->dataType = intval($row['dataType']);
-         $inspectionResult->value = $row['value'];
+         $inspectionResult->inspectionId = $row['inspectionId'];
+         $inspectionResult->propertyId = $row['propertyId'];
+         $inspectionResult->status = intval($row['status']);
+         $inspectionResult->data = $row['data'];
       }
       
       return ($inspectionResult);
    }
    
-   public function getStatus()
-   {
-      $inspectionStatus = InspectionStatus::NON_APPLICABLE;
-      
-      switch ($this->dataType)
-      {
-         case InspectionDataType::PASS_FAIL:
-         {
-            $inspectionStatus = intval($this->value);
-            break;
-         }
-            
-         default:
-         {
-            break;
-         }
-      }
-      
-      return ($inspectionStatus);
-   }
-   
    public function pass()
    {
-      return ($this->getStatus() == InspectionStatus::PASS);
+      return ($this->status == InspectionStatus::PASS);
    }
    
    public function fail()
    {
-      return ($this->getStatus() == InspectionStatus::FAIL);
+      return ($this->status == InspectionStatus::FAIL);
    }
    
    public function nonApplicable()
    {
-      return ($this->getStatus() == InspectionStatus::NON_APPLICABLE);
+      return ($this->status == InspectionStatus::NON_APPLICABLE);
    }
 }
 
@@ -86,7 +72,6 @@ class Inspection
    {
       $this->inspectionId = Inspection::UNKNOWN_INSPECTION_ID;
       
-      $this->inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
       $this->inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
@@ -97,7 +82,7 @@ class Inspection
    
    public static function load($inspectionId)
    {
-      $inspectionInfo = null;
+      $inspection = null;
       
       $database = PPTPDatabase::getInstance();
       
@@ -121,7 +106,8 @@ class Inspection
             
             while ($result && ($row = $result->fetch_assoc()))
             {
-               $inspection->inspectionResults[] = InspectionResult::load($row);
+               $inspectionResult = InspectionResult::load($row);
+               $inspection->inspectionResults[$inspectionResult->propertyId] = $inspectionResult;
             }
          }
       }
@@ -182,24 +168,7 @@ if (isset($_GET["inspectionId"]))
       
       foreach ($inspection->inspectionResults as $inspectionResult)
       {
-         $value = "";
-         switch ($inspectionResult->dataType)
-         {
-            case InspectionDataType::PASS_FAIL:
-            {
-               $inspectionStatus = intval($inspectionResult->value);
-               $value = InspectionStatus::getLabel($inspectionStatus);
-               break;
-            }
- 
-            default:
-            {
-               $value = $inspectionResult->value;
-               break;
-            }
-         }
- 
-         echo $inspectionResult->propertyName . " : " . $value . "<br/>";
+         echo $inspectionResult->propertyId . " : " . InspectionStatus::getLabel($inspectionResult->status) . "<br/>";
       }
       
       echo "comments: " .  $inspection->comments .         "<br/>";
