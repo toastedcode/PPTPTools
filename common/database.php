@@ -1059,7 +1059,7 @@ class PPTPDatabase extends MySqlDatabase
    //                                Inspections
    // **************************************************************************
    
-   public function getInspections($jobNumber, $operator, $inspectionType, $startDate, $endDate)
+   public function getInspections($inspectionType, $jobNumber, $operator, $startDate, $endDate)
    {
       $operatorClause = "";
       if ($operator != 0)
@@ -1068,20 +1068,21 @@ class PPTPDatabase extends MySqlDatabase
       }
       
       $jobNumberClause = "";
-      /*
       if ($jobNumber != "All")
       {
-         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
+         $jobNumberClause = "job.jobNumber = '$jobNumber' AND ";
       }
-      */
       
       $typeClause = "";
       if ($inspectionType != InspectionType::UNKNOWN)
       {
-         $jobNumberClause = "inspectionType = $inspectionType AND ";
+         $typeClause = "inspectionTemplate.inspectionType = $inspectionType AND ";
       }
       
-      $query = "SELECT * FROM inspection WHERE $operatorClause $jobNumberClause $typeClause dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, inspectionId DESC;";
+      $query = "SELECT * FROM inspection " .
+               "INNER JOIN inspectionTemplate ON inspection.templateId = inspectionTemplate.templateId " .
+               "INNER JOIN job ON inspection.jobId = job.jobId " .
+               "WHERE $operatorClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
 
       $result = $this->query($query);
       

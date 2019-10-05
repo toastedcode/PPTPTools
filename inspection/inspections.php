@@ -66,7 +66,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Inspection", "location.replace('inspection.php?view=new_inspection');", true);
+   $navBar->highlightNavButton("New Inspection", "location.replace('selectInspection.php?view=new_inspection');", true);
    $navBar->end();
    
    return ($navBar->getHtml());
@@ -105,8 +105,8 @@ function getFilter()
       $filter = new Filter();
       
       $filter->addByName("inspectionType", new InspectionTypeFilterComponent("Inspection Type"));
-      $filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
       $filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(false), "All"));
+      $filter->addByName("operator", new UserFilterComponent("Operator", $operators, $selectedOperator, $allowAll));
       $filter->addByName('date', new DateFilterComponent());
       $filter->add(new FilterButton());
       $filter->add(new FilterDivider());
@@ -115,8 +115,6 @@ function getFilter()
       //$filter->add(new ThisWeekButton());
       $filter->add(new FilterDivider());
       $filter->add(new PrintButton("inspectionReport.php"));
-      
-      $filter->add(new FilterButton());
       
       $_SESSION["inspectionFilter"] = $filter;
    }
@@ -145,9 +143,9 @@ function getTable($filter)
    $endDateString = $endDate->format("Y-m-d");
    
    $result = PPTPDatabase::getInstance()->getInspections(
-      $filter->get('operator')->selectedEmployeeNumber,
-      $filter->get('jobNumber')->selectedJobNumber,
       $filter->get('inspectionType')->selectedInspectionType,
+      $filter->get('jobNumber')->selectedJobNumber,
+      $filter->get('operator')->selectedEmployeeNumber,
       $startDateString,
       $endDateString);
    
@@ -209,17 +207,17 @@ HEREDOC;
             
             $viewEditIcon = "";
             $deleteIcon = "";
-            if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+            if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
             {
                $viewEditIcon =
-                  "<a href=\"$ROOT/inspection/inspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+                  "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=edit_inspection\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                   "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspectionTemplate($inspectionTemplate->templateId)\">delete</i>";
             }
             else
             {
                $viewEditIcon =
-               "<a href=\"$ROOT/inspection/inspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template&view=view_part_weight_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+                  "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=view_inspection\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
             $html .=

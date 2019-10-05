@@ -87,12 +87,7 @@ function getNewInspection()
    $wcNumber = 
       ($params->keyExists("wcNumber") ? $params->get("wcNumber") : 0);
    
-   $jobInfo = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
-   
-   if ($jobInfo)
-   {
-      $inspection->jobId = $jobInfo->jobId;
-   }
+   $inspection->jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
    
    $userInfo = Authentication::getAuthenticatedUser();
    if ($userInfo)
@@ -552,15 +547,15 @@ function getNavBar()
       // Creating a new inspection.
       // Editing an existing inspection.
       
-      $navBar->cancelButton("submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'cancel_line_inspection')");
-      $navBar->highlightNavButton("Save", "submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'save_line_inspection');", false);
+      $navBar->cancelButton("submitForm('input-form', 'inspections.php', 'view_inspections', 'cancel_inspection')");
+      $navBar->highlightNavButton("Save", "submitForm('input-form', 'lineInspection.php', 'view_inspections', 'save_inspection');", false);
    }
-   else if ($view == "view_line_inspection")
+   else if ($view == "view_inspection")
    {
       // Case 2
       // Viewing an existing job.
       
-      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'jobs.php', 'view_line_inspections', 'no_action')", false);
+      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'inspections.php', 'view_inspections', 'no_action')", false);
    }
    
    $navBar->end();
@@ -642,22 +637,24 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
    $failId = $id . "-fail-button";
    $nonApplicableId = $id . "-na-button";
    
+   $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
+   
    $html =
 <<<HEREDOC
       <td>
-         <input id="$passId" type="radio" class="invisible-radio-button pass" form="input-form" name="$name" value="1" $pass/>
+         <input id="$passId" type="radio" class="invisible-radio-button pass" form="input-form" name="$name" value="1" $pass $disabled/>
          <label for="$passId">
             <div class="select-button">PASS</div>
          </label>
       </td>
       <td>
-         <input id="$failId" type="radio" class="invisible-radio-button fail" form="input-form" name="$name" value="2" $fail/>
+         <input id="$failId" type="radio" class="invisible-radio-button fail" form="input-form" name="$name" value="2" $fail $disabled/>
          <label for="$failId">
             <div class="select-button">FAIL</div>
          </label>
       </td>
       <td>
-         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="3" $nonApplicable/>
+         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="3" $nonApplicable $disabled/>
          <label for="$nonApplicableId">
             <div class="select-button">N/A</div>
          </label>
@@ -844,7 +841,7 @@ if (!Authentication::isAuthenticated())
          
                   <div class="form-item">
                      <div class="form-label">Operator</div>
-                     <select id="operator-input" class="form-input-medium" name="operator" form="input-form" $disabled>
+                     <select id="operator-input" class="form-input-medium" name="operator" form="input-form" <?php echo !isEditable(InspectionInputField::OPERATOR) ? "disabled" : ""; ?>>
                         <?php echo getOperatorOptions(); ?>
                      </select>
                   </div>
