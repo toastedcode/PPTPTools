@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rest.php';
+require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
 require_once '../common/partWasherEntry.php';
@@ -429,6 +430,163 @@ $router->add("inspectionTemplate", function($params) {
    {
       $result->success = false;
       $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("saveInspection", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $inspection = null;
+   
+   if (isset($params["inspectionId"]) &&
+       is_numeric($params["inspectionId"]) &&
+       (intval($params["inspectionId"]) != Inspection::UNKNOWN_INSPECTION_ID))
+   {
+      //  Updated entry
+      $inspection = Inspection::load($params["inspectionId"]);
+      
+      if (!$inspection)
+      {
+         $result->success = false;
+         $result->error = "No existing inspection found.";
+      }
+   }
+   else
+   {
+      // New entry.
+      $inspection = new Inspection();
+      
+      // Use current date/time as entry time.
+      $inspection->dateTime = Time::now("Y-m-d h:i:s A");
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["templateId"]) &&
+          isset($params["jobNumber"]) &&
+          isset($params["wcNumber"]) &&
+          isset($params["inspector"]) &&
+          isset($params["operator"]) &&
+          isset($params["comments"]))
+      {
+         $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
+         
+         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         {
+            $inspection->templateId = intval($params["templateId"]);
+            $inspection->jobId = $jobId;
+            $inspection->inspector = intval($params["inspector"]);
+            $inspection->operator = intval($params["operator"]);
+            $inspection->comments = $params["comments"];
+            
+            $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
+            
+            if ($inspectionTemplate)
+            {
+               foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+               {
+                  $name = "property" . $inspectionProperty->propertyId;
+                  $dataName = "propertyData" . $inspectionProperty->propertyId;
+                  
+                  if (isset($params[$name]))
+                  {
+                     $inspectionResult = new InspectionResult();
+                     $inspectionResult->propertyId = $inspectionProperty->propertyId;
+                     $inspectionResult->status = intval($params[$name]);
+                     
+                     if (isset($params[$dataName]))
+                     {
+                        $inspectionResult->data = $params[$dataName];
+                     }
+                     
+                     $inspection->inspectionResults[$inspectionResult->propertyId] = $inspectionResult;
+                  }
+                  else
+                  {
+                     $result->success = false;
+                     $result->error = "Missing property [$name]";
+                  }
+               }
+                     
+               if ($result->success)
+               {
+                  if ($inspection->inspectionId == Inspection::UNKNOWN_INSPECTION_ID)
+                  {
+                     $dbaseResult = $database->newInspection($inspection);
+                  }
+                  else
+                  {
+                     $dbaseResult = $database->updateInspection($inspection);
+                  }
+                  
+                  if (!$dbaseResult)
+                  {
+                     $result->success = false;
+                     $result->error = "Database query failed.";
+                  }
+               }
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "Failed to lookup inspection template.";
+            }
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Failed to lookup job ID.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("deleteInspection", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["inspectionId"]) &&
+       is_numeric($params["inspectionId"]) &&
+       (intval($params["inspectionId"]) != Inspection::UNKNOWN_INSPECTION_ID))
+   {
+      $inspectionId = intval($params["inspectionId"]);
+      
+      $inspection = Inspection::load($inspectionId);
+      
+      if ($inspection)
+      {
+         $dbaseResult = $database->deleteInspection($inspectionId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing inspection found.";
+      }
    }
    
    echo json_encode($result);

@@ -1,211 +1,71 @@
-/*
-function onDeleteLineInspection(entryId)
+function onSubmit()
 {
-   if (confirm("Are you sure you want to delete this line inspection?"))
+   if (validateInspection())
    {
-      form = document.createElement('form');
-      form.setAttribute('method', 'POST');
-      form.setAttribute('action', 'lineInspection.php');
+      var form = document.querySelector('#input-form');
       
-      input = document.createElement('input');
-      input.setAttribute('name', 'action');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', 'delete_line_inspection');
-      form.appendChild(input);
-      
-      input = document.createElement('input');
-      input.setAttribute('name', 'entryId');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', entryId);
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      form.submit();
+      var xhttp = new XMLHttpRequest();
+   
+      // Bind the form data.
+      var formData = new FormData(form);
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         console.log(this.responseText);
+         var json = JSON.parse(event.target.responseText);
+
+         if (json.success == true)
+         {
+            location.href = "inspections.php";
+         }
+         else
+         {
+            alert(json.error);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/saveInspection/"
+      xhttp.open("POST", requestUrl);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);
    }
 }
 
-function onNewLineInspection()
+function onDeleteInspection(inspectionId)
 {
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'lineInspection.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'new_line_inspection');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'new_line_inspection');
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();  	
-}
-
-function onViewLineInspection(entryId)
-{
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'lineInspection.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'view_line_inspection');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'entryId');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', entryId);
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();
-}
-
-function onEditLineInspection(entryId)
-{
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'lineInspection.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'edit_line_inspection');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'edit_line_inspection');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'entryId');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', entryId);
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();
-}
-
-
-function onCancel()
-{
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'lineInspection.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'view_line_inspections');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'cancel_line_inspection');
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();  	
-}
-
-function submitForm(form, page, view, action)
-{
-   //alert(form + ", " + page + ", " + view + ", " + action);
-   
-   if (!form)
+   if (confirm("Are you sure you want to delete this inspection?"))
    {
-      form = document.createElement('form');
-      form.setAttribute('method', 'POST');
-      document.body.appendChild(form);
-   }
-   else
-   {
-      form = document.getElementById(form);
-   }
-   
-   form.setAttribute('action', page);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', view);
-   form.appendChild(input);
-
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', action);
-   form.appendChild(input);
-   
-   form.submit();
-}
-
-function updateWCNumberInput()
-{
-   input = document.getElementById("job-number-input");
-   
-   // Retrieve the selected job number.
-   jobNumber = input.options[input.selectedIndex].value; 
-   
-   // Retrieve the enabled/disabled status of the input.
-   isDisabled = input.disabled;
-   
-   // Build the AJAX query.
-   requestURl = "viewLineInspection.php?action=get_wc_number_input&jobNumber=" + jobNumber + "&isDisabled=" + isDisabled;
-   
-   var xhttp = new XMLHttpRequest();
-   xhttp.validator = this;
-   xhttp.onreadystatechange = function()
-   {
-      if (this.readyState == 4 && this.status == 200)
+      // AJAX call to delete an ispection.
+      requestUrl = "../api/deleteInspection/?inspectionId=" + inspectionId;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
       {
-         // Update with the new wc-number-input.
-         input = document.getElementById("wc-number-input-div");
-         input.innerHTML = this.responseText;
-      }
-   };
-   
-   xhttp.open("GET", requestURl, true);
-   xhttp.send(); 
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               location.href = "inspections.php";            
+            }
+            else
+            {
+               alert(json.error);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();  
+   }
 }
-
-function updateCustomerPrint()
-{
-   input = document.getElementById("job-number-input");
-   
-   // Retrieve the selected job number.
-   jobNumber = input.options[input.selectedIndex].value; 
-   
-   // Build the AJAX query.
-   requestURl = "viewLineInspection.php?action=get_customer_print_link&jobNumber=" + jobNumber;
-   
-   var xhttp = new XMLHttpRequest();
-   xhttp.validator = this;
-   xhttp.onreadystatechange = function()
-   {
-      if (this.readyState == 4 && this.status == 200)
-      {
-         // Update with the customer print link.
-         div = document.getElementById("customer-print-div");
-         div.innerHTML = this.responseText;
-      }
-   };
-   
-   xhttp.open("GET", requestURl, true);
-   xhttp.send(); 
-}
-*/
 
 function set(elementId, value)
 {
@@ -268,7 +128,6 @@ function onJobNumberChange()
 
 function updateTemplateId()
 {
-   console.log("here");
    inspectionType = document.getElementById("inspection-type-input").value;
    jobNumber = document.getElementById("job-number-input").value;
    wcNumber = document.getElementById("wc-number-input").value;
@@ -320,4 +179,53 @@ function updateWcOptions(wcNumbers)
    }
    
    element.value = null;
+}
+
+function validateInspection()
+{
+   valid = true;
+   
+   /*
+   $validTimeCardId = (document.getElementById("time-card-id-input").validator.validate() &&
+                       (document.getElementById("time-card-id-input").style.color != "#FF0000"));
+
+   if (!$validTimeCardId)
+   {
+      alert("Please enter a valid time card ID.");    
+   }
+   else if (!(document.getElementById("job-number-input").validator.validate()))
+   {
+      alert("Start by selecting a valid time card ID or active job.");    
+   }
+   else if (!(document.getElementById("wc-number-input").validator.validate()))
+   {
+      alert("Please select a work center.");    
+   }
+   else if (isNaN(Date.parse(document.getElementById("manufacture-date-input").value)))
+   {
+      alert("Please enter a valid manufacture date.");    
+   }
+   else if (!(document.getElementById("operator-input").validator.validate()))
+   {
+      alert("Please select an operator.");    
+   }
+   else if (!(document.getElementById("part-washer-input").validator.validate()))
+   {
+      alert("Please select a part washer.");    
+   }
+   else if (!(document.getElementById("pan-count-input").validator.validate()))
+   {
+      alert("Please enter a valid pan count.");
+   }
+   else if (!(document.getElementById("part-count-input").validator.validate()))
+   {
+      alert("Please enter a valid part count.");
+   }
+   else
+   {
+      valid = true;
+   }
+   */
+   
+   return (valid);   
 }

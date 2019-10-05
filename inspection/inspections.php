@@ -212,7 +212,7 @@ HEREDOC;
                $viewEditIcon =
                   "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=edit_inspection\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
-                  "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspectionTemplate($inspectionTemplate->templateId)\">delete</i>";
+                  "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspection($inspection->inspectionId)\">delete</i>";
             }
             else
             {
@@ -283,12 +283,10 @@ $filter = getFilter();
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
-   <link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWeightLog.js"></script>
+   <script src="inspection.js"></script>
    <script src="../common/validate.js"></script>
-   <script src="partWeightLog.js"></script>
 
 </head>
 

@@ -594,6 +594,7 @@ if (!Authentication::isAuthenticated())
      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
       <form id="input-form" action="" method="POST">
+         <!-- Hidden inputs make sure disabled fields below get posted. -->
          <input id="entry-id-input" type="hidden" name="entryId" value="<?php echo getEntryId(); ?>">
          <input type="hidden" name="washer" value="<?php echo getWasher(); ?>">
          <input type="hidden" name="washDate" value="<?php echo getWashDate(); ?>">

@@ -199,20 +199,19 @@ HEREDOC;
      </div>
 HEREDOC;
    }
-      
-   // Line Inspection
-   $lineInspectionButton = "";
-   if (Activity::isAllowed(Activity::LINE_INSPECTION, $permissions))
-   {
-      $lineInspectionButton =
+   
+    // Inspection
+    $inspectionButton = "";
+    if (Activity::isAllowed(Activity::LINE_INSPECTION, $permissions))
+    {
+       $inspectionButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='lineInspection/lineInspection.php?view=view_line_inspections';">
-        <i class="material-icons action-button-icon">thumbs_up_down</i>
-        <div>Line</div>
-        <div>Inspections</div>
-     </div>
+       <div class="action-button" onclick="location.href='inspection/inspections.php';">
+          <i class="material-icons action-button-icon">thumbs_up_down</i>
+          <div>Inspections</div>
+       </div>
 HEREDOC;
-   }
+    }
       
    // Machine Status
    $machineStatusButton = "";
@@ -286,7 +285,7 @@ HEREDOC;
             
             $partInspectionButton
             
-            $lineInspectionButton
+            $inspectionButton
             
             $machineStatusButton
             

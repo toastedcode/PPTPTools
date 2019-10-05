@@ -1109,31 +1109,71 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
-   public function newInspection($inspectionInfo)
+   public function newInspection($inspection)
    {
-      $dateTime = Time::toMySqlDate($inspectionInfo->dateTime);
+      $dateTime = Time::toMySqlDate($inspection->dateTime);
       
       $query =
       "INSERT INTO inspection " .
       "(templateId, dateTime, inspector, operator, jobId, comments) " .
       "VALUES " .
-      "('$templateId', '$dateTime', '$inspectionInfo->inspector', '$inspectionInfo->operator', '$inspectionInfo->jobId', '$inspectionInfo->comments');";
+      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->operator', '$inspection->jobId', '$inspection->comments');";
       
       $result = $this->query($query);
+      
+      if ($result)
+      {
+         // Get the last auto-increment id, which should be the inspection id.
+         $inspectionId = mysqli_insert_id($this->getConnection());
+         
+         foreach ($inspection->inspectionResults as $inspectionResult)
+         {
+            $query =
+            "INSERT INTO inspectionResult " .
+            "(inspectionId, propertyId, status, data) " .
+            "VALUES " .
+            "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->status', '$inspectionResult->data');";
+            
+            $result &= $this->query($query);
+            
+            if (!$result)
+            {
+               break;
+            }
+         }
+      }
       
       return ($result);
    }
    
-   public function updateInspection($inspectionInfo)
+   public function updateInspection($inspection)
    {
-      $dateTime = Time::toMySqlDate($inspectionInfo->dateTime);
+      $dateTime = Time::toMySqlDate($inspection->dateTime);
       
       $query =
       "UPDATE inspection " .
-      "SET templateId = '$inspectionInfo->templateId', dateTime = '$dateTime',  inspector = '$inspectionInfo->inspector', operator = '$inspectionInfo->operator', jobId = '$inspectionInfo->jobId', comments = '$inspectionInfo->comments' " .
-      "WHERE inspectionId = '$inspectionInfo->inspectionId';";
+      "SET inspector = '$inspection->inspector', operator = '$inspection->operator', comments = '$inspection->comments' " .
+      "WHERE inspectionId = '$inspection->inspectionId';";
       
       $result = $this->query($query);
+      
+      if ($result)
+      {
+         foreach ($inspection->inspectionResults as $inspectionResult)
+         {
+            $query =
+            "UPDATE inspectionResult " .
+            "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
+            "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId';";
+
+            $result &= $this->query($query);
+            
+            if (!$result)
+            {
+               break;
+            }
+         }
+      }
       
       return ($result);
    }
@@ -1146,7 +1186,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query = "DELETE FROM inspectionresult WHERE inspectionId = $inspectionId;";
       
-      $result = $this->query($query);
+      $result &= $this->query($query);
+      
+      return ($result);
    }
    
    // **************************************************************************

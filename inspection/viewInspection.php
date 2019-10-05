@@ -18,10 +18,11 @@ abstract class InspectionInputField
    const INSPECTION_TYPE = InspectionInputField::FIRST;
    const JOB_NUMBER = 1;
    const WC_NUMBER = 2;
-   const OPERATOR = 3;
-   const INSPECTION = 4;
-   const COMMENTS = 5;
-   const LAST = 6;
+   const INSPECTOR = 3;
+   const OPERATOR = 4;
+   const INSPECTION = 5;
+   const COMMENTS = 6;
+   const LAST = 7;
    const COUNT = InspectionInputField::LAST - InspectionInputField::FIRST;
 }
 
@@ -94,8 +95,6 @@ function getNewInspection()
    {
       $inspection->inspector = $userInfo->employeeNumber;
    }
-   
-   $inspection->dateTime = Time::now("Y-m-d h:i:s A");
    
    if ($inspection->templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
    {
@@ -236,9 +235,23 @@ function getWcNumber()
    return ($wcNumber);
 }
 
+function getInspector()
+{
+   $inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+   
+   $inspection = getInspection();
+   
+   if ($inspection)
+   {
+      $inspector = $inspection->inspector;
+   }
+   
+   return ($inspector);
+}
+
 function getOperator()
 {
-   $operator = 0;
+   $operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    
    $inspection = getInspection();
    
@@ -332,6 +345,46 @@ function getWcNumberOptions()
       $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
       
       $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
+   }
+   
+   return ($options);
+}
+
+function getInspectorOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $inspectors = PPTPDatabase::getInstance()->getUsersByRole(Role::INSPECTOR);
+
+   // Create an array of employee numbers.
+   $employeeNumbers = array();
+   foreach ($inspectors as $inspector)
+   {
+      $employeeNumbers[] = intval($inspector["employeeNumber"]);
+   }
+   
+   $selectedInspector = getInspector();
+   
+   // Add selected job number, if not already in the array.
+   // Note: This handles the case of viewing an entry with an operator that is not assigned to the OPERATOR role.
+   if (($selectedInspector != UserInfo::UNKNOWN_EMPLOYEE_NUMBER) &&
+      (!in_array($selectedInspector, $employeeNumbers)))
+   {
+      $employeeNumbers[] = $selectedInspector;
+      sort($employeeNumbers);
+   }
+   
+   foreach ($employeeNumbers as $employeeNumber)
+   {
+      $userInfo = UserInfo::load($employeeNumber);
+      if ($userInfo)
+      {
+         $selected = ($employeeNumber == $selectedInspector) ? "selected" : "";
+         
+         $name = $employeeNumber . " - " . $userInfo->getFullName();
+         
+         $options .= "<option value=\"$employeeNumber\" $selected>$name</option>";
+      }
    }
    
    return ($options);
@@ -547,15 +600,15 @@ function getNavBar()
       // Creating a new inspection.
       // Editing an existing inspection.
       
-      $navBar->cancelButton("submitForm('input-form', 'inspections.php', 'view_inspections', 'cancel_inspection')");
-      $navBar->highlightNavButton("Save", "submitForm('input-form', 'lineInspection.php', 'view_inspections', 'save_inspection');", false);
+      $navBar->cancelButton("location.href = 'inspections.php';");
+      $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
    else if ($view == "view_inspection")
    {
       // Case 2
       // Viewing an existing job.
       
-      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'inspections.php', 'view_inspections', 'no_action')", false);
+      $navBar->highlightNavButton("Ok", "location.href = 'inspections.php';", false);
    }
    
    $navBar->end();
@@ -627,8 +680,8 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
 {
    $html = "";
    
-   $id = "inspectionProperty-" . $inspectionProperty->propertyId;
-   $name = "inspectionProperty" . $inspectionProperty->propertyId;
+   $id = "property-" . $inspectionProperty->propertyId;
+   $name = "property" . $inspectionProperty->propertyId;
    $pass = ($inspectionResult->pass()) ? "checked" : "";
    $fail = ($inspectionResult->fail()) ? "checked" : "";
    $nonApplicable = ($inspectionResult->nonApplicable()) ? "checked" : "";
@@ -803,6 +856,10 @@ if (!Authentication::isAuthenticated())
    
       <form id="input-form" action="" method="POST">
          <input id="inspection-id-input" type="hidden" name="inspectionId" value="<?php echo getInspectionId(); ?>">
+         <!-- Hidden inputs make sure disabled fields below get posted. -->
+         <input type="hidden" name="templateId" value="<?php echo getTemplateId(); ?>">
+         <input type="hidden" name="jobNumber" value="<?php echo getJobNumber(); ?>">
+         <input type="hidden" name="wcNumber" value="<?php echo getWcNumber(); ?>">
       </form>
       
       <div class="flex-vertical content">
@@ -836,6 +893,13 @@ if (!Authentication::isAuthenticated())
                      <div class="form-label">WC Number</div>
                      <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                         <?php echo getWcNumberOptions(); ?>
+                     </select>
+                  </div>
+                  
+                  <div class="form-item">
+                     <div class="form-label">Inspector</div>
+                     <select id="inspector-input" class="form-input-medium" name="inspector" form="input-form" <?php echo !isEditable(InspectionInputField::INSPECTOR) ? "disabled" : ""; ?>>
+                        <?php echo getInspectorOptions(); ?>
                      </select>
                   </div>
          
