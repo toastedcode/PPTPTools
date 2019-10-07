@@ -120,13 +120,13 @@ class Inspection
       return (count($this->inspectionResults));
    }
    
-   public function getPassCount()
+   public function getCountByStatus($inspectionStatus)
    {
       $count = 0;
       
       foreach ($this->inspectionResults as $inspectionResult)
       {
-         if ($inspectionResult->pass())
+         if ($inspectionResult->status == $inspectionStatus)
          {
             $count++;
          }
@@ -135,14 +135,9 @@ class Inspection
       return ($count);
    }
    
-   public function getFailCount()
-   {
-      return ($this->getCount() - $this->getPassCount());
-   }
-   
    public function pass()
    {
-      return ($this->getFailCount() == 0);
+      return ($this->getCountByStatus(InspectionStatus::FAIL) == 0);
    }
    
    public function fail()

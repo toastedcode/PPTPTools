@@ -8,7 +8,8 @@ class InspectionProperty
    
    public $propertyId;
    public $templateId;
-   public $propertyName;
+   public $name;
+   public $specification;
    public $dataType;
    public $ordering;
    
@@ -16,7 +17,8 @@ class InspectionProperty
    {
       $this->propertyId = InspectionProperty::UNKNOWN_PROPERTY_ID;
       $this->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
-      $this->propertyName = "";
+      $this->name = "";
+      $this->specification = "";
       $this->dataType = InspectionDataType::UNKNOWN;
       $this->ordering = 0;
    }
@@ -31,7 +33,8 @@ class InspectionProperty
          
          $inspectionProperty->propertyId = intval($row['propertyId']);
          $inspectionProperty->templateId = intval($row['templateId']);
-         $inspectionProperty->propertyName = $row['propertyName'];
+         $inspectionProperty->name = $row['name'];
+         $inspectionProperty->specification = $row['specification'];
          $inspectionProperty->dataType = intval($row['dataType']);
          $inspectionProperty->ordering = intval($row['ordering']);
       }
@@ -114,15 +117,21 @@ class InspectionTemplate
          }
             
          case InspectionType::QCP:
-         {
-            // TODO: Get from job.
-            break;
-         }
-            
          case InspectionType::IN_PROCESS:
          {
-            // TODO: Get from job.
-            break;
+           $jobInfo = JobInfo::load($jobId);
+           if ($jobInfo)
+           {
+              if ($inspectionType == InspectionType::QCP)
+              {
+                 $templateId = $jobInfo->qcpInspectionTemplateId;
+              }
+              else if ($inspectionType == InspectionType::IN_PROCESS)
+              {
+                 $templateId = $jobInfo->inlineInspectionTemplateId;
+              }
+           }
+           break;
          }
             
          default:
@@ -155,7 +164,7 @@ if (isset($_GET["templateId"]))
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {
-         echo $inspectionProperty->propertyName . ": " . InspectionDataType::getLabel($inspectionProperty->dataType) . ", " . $inspectionProperty->ordering . "<br/>";
+         echo $inspectionProperty->name . ": " . InspectionDataType::getLabel($inspectionProperty->dataType) . ", " . $inspectionProperty->ordering . "<br/>";
       }
    }
    else

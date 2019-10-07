@@ -203,7 +203,8 @@ HEREDOC;
                $operatorName = $user->getFullName();
             }
             
-            $passFail = ($inspection->pass() ? "PASS" : "FAIL");
+            $passFail = ($inspection->pass() ? "<div class=\"inspection-status pass\">PASS</div>" : 
+                                               "<div class=\"inspection-status fail\">FAIL</div>");
             
             $viewEditIcon = "";
             $deleteIcon = "";
@@ -220,6 +221,9 @@ HEREDOC;
                   "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=view_inspection\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
+            $passCount = $inspection->getCountByStatus(InspectionStatus::PASS);
+            $count = ($inspection->getCount() - $inspection->getCountByStatus(InspectionStatus::NON_APPLICABLE));
+            
             $html .=
 <<<HEREDOC
             <tr>
@@ -230,7 +234,7 @@ HEREDOC;
                <td class="hide-on-tablet">$operatorName</td>
                <td>$jobInfo->jobNumber</td>
                <td>$jobInfo->wcNumber</td>
-               <td>{$inspection->getPassCount()}/{$inspection->getCount()}</td>
+               <td>$passCount/$count</td>
                <td>$passFail</td>
                <td>$viewEditIcon</td>
                <td>$deleteIcon</td>
@@ -283,6 +287,7 @@ $filter = getFilter();
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
+   <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="inspection.js"></script>
@@ -296,13 +301,13 @@ $filter = getFilter();
    
    <div class="flex-horizontal main">
      
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+     <!-- div class="flex-horizontal sidebar hide-on-tablet"></div--> 
    
      <div class="flex-vertical content">
 
-        <div class="heading">Inspection</div>
+        <div class="heading">Inspections</div>
 
-        <div class="description">Blah blah blah</div>
+        <div class="description">Part inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
 
         <div class="flex-vertical inner-content">
         

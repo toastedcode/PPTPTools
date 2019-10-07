@@ -88,3 +88,36 @@ input.fail:checked + label > div  {
 input.nonApplicable:checked + label > div  {
    background-color: background-color: #6496c8;
 }
+
+.inspection-property-name {
+	font-weight: bold;
+}
+
+.inspection-status {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: center;
+   
+   font-size: 14px;
+   color: #fff;
+   text-shadow: -1px 1px #417cb8;
+   
+   line-height: 1.8;
+   appearance: none;
+   box-shadow: none;
+   border-radius: 0;
+   background-color: grey;
+   border: none;
+   
+   width: 50px;
+   height: 20px;	
+}
+
+.inspection-status.pass {
+	background-color: green;
+}
+
+.inspection-status.fail {
+   background-color: red;
+}

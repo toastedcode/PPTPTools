@@ -40,9 +40,12 @@ function getInspectionTypeOptions()
    
    for ($inspectionType = InspectionType::FIRST; $inspectionType != InspectionType::LAST; $inspectionType++)
    {
-      $label = InspectionType::getLabel($inspectionType);
-      
-      $options .= "<option value=\"$inspectionType\">$label</option>";
+      if ($inspectionType != InspectionType::OASIS)  // Cannot make manually.
+      {
+         $label = InspectionType::getLabel($inspectionType);
+         
+         $options .= "<option value=\"$inspectionType\">$label</option>";
+      }
    }
    
    return ($options);
@@ -78,7 +81,7 @@ function getHeading()
 
 function getDescription()
 {
-   $description = "Start by selecting a work center, then any of the currently active jobs for that station.";
+   $description = "Start by selecting choosing your inspection type and a currently active job.";
    
    return ($description);
 }
@@ -89,8 +92,8 @@ function getNavBar()
    
    $navBar->start();
    
-   $navBar->cancelButton("submitForm('input-form', 'lineInspection.php', 'view_line_inspections', 'cancel_line_inspection')");
-   $navBar->nextButton("submitForm('input-form', 'viewInspection.php', 'new_inspection', '')");
+   $navBar->cancelButton("location.href = 'inspections.php';");
+   $navBar->nextButton("if (validateInspectionSelection()) {submitForm('input-form', 'viewInspection.php', 'new_inspection', '');}");
    
    $navBar->end();
    
@@ -193,9 +196,13 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         var inspectionTypeValidator = new SelectValidator("inspection-type-input");
          var jobNumberValidator = new SelectValidator("job-number-input");
+         var wcNumberValidator = new SelectValidator("wc-number-input");
 
+         inspectionTypeValidator.init();
          jobNumberValidator.init();
+         wcNumberValidator.init();
       </script>
      
    </div>

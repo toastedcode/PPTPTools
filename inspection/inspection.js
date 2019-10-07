@@ -136,7 +136,6 @@ function updateTemplateId()
    {
       // AJAX call to populate template id based on selected inspection type, job number, and WC number.
       requestUrl = "../api/inspectionTemplate/?inspectionType=" + inspectionType + "&jobNumber=" + jobNumber + "&wcNumber=" + wcNumber;
-      console.log(requestUrl);
       
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function()
@@ -181,51 +180,51 @@ function updateWcOptions(wcNumbers)
    element.value = null;
 }
 
-function validateInspection()
+function validateInspectionSelection()
 {
-   valid = true;
+   valid = false;
    
-   /*
-   $validTimeCardId = (document.getElementById("time-card-id-input").validator.validate() &&
-                       (document.getElementById("time-card-id-input").style.color != "#FF0000"));
-
-   if (!$validTimeCardId)
+   if (!(document.getElementById("inspection-type-input").validator.validate()))
    {
-      alert("Please enter a valid time card ID.");    
+      alert("Start by selecting an inspection type.");    
    }
    else if (!(document.getElementById("job-number-input").validator.validate()))
    {
-      alert("Start by selecting a valid time card ID or active job.");    
+      alert("Please select an active job.");    
    }
    else if (!(document.getElementById("wc-number-input").validator.validate()))
    {
       alert("Please select a work center.");    
    }
-   else if (isNaN(Date.parse(document.getElementById("manufacture-date-input").value)))
+   else
    {
-      alert("Please enter a valid manufacture date.");    
+      templateId = parseInt(document.getElementById("template-id-input").value);
+      
+      if (templateId == 0)
+      {
+         alert("No inspection template could be found for the current selection."); 
+      }
+      else
+      {
+         valid = true;
+      }
    }
-   else if (!(document.getElementById("operator-input").validator.validate()))
+   
+   return (valid);
+}
+
+function validateInspection()
+{
+   valid = false;
+   
+   if (!(document.getElementById("operator-input").validator.validate()))
    {
-      alert("Please select an operator.");    
-   }
-   else if (!(document.getElementById("part-washer-input").validator.validate()))
-   {
-      alert("Please select a part washer.");    
-   }
-   else if (!(document.getElementById("pan-count-input").validator.validate()))
-   {
-      alert("Please enter a valid pan count.");
-   }
-   else if (!(document.getElementById("part-count-input").validator.validate()))
-   {
-      alert("Please enter a valid part count.");
+      alert("Select an operator.");    
    }
    else
    {
       valid = true;
    }
-   */
    
    return (valid);   
 }

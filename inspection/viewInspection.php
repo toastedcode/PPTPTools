@@ -149,7 +149,7 @@ function getInspectionTemplate()
    if ($inspectionTemplate == null)
    {
       $templateId = getTemplateId();
-
+      
       if ($templateId != Inspection::UNKNOWN_INSPECTION_ID)
       {
          $inspectionTemplate = InspectionTemplate::load($templateId);
@@ -233,6 +233,28 @@ function getWcNumber()
    }
    
    return ($wcNumber);
+}
+
+function getCustomerPrint()
+{
+   $customerPrint = "";
+   
+   $jobNumber = getJobNumber();
+   $wcNumber = getWcNumber();
+   
+   $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+   
+   if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+   {
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo)
+      {
+         $customerPrint = $jobInfo->customerPrint;
+      }
+   }
+   
+   return ($customerPrint);
 }
 
 function getInspector()
@@ -460,7 +482,7 @@ function getDescription()
    
    if ($view == "new_inspection")
    {
-      $description = "Start by selecting a work center, then any of the currently active jobs for that station.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
+      $description = "Next, select the operator responsible for the targeted part inspection.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
    }
    else if ($view == "edit_inspection")
    {
@@ -473,117 +495,6 @@ function getDescription()
    
    return ($description);
 }
-   
-/*
-   protected static function inspectionDiv($lineInspectionInfo, $view)
-   {
-      $isDisabled = ($view == "view_line_inspection");
-      $disabled = $isDisabled? "disabled" : "";
-      
-      $selected= ($lineInspectionInfo->jobNumber == JobInfo::UNKNOWN_JOB_NUMBER) ? "selected" : "";
-      
-      $options = "<option disabled $selected hidden>Select job</option>";
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getActiveJobs(null);
-         
-         $i = 0;
-         while ($result && ($row = $result->fetch_assoc()))
-         {
-            $jobNumber = $row["jobNumber"];
-            
-            $selected = "";
-            if ($jobNumber == $lineInspectionInfo->jobNumber)
-            {
-               $selected = "selected";
-            }
-            
-            $options .= "<option value=\"$jobNumber\" $selected>" . $jobNumber . "</option>";
-            
-            $i++;
-         }
-      }
-      
-      $wcNumberInput = ViewLineInspection::getWcNumberInput("", $lineInspectionInfo->wcNumber, $isDisabled);
-      
-      $operatorInput = ViewLineInspection::getOperatorInput($lineInspectionInfo, $isDisabled);
-      
-      $inspectionInput = array();
-      $fail = array();
-      for ($i = 0; $i < LineInspectionInfo::NUM_INSPECTIONS; $i++)
-      {
-         $inspectionInput[$i] = ViewLineInspection::inspectionInput($lineInspectionInfo, $i, $isDisabled);
-      }
-      
-      $html =
-<<<HEREDOC
-      <div class="form-col">
-
-         <div class="form-item">
-            <div class="form-label">Job Number</div>
-            <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="updateWCNumberInput(); updateCustomerPrint();" $disabled>
-               $options
-            </select>
-            &nbsp;&nbsp;
-            <div id="customer-print-div"></div>
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">WC Number</div>
-            <div id="wc-number-input-div">$wcNumberInput</div>
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Operator</div>
-            $operatorInput
-         </div>
-         
-         <div class="form-item">
-            <div class="form-label hide-on-mobile">Inspection</div>
-            <table class="inspection-table">
-               <tr>
-                  <td>Thread #1</td>
-                  {$inspectionInput[0]}
-               </tr>
-               <tr>
-                  <td>Thread #2</td>
-                  {$inspectionInput[1]}
-               </tr>
-               <tr>
-                  <td>Thread #3</td>
-                  {$inspectionInput[2]}
-               </tr>
-               <tr>
-                  <td>Visual</td>
-                  {$inspectionInput[3]}
-               </tr>
-               <tr>
-                  <td>Undercut</td>
-                  {$inspectionInput[4]}
-               </tr>
-               <tr>
-                  <td>Depth</td>
-                  {$inspectionInput[5]}
-               </tr>
-            </table>
-         </div>
-   
-         <div class="form-item">
-            <div class="form-label hide-on-mobile">Comments</div>
-            <textarea form="input-form" class="comments-input" type="text" name="comments" placeholder="Enter comments ...">$lineInspectionInfo->comments</textarea>
-         </div>
-
-      </div>
-HEREDOC;
-      
-      return ($html);
-   }
-   */
 
 function getNavBar()
 {
@@ -664,7 +575,11 @@ function getInspections()
          $html .= 
 <<<HEREDOC
          <tr>
-            <td>$inspectionProperty->propertyName</td>
+            <td>
+               <div class="flex-vertical">
+                  <div class="inspection-property-name">$inspectionProperty->name</div>
+                  <div>$inspectionProperty->specification</div>
+            </td>
             $inspectionInput
          </tr>\n
 HEREDOC;
@@ -715,99 +630,6 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
 HEREDOC;
    
    return ($html);
-}
-   
-/*
-   
-   public static function inspectionInput($lineInspectionInfo, $inspectionIndex, $isDisabled)
-   {
-      $name = LineInspectionInfo::getInspectionName($inspectionIndex);
-      $pass = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::PASS) ? "checked" : "";
-      $fail = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::FAIL) ? "checked" : "";
-      $nonApplicable = ($lineInspectionInfo->inspections[$inspectionIndex] == InspectionStatus::UNKNOWN) ? "checked" : "";
-      
-      $passId = $name . "-pass-button";
-      $failId = $name . "-fail-button";
-      $nonApplicableId = $name . "-na-button";
-      
-      $html = 
-<<<HEREDOC
-      <td>
-         <input id="$passId" type="radio" class="invisible-radio-button pass" form="input-form" name="$name" value="1" $pass/>
-         <label for="$passId">
-            <div class="select-button">PASS</div>
-         </label>
-      </td>
-      <td>
-         <input id="$failId" type="radio" class="invisible-radio-button fail" form="input-form" name="$name" value="2" $fail/>
-         <label for="$failId">
-            <div class="select-button">FAIL</div>
-         </label>
-      </td>
-      <td>
-         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="0" $nonApplicable/>
-         <label for="$nonApplicableId">
-            <div class="select-button">N/A</div>
-         </label>
-      </td>
-HEREDOC;
-      
-      return ($html);
-   }
-*/
-
-// *****************************************************************************
-//                          AJAX request handling
-// *****************************************************************************
-
-global $ROOT;
-
-if (isset($_GET["action"]))
-{
-   switch ($_GET["action"])
-   {
-      case "get_wc_number_input":
-      {
-         $jobNumber = $_GET["jobNumber"];
-         $isDisabled = filter_var($_GET["isDisabled"], FILTER_VALIDATE_BOOLEAN);
-         
-         $wcNumberInput =  ViewLineInspection::getWcNumberInput($jobNumber, $isDisabled);
-         break;
-      }
-      
-      case "get_customer_print_link":
-      {
-         $jobNumber = $_GET["jobNumber"];
-         
-         $database = new PPTPDatabase();
-         
-         $database->connect();
-         
-         if ($database->isConnected())
-         {
-            $customerPrint = null;
-
-            $result = $database->getJobsByJobNumber($jobNumber);
-            
-            while ($result && ($row = $result->fetch_assoc()))
-            {
-               $jobInfo = JobInfo::load($row["jobId"]);
-               
-               if (($jobInfo) && ($jobInfo->customerPrint))
-               {
-                  $customerPrint = $jobInfo->customerPrint;
-                  break;
-               }
-            }
-            
-            if ($customerPrint)
-            {
-               echo "<a href=\"$ROOT/uploads/$customerPrint\" target=\"_blank\">$customerPrint</a>";
-            }
-         }
-         break;
-      }
-   }
 }
 
 // *****************************************************************************
@@ -886,7 +708,7 @@ if (!Authentication::isAuthenticated())
                          <?php echo getJobNumberOptions(); ?>
                      </select>
                      &nbsp;&nbsp;
-                     <div id="customer-print-div"></div>
+                     <div id="customer-print-div"><a href="$ROOT/uploads/<?php echo getCustomerPrint(); ?>" target="_blank"><?php echo getCustomerPrint(); ?></a></div>
                   </div>
          
                   <div class="form-item">
@@ -932,9 +754,9 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
-         var jobNumberValidator = new SelectValidator("job-number-input");
+         var operatorValidator = new SelectValidator("operator-input");
 
-         jobNumberValidator.init();
+         operatorValidator.init();
       </script>
      
    </div>
