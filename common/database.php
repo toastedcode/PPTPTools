@@ -1076,11 +1076,11 @@ class PPTPDatabase extends MySqlDatabase
       $typeClause = "";
       if ($inspectionType != InspectionType::UNKNOWN)
       {
-         $typeClause = "inspectionTemplate.inspectionType = $inspectionType AND ";
+         $typeClause = "inspectiontemplate.inspectionType = $inspectionType AND ";
       }
       
       $query = "SELECT * FROM inspection " .
-               "INNER JOIN inspectionTemplate ON inspection.templateId = inspectionTemplate.templateId " .
+               "INNER JOIN inspectiontemplate ON inspection.templateId = inspectiontemplate.templateId " .
                "INNER JOIN job ON inspection.jobId = job.jobId " .
                "WHERE $operatorClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
 
@@ -1129,7 +1129,7 @@ class PPTPDatabase extends MySqlDatabase
          foreach ($inspection->inspectionResults as $inspectionResult)
          {
             $query =
-            "INSERT INTO inspectionResult " .
+            "INSERT INTO inspectionresult " .
             "(inspectionId, propertyId, status, data) " .
             "VALUES " .
             "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->status', '$inspectionResult->data');";
@@ -1162,7 +1162,7 @@ class PPTPDatabase extends MySqlDatabase
          foreach ($inspection->inspectionResults as $inspectionResult)
          {
             $query =
-            "UPDATE inspectionResult " .
+            "UPDATE inspectionresult " .
             "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
             "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId';";
 

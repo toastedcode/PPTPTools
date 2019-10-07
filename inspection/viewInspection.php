@@ -708,7 +708,7 @@ if (!Authentication::isAuthenticated())
                          <?php echo getJobNumberOptions(); ?>
                      </select>
                      &nbsp;&nbsp;
-                     <div id="customer-print-div"><a href="$ROOT/uploads/<?php echo getCustomerPrint(); ?>" target="_blank"><?php echo getCustomerPrint(); ?></a></div>
+                     <div id="customer-print-div"><a href="<?php $ROOT ?>/uploads/<?php echo getCustomerPrint(); ?>" target="_blank"><?php echo getCustomerPrint(); ?></a></div>
                   </div>
          
                   <div class="form-item">
