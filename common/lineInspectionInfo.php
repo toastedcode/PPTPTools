@@ -2,30 +2,6 @@
 require_once 'database.php';
 require_once 'time.php';
 
-abstract class InspectionStatus
-{
-   const FIRST = 0;
-   const UNKNOWN = InspectionStatus::FIRST;
-   const PASS = 1;
-   const FAIL = 2;
-   const LAST = 3;
-   const COUNT = InspectionStatus::LAST - InspectionStatus::FIRST;
-   
-   public static function getLabel($inspectionStatus)
-   {
-      $labels = array("---", "PASS", "FAIL");
-      
-      return ($labels[$inspectionStatus]);
-   }
-   
-   public static function getClass($inspectionStatus)
-   {
-      $classes = array("", "pass", "fail");
-      
-      return ($classes[$inspectionStatus]);
-   }
-}
-
 class LineInspectionInfo
 {
    const INVALID_ENTRY_ID = 0;
