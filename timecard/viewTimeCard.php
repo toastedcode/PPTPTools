@@ -1,14 +1,163 @@
 <?php
 
 require_once '../common/commentCodes.php';
+require_once '../common/header.php';
 require_once '../common/userInfo.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
+require_once '../common/params.php';
 require_once '../common/timeCardInfo.php';
-require_once 'enterComments.php';
+//require_once 'enterComments.php';
 
 require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
+function getView()
+{
+   $params = Params::parse();
+   
+   return ($params->keyExists("view") ? $params->get("view") : "");
+}
+
+function getTimeCardId()
+{
+   $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
+   
+   return ($timeCardId);
+}
+
+function getTimeCardInfo()
+{
+   static $timeCardInfo = null;
+   
+   if ($timeCardInfo == null)
+   {
+      $params = Params::parse();
+      
+      if ($params->keyExists("timeCardId"))
+      {
+         $timeCardInfo = TimeCardInfo::load($params->get("timeCardId"));
+      }
+   }
+   
+   return ($timeCardInfo);
+}
+
+function getOperatorName()
+{
+   return ("");
+}
+
+function getOperatorEmployeeNumber()
+{
+   return (0);
+}
+
+function getJobNumber()
+{
+   return ("");
+}
+
+function getWcNumber()
+{
+   return (0);
+}
+
+function getMaterialNumber()
+{
+   return (0);
+}
+
+function getHeading()
+{
+   $heading = "";
+   
+   $view = getView();
+   
+   if ($view == "new_time_card")
+   {
+      $heading = "Create a New Time Card";
+   }
+   else if ($view == "edit_time_card")
+   {
+      $heading = "Update a Time Card";
+   }
+   else if ($view == "view_time_card")
+   {
+      $heading = "View a Time Card";
+   }
+
+   return ($heading);
+}
+
+function getDescription()
+{
+   $description = "";
+   
+   $view = getView();
+   
+   if ($view == "new_time_card")
+   {
+      $description = "Enter all required fields for your time card.  Once you're satisfied, click Save below to add this time card to the system.";
+   }
+   else if ($view == "edit_time_card")
+   {
+      $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
+   }
+   else if ($view == "view_time_card")
+   {
+      $description = "View a previously saved time card in detail.";
+   }
+   
+   return ($description);
+}
+
+function getManufactureDate()
+{
+   $mfgDate = Time::now(Time::$javascriptDateFormat);
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $mfgDate = $dateTime->format(Time::$javascriptDateFormat);
+   }
+   
+   return ($mfgDate);
+}
+
+function getNavBar()
+{
+   $navBar = new Navigation();
+   
+   $navBar->start();
+   
+   $view = getView();
+   
+   if (($view == "new_time_card") ||
+       ($view == "edit_time_card"))
+   {
+      // Case 1
+      // Creating a new time card.
+      // Editing an existing time card.
+      
+      $navBar->cancelButton("submitForm('input-form', 'viewTimeCards.php', '', '')");
+      $navBar->highlightNavButton("Save", "onSubmit();", false);
+   }
+   else if ($view == "view_time_card")
+   {
+      // Case 2
+      // Viewing an existing entry.
+      
+      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'viewTimeCards.php', '', '')", false);
+   }
+   
+   $navBar->end();
+   
+   return ($navBar->getHtml());
+}
+
+/*
 class ViewTimeCard
 {
    public static function getHtml($view)
@@ -33,7 +182,7 @@ class ViewTimeCard
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="timeCard.php" method="POST">
+      <form id="input-form" action="" method="POST">
          <input type="hidden" name="timeCardId" value="$timeCardInfo->timeCardId"/>
       </form>
 
@@ -262,13 +411,13 @@ HEREDOC;
       }
       
       $approvalText = "Approved by supervisor";
-      /*
+      *
       $userInfo = UserInfo::load($timeCardInfo->approvedBy);
       if ($userInfo)
       {
          $approvalText = "Approved by " . $userInfo->username;
       }
-      */
+      *
       
       $approvalButton = "";
       $unapprovalButton = "";
@@ -543,4 +692,121 @@ HEREDOC;
       return ($timeCardInfo);
    }
 }
+*/
 ?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
+   <link rel="stylesheet" type="text/css" href="timeCard.css"/>
+   
+   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="../common/validate.js"></script>
+   <script src="timeCard.js"></script>
+
+</head>
+
+<body>
+
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="flex-horizontal main">
+     
+     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   
+      <form id="input-form" action="" method="POST">
+         <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
+      </form>
+      
+      <div class="flex-vertical content">
+      
+         <div class="heading"><?php echo getHeading(); ?></div>
+         
+         <div class="description"><?php echo getDescription(); ?></div>
+         
+          <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;">
+
+            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+            
+               <div class="form-item">
+                  <div class="form-label">Date</div>
+                  <input type="text" class="form-input-medium" name="date" style="width:100px;" value="<?php echo getManufactureDate(); ?>" disabled>
+               </div>
+               
+               <div class="form-col">
+                  <div class="form-section-header">Operator</div>
+                  <div class="form-item">
+                     <div class="form-label">Name</div>
+                     <input type="text" class="form-input-medium" style="width:150px;" value="<?php echo getOperatorName(); ?>" disabled>
+                  </div>
+                  <div class="form-item">
+                     <div class="form-label">Employee #</div>
+                     <input type="text" class="form-input-medium" style="width:100px;" value="<?php echo getOperatorEmployeeNumber(); ?>" disabled>
+                  </div>
+               </div>
+         
+               <div class="form-col">         
+                  <div class="form-section-header">Job</div>         
+                  <div class="form-item">
+                     <div class="form-label">Job #</div>
+                     <input type="text" class="form-input-medium" style="width:150px;" value="<?php getJobNumber(); ?>" disabled>
+                  </div>         
+                  <div class="form-item">
+                     <div class="form-label">Work center #</div>
+                     <input type="text" class="form-input-medium" style="width:150px;" value="<?php getWcNumber(); ?>" disabled>
+                  </div>         
+                  <div class="form-item">
+                     <div class="form-label">Heat #</div>
+                     <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="<?php getMaterialNumber(); ?>" $disabled>
+                  </div>         
+               </div>
+      
+            </div>
+            
+            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+               $timeDiv
+               $partsDiv
+            </div>
+            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+               $commentCodesDiv
+               $commentsDiv
+            </div>
+
+         </div>
+         
+         <?php echo getNavBar(); ?>
+         
+      </div>
+      
+      <script>
+         var timeCardIdValidator = new IntValidator("time-card-id-input", 7, 1, 1000000, true);
+         var jobNumberValidator = new SelectValidator("job-number-input");
+         var wcNumberValidator = new SelectValidator("wc-number-input");
+         var operatorValidator = new SelectValidator("operator-input");
+         var laborerValidator = new SelectValidator("laborer-input");
+         var panCountValidator = new IntValidator("pan-count-input", 2, 1, 40, false);
+         var partWeightValidator = new DecimalValidator("part-weight-input", 7, 1, 10000, 2, false);
+
+         timeCardIdValidator.init();
+         jobNumberValidator.init();
+         wcNumberValidator.init();
+         operatorValidator.init();
+         laborerValidator.init();
+         panCountValidator.init();
+         partWeightValidator.init();
+      </script>
+     
+   </div>
+
+</body>
+
+</html>

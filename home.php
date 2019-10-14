@@ -151,7 +151,7 @@ HEREDOC;
    {
       $timeCardButton =
 <<<HEREDOC
-      <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
+      <div class="action-button" onclick="location.href='timecard/viewTimeCards.php';">
          <div><i class="material-icons action-button-icon">schedule</i></div>
          <div>Time Cards</div>
       </div>
