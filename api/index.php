@@ -148,6 +148,94 @@ $router->add("users", function($params) {
    echo json_encode($result);
 });
 
+$router->add("saveTimeCard", function($params) {
+   $result = new stdClass();
+   $result->success = false;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $timeCardInfo = null;
+   
+   if (isset($params["timeCardId"]) &&
+       is_numeric($params["timeCardId"]) &&
+       (intval($params["timeCardId"]) != TimeCardInfo::UNKNOWN_TIME_CARD_ID))
+   {
+      //  Updated entry
+      $timeCardInfo = PartWeightEntry::load($params["timeCardId"]);
+      
+      if (!$timeCardInfo)
+      {
+         $result->success = false;
+         $result->error = "No existing part weight entry found.";
+      }
+   }
+   else
+   {
+      // New time card.
+      $timeCardInfo = new TimeCardInfo();
+      
+      // Use current date/time as time card time.
+      $timeCardInfo->dateTime = Time::now("Y-m-d h:i:s A");
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["operator"]) &&
+          isset($params["jobNumber"]) &&
+          isset($params["wcNumber"]) &&
+          isset($params["materialNumber"]) &&
+          isset($params["setupTime"]) &&
+          isset($params["runTime"]) &&
+          isset($params["panCount"]) &&
+          isset($params["partCount"]) &&
+          isset($params["scrapCount"]) &&
+          isset($params["comments"]))
+      {
+         $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
+         
+         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         {
+            $timeCardInfo->employeeNumber = intval($params["operator"]);
+            $timeCardInfo->jobId = $jobId;
+            $timeCardInfo->materialNumber = intval($params["materialNumber"]);
+            $timeCardInfo->setupTime = intval($params["setupTime"]);
+            $timeCardInfo->runTime = intval($params["runTime"]);
+            $timeCardInfo->panCount = intval($params["panCount"]);
+            $timeCardInfo->partCount = intval($params["partCount"]);
+            $timeCardInfo->scrapCount = intval($params["scrapCount"]);
+            
+            if ($timeCardInfo->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+            {
+               $dbaseResult = $database->newTimeCard($timeCardInfo);
+            }
+            else
+            {
+               $dbaseResult = $database->updateTimeCard($timeCardInfo);
+            }
+            
+            if (!$dbaseResult)
+            {
+               $result->success = false;
+               $result->error = "Database query failed.";
+            }
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Failed to lookup job ID.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("savePartWasherEntry", function($params) {
    $result = new stdClass();
    $result->success = true;

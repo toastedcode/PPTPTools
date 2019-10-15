@@ -676,3 +676,42 @@ function updateWcOptions(wcNumbers)
    
    element.value = null;
 }
+
+function onSubmit()
+{
+   if (validatePartWasherEntry())
+   {
+      var form = document.querySelector('#input-form');
+      
+      var xhttp = new XMLHttpRequest();
+   
+      // Bind the form data.
+      var formData = new FormData(form);
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         var json = JSON.parse(event.target.responseText);
+
+         if (json.success == true)
+         {
+            location.href = "viewTimeCards.php";
+         }
+         else
+         {
+            alert(json.error);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/saveTimeCard/"
+      xhttp.open("POST", requestUrl);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);
+   }
+}
