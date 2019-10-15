@@ -476,9 +476,9 @@ function formattedDate(date)
 
 function autoFillEfficiency()
 {
-   var runTimeHourInput = document.getElementById("runTimeHour-input");
-   var runTimeMinuteInput = document.getElementById("runTimeMinute-input");
-   var partCountInput = document.getElementById("partsCount-input");
+   var runTimeHourInput = document.getElementById("run-time-hour-input");
+   var runTimeMinuteInput = document.getElementById("run-time-minute-input");
+   var partCountInput = document.getElementById("part-count-input");
    var grossPartsPerHourInput = document.getElementById("gross-parts-per-hour-input");
    var efficiencyInput = document.getElementById("efficiency-input");
    
@@ -537,9 +537,9 @@ function autoFillTotalTime()
 
 function updateApproval()
 {
-   var setupTimeHourInput = document.getElementById("setupTimeHour-input");
-   var setupTimeMinuteInput = document.getElementById("setupTimeMinute-input");  
-   var approvedByInput = document.getElementById("approvedBy-input");
+   var setupTimeHourInput = document.getElementById("setup-time-hour-input");
+   var setupTimeMinuteInput = document.getElementById("setup-time-minute-input");  
+   var approvedByInput = document.getElementById("approved-by-input");
    
    var approval = "no-approval-required";
    
@@ -594,4 +594,85 @@ function unapprove(approvedBy)
    approvedByInput.value = 0;
    
    updateApproval();
+}
+
+// *****************************************************************************
+
+function set(elementId, value)
+{
+   document.getElementById(elementId).value = value;
+}
+
+function clear(elementId)
+{
+   document.getElementById(elementId).value = null;
+}
+
+function enable(elementId)
+{
+   document.getElementById(elementId).disabled = false;
+}
+
+function disable(elementId)
+{
+   document.getElementById(elementId).disabled = true;
+}
+
+function onJobNumberChange()
+{
+   jobNumber = document.getElementById("job-number-input").value;
+   
+   if (jobNumber == null)
+   {
+      disable("wc-number-input");
+   }
+   else
+   {
+      enable("wc-number-input");
+      
+      // Populate WC numbers based on selected job number.
+      
+      // AJAX call to populate WC numbers based on selected job number.
+      requestUrl = "../api/wcNumbers/?jobNumber=" + jobNumber;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               updateWcOptions(json.wcNumbers);               
+            }
+            else
+            {
+               console.log("API call to retrieve WC numbers failed.");
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();  
+   }
+}
+
+function updateWcOptions(wcNumbers)
+{
+   element = document.getElementById("wc-number-input");
+   
+   while (element.firstChild)
+   {
+      element.removeChild(element.firstChild);
+   }
+
+   for (var wcNumber of wcNumbers)
+   {
+      var option = document.createElement('option');
+      option.innerHTML = wcNumber;
+      option.value = wcNumber;
+      element.appendChild(option);
+   }
+   
+   element.value = null;
 }

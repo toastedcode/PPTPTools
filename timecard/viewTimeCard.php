@@ -11,11 +11,57 @@ require_once '../common/timeCardInfo.php';
 
 require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
 
+abstract class TimeCardInputField
+{
+   const FIRST = 0;
+   const MANUFACTURE_DATE = PartWasherLogInputField::FIRST;
+   const MANUFACTURE_TIME = 1;
+   const OPERATOR = 2;
+   const JOB_NUMBER = 3;
+   const WC_NUMBER = 4;
+   const MATERIAL_NUMBER = 5;
+   const RUN_TIME = 6;
+   const SETUP_TIME = 7;
+   const PAN_COUNT = 8;
+   const PART_COUNT = 9;
+   const SCRAP_COUNT = 10;
+   const COMMENTS = 11;
+   const LAST = 12;
+   const COUNT = PartWasherLogInputField::LAST - PartWasherLogInputField::FIRST;
+}
+
 function getView()
 {
    $params = Params::parse();
    
    return ($params->keyExists("view") ? $params->get("view") : "");
+}
+
+function isEditable($field)
+{
+   $view = getView();
+   
+   // Start with the edit mode, as dictated by the view.
+   $isEditable = (($view == "new_time_card") ||
+                  ($view == "edit_time_card"));
+   
+   switch ($field)
+   {         
+      case TimeCardInputField::WC_NUMBER:
+      {
+         // Edit status determined by job number selection.
+         $isEditable &= (getJobNumber() != JobInfo::UNKNOWN_JOB_NUMBER);
+         break;
+      }
+         
+      default:
+      {
+         // Edit status based solely on view.
+         break;
+      }
+   }
+   
+   return ($isEditable);
 }
 
 function getTimeCardId()
@@ -37,6 +83,10 @@ function getTimeCardInfo()
       {
          $timeCardInfo = TimeCardInfo::load($params->get("timeCardId"));
       }
+      else
+      {
+         $timeCardInfo = new TimeCardInfo();
+      }
    }
    
    return ($timeCardInfo);
@@ -47,24 +97,333 @@ function getOperatorName()
    return ("");
 }
 
-function getOperatorEmployeeNumber()
+function getOperator()
 {
-   return (0);
+   $operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $operator = $timeCardInfo->employeeNumber;
+   }
+   
+   return ($operator);
+}
+
+function getOperatorOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $operators = PPTPDatabase::getInstance()->getUsersByRole(Role::OPERATOR);
+   
+   // Create an array of employee numbers.
+   $employeeNumbers = array();
+   foreach ($operators as $operator)
+   {
+      $employeeNumbers[] = intval($operator["employeeNumber"]);
+   }
+   
+   $selectedOperator = getOperator();
+   
+   // Add selected operator, if not already in the array.
+   // Note: This handles the case of viewing an entry with an operator that is not assigned to the OPERATOR role.
+   if (($selectedOperator != UserInfo::UNKNOWN_EMPLOYEE_NUMBER) &&
+       (!in_array($selectedOperator, $employeeNumbers)))
+   {
+      $employeeNumbers[] = $selectedOperator;
+      sort($employeeNumbers);
+   }
+   
+   foreach ($employeeNumbers as $employeeNumber)
+   {
+      $userInfo = UserInfo::load($employeeNumber);
+      if ($userInfo)
+      {
+         $selected = ($employeeNumber == $selectedOperator) ? "selected" : "";
+         
+         $name = $employeeNumber . " - " . $userInfo->getFullName();
+         
+         $options .= "<option value=\"$employeeNumber\" $selected>$name</option>";
+      }
+   }
+   
+   return ($options);
+}
+
+function getJobNumberOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $jobNumbers = JobInfo::getJobNumbers(ONLY_ACTIVE);
+   
+   $selectedJobNumber = getJobNumber();
+   
+   // Add selected job number, if not already in the array.
+   // Note: This handles the case of viewing an entry that references a non-active job.
+   if (($selectedJobNumber != "") &&
+      (!in_array($selectedJobNumber, $jobNumbers)))
+   {
+      $jobNumbers[] = $selectedJobNumber;
+      sort($jobNumbers);
+   }
+   
+   foreach ($jobNumbers as $jobNumber)
+   {
+      $selected = ($jobNumber == $selectedJobNumber) ? "selected" : "";
+      
+      $options .= "<option value=\"{$jobNumber}\" $selected>{$jobNumber}</option>";
+   }
+   
+   return ($options);
+}
+
+function getWcNumberOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $jobNumber = getJobNumber();
+   
+   $workCenters = null;
+   if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
+   {
+      $workCenters = PPTPDatabase::getInstance()->getWorkCentersForJob($jobNumber);
+   }
+   else
+   {
+      $workCenters = PPTPDatabase::getInstance()->getWorkCenters();
+   }
+   
+   $selectedWcNumber = getWcNumber();
+   
+   foreach ($workCenters as $workCenter)
+   {
+      $selected = ($workCenter["wcNumber"] == $selectedWcNumber) ? "selected" : "";
+      
+      $options .= "<option value=\"{$workCenter["wcNumber"]}\" $selected>{$workCenter["wcNumber"]}</option>";
+   }
+   
+   return ($options);
+}
+
+function getCommentCodesDiv()
+{
+   $timeCardInfo = getTimeCardInfo();
+   
+   $disabled = !isEditable(TimeCardInputField::COMMENTS) ? "disabled" : "";
+   
+   $commentCodes = CommentCode::getCommentCodes();
+   
+   $leftColumn = "";
+   $rightColumn = "";
+   $index = 0;
+   foreach ($commentCodes as $commentCode)
+   {
+      $id = "code-" . $commentCode->code . "-input";
+      $name = "code-" . $commentCode->code;
+      $checked = ($timeCardInfo->hasCommentCode($commentCode->code) ? "checked" : "");
+      $description = $commentCode->description;
+      
+      $codeDiv =
+<<< HEREDOC
+      <div class="form-item">
+         <input id="$id" type="checkbox" class="comment-checkbox" form="input-form" name="$name" $checked $disabled/>
+         <label for="$id" class="form-input-medium">$description</label>
+      </div>
+HEREDOC;
+      
+      if (($index % 2) == 0)
+      {
+         $leftColumn .= $codeDiv;
+      }
+      else
+      {
+         $rightColumn .= $codeDiv;
+      }
+      
+      $index++;
+   }
+   
+   $html =
+<<<HEREDOC
+   <input type="hidden" form="input-form" name="commentCodes" value="true"/>
+   <div class="form-col">
+      <div class="form-section-header">Codes</div>
+      <div class="form-row">
+         <div class="form-col">
+            $leftColumn
+         </div>
+         <div class="form-col">
+            $rightColumn
+         </div>
+      </div>
+   </div>
+HEREDOC;
+   
+   return ($html);
+}
+
+function getApprovalButton()
+{
+   $html = "";
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   $approval = "no-approval-required";
+   if ($timeCardInfo->requiresApproval())
+   {
+      if ($timeCardInfo->isApproved())
+      {
+         $approval = "approved";
+         
+      }
+      else
+      {
+         $approval = "unapproved";
+      }
+   }
+
+   if (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS))
+   {
+      $approvingUser = Authentication::getAuthenticatedUser();
+      
+      $approvalButton =
+<<<HEREDOC
+      <button id="approve-button" class="unapproval $approval" onclick="approve($approvingUser->employeeNumber)" style="width: 100px;">Approve</button>
+HEREDOC;
+   }
+      
+   return ($html);
+}
+
+function getUnapprovalButton()
+{
+   $html = "";
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   $approval = "no-approval-required";
+   if ($timeCardInfo->requiresApproval())
+   {
+      if ($timeCardInfo->isApproved())
+      {
+         $approval = "approved";
+         
+      }
+      else
+      {
+         $approval = "unapproved";
+      }
+   }
+   
+   if (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS))
+   {
+      $approvingUser = Authentication::getAuthenticatedUser();
+      
+      $unapprovalButton =
+<<<HEREDOC
+      <button id="unapprove-button" class="approval $approval" onclick="unapprove()" style="width: 100px;">Unapprove</button>
+HEREDOC;
+   }
+   
+   return ($html);
+}
+
+function getApprovalText()
+{
+   $approvalText = "";
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if (($timeCardInfo->requiresApproval()) &&
+       ($timeCardInfo->isApproved()))
+   {
+      $approvalText = "Approved by supervisor";
+
+      $userInfo = UserInfo::load($timeCardInfo->approvedBy);
+      
+      if ($userInfo)
+      {
+         $approvalText = "Approved by " . $userInfo->getFullName();
+      }
+   }
 }
 
 function getJobNumber()
 {
-   return ("");
+   $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $jobId = $timeCardInfo->jobId;
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo)
+      {
+         $jobNumber = $jobInfo->jobNumber;
+      }
+   }
+   
+   return ($jobNumber);
 }
 
 function getWcNumber()
 {
-   return (0);
+   $wcNumber = 0;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $jobId = $timeCardInfo->jobId;
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo)
+      {
+         $wcNumber = $jobInfo->wcNumber;
+      }
+   }
+   
+   return ($wcNumber);
 }
 
 function getMaterialNumber()
 {
-   return (0);
+   $materialNumber = 0;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $materialNumber = $timeCardInfo->materialNumber;
+   }
+   
+   return ($materialNumber);
+}
+
+function getGrossPartsPerHour()
+{
+   $grossPartsPerHour = 0;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $jobId = $timeCardInfo->jobId;
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo)
+      {
+         $grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
+      }
+   }
+   
+   return ($grossPartsPerHour);
 }
 
 function getHeading()
@@ -124,6 +483,21 @@ function getManufactureDate()
    }
    
    return ($mfgDate);
+}
+
+function getManufactureTime()
+{
+   $mfgTime = Time::now(Time::$javascriptTimeFormat);
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $mfgTime = $dateTime->format(Time::$javascriptTimeFormat);
+   }
+   
+   return ($mfgTime);
 }
 
 function getNavBar()
@@ -706,6 +1080,7 @@ HEREDOC;
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    <link rel="stylesheet" type="text/css" href="timeCard.css"/>
    
@@ -725,6 +1100,7 @@ HEREDOC;
    
       <form id="input-form" action="" method="POST">
          <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
+         <input id="gross-parts-per-hour-input" type="hidden" value="<?php echo getGrossPartsPerHour(); ?>">
       </form>
       
       <div class="flex-vertical content">
@@ -738,47 +1114,116 @@ HEREDOC;
             <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
             
                <div class="form-item">
-                  <div class="form-label">Date</div>
-                  <input type="text" class="form-input-medium" name="date" style="width:100px;" value="<?php echo getManufactureDate(); ?>" disabled>
+                  <div class="form-label">Mfg. Date</div>
+                  <input type="date" class="form-input-medium" name="date" value="<?php echo getManufactureDate(); ?>" disabled>
                </div>
                
-               <div class="form-col">
-                  <div class="form-section-header">Operator</div>
-                  <div class="form-item">
-                     <div class="form-label">Name</div>
-                     <input type="text" class="form-input-medium" style="width:150px;" value="<?php echo getOperatorName(); ?>" disabled>
-                  </div>
-                  <div class="form-item">
-                     <div class="form-label">Employee #</div>
-                     <input type="text" class="form-input-medium" style="width:100px;" value="<?php echo getOperatorEmployeeNumber(); ?>" disabled>
-                  </div>
+               <div class="form-item">
+                  <div class="form-label">Mfg. Time</div>
+                  <input type="time" class="form-input-medium" name="time" value="<?php echo getManufactureTime(); ?>" disabled>
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Operator</div>
+                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(TimeCardInputField::OPERATOR) ? "disabled" : ""; ?>>
+                     <?php echo getOperatorOptions(); ?>
+                  </select>
                </div>
          
                <div class="form-col">         
                   <div class="form-section-header">Job</div>         
                   <div class="form-item">
-                     <div class="form-label">Job #</div>
-                     <input type="text" class="form-input-medium" style="width:150px;" value="<?php getJobNumber(); ?>" disabled>
-                  </div>         
+                     <div class="form-label">Job Number</div>
+                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(TimeCardInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
+                        <?php echo getJobNumberOptions(); ?>
+                     </select>
+                  </div>       
                   <div class="form-item">
-                     <div class="form-label">Work center #</div>
-                     <input type="text" class="form-input-medium" style="width:150px;" value="<?php getWcNumber(); ?>" disabled>
-                  </div>         
+                     <div class="form-label">Work Center</div>
+                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(TimeCardInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                        <?php echo getWcNumberOptions(); ?>
+                     </select>
+                  </div>       
                   <div class="form-item">
                      <div class="form-label">Heat #</div>
-                     <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="<?php getMaterialNumber(); ?>" $disabled>
+                     <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:100px;" oninput="this.validator.validate()" value="<?php echo getMaterialNumber(); ?>" <?php echo !isEditable(TimeCardInputField::MATERIAL_NUMBER) ? "disabled" : ""; ?>>
                   </div>         
                </div>
       
             </div>
             
             <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
-               $timeDiv
-               $partsDiv
+            
+               <div class="form-col">
+               
+                  <div class="form-section-header">Time</div>
+                  
+                  <div class="form-item">
+                     <div class="form-label">Run time</div>
+                     <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); autoFillEfficiency();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
+                     <div style="padding: 5px;">:</div>
+                     <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate(); autoFillEfficiency();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
+                  </div>
+         
+                  <div class="form-item">
+                     <div class="form-label">Setup time</div>
+                     <div class="form-col">
+                        <div class="form-row">
+                           <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate(); updateApproval();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           <div style="padding: 5px;">:</div>
+                           <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate(); updateApproval();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
+                           <input type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
+                           <?php echo getApprovalButton(); ?>
+                           <?php echo getUnapprovalButton(); ?>
+                        </div>
+                        <div id="approval-div" class="approval"><?php echo getApprovalText(); ?></div>
+                        <div id="unapproval-div" class="unapproval" style="display:none;">Requires supervisor approval</div>
+                     </div>
+                  </div>
+                  
+               </div>
+               
+               <div class="form-col">
+                  
+                  <div class="form-section-header">Part Counts</div>
+                  
+                  <div class="form-item">
+                     <div class="form-label">Basket count</div>
+                     <input id="pan-count-input" type="number" class="form-input-medium" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="<?php echo getTimeCardInfo()->panCount; ?>" <?php echo !isEditable(TimeCardInputField::PAN_COUNT) ? "disabled" : ""; ?> />
+                  </div>
+            
+                  <div class="form-item">
+                     <div class="form-label">Good count</div>
+                     <input id="part-count-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); autoFillEfficiency();" value="<?php echo getTimeCardInfo()->partCount; ?>" <?php echo !isEditable(TimeCardInputField::PART_COUNT) ? "disabled" : ""; ?> />
+                  </div>
+            
+                  <div class="form-item">
+                     <div class="form-label">Scrap count</div>
+                     <input id="scrap-count-input" type="number" class="form-input-medium" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="<?php echo getTimeCardInfo()->scrapCount; ?>" <?php echo !isEditable(TimeCardInputField::SCRAP_COUNT) ? "disabled" : ""; ?> />
+                  </div>
+            
+                  <div class="form-item">
+                     <div class="form-label">Efficiency</div>
+                     <input id="efficiency-input" type="number" class="form-input-medium" style="width:100px;" value="" disabled />
+                     <div>&nbsp%</div>
+                  </div>
+            
+               </div>
+               
             </div>
+            
             <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
-               $commentCodesDiv
-               $commentsDiv
+            
+               <?php echo getCommentCodesDiv(); ?>
+               
+               <div class="form-col">
+                  <div class="form-section-header">Comments</div>
+                  <div class="form-item">
+                     <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" <?php echo !isEditable(TimeCardInputField::COMMENTS) ? "disabled" : ""; ?>><?php echo getTimeCardInfo()->comments; ?></textarea>
+                  </div>
+               </div>
+               
             </div>
 
          </div>
@@ -788,21 +1233,31 @@ HEREDOC;
       </div>
       
       <script>
-         var timeCardIdValidator = new IntValidator("time-card-id-input", 7, 1, 1000000, true);
+         var operatorValidator = new SelectValidator("operator-input");
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
-         var operatorValidator = new SelectValidator("operator-input");
-         var laborerValidator = new SelectValidator("laborer-input");
+         var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
+         var runTimeHourValidator = new IntValidator("run-time-hour-input", 2, 0, 10, false);
+         var runTimeMinuteValidator = new IntValidator("run-time-minute-input", 2, 0, 59, false);
+         var setupTimeHourValidator = new IntValidator("setup-time-hour-input", 2, 0, 10, false);
+         var setupTimeMinuteValidator = new IntValidator("setup-time-minute-input", 2, 0, 59, false);
          var panCountValidator = new IntValidator("pan-count-input", 2, 1, 40, false);
-         var partWeightValidator = new DecimalValidator("part-weight-input", 7, 1, 10000, 2, false);
+         var partsCountValidator = new IntValidator("part-count-input", 6, 0, 100000, true);
+         var scrapCountValidator = new IntValidator("scrap-count-input", 6, 0, 100000, true);
 
-         timeCardIdValidator.init();
+         operatorValidator.init();
          jobNumberValidator.init();
          wcNumberValidator.init();
-         operatorValidator.init();
-         laborerValidator.init();
+         materialNumberValidator.init();
+         runTimeHourValidator.init();
+         runTimeMinuteValidator.init();
+         setupTimeHourValidator.init();
+         setupTimeMinuteValidator.init();
          panCountValidator.init();
-         partWeightValidator.init();
+         partsCountValidator.init();
+         scrapCountValidator.init();
+   
+         autoFillEfficiency();
       </script>
      
    </div>

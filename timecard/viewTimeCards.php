@@ -167,7 +167,8 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
             {
                $viewEditIcon =
-               "<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard('$timeCardInfo->timeCardId')\">mode_edit</i>";
+               //"<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard('$timeCardInfo->timeCardId')\">mode_edit</i>";
+               "<a href=\"$ROOT/timecard/viewTimeCard.php?entryId=$timeCardInfo->timeCardId&view=edit_time_card\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeleteTimeCard('$timeCardInfo->timeCardId')\">delete</i>";
@@ -175,7 +176,8 @@ HEREDOC;
             else
             {
                $viewEditIcon =
-               "<i class=\"material-icons table-function-button\" onclick=\"onViewTimeCard('$timeCardInfo->timeCardId')\">visibility</i>";
+               //"<i class=\"material-icons table-function-button\" onclick=\"onViewTimeCard('$timeCardInfo->timeCardId')\">visibility</i>";
+               "<a href=\"$ROOT/timecard/viewTimeCard.php?entryId=$timeCardInfo->timeCardId&view=view_time_card\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
             $html .=

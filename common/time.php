@@ -4,6 +4,9 @@ class Time
    // Date format required for initializing date inputs.
    static public $javascriptDateFormat = "Y-m-d";
    
+   // Date format required for initializing time inputs.
+   static public $javascriptTimeFormat = "H:m:s";
+   
    static public function init()
    {
       date_default_timezone_set('America/New_York');
