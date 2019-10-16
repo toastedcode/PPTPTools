@@ -150,7 +150,7 @@ $router->add("users", function($params) {
 
 $router->add("saveTimeCard", function($params) {
    $result = new stdClass();
-   $result->success = false;
+   $result->success = true;
    
    $database = PPTPDatabase::getInstance();
    $dbaseResult = null;
@@ -162,7 +162,7 @@ $router->add("saveTimeCard", function($params) {
        (intval($params["timeCardId"]) != TimeCardInfo::UNKNOWN_TIME_CARD_ID))
    {
       //  Updated entry
-      $timeCardInfo = PartWeightEntry::load($params["timeCardId"]);
+      $timeCardInfo = TimeCardInfo::load(intval($params["timeCardId"]));
       
       if (!$timeCardInfo)
       {
@@ -204,6 +204,24 @@ $router->add("saveTimeCard", function($params) {
             $timeCardInfo->panCount = intval($params["panCount"]);
             $timeCardInfo->partCount = intval($params["partCount"]);
             $timeCardInfo->scrapCount = intval($params["scrapCount"]);
+            $timeCardInfo->comments = $params["comments"];
+            
+            $commentCodes = CommentCode::getCommentCodes();
+            
+            foreach ($commentCodes as $commentCode)
+            {
+               $code = $commentCode->code;
+               $name = "code-" . $code;
+               
+               if (isset($params[$name]))
+               {
+                  $timeCardInfo->setCommentCode($code);
+               }
+               else
+               {
+                  $timeCardInfo->clearCommentCode($code);
+               }
+            }
             
             if ($timeCardInfo->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID)
             {
@@ -231,6 +249,49 @@ $router->add("saveTimeCard", function($params) {
          $result->success = false;
          $result->error = "Missing parameters.";
       }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("deleteTimeCard", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["timeCardId"]) &&
+       is_numeric($params["timeCardId"]) &&
+       (intval($params["timeCardId"]) != TimeCardInfo::UNKNOWN_TIME_CARD_ID))
+   {
+      $timeCardId = intval($params["timeCardId"]);
+      
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      
+      if ($timeCardInfo)
+      {
+         $dbaseResult = $database->deleteTimeCard($timeCardId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing time card found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
    }
    
    echo json_encode($result);

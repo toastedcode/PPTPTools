@@ -3,6 +3,7 @@ require_once 'commentCodes.php';
 require_once 'database.php';
 require_once 'jobInfo.php';
 require_once 'time.php';
+require_once 'userInfo.php';
 
 class TimeCardInfo
 {
@@ -12,7 +13,7 @@ class TimeCardInfo
    
    public $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    public $dateTime;
-   public $employeeNumber;
+   public $employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    public $jobId;
    public $materialNumber;
    public $setupTime;
@@ -22,7 +23,7 @@ class TimeCardInfo
    public $scrapCount;
    public $commentCodes;
    public $comments;
-   public $approvedBy;
+   public $approvedBy = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    public $approvedDateTime;
    
    public function formatSetupTime()

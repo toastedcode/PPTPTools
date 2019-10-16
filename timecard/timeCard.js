@@ -1,3 +1,4 @@
+/*
 function onDeleteTimeCard(timeCardId)
 {
    if (confirm("Are you sure you want to delete this time card?"))
@@ -595,6 +596,7 @@ function unapprove(approvedBy)
    
    updateApproval();
 }
+*/
 
 // *****************************************************************************
 
@@ -677,9 +679,29 @@ function updateWcOptions(wcNumbers)
    element.value = null;
 }
 
+function updateRunTime()
+{
+   var hours = parseInt(document.getElementById("run-time-hour-input").value);
+   var minutes = parseInt(document.getElementById("run-time-minute-input").value);
+   
+   var runTime = ((hours * 60) + minutes);
+   
+   document.getElementById("run-time-input").value = runTime;
+}
+
+function updateSetupTime()
+{
+   var hours = parseInt(document.getElementById("setup-time-hour-input").value);
+   var minutes = parseInt(document.getElementById("setup-time-minute-input").value);
+   
+   var setupTime = ((hours * 60) + minutes);
+   
+   document.getElementById("setup-time-input").value = setupTime;   
+}
+
 function onSubmit()
 {
-   if (validatePartWasherEntry())
+   if (validateTimeCard())
    {
       var form = document.querySelector('#input-form');
       
@@ -690,15 +712,23 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "viewTimeCards.php";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "viewTimeCards.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
+            console.log("JSON syntax error");
+            console.log(this.responseText);
          }
       });
    
@@ -714,4 +744,83 @@ function onSubmit()
       // The data sent is what the user provided in the form
       xhttp.send(formData);
    }
+}
+
+function onDeleteTimeCard(timeCardId)
+{
+   if (confirm("Are you sure you want to delete this log entry?"))
+   {
+      // AJAX call to delete part weight entry.
+      requestUrl = "../api/deleteTimeCard/?timeCardId=" + timeCardId;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {         
+            try
+            {
+               console.log(this.responseText);
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  location.href = "viewTimeCards.php";
+               }
+               else
+               {
+                  console.log("API call to delete part weight entry failed.");
+                  alert(json.error);
+               }
+            }
+            catch (expection)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send(); 
+   }
+}
+
+function validateTimeCard()
+{
+   valid = false;
+
+   if (!(document.getElementById("operator-input").validator.validate()))
+   {
+      alert("Please select an operator.");    
+   }
+   else if (!(document.getElementById("job-number-input").validator.validate()))
+   {
+      alert("Please select an active job.");    
+   }
+   else if (!(document.getElementById("wc-number-input").validator.validate()))
+   {
+      alert("Please select a work center.");    
+   }
+   else if (!(document.getElementById("material-number-input").validator.validate()))
+   {
+      alert("Please enter a valid heat number.");    
+   }
+   else if (!(document.getElementById("pan-count-input").validator.validate()))
+   {
+      alert("Please enter a valid basket count.");    
+   }
+   else if (!(document.getElementById("part-count-input").validator.validate()))
+   {
+      alert("Please enter a valid part count.");    
+   }
+   else if (!(document.getElementById("scrap-count-input").validator.validate()))
+   {
+      alert("Please enter a valid scrap count.");    
+   }
+   else
+   {
+      valid = true;
+   }
+   
+   return (valid);   
 }

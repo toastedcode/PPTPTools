@@ -168,7 +168,7 @@ HEREDOC;
             {
                $viewEditIcon =
                //"<i class=\"material-icons table-function-button\" onclick=\"onEditTimeCard('$timeCardInfo->timeCardId')\">mode_edit</i>";
-               "<a href=\"$ROOT/timecard/viewTimeCard.php?entryId=$timeCardInfo->timeCardId&view=edit_time_card\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+               "<a href=\"$ROOT/timecard/viewTimeCard.php?timeCardId=$timeCardInfo->timeCardId&view=edit_time_card\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeleteTimeCard('$timeCardInfo->timeCardId')\">delete</i>";
@@ -177,7 +177,7 @@ HEREDOC;
             {
                $viewEditIcon =
                //"<i class=\"material-icons table-function-button\" onclick=\"onViewTimeCard('$timeCardInfo->timeCardId')\">visibility</i>";
-               "<a href=\"$ROOT/timecard/viewTimeCard.php?entryId=$timeCardInfo->timeCardId&view=view_time_card\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+               "<a href=\"$ROOT/timecard/viewTimeCard.php?timeCardId=$timeCardInfo->timeCardId&view=view_time_card\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
             $html .=
