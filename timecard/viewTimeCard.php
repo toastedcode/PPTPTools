@@ -7,9 +7,8 @@ require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
 require_once '../common/params.php';
 require_once '../common/timeCardInfo.php';
-//require_once 'enterComments.php';
 
-require_once $_SERVER["DOCUMENT_ROOT"] . "/phpqrcode/phpqrcode.php";
+const ONLY_ACTIVE = true;
 
 abstract class TimeCardInputField
 {

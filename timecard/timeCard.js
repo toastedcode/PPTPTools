@@ -699,6 +699,38 @@ function updateSetupTime()
    document.getElementById("setup-time-input").value = setupTime;   
 }
 
+function autoFillEfficiency()
+{
+   var runTimeHourInput = document.getElementById("run-time-hour-input");
+   var runTimeMinuteInput = document.getElementById("run-time-minute-input");
+   var partCountInput = document.getElementById("part-count-input");
+   var grossPartsPerHourInput = document.getElementById("gross-parts-per-hour-input");
+   var efficiencyInput = document.getElementById("efficiency-input");
+   
+   if (runTimeHourInput.validator.isValid() && 
+       runTimeMinuteInput.validator.isValid() &&
+       partCountInput.validator.isValid())
+   {
+      var runTimeMinutes = ((parseInt(runTimeHourInput.value) * 60) + parseInt(runTimeMinuteInput.value));
+      
+      var partCount = partCountInput.value;
+      
+      var grossPartsPerHour = parseInt(grossPartsPerHourInput.value);
+      
+      if (grossPartsPerHour > 0)
+      {
+         var potentialParts = ((runTimeMinutes / 60) * grossPartsPerHour);
+         
+         if (potentialParts > 0)
+         {
+            var efficiency = ((partCount / potentialParts) * 100);
+            
+            efficiencyInput.value = efficiency.toFixed(2);
+         }
+      }
+   }
+}
+
 function onSubmit()
 {
    if (validateTimeCard())
@@ -805,6 +837,23 @@ function validateTimeCard()
    {
       alert("Please enter a valid heat number.");    
    }
+   else if (!(document.getElementById("run-time-hour-input").validator.validate() &&
+              document.getElementById("run-time-minute-input").validator.validate()))
+   {
+      alert("Please enter a valid run time.")      
+   }
+   else if (!(document.getElementById("setup-time-hour-input").validator.validate() &&
+              document.getElementById("setup-time-minute-input").validator.validate()))
+   {
+      alert("Please enter a valid setup time.")
+   }
+   else if ((document.getElementById("setup-time-hour-input").value == 0) &&
+            (document.getElementById("setup-time-minute-input").value == 0) &&
+            (document.getElementById("run-time-hour-input").value == 0) &&
+            (document.getElementById("run-time-minute-input").value == 0))
+   {
+      alert("Please enter some valid times.")  
+   }
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
       alert("Please enter a valid basket count.");    
@@ -817,10 +866,78 @@ function validateTimeCard()
    {
       alert("Please enter a valid scrap count.");    
    }
+   else if ((document.getElementById("part-count-input").value == 0) &&
+            (document.getElementById("scrap-count-input").value == 0))
+   {
+      alert("Please enter some part counts.");   
+   }
    else
    {
       valid = true;
    }
    
    return (valid);   
+}
+
+function updateApproval()
+{
+   var setupTimeHourInput = document.getElementById("setup-time-hour-input");
+   var setupTimeMinuteInput = document.getElementById("setup-time-minute-input");  
+   var approvedByInput = document.getElementById("approved-by-input");
+   
+   var approval = "no-approval-required";
+   
+   if (setupTimeHourInput.validator.isValid() && 
+       setupTimeMinuteInput.validator.isValid())
+   {
+      var setupTimeMinutes = ((parseInt(setupTimeHourInput.value) * 60) + parseInt(setupTimeMinuteInput.value));
+      
+      if (setupTimeMinutes > 0)
+      {
+         approval = (parseInt(approvedByInput.value) > 0) ? "approved" : "unapproved";
+      }
+   }
+   
+   setApproval("setup-time-hour-input", approval);
+   setApproval("setup-time-minute-input", approval);
+   setApproval("approval-div", approval);
+   setApproval("unapproval-div", approval);
+   setApproval("approve-button", approval);
+   setApproval("unapprove-button", approval);
+}
+
+function setApproval(elementId, approval)
+{
+   
+   console.log("here");
+   var element = document.getElementById(elementId);
+   
+   if (element)
+   {
+      // Clear existing class tags.
+      element.classList.remove('approved');
+      element.classList.remove('unapproved');
+      element.classList.remove('no-approval-required');
+      
+      // Set new approval tag.
+      element.classList.add(approval);
+   }   
+}
+
+function approve(approvedBy)
+{
+   var approvedByInput = document.getElementById("approved-by-input");
+   
+   approvedByInput.value = approvedBy;
+   
+   updateApproval();
+}
+
+function unapprove(approvedBy)
+{
+   var approvedByInput = document.getElementById("approvedBy-input");
+   
+   approvedByInput.value = 0;
+   
+   updateApproval();
 }
