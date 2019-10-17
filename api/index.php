@@ -148,6 +148,43 @@ $router->add("users", function($params) {
    echo json_encode($result);
 });
 
+$router->add("grossPartsPerHour", function($params) {
+   $result = new stdClass();
+   
+   if (isset($params["jobNumber"]) &&
+       isset($params["wcNumber"]))
+   {
+      $jobInfo = null;
+      
+      $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
+      
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         $jobInfo = JobInfo::load($jobId);
+      }
+      
+      if ($jobInfo)
+      {
+         $result->success = true;
+         $result->grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Failed to lookup job ID.";
+         $result->jobNumber = $params->get("jobNumber");
+         $result->wcNumber = $params->getInt("wcNumber");
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("saveTimeCard", function($params) {
    $result = new stdClass();
    $result->success = true;

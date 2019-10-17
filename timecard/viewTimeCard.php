@@ -58,6 +58,13 @@ function isEditable($field)
    
    switch ($field)
    {         
+      case TimeCardInputField::OPERATOR:
+      {
+         $isEditable = ((Authentication::getAuthenticatedUser()->roles == Role::ADMIN) ||
+                        (Authentication::getAuthenticatedUser()->roles == Role::SUPER_USER));
+         break;
+      }
+         
       case TimeCardInputField::WC_NUMBER:
       {
          // Edit status determined by job number selection.
@@ -104,15 +111,12 @@ function getTimeCardInfo()
       else
       {
          $timeCardInfo = new TimeCardInfo();
+         
+         $timeCardInfo->employeeNumber = Authentication::getAuthenticatedUser()->employeeNumber;
       }
    }
    
    return ($timeCardInfo);
-}
-
-function getOperatorName()
-{
-   return ("");
 }
 
 function getOperator()
@@ -533,7 +537,7 @@ function getNavBar()
       // Creating a new time card.
       // Editing an existing time card.
       
-      $navBar->cancelButton("submitForm('input-form', 'viewTimeCards.php', '', '')");
+      $navBar->cancelButton("location.href = 'viewTimeCards.php'");
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
    else if ($view == "view_time_card")
@@ -1085,6 +1089,19 @@ HEREDOC;
    }
 }
 */
+
+// *****************************************************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../pptpTools.php');
+   exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -1118,6 +1135,7 @@ HEREDOC;
    
       <form id="input-form" action="" method="POST">
          <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
+         <input type="hidden" name="operator" value="<?php echo getOperator(); ?>">
          <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
          <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
          <input id="run-time-input" type="hidden" name="runTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
@@ -1162,7 +1180,7 @@ HEREDOC;
                   </div>       
                   <div class="form-item">
                      <div class="form-label">Work Center</div>
-                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(TimeCardInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate(); onWcNumberChange();" <?php echo !isEditable(TimeCardInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                         <?php echo getWcNumberOptions(); ?>
                      </select>
                   </div>       
@@ -1182,18 +1200,18 @@ HEREDOC;
                   
                   <div class="form-item">
                      <div class="form-label">Run time</div>
-                     <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); updateRunTime(); autoFillEfficiency();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
+                     <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
                      <div style="padding: 5px;">:</div>
-                     <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate(); updateRunTime(); autoFillEfficiency();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
+                     <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
                   </div>
          
                   <div class="form-item">
                      <div class="form-label">Setup time</div>
                      <div class="form-col">
                         <div class="form-row">
-                           <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate(); updateSetupTime(); updateApproval();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
                            <div style="padding: 5px;">:</div>
-                           <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate(); updateSetupTime(); updateApproval();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
                            <?php echo getApprovalButton(); ?>
                            <?php echo getUnapprovalButton(); ?>
                         </div>
@@ -1215,7 +1233,7 @@ HEREDOC;
             
                   <div class="form-item">
                      <div class="form-label">Good count</div>
-                     <input id="part-count-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); autoFillEfficiency();" value="<?php echo getTimeCardInfo()->partCount; ?>" <?php echo !isEditable(TimeCardInputField::PART_COUNT) ? "disabled" : ""; ?> />
+                     <input id="part-count-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); onPartCountChange();" value="<?php echo getTimeCardInfo()->partCount; ?>" <?php echo !isEditable(TimeCardInputField::PART_COUNT) ? "disabled" : ""; ?> />
                   </div>
             
                   <div class="form-item">
@@ -1277,7 +1295,7 @@ HEREDOC;
          partsCountValidator.init();
          scrapCountValidator.init();
    
-         autoFillEfficiency();
+         updateEfficiency();
       </script>
      
    </div>

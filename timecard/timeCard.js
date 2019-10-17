@@ -620,9 +620,18 @@ function disable(elementId)
    document.getElementById(elementId).disabled = true;
 }
 
+function formatToTwoDigits(value)
+{
+   return (("0" + value).slice(-2));
+}
+
 function onJobNumberChange()
 {
    jobNumber = document.getElementById("job-number-input").value;
+   
+   clear("wc-number-input");
+   
+   updateGrossPartsPerHour();
    
    if (jobNumber == null)
    {
@@ -642,16 +651,24 @@ function onJobNumberChange()
       {
          if (this.readyState == 4 && this.status == 200)
          {
-            var json = JSON.parse(this.responseText);
-            
-            if (json.success == true)
-            {
-               updateWcOptions(json.wcNumbers);               
+            try
+            {            
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  updateWcOptions(json.wcNumbers);               
+               }
+               else
+               {
+                  console.log("API call to retrieve WC numbers failed.");
+               }
             }
-            else
+            catch (expection)
             {
-               console.log("API call to retrieve WC numbers failed.");
-            }
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }               
          }
       };
       xhttp.open("GET", requestUrl, true);
@@ -679,7 +696,12 @@ function updateWcOptions(wcNumbers)
    element.value = null;
 }
 
-function updateRunTime()
+function onWcNumberChange()
+{
+   updateGrossPartsPerHour();
+}
+
+function onRunTimeChange()
 {
    var hours = parseInt(document.getElementById("run-time-hour-input").value);
    var minutes = parseInt(document.getElementById("run-time-minute-input").value);
@@ -687,19 +709,88 @@ function updateRunTime()
    var runTime = ((hours * 60) + minutes);
    
    document.getElementById("run-time-input").value = runTime;
+   
+   document.getElementById("run-time-minute-input").value = formatToTwoDigits(minutes);
+   
+   updateEfficiency();
 }
 
-function updateSetupTime()
+function onSetupTimeChange()
 {
    var hours = parseInt(document.getElementById("setup-time-hour-input").value);
    var minutes = parseInt(document.getElementById("setup-time-minute-input").value);
    
    var setupTime = ((hours * 60) + minutes);
    
-   document.getElementById("setup-time-input").value = setupTime;   
+   document.getElementById("setup-time-input").value = setupTime;
+   
+   document.getElementById("setup-time-minute-input").value = formatToTwoDigits(minutes);
+   
+   updateApproval();
 }
 
-function autoFillEfficiency()
+function onPartCountChange()
+{
+   updateEfficiency();
+}
+
+function updateGrossPartsPerHour()
+{
+   var jobNumber = document.getElementById("job-number-input").value;
+   var wcNumber = parseInt(document.getElementById("wc-number-input").value);
+   
+   var grossPartsPerHour = 0;
+   
+   if ((jobNumber != "") && !isNaN(wcNumber) && (wcNumber != 0))
+   {
+      // Populate gross parts per hour based on selected job.
+      
+      // AJAX call to retrieve gross parts per hour by selected job.
+      requestUrl = "../api/grossPartsPerHour/?jobNumber=" + jobNumber + "&wcNumber=" + wcNumber;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var grossPartsPerHour = 0;
+            
+            try
+            {
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  grossPartsPerHour = json.grossPartsPerHour;      
+               }
+               else
+               {
+                  console.log("API call to retrieve gross parts-per-hour failed.");
+               }
+            }
+            catch (expection)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+            
+            document.getElementById("gross-parts-per-hour-input").value = grossPartsPerHour;
+
+            updateEfficiency();
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();
+   }
+   else
+   {
+      document.getElementById("gross-parts-per-hour-input").value = 0;  
+
+      updateEfficiency();
+   }  
+}
+
+function updateEfficiency()
 {
    var runTimeHourInput = document.getElementById("run-time-hour-input");
    var runTimeMinuteInput = document.getElementById("run-time-minute-input");
@@ -728,6 +819,14 @@ function autoFillEfficiency()
             efficiencyInput.value = efficiency.toFixed(2);
          }
       }
+      else
+      {
+         clear("efficiency-input");
+      }
+   }
+   else
+   {
+      clear("efficiency-input");
    }
 }
 
@@ -792,7 +891,6 @@ function onDeleteTimeCard(timeCardId)
          {         
             try
             {
-               console.log(this.responseText);
                var json = JSON.parse(this.responseText);
                
                if (json.success == true)
@@ -908,8 +1006,6 @@ function updateApproval()
 
 function setApproval(elementId, approval)
 {
-   
-   console.log("here");
    var element = document.getElementById(elementId);
    
    if (element)
