@@ -5,7 +5,7 @@ class Time
    static public $javascriptDateFormat = "Y-m-d";
    
    // Date format required for initializing time inputs.
-   static public $javascriptTimeFormat = "H:m:s";
+   static public $javascriptTimeFormat = "H:m";
    
    static public function init()
    {

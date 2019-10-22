@@ -29,6 +29,13 @@ abstract class TimeCardInputField
    const COUNT = PartWasherLogInputField::LAST - PartWasherLogInputField::FIRST;
 }
 
+abstract class View
+{
+   const NEW_TIME_CARD = 0;
+   const VIEW_TIME_CARD = 1;
+   const EDIT_TIME_CARD = 2;
+}
+
 function getParams()
 {
    static $params = null;
@@ -43,9 +50,18 @@ function getParams()
 
 function getView()
 {
-   $params = getParams();
+   $view = View::VIEW_TIME_CARD;
    
-   return ($params->keyExists("view") ? $params->get("view") : "");
+   if (getTimeCardId() == TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+   {
+      $view = View::NEW_TIME_CARD;
+   }
+   else if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
+   {
+      $view = View::EDIT_TIME_CARD;
+   }
+   
+   return ($view);
 }
 
 function isEditable($field)
@@ -53,8 +69,8 @@ function isEditable($field)
    $view = getView();
    
    // Start with the edit mode, as dictated by the view.
-   $isEditable = (($view == "new_time_card") ||
-                  ($view == "edit_time_card"));
+   $isEditable = (($view == View::NEW_TIME_CARD) ||
+                  ($view == View::EDIT_TIME_CARD));
    
    switch ($field)
    {         
@@ -285,35 +301,21 @@ HEREDOC;
    return ($html);
 }
 
+function canApprove()
+{
+   return (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS));
+}
+
 function getApprovalButton()
 {
    $html = "";
    
-   $timeCardInfo = getTimeCardInfo();
-   
-   $approval = "no-approval-required";
-   if ($timeCardInfo->requiresApproval())
-   {
-      if ($timeCardInfo->isApproved())
-      {
-         $approval = "approved";
-         
-      }
-      else
-      {
-         $approval = "unapproved";
-      }
-   }
-
-   if (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS))
-   {
-      $approvingUser = Authentication::getAuthenticatedUser();
+   $approvingUser = Authentication::getAuthenticatedUser();
       
-      $approvalButton =
+   $html =
 <<<HEREDOC
-      <button id="approve-button" class="unapproval $approval" onclick="approve($approvingUser->employeeNumber)" style="width: 100px;">Approve</button>
+   <button id="approve-button" class="approval" onclick="approve($approvingUser->employeeNumber)" style="width: 100px;">Approve</button>
 HEREDOC;
-   }
       
    return ($html);
 }
@@ -322,31 +324,12 @@ function getUnapprovalButton()
 {
    $html = "";
    
-   $timeCardInfo = getTimeCardInfo();
-   
-   $approval = "no-approval-required";
-   if ($timeCardInfo->requiresApproval())
-   {
-      if ($timeCardInfo->isApproved())
-      {
-         $approval = "approved";
-         
-      }
-      else
-      {
-         $approval = "unapproved";
-      }
-   }
-   
-   if (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS))
-   {
-      $approvingUser = Authentication::getAuthenticatedUser();
+   $approvingUser = Authentication::getAuthenticatedUser();
       
-      $unapprovalButton =
+   $html =
 <<<HEREDOC
-      <button id="unapprove-button" class="approval $approval" onclick="unapprove()" style="width: 100px;">Unapprove</button>
+   <button id="unapprove-button" class="approval" onclick="unapprove($approvingUser->employeeNumber)" style="width: 100px;">Unapprove</button>
 HEREDOC;
-   }
    
    return ($html);
 }
@@ -452,19 +435,26 @@ function getHeading()
 {
    $heading = "";
    
-   $view = getView();
-   
-   if ($view == "new_time_card")
+   switch (getView())
    {
-      $heading = "Create a New Time Card";
-   }
-   else if ($view == "edit_time_card")
-   {
-      $heading = "Update a Time Card";
-   }
-   else if ($view == "view_time_card")
-   {
-      $heading = "View a Time Card";
+      case View::NEW_TIME_CARD:
+      {
+         $heading = "Create a New Time Card";
+         break;
+      }
+      
+      case View::EDIT_TIME_CARD:
+      {
+         $heading = "Update a Time Card";
+         break;
+      }
+      
+      case View::VIEW_TIME_CARD:
+      default:
+      {
+         $heading = "View a Time Card";
+         break;
+      }
    }
 
    return ($heading);
@@ -474,19 +464,26 @@ function getDescription()
 {
    $description = "";
    
-   $view = getView();
-   
-   if ($view == "new_time_card")
+   switch (getView())
    {
-      $description = "Enter all required fields for your time card.  Once you're satisfied, click Save below to add this time card to the system.";
-   }
-   else if ($view == "edit_time_card")
-   {
-      $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
-   }
-   else if ($view == "view_time_card")
-   {
-      $description = "View a previously saved time card in detail.";
+      case View::NEW_TIME_CARD:
+      {
+         $description = "Enter all required fields for your time card.  Once you're satisfied, click Save below to add this time card to the system.";
+         break;
+      }
+         
+      case View::EDIT_TIME_CARD:
+      {
+         $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
+         break;
+      }
+         
+      case View::VIEW_TIME_CARD:
+      default:
+      {
+         $description = "View a previously saved time card in detail.";
+         break;
+      }
    }
    
    return ($description);
@@ -496,12 +493,15 @@ function getManufactureDate()
 {
    $mfgDate = Time::now(Time::$javascriptDateFormat);
    
-   $timeCardInfo = getTimeCardInfo();
-   
-   if ($timeCardInfo)
+   if (getView() != View::NEW_TIME_CARD)
    {
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
-      $mfgDate = $dateTime->format(Time::$javascriptDateFormat);
+      $timeCardInfo = getTimeCardInfo();
+      
+      if ($timeCardInfo)
+      {
+         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+         $mfgDate = $dateTime->format(Time::$javascriptDateFormat);
+      }
    }
    
    return ($mfgDate);
@@ -511,12 +511,15 @@ function getManufactureTime()
 {
    $mfgTime = Time::now(Time::$javascriptTimeFormat);
    
-   $timeCardInfo = getTimeCardInfo();
-   
-   if ($timeCardInfo)
+   if (getView() != View::NEW_TIME_CARD)
    {
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
-      $mfgTime = $dateTime->format(Time::$javascriptTimeFormat);
+      $timeCardInfo = getTimeCardInfo();
+      
+      if ($timeCardInfo)
+      {
+         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+         $mfgTime = $dateTime->format(Time::$javascriptTimeFormat);
+      }
    }
    
    return ($mfgTime);
@@ -530,8 +533,8 @@ function getNavBar()
    
    $view = getView();
    
-   if (($view == "new_time_card") ||
-       ($view == "edit_time_card"))
+   if (($view == View::NEW_TIME_CARD) ||
+       ($view == View::EDIT_TIME_CARD))
    {
       // Case 1
       // Creating a new time card.
@@ -540,555 +543,18 @@ function getNavBar()
       $navBar->cancelButton("location.href = 'viewTimeCards.php'");
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
-   else if ($view == "view_time_card")
+   else if ($view == View::VIEW_TIME_CARD)
    {
       // Case 2
       // Viewing an existing entry.
       
-      $navBar->highlightNavButton("Ok", "submitForm('input-form', 'viewTimeCards.php', '', '')", false);
+      $navBar->highlightNavButton("Ok", "location.href = 'viewTimeCards.php'", false);
    }
    
    $navBar->end();
    
    return ($navBar->getHtml());
 }
-
-/*
-class ViewTimeCard
-{
-   public static function getHtml($view)
-   {
-      $html = "";
-      
-      $timeCardInfo = ViewTimeCard::getTimeCardInfo();
-      
-      $readOnly = (($view == "view_time_card") || ($view == "use_time_card"));
-
-      $headingDiv = ViewTimeCard::headingDiv($timeCardInfo, $view);
-      $descriptionDiv = ViewTimeCard::descriptionDiv($timeCardInfo, $view);
-      $dateDiv = ViewTimeCard::dateDiv($timeCardInfo);
-      $operatorDiv = ViewTimeCard::operatorDiv($timeCardInfo);
-      $jobDiv = ViewTimeCard::jobDiv($timeCardInfo, $readOnly);
-      $timeDiv = ViewTimeCard::timeDiv($timeCardInfo, $readOnly);
-      $partsDiv = ViewTimeCard::partsDiv($timeCardInfo, $readOnly);
-      $commentsDiv = ViewTimeCard::commentsDiv($timeCardInfo, $readOnly);
-      $commentCodesDiv = ViewTimeCard::commentCodesDiv($timeCardInfo, $readOnly);
-      
-      $navBar = ViewTimeCard::navBar($timeCardInfo, $view);
-      
-      $html =
-<<<HEREDOC
-      <form id="input-form" action="" method="POST">
-         <input type="hidden" name="timeCardId" value="$timeCardInfo->timeCardId"/>
-      </form>
-
-      <div class="flex-vertical content">
-
-         $headingDiv
-
-         $descriptionDiv
-
-         <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;">
-
-            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
-               $dateDiv
-               $operatorDiv
-               $jobDiv
-            </div>
-            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
-               $timeDiv
-               $partsDiv
-            </div>
-            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
-               $commentCodesDiv
-               $commentsDiv
-            </div>
-
-         </div>
-         
-         $navBar
-         
-      </div>
-
-      <script>
-         var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
-         var runTimeHourValidator = new IntValidator("runTimeHour-input", 2, 0, 10, false);
-         var runTimeMinuteValidator = new IntValidator("runTimeMinute-input", 2, 0, 59, false);
-         var setupTimeHourValidator = new IntValidator("setupTimeHour-input", 2, 0, 10, false);
-         var setupTimeMinuteValidator = new IntValidator("setupTimeMinute-input", 2, 0, 59, false);
-         var panCountValidator = new IntValidator("panCount-input", 2, 1, 40, false);
-         var partsCountValidator = new IntValidator("partsCount-input", 6, 0, 100000, true);
-         var scrapCountValidator = new IntValidator("scrapCount-input", 6, 0, 100000, true);
-
-         materialNumberValidator.init();
-         runTimeHourValidator.init();
-         runTimeMinuteValidator.init();
-         setupTimeHourValidator.init();
-         setupTimeMinuteValidator.init();
-         panCountValidator.init();
-         partsCountValidator.init();
-         scrapCountValidator.init();
-
-         autoFillEfficiency();
-      </script>
-HEREDOC;
-      
-      return ($html);
-   }
-   
-   public static function render($readOnly)
-   {
-      echo (ViewTimeCard::getHtml($readOnly));
-   }
-   
-   protected static function titleDiv()
-   {
-      $html =
-<<<HEREDOC
-      <div class="form-title">Time Card</div>
-HEREDOC;
-
-      return ($html);
-   }
-   
-   protected static function headingDiv($timeCardInfo, $view)
-   {
-      $heading = "";
-      if ($view == "edit_time_card")
-      {
-         if ($timeCardInfo->timeCardId == 0)
-         {
-            $heading = "Review Your New Time Card";
-         }
-         else
-         {
-            $heading = "Update a Time Card";
-         }
-      }
-      else if ($view == "view_time_card")
-      {
-         $heading = "View a Time Card";
-      }
-      
-      $html =
-      <<<HEREDOC
-      <div class="heading">$heading</div>
-HEREDOC;
-      
-      return ($html);
-   }
-   
-   protected static function descriptionDiv($timeCardInfo, $view)
-   {
-      $description = "";
-      if ($view == "edit_time_card")
-      {
-         if ($timeCardInfo->timeCardId == 0)
-         {
-            $description = "Review all the fields of your time card and make any necessary corrections.  Once you're satisfied, click Save below to add this time card to the system.";
-         }
-         else
-         {
-            $description = "You may revise any of the fields for this time card and then select save when you're satisfied with the changes.";
-         }
-      }
-      else if ($view == "view_time_card")
-      {
-         $description = "View a previously saved time card in detail.";
-      }
-      
-      $html =
-      <<<HEREDOC
-      <div class="description">$description</div>
-HEREDOC;
-      
-      return ($html);
-   }
-   
-   protected static function dateDiv($timeCardInfo)
-   {
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-      $dateString = $dateTime->format("m-d-Y");
-      
-      $html =
-<<<HEREDOC
-         <div class="form-item">
-            <div class="form-label">Date</div>
-            <input type="text" class="form-input-medium" name="date" style="width:100px;" value="$dateString" disabled>
-         </div>
-HEREDOC;
-      return ($html);
-   }
-   
-   protected static function operatorDiv($timeCardInfo)
-   {
-      $name = "";
-      $operator = UserInfo::load($timeCardInfo->employeeNumber);
-      if ($operator)
-      {
-         $name = $operator->getFullName();
-      }
-      
-      $html = 
-<<<HEREDOC
-      <div class="form-col">
-         <div class="form-section-header">Operator</div>
-         <div class="form-item">
-            <div class="form-label">Name</div>
-            <input type="text" class="form-input-medium" style="width:150px;" value="$name" disabled>
-         </div>
-         <div class="form-item">
-            <div class="form-label">Employee #</div>
-            <input type="text" class="form-input-medium" style="width:100px;" value="$timeCardInfo->employeeNumber" disabled>
-         </div>
-      </div>
-HEREDOC;
-         
-      return ($html);
-   }
-   
-   protected static function jobDiv($timeCardInfo, $readOnly)
-   {
-      $disabled = ($readOnly) ? "disabled" : "";
-      
-      $wcNumber = "unknown";
-      $jobInfo = JobInfo::load($timeCardInfo->jobId);
-      if ($jobInfo)
-      {
-         $wcNumber = $jobInfo->wcNumber;
-      }
-      
-      $html =
-<<<HEREDOC
-      
-      <input id="gross-parts-per-hour-input" type="hidden" value="{$jobInfo->getGrossPartsPerHour()}">
-
-      <div class="form-col">
-
-         <div class="form-section-header">Job</div>
-
-         <div class="form-item">
-            <div class="form-label">Job #</div>
-            <input type="text" class="form-input-medium" style="width:150px;" value="$jobInfo->jobNumber" disabled>
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Work center #</div>
-            <input type="text" class="form-input-medium" style="width:150px;" value="$wcNumber" disabled>
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Heat #</div>
-            <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:150px;" oninput="this.validator.validate()" value="$timeCardInfo->materialNumber" $disabled>
-         </div>
-
-      </div>
-HEREDOC;
-         
-      return ($html);
-   }
-   
-   protected static function timeDiv($timeCardInfo, $readOnly)
-   {
-      $disabled = ($readOnly) ? "disabled" : "";
-      
-      $approval = "no-approval-required";
-      if ($timeCardInfo->requiresApproval())
-      {
-         if ($timeCardInfo->isApproved())
-         {
-            $approval = "approved";
-            
-         }
-         else
-         {
-            $approval = "unapproved";
-         }
-      }
-      
-      $approvalText = "Approved by supervisor";
-      *
-      $userInfo = UserInfo::load($timeCardInfo->approvedBy);
-      if ($userInfo)
-      {
-         $approvalText = "Approved by " . $userInfo->username;
-      }
-      *
-      
-      $approvalButton = "";
-      $unapprovalButton = "";
-      if (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS))
-      {
-         $approvingUser = Authentication::getAuthenticatedUser();
-         $approvalButton = 
-<<<HEREDOC
-         <button id="approve-button" class="unapproval $approval" onclick="approve($approvingUser->employeeNumber)" style="width: 100px;">Approve</button>
-HEREDOC;
-         $unapprovalButton =
-<<<HEREDOC
-         <button id="unapprove-button" class="approval $approval" onclick="unapprove()" style="width: 100px;">Unapprove</button>
-HEREDOC;
-      }
-      
-      // Pad minutes to 2 digits.
-      $runTimeMinutes = str_pad($timeCardInfo->getRunTimeMinutes(), 2, '0', STR_PAD_LEFT);
-      $setupTimeMinutes = str_pad($timeCardInfo->getSetupTimeMinutes(), 2, '0', STR_PAD_LEFT);
-      
-      $html =
-<<<HEREDOC
-      <div class="form-col">
-         <div class="form-section-header">Time</div>
-         
-         <div class="form-item">
-            <div class="form-label">Run time</div>
-            <input id="runTimeHour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="runTimeHourValidator.validate(); autoFillEfficiency();" value="{$timeCardInfo->getRunTimeHours()}" $disabled />
-            <div style="padding: 5px;">:</div>
-            <input id="runTimeMinute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="runTimeMinuteValidator.validate();  autoFillEfficiency();"value="$runTimeMinutes" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Setup time</div>
-            <div class="form-col">
-               <div class="form-row">
-                  <input id="setupTimeHour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="setupTimeHourValidator.validate(); updateApproval();" value="{$timeCardInfo->getSetupTimeHours()}" $disabled />
-                  <div style="padding: 5px;">:</div>
-                  <input id="setupTimeMinute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="setupTimeMinuteValidator.validate(); updateApproval();" value="$setupTimeMinutes" $disabled />
-                  <input id="approvedBy-input" type="hidden" form="input-form" name="approvedBy" value="$timeCardInfo->approvedBy" />
-                  <input type="hidden" form="input-form" name="approvedDateTime" value="$timeCardInfo->approvedDateTime" />
-                  $approvalButton
-                  $unapprovalButton
-               </div>
-               <div id="approval-div" class="approval $approval">$approvalText</div>
-               <div id="unapproval-div" class="unapproval $approval">Requires supervisor approval</div>
-            </div>
-         </div>
-      </div>
-HEREDOC;
-         
-      return ($html);
-   }
-   
-   protected static function partsDiv($timeCardInfo, $readOnly)
-   {
-      $disabled = ($readOnly) ? "disabled" : "";
-      $efficiency = round($timeCardInfo->getEfficiency(), 2);
-      
-      $html =
-<<<HEREDOC
-      <div class="form-col">
-         
-         <div class="form-section-header">Part Counts</div>
-         
-         <div class="form-item">
-            <div class="form-label">Basket count</div>
-            <input id="panCount-input" type="number" class="form-input-medium" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="$timeCardInfo->panCount" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Good count</div>
-            <input id="partsCount-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); autoFillEfficiency();" value="$timeCardInfo->partCount" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Scrap count</div>
-            <input id="scrapCount-input" type="number" class="form-input-medium" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="$timeCardInfo->scrapCount" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Efficiency</div>
-            <input id="efficiency-input" type="number" class="form-input-medium" style="width:100px;" value="$efficiency" disabled />
-            <div>&nbsp%</div>
-         </div>
-
-      </div>
-HEREDOC;
-         
-      return ($html);
-   }
-   
-   protected static function commentsDiv($timeCardInfo, $readOnly)
-   {
-      $disabled = ($readOnly) ? "disabled" : "";
-      
-      $html =
-<<<HEREDOC
-      <div class="form-col">
-         <div class="form-section-header">Comments</div>
-         <div class="form-item">
-            <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" $disabled>$timeCardInfo->comments</textarea>
-         </div>
-      </div>
-HEREDOC;
-      
-      return ($html);
-   }
-   
-   protected static function commentCodesDiv($timeCardInfo, $readOnly)
-   {
-      $disabled = ($readOnly) ? "disabled" : "";
-      
-      $commentCodes = CommentCode::getCommentCodes();
-      
-      $leftColumn = "";
-      $rightColumn = "";
-      $index = 0;
-      foreach ($commentCodes as $commentCode)
-      {
-         $id = "code-" . $commentCode->code . "-input";
-         $name = "code-" . $commentCode->code;
-         $checked = ($timeCardInfo->hasCommentCode($commentCode->code) ? "checked" : "");
-         $description = $commentCode->description;
-         
-         $codeDiv = 
-<<< HEREDOC
-            <div class="form-item">
-               <input id="$id" type="checkbox" class="comment-checkbox" form="input-form" name="$name" $checked $disabled/>
-               <label for="$id" class="form-input-medium">$description</label>
-            </div>
-HEREDOC;
-
-         if (($index % 2) == 0)
-         {
-            $leftColumn .= $codeDiv;
-         }
-         else
-         {
-            $rightColumn .= $codeDiv;
-         }
-         
-         $index++;
-      }
-      
-      $html =
-<<<HEREDOC
-      <input type="hidden" form="input-form" name="commentCodes" value="true"/>
-      <div class="form-col">
-         <div class="form-section-header">Codes</div>
-         <div class="form-row">
-            <div class="form-col">
-               $leftColumn
-            </div>
-            <div class="form-col">
-               $rightColumn
-            </div>
-         </div>
-      </div>
-HEREDOC;
-      
-      return ($html);
-   }
-   
-   protected static function qrDiv($timeCardInfo)
-   {
-      if ($timeCardInfo->timeCardId != 0)
-      {
-         // TODO: Derive domain name.
-         $url = "www.roboxes.com/pptp/timecard/timeCard.php?view=use_time_card&timeCardId=$timeCardInfo->timeCardId";
-         
-         // http://phpqrcode.sourceforge.net/
-         QRcode::png($url, "qrCode.png");
-         
-         $html =
-<<<HEREDOC
-         <div class="form-col" style="align-items:center">
-            <div><img src="qrCode.png"></image></div>
-            <div>TC$timeCardInfo->timeCardId</div>
-         </div>
-HEREDOC;
-      }
-      
-      return ($html);
-   }
-   
-   protected static function navBar($timeCardInfo, $view)
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      
-      if ($view == "view_time_card")
-      {
-         // Case 1
-         // Viewing single time card selected from table of time cards.
-         
-         $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
-         
-         $navBar->highlightNavButton("Ok", "submitForm('input-form', 'timeCard.php', 'view_time_cards', 'no_action')", false);
-      }
-      else if ($view == "edit_time_card")
-      {   
-         if ($timeCardInfo->timeCardId == 0)
-         {
-            // Case 2
-            // Viewing as last step of creating a new time card.
-            
-            $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-            $navBar->backButton("submitForm('input-form', 'timeCard.php', 'enter_comments', 'update_time_card_info');");
-            $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
-         }
-         else
-         {
-            // Case 3
-            // Editing a single time card selected from table of time cards.
-            
-            $navBar->cancelButton("submitForm('input-form', 'timeCard.php', 'view_time_cards', 'cancel_time_card')");
-            
-            $navBar->printButton("onPrintTimeCard($timeCardInfo->timeCardId)");
-                     
-            $navBar->highlightNavButton("Save", "if (validateCard()){submitForm('input-form', 'timeCard.php', 'view_time_cards', 'save_time_card');};", false);
-         }
-      }
-      else if ($view == "use_time_card")
-      {
-         // Case 4
-         // Selecting an action from a scanned time card.
-         
-         if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
-         {
-            $navBar->highlightNavButton("Edit", "submitForm('input-form', 'timeCard.php', 'edit_time_card', 'update_time_card_info');", false);
-         }
-         else
-         {
-            $navBar->mainMenuButton();
-         }
-         
-         if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
-         {
-            $navBar->highlightNavButton("Weigh Parts", "submitForm('input-form', '../partWeightLog/partWeightLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_weight', 'new_part_weight_entry')", true);
-         }
-         
-         if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
-         {
-            $navBar->highlightNavButton("Count Parts", "submitForm('input-form', '../partWasherLog/partWasherLog.php?timeCardId=$timeCardInfo->timeCardId', 'enter_part_count', 'new_part_washer_entry')", true);
-         }
-      }
-      
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
-   
-   protected static function getTimeCardInfo()
-   {
-      $timeCardInfo = new TimeCardInfo();
-      
-      if (isset($_POST['timeCardId']))
-      {
-         $timeCardInfo = TimeCardInfo::load($_POST['timeCardId']);
-      }
-      else if (isset($_GET['timeCardId']))
-      {
-         $timeCardInfo = TimeCardInfo::load($_GET['timeCardId']);
-      }
-      else if (isset($_SESSION['timeCardInfo']))
-      {
-         $timeCardInfo = $_SESSION['timeCardInfo'];
-      }
-      
-      return ($timeCardInfo);
-   }
-}
-*/
 
 // *****************************************************************************
 
@@ -1139,7 +605,7 @@ if (!Authentication::isAuthenticated())
          <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
          <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
          <input id="run-time-input" type="hidden" name="runTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
-         <input id="setup-time-input" type="hidden" name="setupTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
+         <input id="setup-time-input" type="hidden" name="setupTime" value="<?php echo getTimeCardInfo()->setupTime; ?>">
          <input id="gross-parts-per-hour-input" type="hidden" value="<?php echo getGrossPartsPerHour(); ?>">
       </form>
       
@@ -1208,15 +674,15 @@ if (!Authentication::isAuthenticated())
                   <div class="form-item">
                      <div class="form-label">Setup time</div>
                      <div class="form-col">
-                        <div class="form-row">
+                        <div class="form-row" style="justify-content:flex-start">
                            <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
                            <div style="padding: 5px;">:</div>
                            <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
                            <?php echo getApprovalButton(); ?>
                            <?php echo getUnapprovalButton(); ?>
                         </div>
-                        <div id="approval-div" class="approval"><?php echo getApprovalText(); ?></div>
-                        <div id="unapproval-div" class="unapproval" style="display:none;">Requires supervisor approval</div>
+                        <div id="approved-text" class="approved">Approved by supervisor.</div>
+                        <div id="unapproved-text" class="unapproved">Requires approval by supervisor.</div>
                      </div>
                   </div>
                   
@@ -1271,6 +737,12 @@ if (!Authentication::isAuthenticated())
       </div>
       
       <script>
+
+         function userCanApprove()
+         {
+            return (<?php echo canApprove() ? "true" : "false"; ?>);
+         }
+         
          var operatorValidator = new SelectValidator("operator-input");
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
@@ -1296,6 +768,7 @@ if (!Authentication::isAuthenticated())
          scrapCountValidator.init();
    
          updateEfficiency();
+         updateApproval();
       </script>
      
    </div>

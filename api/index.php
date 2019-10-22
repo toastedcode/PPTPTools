@@ -223,6 +223,7 @@ $router->add("saveTimeCard", function($params) {
           isset($params["wcNumber"]) &&
           isset($params["materialNumber"]) &&
           isset($params["setupTime"]) &&
+          isset($params["approvedBy"]) &&
           isset($params["runTime"]) &&
           isset($params["panCount"]) &&
           isset($params["partCount"]) &&
@@ -237,6 +238,7 @@ $router->add("saveTimeCard", function($params) {
             $timeCardInfo->jobId = $jobId;
             $timeCardInfo->materialNumber = intval($params["materialNumber"]);
             $timeCardInfo->setupTime = intval($params["setupTime"]);
+            $timeCardInfo->approvedBy = intval($params["approvedBy"]);
             $timeCardInfo->runTime = intval($params["runTime"]);
             $timeCardInfo->panCount = intval($params["panCount"]);
             $timeCardInfo->partCount = intval($params["partCount"]);

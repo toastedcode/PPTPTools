@@ -33,12 +33,12 @@ class TimeCardInfo
    
    public function getSetupTimeHours()
    {
-      return (round($this->setupTime / 60));
+      return ((int)($this->setupTime / 60));
    }
    
    public function getSetupTimeMinutes()
    {
-      return (round($this->setupTime % 60));
+      return ($this->setupTime % 60);
    }
    
    public function formatRunTime()
@@ -48,12 +48,12 @@ class TimeCardInfo
    
    public function getRunTimeHours()
    {
-      return (round($this->runTime / 60));
+      return ((int)($this->runTime / 60));
    }
    
    public function getRunTimeMinutes()
    {
-      return (round($this->runTime % 60));
+      return ($this->runTime % 60);
    }
    
    public function formatTotalTime()
