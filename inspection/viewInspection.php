@@ -81,20 +81,20 @@ function getNewInspection()
    
    $inspection->templateId = 
       ($params->keyExists("templateId") ? $params->get("templateId") : Inspection::UNKNOWN_INSPECTION_ID);
-   
-   $jobNumber = 
-      ($params->keyExists("jobNumber") ? $params->get("jobNumber") : JobInfo::UNKNOWN_JOB_NUMBER);
-   
-   $wcNumber = 
-      ($params->keyExists("wcNumber") ? $params->get("wcNumber") : 0);
-   
-   $inspection->jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
-   
+      
    $userInfo = Authentication::getAuthenticatedUser();
    if ($userInfo)
    {
       $inspection->inspector = $userInfo->employeeNumber;
    }
+   
+   $jobNumber =
+   ($params->keyExists("jobNumber") ? $params->get("jobNumber") : JobInfo::UNKNOWN_JOB_NUMBER);
+   
+   $wcNumber =
+   ($params->keyExists("wcNumber") ? $params->get("wcNumber") : 0);
+   
+   $inspection->jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
    
    if ($inspection->templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
    {
@@ -102,16 +102,21 @@ function getNewInspection()
       
       if ($inspectionTemplate)
       {
+         $inspection->initialize($inspectionTemplate);
+         
          foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
          {
-            $inspectionResult = new InspectionResult();
-            $inspectionResult->propertyId = $inspectionProperty->propertyId;
-            $inspectionResult->status = InspectionStatus::NON_APPLICABLE;
-            
-            $inspection->inspectionResults[$inspectionProperty->propertyId] = $inspectionResult;
+            for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
+            {
+               $inspectionResult = new InspectionResult();
+               $inspectionResult->propertyId = $inspectionProperty->propertyId;
+               $inspectionResult->status = InspectionStatus::NON_APPLICABLE;
+               
+               $inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex] = $inspectionResult;
+            }
          }
       }
-      
+
    }
  
    return ($inspection);
@@ -565,32 +570,55 @@ function getInspections()
    
    if ($inspection && $inspectionTemplate)
    {
-      $i = 0;
+      $html .=
+<<<HEREDOC
+      <tr>
+         <td></td>
+HEREDOC;
+      
+      // Sample heading.
+      for ($sampleId = 1; $sampleId <= $inspectionTemplate->sampleSize; $sampleId++)
+      {
+         $html .=
+<<<HEREDOC
+         <th>Sample $sampleId</th>
+HEREDOC;
+      }
+         
+      $html .= "</tr>";
+      
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {
-         $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId];
-         
-         $inspectionInput = getInspectionInput($inspectionProperty, $inspectionResult);
+         $html .= "<tr>";
          
          $html .= 
 <<<HEREDOC
-         <tr>
-            <td>
-               <div class="flex-vertical">
-                  <div class="inspection-property-name">$inspectionProperty->name</div>
-                  <div>$inspectionProperty->specification</div>
-            </td>
-            $inspectionInput
-         </tr>\n
+         <td>
+            <div class="flex-vertical">
+               <div class="inspection-property-name">$inspectionProperty->name</div>
+               <div>$inspectionProperty->specification</div>
+         </td>
 HEREDOC;
-         
-         $i++;
+        
+         for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
+         {
+            $inspectionResult = null;
+            if (isset($inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex]))
+            {
+               $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex];
+            }
+            
+            $html .= getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult);
+         }
+            
+         $html .= "</tr>";
       }
    }
    
    return ($html);
 }
 
+/*
 function getInspectionInput($inspectionProperty, $inspectionResult)
 {
    $html = "";
@@ -628,6 +656,49 @@ function getInspectionInput($inspectionProperty, $inspectionResult)
          </label>
       </td>
 HEREDOC;
+   
+   return ($html);
+}
+*/
+
+function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult)
+{
+   $html = "<td>";
+   
+   if ($inspectionProperty)
+   {
+      $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
+
+      $pass = "";
+      $fail = "";
+      $nonApplicable = "selected";
+      $class = "";
+      
+      if ($inspectionResult)
+      {
+         $pass = ($inspectionResult->pass()) ? "selected" : "";
+         $fail = ($inspectionResult->fail()) ? "selected" : "";
+         $nonApplicable = ($inspectionResult->nonApplicable()) ? "selected" : "";
+         $class = InspectionStatus::getClass($inspectionResult->status);
+      }
+      
+      $nonApplicableValue = InspectionStatus::NON_APPLICABLE;
+      $passValue = InspectionStatus::PASS;
+      $failValue = InspectionStatus::FAIL;
+      
+      $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
+      
+      $html .=
+<<<HEREDOC
+      <select name="$name" class="inspection-status-input $class" form="input-form" oninput="onInspectionStatusUpdate(this)" $disabled>
+         <option value="$nonApplicableValue" $nonApplicable>N/A</option>
+         <option value="$passValue" $pass>PASS</option>
+         <option value="$failValue" $fail>FAIL</option>
+      </select>
+HEREDOC;
+   }
+      
+   $html .= "</td>";
    
    return ($html);
 }
@@ -757,6 +828,34 @@ if (!Authentication::isAuthenticated())
          var operatorValidator = new SelectValidator("operator-input");
 
          operatorValidator.init();
+
+         function onInspectionStatusUpdate(element)
+         {
+            // Clear classes.
+            element.classList.remove("<?php echo InspectionStatus::getClass(InspectionStatus::PASS); ?>");
+            element.classList.remove("<?php echo InspectionStatus::getClass(InspectionStatus::FAIL); ?>");
+            
+            switch (parseInt(element.value))
+            {
+               case <?php echo InspectionStatus::PASS ?>:
+               {
+                  element.classList.add("<?php echo InspectionStatus::getClass(InspectionStatus::PASS); ?>");
+                  break;
+               }
+
+               case <?php echo InspectionStatus::FAIL ?>:
+               {
+                  element.classList.add("<?php echo InspectionStatus::getClass(InspectionStatus::FAIL); ?>");
+                  break;
+               }
+
+               default:
+               {
+                  // No action.
+                  break;
+               }               
+            }
+         }
       </script>
      
    </div>

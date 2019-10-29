@@ -677,28 +677,29 @@ $router->add("saveInspection", function($params) {
             
             if ($inspectionTemplate)
             {
+               $inspection->initialize($inspectionTemplate);
+               
                foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
                {
-                  $name = "property" . $inspectionProperty->propertyId;
-                  $dataName = "propertyData" . $inspectionProperty->propertyId;
-                  
-                  if (isset($params[$name]))
+                  for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
                   {
-                     $inspectionResult = new InspectionResult();
-                     $inspectionResult->propertyId = $inspectionProperty->propertyId;
-                     $inspectionResult->status = intval($params[$name]);
+                     $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
                      
-                     if (isset($params[$dataName]))
+                     if (isset($params[$name]))
                      {
-                        $inspectionResult->data = $params[$dataName];
+                        $inspectionResult = new InspectionResult();
+                        $inspectionResult->propertyId = $inspectionProperty->propertyId;
+                        $inspectionResult->sampleIndex = $sampleIndex;
+                        $inspectionResult->status = intval($params[$name]);
+                        
+                        $inspection->inspectionResults[$inspectionResult->propertyId][$sampleIndex] = $inspectionResult;
                      }
-                     
-                     $inspection->inspectionResults[$inspectionResult->propertyId] = $inspectionResult;
-                  }
-                  else
-                  {
-                     $result->success = false;
-                     $result->error = "Missing property [$name]";
+                     else
+                     {
+                        $result->success = false;
+                        $result->error = "Missing property [$name]";
+                        break;
+                     }
                   }
                }
                      

@@ -18,6 +18,7 @@ class InspectionResult
    {
       $this->inspectionId = InspectionResult::UNKNOWN_INSPECTION_ID;
       $this->propertyId = InspectionResult::UNKNOWN_PROPERTY_ID;
+      $this->sampleIndex = 0;
       $this->status = InspectionStatus::UNKNOWN;
       $this->data = null;
    }
@@ -30,8 +31,9 @@ class InspectionResult
       {
          $inspectionResult = new InspectionResult();
          
-         $inspectionResult->inspectionId = $row['inspectionId'];
-         $inspectionResult->propertyId = $row['propertyId'];
+         $inspectionResult->inspectionId = intval($row['inspectionId']);
+         $inspectionResult->propertyId = intval($row['propertyId']);
+         $inspectionResult->sampleIndex = intval($row['sampleIndex']);
          $inspectionResult->status = intval($row['status']);
          $inspectionResult->data = $row['data'];
       }
@@ -52,6 +54,11 @@ class InspectionResult
    public function nonApplicable()
    {
       return ($this->status == InspectionStatus::NON_APPLICABLE);
+   }
+   
+   public static function getInputName($propertyId, $sampleIndex)
+   {
+      return ("property" . $propertyId . "_sample" . $sampleIndex);
    }
 }
 
@@ -76,8 +83,26 @@ class Inspection
       $this->inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->jobId = JobInfo::UNKNOWN_JOB_ID;
-      $this->inspectionResults = array();
+      $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
       $this->comments = "";
+   }
+   
+   public function initialize($inspectionTemplate)
+   {
+      if ($inspectionTemplate)
+      {
+         $this->inspectionResults = array();
+         
+         foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+         {
+            $this->inspectionResults[$inspectionProperty->propertyId] = array($inspectionTemplate->sampleSize);
+            
+            for ($sampleSize = 0; $sampleSize < $inspectionTemplate->sampleSize; $sampleSize++)
+            {
+               $this->inspectionResults[$inspectionProperty->propertyId][$sampleSize] = null; 
+            }
+         }
+      }
    }
    
    public static function load($inspectionId)
@@ -107,7 +132,12 @@ class Inspection
             while ($result && ($row = $result->fetch_assoc()))
             {
                $inspectionResult = InspectionResult::load($row);
-               $inspection->inspectionResults[$inspectionResult->propertyId] = $inspectionResult;
+               
+               if ($inspectionResult)
+               {
+                  $inspection->inspectionResults[$inspectionResult->propertyId] = array();
+                  $inspection->inspectionResults[$inspectionResult->propertyId][$inspectionResult->sampleIndex] = $inspectionResult;
+               }
             }
          }
       }
@@ -124,11 +154,14 @@ class Inspection
    {
       $count = 0;
       
-      foreach ($this->inspectionResults as $inspectionResult)
+      foreach ($this->inspectionResults as $inspectionRow)
       {
-         if ($inspectionResult->status == $inspectionStatus)
+         foreach ($inspectionRow as $inspectionResult)
          {
-            $count++;
+            if ($inspectionResult->status == $inspectionStatus)
+            {
+               $count++;
+            }
          }
       }
       
@@ -151,8 +184,9 @@ if (isset($_GET["inspectionId"]))
 {
    $inspectionId = $_GET["inspectionId"];
    $inspection = Inspection::load($inspectionId);
+   $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
  
-   if ($inspection)
+   if ($inspection && $inspectionTemplate)
    {
       echo "inspectionId: " . $inspection->inspectionId . "<br/>";
       echo "templateId: " .   $inspection->templateId .   "<br/>";
@@ -161,9 +195,23 @@ if (isset($_GET["inspectionId"]))
       echo "operator: " .     $inspection->operator .     "<br/>";
       echo "jobId: " .        $inspection->jobId .        "<br/>";
       
-      foreach ($inspection->inspectionResults as $inspectionResult)
+      echo "inspections: " .  count($inspection->inspectionResults) . "<br/>";
+ 
+      foreach ($inspection->inspectionResults as $inspectionRow)
       {
-         echo $inspectionResult->propertyId . " : " . InspectionStatus::getLabel($inspectionResult->status) . "<br/>";
+         for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
+         {
+            if (isset($inspectionRow[$sampleIndex]))
+            {
+               $inspectionResult = $inspectionRow[$sampleIndex];
+               
+               echo "[$inspectionResult->propertyId][$sampleIndex] : " . InspectionStatus::getLabel($inspectionResult->status) . "<br/>";
+            }
+            else
+            {
+               echo "No result found for [$inspectionResult->propertyId][$sampleIndex].\n";
+            }
+         }
       }
       
       echo "comments: " .  $inspection->comments .         "<br/>";

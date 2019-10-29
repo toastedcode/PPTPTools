@@ -54,6 +54,7 @@ class InspectionTemplate
    public $inspectionType;
    public $name;
    public $description;
+   public $sampleSize;
    public $inspectionProperties;
    
    public function __construct()
@@ -62,6 +63,7 @@ class InspectionTemplate
       $this->inspectionType = InspectionType::UNKNOWN;
       $this->name = "";
       $this->description = "";
+      $this->sampleSize = 1;
       $this->inspectionProperties = array();
    }
    
@@ -83,6 +85,7 @@ class InspectionTemplate
             $inspectionTemplate->inspectionType = intval($row['inspectionType']);
             $inspectionTemplate->name = $row['name'];
             $inspectionTemplate->description = $row['description'];
+            $inspectionTemplate->sampleSize = intval($row['sampleSize']);
             
             $result = $database->getInspectionProperties($templateId);
             
@@ -161,6 +164,8 @@ if (isset($_GET["templateId"]))
       echo "inspectionType: " . InspectionType::getLabel($inspectionTemplate->inspectionType) . "<br/>";
       echo "name: " .           $inspectionTemplate->name .                                     "<br/>";
       echo "description: " .    $inspectionTemplate->description .                              "<br/>";
+      echo "sampleSize: " .     $inspectionTemplate->sampleSize .                               "<br/>";
+      
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {

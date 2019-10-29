@@ -1102,8 +1102,8 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query = "SELECT * FROM inspectionresult " .
                "INNER JOIN inspectionproperty ON inspectionresult.propertyId = inspectionproperty.propertyId " .
-               "WHERE inspectionresult.inspectionId = $inspectionId ORDER BY inspectionproperty.ordering ASC;";
-      
+               "WHERE inspectionresult.inspectionId = $inspectionId ORDER BY inspectionproperty.ordering ASC, inspectionresult.sampleIndex ASC;";
+
       $result = $this->query($query);
 
       return ($result);
@@ -1126,19 +1126,22 @@ class PPTPDatabase extends MySqlDatabase
          // Get the last auto-increment id, which should be the inspection id.
          $inspectionId = mysqli_insert_id($this->getConnection());
          
-         foreach ($inspection->inspectionResults as $inspectionResult)
+         foreach ($inspection->inspectionResults as $inspectionRow)
          {
-            $query =
-            "INSERT INTO inspectionresult " .
-            "(inspectionId, propertyId, status, data) " .
-            "VALUES " .
-            "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->status', '$inspectionResult->data');";
-            
-            $result &= $this->query($query);
-            
-            if (!$result)
+            foreach ($inspectionRow as $inspectionResult)
             {
-               break;
+               $query =
+               "INSERT INTO inspectionresult " .
+               "(inspectionId, propertyId, status, data) " .
+               "VALUES " .
+               "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->status', '$inspectionResult->data');";
+               
+               $result &= $this->query($query);
+               
+               if (!$result)
+               {
+                  break;
+               }
             }
          }
       }
@@ -1159,18 +1162,21 @@ class PPTPDatabase extends MySqlDatabase
       
       if ($result)
       {
-         foreach ($inspection->inspectionResults as $inspectionResult)
+         foreach ($inspection->inspectionResults as $inspectionRow)
          {
-            $query =
-            "UPDATE inspectionresult " .
-            "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
-            "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId';";
-
-            $result &= $this->query($query);
-            
-            if (!$result)
+            foreach ($inspectionRow as $inspectionResult)
             {
-               break;
+               $query =
+               "UPDATE inspectionresult " .
+               "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
+               "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId';";
+   
+               $result &= $this->query($query);
+               
+               if (!$result)
+               {
+                  break;
+               }
             }
          }
       }

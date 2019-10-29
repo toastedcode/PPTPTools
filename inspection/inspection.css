@@ -121,3 +121,17 @@ input.nonApplicable:checked + label > div  {
 .inspection-status.fail {
    background-color: red;
 }
+
+.inspection-status-input {
+   background-color: grey;
+   color: #fff;
+   font-size: 14px;
+}
+
+.inspection-status-input.pass {
+   background-color: green;
+}
+
+.inspection-status-input.fail {
+   background-color: red;
+}
