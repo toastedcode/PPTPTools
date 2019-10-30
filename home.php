@@ -14,11 +14,12 @@ class Activity
    const PART_WEIGHT = 3;
    const PART_WASH = 4;
    const PART_INSPECTION = 5;
-   const LINE_INSPECTION = 6;
-   const MACHINE_STATUS = 7;
-   const PRODUCTION_SUMMARY = 8;
-   const USER = 9;
-   const SIGNAGE = 10;
+   const INSPECTION_TEMPLATE = 6;
+   const LINE_INSPECTION = 7;
+   const MACHINE_STATUS = 8;
+   const PRODUCTION_SUMMARY = 9;
+   const USER = 10;
+   const SIGNAGE = 11;
    const LAST = Activity::SIGNAGE;
       
    private static $permissionMasks = null;
@@ -33,6 +34,7 @@ class Activity
             Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
             Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
             Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // INSPECTION_TEMPLATE
             Permission::getPermission(Permission::VIEW_LINE_INSPECTION)->bits,     // LINE_INSPECTION
             Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
             Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
@@ -185,6 +187,20 @@ HEREDOC;
      </div>
 HEREDOC;
    }
+   
+   // Part Inspection
+   $inspectionTemplateButton = "";
+   if (Activity::isAllowed(Activity::INSPECTION_TEMPLATE, $permissions))
+   {
+      $inspectionTemplateButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='inspectionTemplate/inspectionTemplates.php';">
+        <i class="material-icons action-button-icon">format_list_bulleted</i>
+        <div>Inspection</div>
+        <div>Templates</div>
+     </div>
+HEREDOC;
+   }
       
    // Part Inspection
    $partInspectionButton = "";
@@ -282,6 +298,8 @@ HEREDOC;
             $partWeightButton
             
             $partWashButton
+
+            $inspectionTemplateButton
             
             $partInspectionButton
             

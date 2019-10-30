@@ -781,5 +781,145 @@ $router->add("deleteInspection", function($params) {
    echo json_encode($result);
 });
 
+$router->add("saveInspectionTemplate", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $inspectionTemplate = null;
+   
+   if (isset($params["templateId"]) &&
+       is_numeric($params["templateId"]) &&
+       (intval($params["templateId"]) != InspectionTemplate::UNKNOWN_TEMPLATE_ID))
+   {
+      //  Updated entry
+      $inspectionTemplate = InspectionTemplate::load($params["templateId"]);
+      
+      if (!$inspectionTemplate)
+      {
+         $result->success = false;
+         $result->error = "No existing template found.";
+      }
+   }
+   else
+   {
+      // New entry.
+      $inspectionTemplate = new InspectionTemplate();
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["templateName"]) &&
+          isset($params["templateDescription"]) &&
+          isset($params["inspectionType"]) &&
+          isset($params["sampleSize"]))
+      {
+         $inspectionTemplate->name = $params["templateName"];
+         $inspectionTemplate->description = $params["templateDescription"];
+         $inspectionTemplate->inspectionType = intval($params["inspectionType"]);
+         $inspectionTemplate->sampleSize = intval($params["sampleSize"]);
+         
+         // Clear properties list.
+         $inspectionTemplate->inspectionProperties = array();
+         
+         $propertyIndex = 0;
+         $name = "property" . $propertyIndex;
+         
+         while (isset($params[$name . "_name"]))
+         {
+            if (isset($params[$name . "_specification"]) &&
+                isset($params[$name . "_dataType"]) &&
+                isset($params[$name . "_dataUnits"]))
+            {
+               $inspectionProperty = new InspectionProperty();
+               
+               $inspectionProperty->templateId = $inspectionTemplate->templateId;
+               $inspectionProperty->name = $params[$name . "_name"];
+               $inspectionProperty->specification = $params[$name . "_specification"];
+               $inspectionProperty->dataType = intval($params[$name . "_dataType"]);
+               $inspectionProperty->dataUnits = intval($params[$name . "_dataUnits"]);
+               $inspectionProperty->ordering = $propertyIndex;
+               
+               $inspectionTemplate->inspectionProperties[] = $inspectionProperty;
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "Missing parameters for property[$propertyIndex].";
+               break;
+            }
+
+            $propertyIndex++;
+            $name = "property" . $propertyIndex;
+         }
+               
+         if ($result->success)
+         {
+            if ($inspectionTemplate->templateId == InspectionTemplate::UNKNOWN_TEMPLATE_ID)
+            {
+               $dbaseResult = $database->newInspectionTemplate($inspectionTemplate);
+            }
+            else
+            {
+               $dbaseResult = $database->updateInspectionTemplate($inspectionTemplate);
+            }
+            
+            if (!$dbaseResult)
+            {
+               $result->success = false;
+               $result->error = "Database query failed.";
+            }
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+   
+$router->add("deleteInspectionTemplate", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["templateId"]) &&
+       is_numeric($params["templateId"]) &&
+       (intval($params["templateId"]) != InspectionTemplate::UNKNOWN_TEMPLATE_ID))
+   {
+      $templateId = intval($params["templateId"]);
+      
+      $inspectionTemplate = InspectionTemplate::load($templateId);
+      
+      if ($inspectionTemplate)
+      {
+         $dbaseResult = $database->deleteInspectionTemplate($templateId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing template found.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+
 $router->route();
 ?>

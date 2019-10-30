@@ -64,7 +64,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Template", "location.replace('inspectionTemplate.php?view=new_template');", true);
+   $navBar->highlightNavButton("New Template", "location.replace('viewInspectionTemplate.php');", true);
    $navBar->end();
    
    return ($navBar->getHtml());
@@ -132,14 +132,14 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-                  "<a href=\"$ROOT/inspection/inspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+                  "<a href=\"$ROOT/inspectionTemplate/viewInspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                   "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspectionTemplate($inspectionTemplate->templateId)\">delete</i>";
             }
             else
             {
                $viewEditIcon =
-               "<a href=\"$ROOT/inspection/inspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template&view=view_part_weight_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+                  "<a href=\"$ROOT/inspectionTemplate/viewInspectionTemplate.php?templateId=$inspectionTemplate->templateId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
             $html .=
@@ -200,12 +200,11 @@ $filter = getFilter();
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
-   <link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
+   <link rel="stylesheet" type="text/css" href="inspectionTemplate.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWeightLog.js"></script>
    <script src="../common/validate.js"></script>
-   <script src="partWeightLog.js"></script>
+   <script src="inspectionTemplate.js"></script>
 
 </head>
 

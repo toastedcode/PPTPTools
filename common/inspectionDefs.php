@@ -37,12 +37,13 @@ abstract class InspectionType
    const LINE = 2;
    const QCP = 3;
    const IN_PROCESS = 4;
-   const LAST = 5;
+   const GENERIC = 5;
+   const LAST = 6;
    const COUNT = InspectionType::LAST - InspectionType::FIRST;
    
    public static function getLabel($inspectionType)
    {
-      $labels = array("---", "Oasis Inspection", "Line Inspection", "QCP Inspection", "In Process");
+      $labels = array("---", "Oasis Inspection", "Line Inspection", "QCP Inspection", "In Process", "Generic");
       
       return ($labels[$inspectionType]);
    }
@@ -50,18 +51,42 @@ abstract class InspectionType
 
 abstract class InspectionDataType
 {
-   const FIRST = 0;
-   const UNKNOWN = InspectionDataType::FIRST;
-   const PASS_FAIL = 1;
-   const INTEGER = 2;
-   const DECIMAL = 3;
-   const STRING = 4;
-   const BOOL = 4;
+   const UNKNOWN = 0;
+   const FIRST = 1;
+   const INTEGER = InspectionDataType::FIRST;
+   const DECIMAL = 2;
+   const STRING = 3;
+   const LAST = 4;
    const COUNT = InspectionDataType::LAST - InspectionDataType::FIRST;
    
    public static function getLabel($dataType)
    {
-      $labels = array("---", "Pass/Fail", "Integer", "Decimal", "String");
+      $labels = array("---", "Integer", "Decimal", "String");
+      
+      return ($labels[$dataType]);
+   }
+}
+
+abstract class InspectionDataUnits
+{
+   const UNKNOWN = 0;
+   const FIRST = 1;
+   const INCHES = InspectionDataUnits::FIRST;
+   const MILLIMETERS = 2;
+   const DEGREES = 3;
+   const LAST = 4;
+   const COUNT = InspectionDataUnits::LAST - InspectionDataUnits::FIRST;
+   
+   public static function getLabel($dataType)
+   {
+      $labels = array("---", "Inches", "Millimeters", "Degrees");
+      
+      return ($labels[$dataType]);
+   }
+   
+   public static function getAbbreviatedLabel($dataType)
+   {
+      $labels = array("---", "\"\"", "mm", "&#176;");
       
       return ($labels[$dataType]);
    }

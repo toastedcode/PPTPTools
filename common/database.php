@@ -1055,6 +1055,100 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
+   public function newInspectionTemplate($inspectionTemplate)
+   {
+      $query =
+      "INSERT INTO inspectiontemplate " .
+      "(name, description, inspectionType, sampleSize) " .
+      "VALUES " .
+      "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize');";
+echo $query;
+      $result = $this->query($query);
+      
+      if ($result)
+      {
+         // Get the last auto-increment id, which should be the inspection id.
+         $templateId = mysqli_insert_id($this->getConnection());
+         
+         foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+         {
+            $query =
+            "INSERT INTO inspectionproperty " .
+            "(templateId, name, specification, dataType, dataUnits, ordering) " .
+            "VALUES " .
+            "('$templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
+            echo $query;
+            $result &= $this->query($query);
+            
+            if (!$result)
+            {
+               break;
+            }
+         }
+      }
+      
+      return ($result);
+   }
+   
+   public function updateInspectionTemplate($inspectionTemplate)
+   {
+      $query =
+      "UPDATE inspectiontemplate " .
+      "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize' " .
+      "WHERE templateId = '$inspectionTemplate->templateId';";
+echo $query;
+      $result = $this->query($query);
+      
+      if ($result)
+      {
+         // Delete all existing properties.
+         $query = "DELETE FROM inspectionproperty WHERE templateId = $inspectionTemplate->templateId;";
+         echo $query;
+         $result &= $this->query($query);
+         
+         if ($result)
+         {         
+            // Add back updated set of properties.
+            foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+            {            
+               $query =
+               "INSERT INTO inspectionproperty " .
+               "(templateId, name, specification, dataType, dataUnits, ordering) " .
+               "VALUES " .
+               "('$inspectionTemplate->templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
+               echo $query;
+               $result &= $this->query($query);
+               
+               if (!$result)
+               {
+                  break;
+               }
+            }
+         }
+      }
+      
+      return ($result);
+   }
+   
+   public function deleteInspectionTemplate($templateId)
+   {
+      $query = "DELETE FROM inspectiontemplate WHERE templateId = $templateId;";
+      
+      $result = $this->query($query);
+      
+      $query = "DELETE FROM inspectionproperty WHERE templateId = $templateId;";
+      
+      $result &= $this->query($query);
+      
+      $query = "DELETE FROM inspection WHERE templateId = $templateId;";
+      
+      $result &= $this->query($query);
+      
+      // TODO: Delete inspection results.
+      
+      return ($result);
+   }
+   
    // **************************************************************************
    //                                Inspections
    // **************************************************************************
@@ -1132,10 +1226,10 @@ class PPTPDatabase extends MySqlDatabase
             {
                $query =
                "INSERT INTO inspectionresult " .
-               "(inspectionId, propertyId, status, data) " .
+               "(inspectionId, propertyId, sampleIndex, status, data) " .
                "VALUES " .
-               "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->status', '$inspectionResult->data');";
-               
+               "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$inspectionResult->status', '$inspectionResult->data');";
+
                $result &= $this->query($query);
                
                if (!$result)
@@ -1169,8 +1263,8 @@ class PPTPDatabase extends MySqlDatabase
                $query =
                "UPDATE inspectionresult " .
                "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
-               "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId';";
-   
+               "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId' AND sampleIndex='$inspectionResult->sampleIndex';";
+
                $result &= $this->query($query);
                
                if (!$result)

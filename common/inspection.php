@@ -135,7 +135,11 @@ class Inspection
                
                if ($inspectionResult)
                {
-                  $inspection->inspectionResults[$inspectionResult->propertyId] = array();
+                  if (!isset($inspection->inspectionResults[$inspectionResult->propertyId]))
+                  {
+                     $inspection->inspectionResults[$inspectionResult->propertyId] = array();
+                  }
+                  
                   $inspection->inspectionResults[$inspectionResult->propertyId][$inspectionResult->sampleIndex] = $inspectionResult;
                }
             }
@@ -147,7 +151,14 @@ class Inspection
    
    public function getCount()
    {
-      return (count($this->inspectionResults));
+      $count = 0;
+      
+      foreach ($this->inspectionResults as $inspectionRow)
+      {
+         $count += count($inspectionRow);
+      }
+      
+      return ($count);
    }
    
    public function getCountByStatus($inspectionStatus)
@@ -199,18 +210,9 @@ if (isset($_GET["inspectionId"]))
  
       foreach ($inspection->inspectionResults as $inspectionRow)
       {
-         for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
+         foreach ($inspectionRow as $inspectionResult)
          {
-            if (isset($inspectionRow[$sampleIndex]))
-            {
-               $inspectionResult = $inspectionRow[$sampleIndex];
-               
-               echo "[$inspectionResult->propertyId][$sampleIndex] : " . InspectionStatus::getLabel($inspectionResult->status) . "<br/>";
-            }
-            else
-            {
-               echo "No result found for [$inspectionResult->propertyId][$sampleIndex].\n";
-            }
+            echo "[$inspectionResult->propertyId][$inspectionResult->sampleIndex] : " . InspectionStatus::getLabel($inspectionResult->status) . "<br/>";
          }
       }
       

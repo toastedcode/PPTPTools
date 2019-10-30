@@ -20,6 +20,7 @@ class InspectionProperty
       $this->name = "";
       $this->specification = "";
       $this->dataType = InspectionDataType::UNKNOWN;
+      $this->dataUnits = InspectionDataUnits::UNKNOWN;
       $this->ordering = 0;
    }
    
@@ -36,6 +37,7 @@ class InspectionProperty
          $inspectionProperty->name = $row['name'];
          $inspectionProperty->specification = $row['specification'];
          $inspectionProperty->dataType = intval($row['dataType']);
+         //$inspectionProperty->dataUnits = intval($row['dataUnits']);  // TODO
          $inspectionProperty->ordering = intval($row['ordering']);
       }
       
@@ -50,6 +52,8 @@ class InspectionTemplate
    const OASIS_INSPECTION_TEMPLATE_ID = 1;
    const LINE_INSPECTION_TEMPLATE_ID = 2;
    
+   const DEFAULT_SAMPLE_SIZE = 1;
+   
    public $templateId;
    public $inspectionType;
    public $name;
@@ -63,7 +67,7 @@ class InspectionTemplate
       $this->inspectionType = InspectionType::UNKNOWN;
       $this->name = "";
       $this->description = "";
-      $this->sampleSize = 1;
+      $this->sampleSize = InspectionTemplate::DEFAULT_SAMPLE_SIZE;
       $this->inspectionProperties = array();
    }
    
