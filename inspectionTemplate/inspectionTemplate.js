@@ -11,17 +11,24 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         console.log(this.responseText);
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "inspectionTemplates.php";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "inspectionTemplates.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
-         }
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }               
       });
    
       // Define what happens on successful data submission.
@@ -50,21 +57,72 @@ function onDeleteInspectionTemplate(templateId)
       {
          if (this.readyState == 4 && this.status == 200)
          {
-            var json = JSON.parse(this.responseText);
-            
-            if (json.success == true)
+            try
             {
-               location.href = "inspectionTemplates.php";            
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  location.href = "inspectionTemplates.php";            
+               }
+               else
+               {
+                  alert(json.error);
+               }
             }
-            else
+            catch (expection)
             {
-               alert(json.error);
-            }
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }               
          }
       };
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
    }
+}
+
+function incrementPropertyName(name)
+{
+   var PROPERTY = "property";
+   
+   var startPos = name.indexOf(PROPERTY) + PROPERTY.length;
+   var endPos = (startPos + 1);
+   while ((endPos < length) && (Number.isInteger(name.charAt(endPos))))
+   {
+      endPos++;
+   }
+   
+   var propertyIndex = parseInt(name.substring(startPos, endPos)) + 1;
+   
+   var newName = name.substring(0, startPos) + propertyIndex + name.substring(endPos);
+   console.log(newName);
+   
+   return (newName);
+}
+
+function onAddProperty()
+{
+   var table = document.getElementById("property-table");
+   
+   var lastRow = table.rows[table.rows.length - 1];
+   var newRow = lastRow.cloneNode(true);
+   
+   for (i = 0; i < newRow.cells.length; i++)
+   {
+      for (j = 0; j < newRow.cells[i].childNodes.length; j++)
+      {
+         var name = newRow.cells[i].childNodes[j].name;
+         
+         if (name.includes("property"))
+         {
+            newName = incrementPropertyName(name);
+            newRow.cells[i].childNodes[j].name = newName;
+         }
+      }
+   }
+   
+   table.append(newRow);
 }
 
 /*

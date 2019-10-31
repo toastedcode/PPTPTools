@@ -103,23 +103,15 @@ class InspectionTemplate
       return ($inspectionTemplate);
    }
    
-   public static function getInspectionTemplate($inspectionType, $jobId)
+   public static function getInspectionTemplates($inspectionType, $jobId)
    {
-      $inspectionTemplate = null;
-      
-      $templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+      $templateIds = array();
 
       switch ($inspectionType)
       {
          case InspectionType::OASIS:
          {
-            $templateId = InspectionTemplate::OASIS_INSPECTION_TEMPLATE_ID;
-            break;
-         }
-            
-         case InspectionType::LINE:
-         {
-            $templateId = InspectionTemplate::LINE_INSPECTION_TEMPLATE_ID;
+            $templateIds[] = InspectionTemplate::OASIS_INSPECTION_TEMPLATE_ID;
             break;
          }
             
@@ -131,14 +123,31 @@ class InspectionTemplate
            {
               if ($inspectionType == InspectionType::QCP)
               {
-                 $templateId = $jobInfo->qcpInspectionTemplateId;
+                 $templateIds[] = $jobInfo->qcpInspectionTemplateId;
               }
               else if ($inspectionType == InspectionType::IN_PROCESS)
               {
-                 $templateId = $jobInfo->inlineInspectionTemplateId;
+                 $templateIds[] = $jobInfo->inlineInspectionTemplateId;
               }
            }
            break;
+         }
+         
+         case InspectionType::LINE:
+         case InspectionType::GENERIC:
+         {
+            $database = PPTPDatabase::getInstance();
+            
+            if ($database && $database->isConnected())
+            {
+               $result = $database->getInspectionTemplates($inspectionType);
+               
+               while ($result && ($row = $result->fetch_assoc()))
+               {
+                  $templateIds[] = intval($row["templateId"]);
+               }
+            }
+            break;
          }
             
          default:
@@ -147,12 +156,7 @@ class InspectionTemplate
          }
       }
       
-      if ($templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
-      {
-         $inspectionTemplate = InspectionTemplate::load($templateId);
-      }
-      
-      return ($inspectionTemplate);
+      return ($templateIds);
    }
    
 }

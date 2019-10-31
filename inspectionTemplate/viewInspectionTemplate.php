@@ -327,6 +327,7 @@ function getInspectionProperties()
          $html .=
 <<<HEREDOC
          <tr>
+            <input name="{$name}_ordering" type="hidden" form="input-form" value="$inspectionProperty->ordering">
             <td></td>
             <td><input name="{$name}_name" type="text" form="input-form" value="$inspectionProperty->name"></td>
             <td><input name="{$name}_specification" type="text" form="input-form" value="$inspectionProperty->specification"></td>
@@ -395,48 +396,54 @@ if (!Authentication::isAuthenticated())
          <div class="heading"><?php echo getHeading(); ?></div>
          
          <div class="description"><?php echo getDescription(); ?></div>
-      
-         <div class="pptp-form">
-            <div class="form-row">
-
-               <div class="form-col">
-               
-                  <div class="form-item">
-                     <div class="form-label">Inspection Type</div>
-                     <select name="inspectionType" class="form-input-medium" form="input-form" <?php echo !isEditable(InspectionTemplateInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
-                         <?php echo getInspectionTypeOptions(); ?>
-                     </select>
-                  </div>
-               
-                  <div class="form-item">
-                     <div class="form-label">Inspection Name</div>
-                     <input name="templateName" type="text" form="input-form" value="<?php echo getInspectionName() ?>">
-                  </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Description</div>
-                     <input name="templateDescription" type="text" form="input-form" value="<?php echo getInspectionDescription() ?>">
-                  </div>
-                  
-                  <div class="form-item">
-                     <div class="form-label">Sample Size</div>
-                     <input name="sampleSize" type="number" form="input-form" value="<?php echo getSampleSize() ?>">
-                  </div>
-                  
-                  <table>
-                     <tr>
-                        <th></th>
-                        <th>Property</th>
-                        <th>Specification</th>
-                        <th>Data Type</th>
-                        <th>Units</th>
-                        <th></th>
-                     <tr>
-                     <?php echo getInspectionProperties() ?>
-                  </table>
          
+         <div class="flex-vertical inner-content">
+            <div class="pptp-form">
+               <div class="form-row">
+   
+                  <div class="form-col">
+                  
+                     <div class="form-item">
+                        <div class="form-label">Inspection Type</div>
+                        <select name="inspectionType" class="form-input-medium" form="input-form" <?php echo !isEditable(InspectionTemplateInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
+                            <?php echo getInspectionTypeOptions(); ?>
+                        </select>
+                     </div>
+                  
+                     <div class="form-item">
+                        <div class="form-label">Inspection Name</div>
+                        <input name="templateName" type="text" class="form-input-medium" form="input-form" value="<?php echo getInspectionName() ?>">
+                     </div>
+                     
+                     <div class="form-item">
+                        <div class="form-label">Description</div>
+                        <input name="templateDescription" type="text" class="form-input-medium" form="input-form" value="<?php echo getInspectionDescription() ?>">
+                     </div>
+                     
+                     <div class="form-item">
+                        <div class="form-label">Sample Size</div>
+                        <input name="sampleSize" type="number" class="form-input-medium" form="input-form" value="<?php echo getSampleSize() ?>">
+                     </div>
+                     
+                     <table id="property-table">
+                        <tr>
+                           <th></th>
+                           <th>Property</th>
+                           <th>Specification</th>
+                           <th>Data Type</th>
+                           <th>Units</th>
+                           <th></th>
+                        <tr>
+                        <?php echo getInspectionProperties() ?>
+                     </table>
+                     
+                     <div class="form-item">
+                        <button onclick="onAddProperty()">+</button>
+                     </div>
+            
+                  </div>
+   
                </div>
-
             </div>
          </div>
       

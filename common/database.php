@@ -1062,7 +1062,7 @@ class PPTPDatabase extends MySqlDatabase
       "(name, description, inspectionType, sampleSize) " .
       "VALUES " .
       "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize');";
-echo $query;
+
       $result = $this->query($query);
       
       if ($result)
@@ -1077,7 +1077,7 @@ echo $query;
             "(templateId, name, specification, dataType, dataUnits, ordering) " .
             "VALUES " .
             "('$templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
-            echo $query;
+
             $result &= $this->query($query);
             
             if (!$result)
@@ -1096,14 +1096,14 @@ echo $query;
       "UPDATE inspectiontemplate " .
       "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize' " .
       "WHERE templateId = '$inspectionTemplate->templateId';";
-echo $query;
+
       $result = $this->query($query);
       
       if ($result)
       {
          // Delete all existing properties.
          $query = "DELETE FROM inspectionproperty WHERE templateId = $inspectionTemplate->templateId;";
-         echo $query;
+
          $result &= $this->query($query);
          
          if ($result)
@@ -1116,7 +1116,7 @@ echo $query;
                "(templateId, name, specification, dataType, dataUnits, ordering) " .
                "VALUES " .
                "('$inspectionTemplate->templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
-               echo $query;
+
                $result &= $this->query($query);
                
                if (!$result)
@@ -1133,18 +1133,18 @@ echo $query;
    public function deleteInspectionTemplate($templateId)
    {
       $query = "DELETE FROM inspectiontemplate WHERE templateId = $templateId;";
-      
       $result = $this->query($query);
       
       $query = "DELETE FROM inspectionproperty WHERE templateId = $templateId;";
-      
       $result &= $this->query($query);
       
-      $query = "DELETE FROM inspection WHERE templateId = $templateId;";
-      
-      $result &= $this->query($query);
-      
-      // TODO: Delete inspection results.
+      $query = "SELECT inspectionId FROM inspection WHERE templateId = $templateId;";
+      $searchResult = $this->query($query);
+
+      while ($searchResult && ($row = $searchResult->fetch_assoc()))
+      {
+         deleteInspection(intval($row['inspectionId']));
+      }
       
       return ($result);
    }

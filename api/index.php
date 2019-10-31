@@ -587,29 +587,35 @@ $router->add("deletePartWeightEntry", function($params) {
    echo json_encode($result);
 });
 
-$router->add("inspectionTemplate", function($params) {
+$router->add("inspectionTemplates", function($params) {
    $result = new stdClass();
    $result->success = false;
+   $result->templates = array();
    
-   if (is_numeric($params["inspectionType"]) &&
-       isset($params["jobNumber"]) &&
-       is_numeric($params["wcNumber"]))
+   if (is_numeric($params["inspectionType"]))
    {
       $inspectionType = intval($params["inspectionType"]);
-      $jobNumber = $params["jobNumber"];
-      $wcNumber = intval($params["wcNumber"]);
+
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
       
-      $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
-      
-      $inspectionTemplate = InspectionTemplate::getInspectionTemplate($inspectionType, $jobId);
-      
-      if ($inspectionTemplate)
+      if (isset($params["jobNumber"]) &&
+          is_numeric($params["wcNumber"]))
       {
-         $result->templateId = $inspectionTemplate->templateId;
+         $jobNumber = $params["jobNumber"];
+         $wcNumber = intval($params["wcNumber"]);
+         $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
       }
-      else
+      
+      $templateIds = InspectionTemplate::getInspectionTemplates($inspectionType, $jobId);
+      
+      foreach ($templateIds as $templateId)
       {
-         $result->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $result->templates[] = $inspectionTemplate;
+         }
       }
 
       $result->success = true;
@@ -617,7 +623,7 @@ $router->add("inspectionTemplate", function($params) {
    else
    {
       $result->success = false;
-      $result->error = "Missing parameters.";
+      $result->error = "No inspection type specified.";
    }
    
    echo json_encode($result);

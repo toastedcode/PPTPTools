@@ -18,7 +18,8 @@ abstract class InspectionInputField
    const INSPECTION_TYPE = InspectionInputField::FIRST;
    const JOB_NUMBER = 1;
    const WC_NUMBER = 2;
-   const LAST = 3;
+   const TEMPLATE_ID = 3;
+   const LAST = 4;
    const COUNT = InspectionInputField::LAST - InspectionInputField::FIRST;
 }
 
@@ -66,6 +67,13 @@ function getJobNumberOptions()
 }
 
 function getWcNumberOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   return ($options);
+}
+
+function getTemplateOptions()
 {
    $options = "<option style=\"display:none\">";
    
@@ -150,7 +158,6 @@ if (!Authentication::isAuthenticated())
      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
       <form id="input-form" action="" method="POST">
-         <input id="template-id-input" type="hidden" name="templateId">
       </form>
       
       <div class="flex-vertical content">
@@ -184,6 +191,13 @@ if (!Authentication::isAuthenticated())
                      <div class="form-label">WC Number</div>
                      <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="updateTemplateId();" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                         <?php echo getWcNumberOptions(); ?>
+                     </select>
+                  </div>
+                  
+                  <div class="form-item">
+                     <div class="form-label">Inspection Template</div>
+                     <select id="template-id-input" class="form-input-medium" name="templateId" form="input-form" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                        <?php echo getTemplateOptions(); ?>
                      </select>
                   </div>
          

@@ -128,14 +128,14 @@ function onJobNumberChange()
 
 function updateTemplateId()
 {
-   inspectionType = document.getElementById("inspection-type-input").value;
+   inspectionType = parseInt(document.getElementById("inspection-type-input").value);
    jobNumber = document.getElementById("job-number-input").value;
-   wcNumber = document.getElementById("wc-number-input").value;
+   wcNumber = parseInt(document.getElementById("wc-number-input").value);
    
-   if ((inspectionType != "") && (jobNumber != "") && (wcNumber != ""))
+   if (inspectionType != 0)
    {
       // AJAX call to populate template id based on selected inspection type, job number, and WC number.
-      requestUrl = "../api/inspectionTemplate/?inspectionType=" + inspectionType + "&jobNumber=" + jobNumber + "&wcNumber=" + wcNumber;
+      requestUrl = "../api/inspectionTemplates/?inspectionType=" + inspectionType + "&jobNumber=" + jobNumber + "&wcNumber=" + wcNumber;
       
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function()
@@ -146,8 +146,12 @@ function updateTemplateId()
             
             if (json.success == true)
             {
-               console.log("Selecting template id: " + json.templateId);
-               document.getElementById("template-id-input").value = json.templateId;
+               //if (json.templates.length == 1)
+               //{
+               //   console.log("Selecting template id: " + json.templates[0].templateId);
+               //}
+               
+               updateTemplateIdOptions(json.templates);
             }
             else
             {
@@ -180,6 +184,40 @@ function updateWcOptions(wcNumbers)
    element.value = null;
 }
 
+function updateTemplateIdOptions(templates)
+{
+   element = document.getElementById("template-id-input");
+   
+   while (element.firstChild)
+   {
+      element.removeChild(element.firstChild);
+   }
+   
+   var selectedTemplateId = 0;
+   if (templates.length == 1)
+   {
+      var selectedTemplateId = templates[0].templateId;
+   }
+
+   for (var template of templates)
+   {
+      var option = document.createElement('option');
+      option.innerHTML = template.name;
+      option.value = template.templateId;
+      element.appendChild(option);
+   }
+
+   if (templates.length == 1)
+   {
+      element.value = templates[0].templateId;
+   }
+   else
+   {
+      element.value = null;
+   }
+ 
+}
+
 function validateInspectionSelection()
 {
    valid = false;
@@ -200,7 +238,7 @@ function validateInspectionSelection()
    {
       templateId = parseInt(document.getElementById("template-id-input").value);
       
-      if (templateId == 0)
+      if (isNaN(templateId) || (templateId == 0))
       {
          alert("No inspection template could be found for the current selection."); 
       }
