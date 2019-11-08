@@ -606,7 +606,7 @@ $router->add("inspectionTemplates", function($params) {
          $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
       }
       
-      $templateIds = InspectionTemplate::getInspectionTemplates($inspectionType, $jobId);
+      $templateIds = InspectionTemplate::getInspectionTemplatesForJob($inspectionType, $jobId);
       
       foreach ($templateIds as $templateId)
       {

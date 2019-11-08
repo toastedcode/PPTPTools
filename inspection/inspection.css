@@ -110,12 +110,16 @@ input.nonApplicable:checked + label > div  {
    background-color: grey;
    border: none;
    
-   width: 50px;
+   width: 75px;
    height: 20px;	
 }
 
 .inspection-status.pass {
 	background-color: green;
+}
+
+.inspection-status.warning {
+   background-color: orange;
 }
 
 .inspection-status.fail {
@@ -130,6 +134,10 @@ input.nonApplicable:checked + label > div  {
 
 .inspection-status-input.pass {
    background-color: green;
+}
+
+.inspection-status-input.warning {
+   background-color: orange;
 }
 
 .inspection-status-input.fail {

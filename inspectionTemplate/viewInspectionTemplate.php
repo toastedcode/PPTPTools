@@ -166,7 +166,7 @@ function getInspectionTypeOptions()
 
 function getDataTypeOptions($inspectionProperty)
 {
-   $options = "<option style=\"display:none\">";
+   $options = "<option value\"" . InspectionDataType::UNKNOWN . "\"></option>";
    
    $selectedDataType = $inspectionProperty->dataType;
    
@@ -184,7 +184,7 @@ function getDataTypeOptions($inspectionProperty)
 
 function getDataUnitsOptions($inspectionProperty)
 {
-   $options = "<option style=\"display:none\">";
+   $options = "<option value\"" . InspectionDataUnits::UNKNOWN . "\"></option>";
    
    $selectedDataType = $inspectionProperty->dataType;
    
@@ -336,6 +336,8 @@ function getInspectionProperties()
             <td></td>
          </tr>
 HEREDOC;
+         
+         $propertyIndex++;
       }
    }
    
@@ -412,33 +414,35 @@ if (!Authentication::isAuthenticated())
                   
                      <div class="form-item">
                         <div class="form-label">Inspection Name</div>
-                        <input name="templateName" type="text" class="form-input-medium" form="input-form" value="<?php echo getInspectionName() ?>">
+                        <input name="templateName" type="text" class="form-input-medium" style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>">
                      </div>
                      
                      <div class="form-item">
                         <div class="form-label">Description</div>
-                        <input name="templateDescription" type="text" class="form-input-medium" form="input-form" value="<?php echo getInspectionDescription() ?>">
+                        <input name="templateDescription" type="text" class="form-input-medium" style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>">
                      </div>
                      
                      <div class="form-item">
                         <div class="form-label">Sample Size</div>
-                        <input name="sampleSize" type="number" class="form-input-medium" form="input-form" value="<?php echo getSampleSize() ?>">
+                        <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>">
                      </div>
                      
-                     <table id="property-table">
-                        <tr>
-                           <th></th>
-                           <th>Property</th>
-                           <th>Specification</th>
-                           <th>Data Type</th>
-                           <th>Units</th>
-                           <th></th>
-                        <tr>
-                        <?php echo getInspectionProperties() ?>
-                     </table>
-                     
                      <div class="form-item">
-                        <button onclick="onAddProperty()">+</button>
+                        <table id="property-table">
+                           <tr>
+                              <th></th>
+                              <th>Property</th>
+                              <th>Specification</th>
+                              <th>Data Type</th>
+                              <th>Units</th>
+                              <th></th>
+                           <tr>
+                           <?php echo getInspectionProperties() ?>
+                        </table>
+                     </div>
+                     
+                     <div class="form-item" style="justify-content: flex-end;">
+                        <button style="width: 50px; height: 30px;" onclick="onAddProperty()">+</button>
                      </div>
             
                   </div>

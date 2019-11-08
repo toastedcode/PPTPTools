@@ -41,8 +41,8 @@ class JobInfo
    public $cycleTime;
    public $netPercentage;
    public $status = JobStatus::PENDING;
-   public $inlineInspectionTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
-   public $qcpInspectionTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $inProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $qcpProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    public $customerPrint;
    
    public function isActive()
@@ -76,8 +76,8 @@ class JobInfo
             $jobInfo->cycleTime =     doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
             $jobInfo->status =        $row['status'];
-            $jobInfo->inlineInspectionTemplateId = $row['inlineInspectionTemplateId'];
-            $jobInfo->qcpInspectionTemplateId =    $row['qcpInspectionTemplateId'];
+            $jobInfo->inProcessTemplateId = intval($row['inProcessTemplateId']);
+            $jobInfo->qcpTemplateId = intval($row['qcpTemplateId']);
             $jobInfo->customerPrint = $row['customerPrint'];
          }
       }
@@ -191,9 +191,9 @@ if (isset($_GET["$jobId"]))
       echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
       echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
       echo "netPercentage: " . $jobInfo->netPercentage .   "<br/>";
-      echo "inlineInspectionTemplateId: " . $jobInfo->inlineInspectionTemplateId . "<br/>";
-      echo "qcpInspectionTemplateId: " .    $jobInfo->qcpInspectionTemplateId .    "<br/>";
-      echo "customerPrint: " . $jobInfo->customerPrint .   "<br/>";
+      echo "inProcessTemplateId: " . $jobInfo->inProcessTemplateId . "<br/>";
+      echo "qcpTemplateId: " . $jobInfo->qcpTemplateId .    "<br/>";
+      echo "customerPrint: " . $jobInfo->customerPrint .    "<br/>";
       
       echo "status: " . JobStatus::getName($jobInfo->status) . "<br/>";
    }

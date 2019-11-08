@@ -677,6 +677,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       if ($inspectionResult)
       {
          $pass = ($inspectionResult->pass()) ? "selected" : "";
+         $warning = ($inspectionResult->warning()) ? "selected" : "";
          $fail = ($inspectionResult->fail()) ? "selected" : "";
          $nonApplicable = ($inspectionResult->nonApplicable()) ? "selected" : "";
          $class = InspectionStatus::getClass($inspectionResult->status);
@@ -684,6 +685,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       
       $nonApplicableValue = InspectionStatus::NON_APPLICABLE;
       $passValue = InspectionStatus::PASS;
+      $warningValue = InspectionStatus::WARNING;
       $failValue = InspectionStatus::FAIL;
       
       $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
@@ -693,6 +695,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       <select name="$name" class="inspection-status-input $class" form="input-form" oninput="onInspectionStatusUpdate(this)" $disabled>
          <option value="$nonApplicableValue" $nonApplicable>N/A</option>
          <option value="$passValue" $pass>PASS</option>
+         <option value="$warningValue" $warning>WARNING</option>
          <option value="$failValue" $fail>FAIL</option>
       </select>
 HEREDOC;
@@ -831,30 +834,29 @@ if (!Authentication::isAuthenticated())
 
          function onInspectionStatusUpdate(element)
          {
-            // Clear classes.
-            element.classList.remove("<?php echo InspectionStatus::getClass(InspectionStatus::PASS); ?>");
-            element.classList.remove("<?php echo InspectionStatus::getClass(InspectionStatus::FAIL); ?>");
-            
-            switch (parseInt(element.value))
+            var inspectionStatusClasses = [
+            <?php
+            for ($inspectionStatus = InspectionStatus::FIRST; $inspectionStatus < InspectionStatus::LAST; $inspectionStatus++)
             {
-               case <?php echo InspectionStatus::PASS ?>:
-               {
-                  element.classList.add("<?php echo InspectionStatus::getClass(InspectionStatus::PASS); ?>");
-                  break;
-               }
-
-               case <?php echo InspectionStatus::FAIL ?>:
-               {
-                  element.classList.add("<?php echo InspectionStatus::getClass(InspectionStatus::FAIL); ?>");
-                  break;
-               }
-
-               default:
-               {
-                  // No action.
-                  break;
-               }               
+               $class = InspectionStatus::getClass($inspectionStatus);
+               echo "\"$class\"";
+               echo ($inspectionStatus < (InspectionStatus::LAST - 1)) ? ", " : "";
             }
+            ?>
+            ];
+
+            // Clear classes
+            for (const inspectionStatusClass of inspectionStatusClasses)
+            {
+               if (inspectionStatusClass != "")
+               {
+                  element.classList.remove(inspectionStatusClass);
+               }
+            }
+
+            // Add new class.
+            var inspectionStatus = parseInt(element.value);
+            element.classList.add(inspectionStatusClasses[inspectionStatus]);
          }
       </script>
      

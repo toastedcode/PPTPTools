@@ -109,16 +109,24 @@ function onJobNumberChange()
       {
          if (this.readyState == 4 && this.status == 200)
          {
-            var json = JSON.parse(this.responseText);
-            
-            if (json.success == true)
-            {
-               updateWcOptions(json.wcNumbers);               
+            try
+            {            
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  updateWcOptions(json.wcNumbers);               
+               }
+               else
+               {
+                  console.log("API call to retrieve WC numbers failed.");
+               }
             }
-            else
+            catch (expection)
             {
-               console.log("API call to retrieve WC numbers failed.");
-            }
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }  
          }
       };
       xhttp.open("GET", requestUrl, true);
@@ -142,21 +150,29 @@ function updateTemplateId()
       {
          if (this.readyState == 4 && this.status == 200)
          {
-            var json = JSON.parse(this.responseText);
-            
-            if (json.success == true)
-            {
-               //if (json.templates.length == 1)
-               //{
-               //   console.log("Selecting template id: " + json.templates[0].templateId);
-               //}
+            try
+            {            
+               var json = JSON.parse(this.responseText);
                
-               updateTemplateIdOptions(json.templates);
+               if (json.success == true)
+               {
+                  //if (json.templates.length == 1)
+                  //{
+                  //   console.log("Selecting template id: " + json.templates[0].templateId);
+                  //}
+                  
+                  updateTemplateIdOptions(json.templates);
+               }
+               else
+               {
+                  console.log("API call to retrieve inspection template id failed.");
+               }
             }
-            else
+            catch (expection)
             {
-               console.log("API call to retrieve inspection template id failed.");
-            }
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            } 
          }
       };
       xhttp.open("GET", requestUrl, true);

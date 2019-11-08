@@ -9,21 +9,22 @@ abstract class InspectionStatus
    const FIRST = 0;
    const UNKNOWN = InspectionStatus::FIRST;
    const PASS = 1;
-   const FAIL = 2;
-   const NON_APPLICABLE = 3;
-   const LAST = 4;
+   const WARNING = 2;
+   const FAIL = 3;
+   const NON_APPLICABLE = 4;
+   const LAST = 5;
    const COUNT = InspectionStatus::LAST - InspectionStatus::FIRST;
    
    public static function getLabel($inspectionStatus)
    {
-      $labels = array("---", "PASS", "FAIL", "N/A");
+      $labels = array("---", "PASS", "WARNING", "FAIL", "N/A");
       
       return ($labels[$inspectionStatus]);
    }
    
    public static function getClass($inspectionStatus)
    {
-      $classes = array("", "pass", "fail", "n/a");
+      $classes = array("", "pass", "warning", "fail", "n/a");
       
       return ($classes[$inspectionStatus]);
    }

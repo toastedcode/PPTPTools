@@ -46,6 +46,11 @@ class InspectionResult
       return ($this->status == InspectionStatus::PASS);
    }
    
+   public function warning()
+   {
+      return ($this->status == InspectionStatus::WARNING);
+   }
+   
    public function fail()
    {
       return ($this->status == InspectionStatus::FAIL);
@@ -153,9 +158,12 @@ class Inspection
    {
       $count = 0;
       
-      foreach ($this->inspectionResults as $inspectionRow)
+      if ($this->inspectionResults)
       {
-         $count += count($inspectionRow);
+         foreach ($this->inspectionResults as $inspectionRow)
+         {
+            $count += count($inspectionRow);
+         }
       }
       
       return ($count);
@@ -165,13 +173,16 @@ class Inspection
    {
       $count = 0;
       
-      foreach ($this->inspectionResults as $inspectionRow)
+      if ($this->inspectionResults)
       {
-         foreach ($inspectionRow as $inspectionResult)
+         foreach ($this->inspectionResults as $inspectionRow)
          {
-            if ($inspectionResult->status == $inspectionStatus)
+            foreach ($inspectionRow as $inspectionResult)
             {
-               $count++;
+               if ($inspectionResult->status == $inspectionStatus)
+               {
+                  $count++;
+               }
             }
          }
       }
@@ -181,12 +192,37 @@ class Inspection
    
    public function pass()
    {
-      return ($this->getCountByStatus(InspectionStatus::FAIL) == 0);
+      return (!$this->fail() && !$this->warning());
+   }
+   
+   public function warning()
+   {
+      return (!$this->fail() && ($this->getCountByStatus(InspectionStatus::WARNING) > 0));
    }
    
    public function fail()
    {
-      return (!$this->pass());
+      return ($this->getCountByStatus(InspectionStatus::FAIL) > 0);
+   }
+   
+   public function getInspectionStatus()
+   {
+      $inspectionStatus = InspectionStatus::UNKNOWN;
+      
+      if ($this->fail())
+      {
+         $inspectionStatus = InspectionStatus::FAIL;
+      }
+      else if ($this->warning())
+      {
+         $inspectionStatus = InspectionStatus::WARNING;
+      }
+      else
+      {
+         $inspectionStatus = InspectionStatus::PASS;
+      }
+      
+      return ($inspectionStatus);
    }
 }
 

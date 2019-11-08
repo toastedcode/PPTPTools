@@ -103,15 +103,36 @@ class InspectionTemplate
       return ($inspectionTemplate);
    }
    
-   public static function getInspectionTemplates($inspectionType, $jobId)
+   public static function getInspectionTemplates($inspectionType)
+   {
+      $templateIds = array();
+      
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->getInspectionTemplates($inspectionType);
+         
+         while ($result && ($row = $result->fetch_assoc()))
+         {
+            $templateIds[] = intval($row["templateId"]);
+         }
+      }
+      
+      return ($templateIds);
+   }
+   
+   public static function getInspectionTemplatesForJob($inspectionType, $jobId)
    {
       $templateIds = array();
 
       switch ($inspectionType)
       {
          case InspectionType::OASIS:
+         case InspectionType::LINE:
+         case InspectionType::GENERIC:
          {
-            $templateIds[] = InspectionTemplate::OASIS_INSPECTION_TEMPLATE_ID;
+            $templateIds[] = getInspectionTemplates($inspectionType);
             break;
          }
             
@@ -123,31 +144,14 @@ class InspectionTemplate
            {
               if ($inspectionType == InspectionType::QCP)
               {
-                 $templateIds[] = $jobInfo->qcpInspectionTemplateId;
+                 $templateIds[] = $jobInfo->qcpTemplateId;
               }
               else if ($inspectionType == InspectionType::IN_PROCESS)
               {
-                 $templateIds[] = $jobInfo->inlineInspectionTemplateId;
+                 $templateIds[] = $jobInfo->inProcessTemplateId;
               }
            }
            break;
-         }
-         
-         case InspectionType::LINE:
-         case InspectionType::GENERIC:
-         {
-            $database = PPTPDatabase::getInstance();
-            
-            if ($database && $database->isConnected())
-            {
-               $result = $database->getInspectionTemplates($inspectionType);
-               
-               while ($result && ($row = $result->fetch_assoc()))
-               {
-                  $templateIds[] = intval($row["templateId"]);
-               }
-            }
-            break;
          }
             
          default:

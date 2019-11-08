@@ -112,12 +112,15 @@ function onAddProperty()
    {
       for (j = 0; j < newRow.cells[i].childNodes.length; j++)
       {
-         var name = newRow.cells[i].childNodes[j].name;
+         var cell = newRow.cells[i].childNodes[j];
+         
+         var name = cell.name;
          
          if (name.includes("property"))
          {
             newName = incrementPropertyName(name);
-            newRow.cells[i].childNodes[j].name = newName;
+            cell.name = newName;
+            cell.value = null;
          }
       }
    }

@@ -203,9 +203,22 @@ HEREDOC;
                $operatorName = $user->getFullName();
             }
             
-            $passFail = ($inspection->pass() ? "<div class=\"inspection-status pass\">PASS</div>" : 
-                                               "<div class=\"inspection-status fail\">FAIL</div>");
+            $inspectionStatus = $inspection->getInspectionStatus();
+            $class = InspectionStatus::getClass($inspectionStatus);
+            $label = InspectionStatus::getLabel($inspectionStatus);
+            $passFail =
+<<<HEREDOC
+            <div class="inspection-status $class">$label</div>
+HEREDOC;
             
+            //$passFail = $inspection->fail() ? "<div class=\"inspection-status fail\">FAIL</div>" : "bummer";
+               
+            /*
+            $passFail = $inspection->fail() ? "<div class=\"inspection-status fail\">FAIL</div>" : 
+                           $inspection->warning() ? "<div class=\"inspection-status warning\">WARNING</div>" :
+                              "<div class=\"inspection-status pass\">PASS</div>";
+                              */
+
             $viewEditIcon = "";
             $deleteIcon = "";
             if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
