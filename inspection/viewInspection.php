@@ -624,9 +624,9 @@ HEREDOC;
             if (isset($inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex]))
             {
                $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex];
-               
-               $html .= getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionResult);
             }
+            
+            $html .= getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionResult);
          }
          
          $html .= "</tr>";
@@ -643,13 +643,12 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
    if ($inspectionProperty)
    {
       $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
-      $dataName = $name . "_data";
 
       $pass = "";
-      $fail = "";
+      $warning = "";
+      $fail = "";      
       $nonApplicable = "selected";
       $class = "";
-      $dataValue = "";
       
       if ($inspectionResult)
       {
@@ -658,7 +657,6 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
          $fail = ($inspectionResult->fail()) ? "selected" : "";
          $nonApplicable = ($inspectionResult->nonApplicable()) ? "selected" : "";
          $class = InspectionStatus::getClass($inspectionResult->status);
-         $dataValue = $inspectionResult->data;
       }
       
       $nonApplicableValue = InspectionStatus::NON_APPLICABLE;
@@ -667,8 +665,6 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       $failValue = InspectionStatus::FAIL;
       
       $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
-      
-      $dataUnits = InspectionDataUnits::getAbbreviatedLabel($inspectionProperty->dataUnits);
       
       $html .=
 <<<HEREDOC
@@ -694,6 +690,7 @@ function getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionRe
    {
       $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
       $dataName = $name . "_data";
+      $inputType = "text";
       $dataValue = "";
       
       if ($inspectionResult)
@@ -705,9 +702,15 @@ function getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionRe
       
       $dataUnits = InspectionDataUnits::getAbbreviatedLabel($inspectionProperty->dataUnits);
       
+      if (($inspectionProperty->dataType == InspectionDataType::INTEGER) ||
+          ($inspectionProperty->dataType == InspectionDataType::DECIMAL))
+      {
+         $inputType = "number";
+      }
+      
       $html .=
 <<<HEREDOC
-      <input name="$dataName" type="text" form="input-form" style="width:50px;" value="$dataValue">&nbsp$dataUnits
+      <input name="$dataName" type="$inputType" form="input-form" style="width:50px;" value="$dataValue" $disabled>&nbsp$dataUnits
 HEREDOC;
    }
    
