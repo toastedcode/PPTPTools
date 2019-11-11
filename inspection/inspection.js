@@ -11,16 +11,23 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         console.log(this.responseText);
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "inspections.php";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "inspections.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
+            console.log("JSON syntax error");
+            console.log(this.responseText);
          }
       });
    
@@ -281,4 +288,32 @@ function validateInspection()
    }
    
    return (valid);   
+}
+
+function showData(button)
+{
+   var dataRow = button.closest("tr").nextSibling;
+   
+   // Show the data row.
+   dataRow.style.display = "table-row";
+   
+   // Hide the "+" button.
+   button.style.display = "none";
+   
+   // Show the "-" button.
+   button.nextSibling.style.display = "block";  
+}
+
+function hideData(button)
+{
+   var dataRow = button.closest("tr").nextSibling;
+   
+   // Hide the data row.
+   dataRow.style.display = "none";
+   
+   // Hide the "-" button.
+   button.style.display = "none";
+   
+   // Show the "+" button.
+   button.previousSibling.style.display = "block";
 }

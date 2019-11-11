@@ -87,7 +87,7 @@ abstract class InspectionDataUnits
    
    public static function getAbbreviatedLabel($dataType)
    {
-      $labels = array("---", "\"\"", "mm", "&#176;");
+      $labels = array("", "in", "mm", "deg");
       
       return ($labels[$dataType]);
    }

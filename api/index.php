@@ -690,6 +690,7 @@ $router->add("saveInspection", function($params) {
                   for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
                   {
                      $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
+                     $dataName = $name . "_data";
                      
                      if (isset($params[$name]))
                      {
@@ -697,6 +698,7 @@ $router->add("saveInspection", function($params) {
                         $inspectionResult->propertyId = $inspectionProperty->propertyId;
                         $inspectionResult->sampleIndex = $sampleIndex;
                         $inspectionResult->status = intval($params[$name]);
+                        $inspectionResult->data = $params[$dataName];
                         
                         $inspection->inspectionResults[$inspectionResult->propertyId][$sampleIndex] = $inspectionResult;
                      }

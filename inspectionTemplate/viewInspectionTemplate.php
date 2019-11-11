@@ -12,6 +12,8 @@ require_once '../common/userInfo.php';
 
 const ONLY_ACTIVE = true;
 
+const INVALID_PROPERTY_INDEX = -1;
+
 abstract class InspectionTemplateInputField
 {
    const FIRST = 0;
@@ -164,11 +166,9 @@ function getInspectionTypeOptions()
    return ($options);
 }
 
-function getDataTypeOptions($inspectionProperty)
+function getDataTypeOptions($selectedDataType)
 {
    $options = "<option value\"" . InspectionDataType::UNKNOWN . "\"></option>";
-   
-   $selectedDataType = $inspectionProperty->dataType;
    
    for ($dataType = InspectionDataType::FIRST; $dataType != InspectionDataType::LAST; $dataType++)
    {
@@ -182,15 +182,13 @@ function getDataTypeOptions($inspectionProperty)
    return ($options);
 }
 
-function getDataUnitsOptions($inspectionProperty)
+function getDataUnitsOptions($selectedDataUnits)
 {
    $options = "<option value\"" . InspectionDataUnits::UNKNOWN . "\"></option>";
    
-   $selectedDataType = $inspectionProperty->dataType;
-   
    for ($dataUnits = InspectionDataUnits::FIRST; $dataUnits != InspectionDataUnits::LAST; $dataUnits++)
    {
-      $selected = ($dataUnits == $selectedDataType) ? "selected" : "";
+      $selected = ($dataUnits == $selectedDataUnits) ? "selected" : "";
       
       $label = InspectionDataUnits::getLabel($dataUnits);
       
@@ -309,6 +307,21 @@ function isEditable($field)
    return ($isEditable);
 }
 
+function getInspectionPropertyCount()
+{
+   $count = 0;
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $count = count($inspectionTemplate->inspectionProperties);
+   }
+   
+   return ($count);
+   
+}
+
 function getInspectionProperties()
 {
    $html = "";
@@ -320,26 +333,40 @@ function getInspectionProperties()
       $propertyIndex = 0;
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {        
-         $name = "property" . $propertyIndex;
-         $dataTypeOptions = getDataTypeOptions($inspectionProperty);
-         $dataUnitsOptions = getDataUnitsOptions($inspectionProperty);
-
-         $html .=
-<<<HEREDOC
-         <tr>
-            <input name="{$name}_ordering" type="hidden" form="input-form" value="$inspectionProperty->ordering">
-            <td></td>
-            <td><input name="{$name}_name" type="text" form="input-form" value="$inspectionProperty->name"></td>
-            <td><input name="{$name}_specification" type="text" form="input-form" value="$inspectionProperty->specification"></td>
-            <td><select name="{$name}_dataType" form="input-form">$dataTypeOptions</select></td>
-            <td><select name="{$name}_dataUnits" form="input-form">$dataUnitsOptions</select></td>
-            <td></td>
-         </tr>
-HEREDOC;
+         $html .= getInspectionRow($propertyIndex, $inspectionProperty);
          
          $propertyIndex++;
       }
    }
+   
+   return ($html);
+}
+
+function getInspectionRow($propertyIndex, $inspectionProperty)
+{
+   
+   $name = "property" . $propertyIndex;
+   
+   $propertyName = $inspectionProperty ? $inspectionProperty->name : "";
+   $specification = $inspectionProperty ? $inspectionProperty->specification : "";
+   $dataType = $inspectionProperty ? $inspectionProperty->dataType : InspectionDataType::UNKNOWN;
+   $dataUnits = $inspectionProperty ? $inspectionProperty->dataUnits : InspectionDataUnits::UNKNOWN;
+   
+   $dataTypeOptions = getDataTypeOptions($dataType);
+   $dataUnitsOptions = getDataUnitsOptions($dataUnits);
+   
+   $html =
+<<<HEREDOC
+   <tr>
+      <input name="{$name}_ordering" type="hidden" form="input-form" value="0">
+      <td></td>
+      <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName"></td>
+      <td><input name="{$name}_specification" type="text" form="input-form" value="$specification"></td>
+      <td><select name="{$name}_dataType" form="input-form">$dataTypeOptions</select></td>
+      <td><select name="{$name}_dataUnits" form="input-form">$dataUnitsOptions</select></td>
+      <td></td>
+   </tr>
+HEREDOC;
    
    return ($html);
 }
@@ -456,6 +483,19 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         var propertyCount = <?php echo getInspectionPropertyCount(); ?>;
+      
+         function getNewInspectionRow()
+         {
+            var innerHtml = "<?php echo preg_replace( "/\r|\n/", "", addslashes(getInspectionRow("@", null)));?>";
+
+            innerHtml = innerHtml.replace(/@/g, propertyCount);
+            console.log(innerHtml);
+
+            propertyCount++;
+
+            return (innerHtml);
+         }
       </script>
      
    </div>

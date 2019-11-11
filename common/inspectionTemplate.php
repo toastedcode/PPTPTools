@@ -11,6 +11,7 @@ class InspectionProperty
    public $name;
    public $specification;
    public $dataType;
+   public $dataUnits;
    public $ordering;
    
    public function __construct()
@@ -37,7 +38,7 @@ class InspectionProperty
          $inspectionProperty->name = $row['name'];
          $inspectionProperty->specification = $row['specification'];
          $inspectionProperty->dataType = intval($row['dataType']);
-         //$inspectionProperty->dataUnits = intval($row['dataUnits']);  // TODO
+         $inspectionProperty->dataUnits = intval($row['dataUnits']);
          $inspectionProperty->ordering = intval($row['ordering']);
       }
       

@@ -574,6 +574,7 @@ function getInspections()
 <<<HEREDOC
       <tr>
          <td></td>
+         <td></td>
 HEREDOC;
       
       // Sample heading.
@@ -593,10 +594,12 @@ HEREDOC;
          
          $html .= 
 <<<HEREDOC
+         <td><div class="expand-button" onclick="showData(this)">+</div><div class="condense-button" style="display:none;" onclick="hideData(this)">-</div></td>
          <td>
             <div class="flex-vertical">
                <div class="inspection-property-name">$inspectionProperty->name</div>
                <div>$inspectionProperty->specification</div>
+            </div>
          </td>
 HEREDOC;
         
@@ -612,54 +615,26 @@ HEREDOC;
          }
             
          $html .= "</tr>";
+         
+         $html .= "<tr style=\"display:none;\"><td/><td/>";
+         
+         for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
+         {
+            $inspectionResult = null;
+            if (isset($inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex]))
+            {
+               $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId][$sampleIndex];
+               
+               $html .= getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionResult);
+            }
+         }
+         
+         $html .= "</tr>";
       }
    }
    
    return ($html);
 }
-
-/*
-function getInspectionInput($inspectionProperty, $inspectionResult)
-{
-   $html = "";
-   
-   $id = "property-" . $inspectionProperty->propertyId;
-   $name = "property" . $inspectionProperty->propertyId;
-   $pass = ($inspectionResult->pass()) ? "checked" : "";
-   $fail = ($inspectionResult->fail()) ? "checked" : "";
-   $nonApplicable = ($inspectionResult->nonApplicable()) ? "checked" : "";
-   
-   $passId = $id . "-pass-button";
-   $failId = $id . "-fail-button";
-   $nonApplicableId = $id . "-na-button";
-   
-   $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
-   
-   $html =
-<<<HEREDOC
-      <td>
-         <input id="$passId" type="radio" class="invisible-radio-button pass" form="input-form" name="$name" value="1" $pass $disabled/>
-         <label for="$passId">
-            <div class="select-button">PASS</div>
-         </label>
-      </td>
-      <td>
-         <input id="$failId" type="radio" class="invisible-radio-button fail" form="input-form" name="$name" value="2" $fail $disabled/>
-         <label for="$failId">
-            <div class="select-button">FAIL</div>
-         </label>
-      </td>
-      <td>
-         <input id="$nonApplicableId" type="radio" class="invisible-radio-button nonApplicable" form="input-form" name="$name" value="3" $nonApplicable $disabled/>
-         <label for="$nonApplicableId">
-            <div class="select-button">N/A</div>
-         </label>
-      </td>
-HEREDOC;
-   
-   return ($html);
-}
-*/
 
 function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult)
 {
@@ -668,11 +643,13 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
    if ($inspectionProperty)
    {
       $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
+      $dataName = $name . "_data";
 
       $pass = "";
       $fail = "";
       $nonApplicable = "selected";
       $class = "";
+      $dataValue = "";
       
       if ($inspectionResult)
       {
@@ -681,6 +658,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
          $fail = ($inspectionResult->fail()) ? "selected" : "";
          $nonApplicable = ($inspectionResult->nonApplicable()) ? "selected" : "";
          $class = InspectionStatus::getClass($inspectionResult->status);
+         $dataValue = $inspectionResult->data;
       }
       
       $nonApplicableValue = InspectionStatus::NON_APPLICABLE;
@@ -689,6 +667,8 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       $failValue = InspectionStatus::FAIL;
       
       $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
+      
+      $dataUnits = InspectionDataUnits::getAbbreviatedLabel($inspectionProperty->dataUnits);
       
       $html .=
 <<<HEREDOC
@@ -701,6 +681,36 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
 HEREDOC;
    }
       
+   $html .= "</td>";
+   
+   return ($html);
+}
+
+function getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionResult)
+{
+   $html = "<td>";
+   
+   if ($inspectionProperty)
+   {
+      $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
+      $dataName = $name . "_data";
+      $dataValue = "";
+      
+      if ($inspectionResult)
+      {
+         $dataValue = $inspectionResult->data;
+      }
+            
+      $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
+      
+      $dataUnits = InspectionDataUnits::getAbbreviatedLabel($inspectionProperty->dataUnits);
+      
+      $html .=
+<<<HEREDOC
+      <input name="$dataName" type="text" form="input-form" style="width:50px;" value="$dataValue">&nbsp$dataUnits
+HEREDOC;
+   }
+   
    $html .= "</td>";
    
    return ($html);

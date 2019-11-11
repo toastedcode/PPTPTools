@@ -104,28 +104,8 @@ function incrementPropertyName(name)
 function onAddProperty()
 {
    var table = document.getElementById("property-table");
-   
-   var lastRow = table.rows[table.rows.length - 1];
-   var newRow = lastRow.cloneNode(true);
-   
-   for (i = 0; i < newRow.cells.length; i++)
-   {
-      for (j = 0; j < newRow.cells[i].childNodes.length; j++)
-      {
-         var cell = newRow.cells[i].childNodes[j];
-         
-         var name = cell.name;
-         
-         if (name.includes("property"))
-         {
-            newName = incrementPropertyName(name);
-            cell.name = newName;
-            cell.value = null;
-         }
-      }
-   }
-   
-   table.append(newRow);
+   var newRow = table.insertRow(-1);
+   newRow.innerHTML = getNewInspectionRow();
 }
 
 /*
