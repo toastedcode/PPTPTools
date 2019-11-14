@@ -16,13 +16,14 @@ abstract class InspectionInputField
 {
    const FIRST = 0;
    const INSPECTION_TYPE = InspectionInputField::FIRST;
-   const JOB_NUMBER = 1;
-   const WC_NUMBER = 2;
-   const INSPECTOR = 3;
-   const OPERATOR = 4;
-   const INSPECTION = 5;
-   const COMMENTS = 6;
-   const LAST = 7;
+   const INSPECTION_TEMPLATE = 1;
+   const JOB_NUMBER = 2;
+   const WC_NUMBER = 3;
+   const INSPECTOR = 4;
+   const OPERATOR = 5;
+   const INSPECTION = 6;
+   const COMMENTS = 7;
+   const LAST = 8;
    const COUNT = InspectionInputField::LAST - InspectionInputField::FIRST;
 }
 
@@ -164,6 +165,20 @@ function getInspectionTemplate()
    return ($inspectionTemplate);
 }
 
+function getInspectionTemplateName()
+{
+   $name = "";
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $name = $inspectionTemplate->name;
+   }
+   
+   return ($name);
+}
+
 function getInspectionType()
 {
    $inspectionType = InspectionType::UNKNOWN;
@@ -184,6 +199,21 @@ function getInspectionType()
    return ($inspectionType);
 }
 
+function showOptionalProperty($optionalProperty)
+{
+   $showOptionalProperty = true;
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if (($inspectionTemplate) &&
+       ($inspectionTemplate->inspectionType == InspectionType::GENERIC))
+   {
+      $showOptionalProperty = $inspectionTemplate->isOptionalPropertySet($optionalProperty);
+   }
+   
+   return ($showOptionalProperty);
+}
+
 function getJobNumber()
 {
    $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
@@ -200,6 +230,10 @@ function getJobNumber()
          {
             $jobNumber = $jobInfo->jobNumber;
          }
+         else
+         {
+            $jobNumber = $inspection->jobNumber;
+         }
       }
    }
    else
@@ -214,7 +248,7 @@ function getJobNumber()
 
 function getWcNumber()
 {
-   $wcNumber = 0;
+   $wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
    
    if (getInspectionId() != Inspection::UNKNOWN_INSPECTION_ID)
    {
@@ -228,13 +262,17 @@ function getWcNumber()
          {
             $wcNumber = $jobInfo->wcNumber;
          }
+         else
+         {
+            $wcNumber = $inspection->wcNumber;
+         }
       }
    }
    else
    {
       $params = getParams();
       
-      $wcNumber = ($params->keyExists("wcNumber") ? $params->get("wcNumber") : JobInfo::UNKNOWN_JOB_NUMBER);
+      $wcNumber = ($params->keyExists("wcNumber") ? $params->get("wcNumber") : JobInfo::UNKNOWN_WC_NUMBER);
    }
    
    return ($wcNumber);
@@ -543,10 +581,30 @@ function isEditable($field)
    switch ($field)
    {
       case InspectionInputField::INSPECTION_TYPE:
-      case InspectionInputField::JOB_NUMBER:
-      case InspectionInputField::WC_NUMBER:
+      case InspectionInputField::INSPECTION_TEMPLATE:
       {
          $isEditable = false;
+         break;
+      }
+      
+      case InspectionInputField::JOB_NUMBER:
+      {
+         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
+                         showOptionalProperty(OptionalInspectionProperties::JOB_NUMBER));
+         break;
+      }
+      
+      case InspectionInputField::WC_NUMBER:
+      {
+         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
+                         showOptionalProperty(OptionalInspectionProperties::WC_NUMBER));
+         break;
+      }
+      
+      case InspectionInputField::OPERATOR:
+      {
+         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
+                         showOptionalProperty(OptionalInspectionProperties::OPERATOR));
          break;
       }
       
@@ -761,7 +819,7 @@ if (!Authentication::isAuthenticated())
    
    <div class="flex-horizontal main">
      
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+     <!-- div class="flex-horizontal sidebar hide-on-tablet"></div--> 
    
       <form id="input-form" action="" method="POST">
          <input id="inspection-id-input" type="hidden" name="inspectionId" value="<?php echo getInspectionId(); ?>">
@@ -788,20 +846,11 @@ if (!Authentication::isAuthenticated())
                          <?php echo getInspectionTypeOptions(); ?>
                      </select>
                   </div>
-         
+                  
                   <div class="form-item">
-                     <div class="form-label">Job Number</div>
-                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(InspectionInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
-                         <?php echo getJobNumberOptions(); ?>
-                     </select>
-                     &nbsp;&nbsp;
-                     <div id="customer-print-div"><a href="<?php $ROOT ?>/uploads/<?php echo getCustomerPrint(); ?>" target="_blank"><?php echo getCustomerPrint(); ?></a></div>
-                  </div>
-         
-                  <div class="form-item">
-                     <div class="form-label">WC Number</div>
-                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
-                        <?php echo getWcNumberOptions(); ?>
+                     <div class="form-label">Template</div>
+                     <select class="form-input-medium" name="inspectionType" form="input-form" oninput="" <?php echo !isEditable(InspectionInputField::INSPECTION_TEMPLATE) ? "disabled" : ""; ?>>
+                         <option><?php echo getInspectionTemplateName(); ?></option>
                      </select>
                   </div>
                   
@@ -812,7 +861,23 @@ if (!Authentication::isAuthenticated())
                      </select>
                   </div>
          
-                  <div class="form-item">
+                  <div class="form-item optional-property-container <?php echo showOptionalProperty(OptionalInspectionProperties::JOB_NUMBER) ? "" : "hidden";?>">
+                     <div class="form-label">Job Number</div>
+                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="onJobNumberChange();" <?php echo !isEditable(InspectionInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
+                         <?php echo getJobNumberOptions(); ?>
+                     </select>
+                     &nbsp;&nbsp;
+                     <div id="customer-print-div"><a href="<?php $ROOT ?>/uploads/<?php echo getCustomerPrint(); ?>" target="_blank"><?php echo getCustomerPrint(); ?></a></div>
+                  </div>
+         
+                  <div class="form-item optional-property-container <?php echo showOptionalProperty(OptionalInspectionProperties::WC_NUMBER) ? "" : "hidden";?>">
+                     <div class="form-label">WC Number</div>
+                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                        <?php echo getWcNumberOptions(); ?>
+                     </select>
+                  </div>
+         
+                  <div class="form-item optional-property-container <?php echo showOptionalProperty(OptionalInspectionProperties::OPERATOR) ? "" : "hidden";?>">
                      <div class="form-label">Operator</div>
                      <select id="operator-input" class="form-input-medium" name="operator" form="input-form" <?php echo !isEditable(InspectionInputField::OPERATOR) ? "disabled" : ""; ?>>
                         <?php echo getOperatorOptions(); ?>
@@ -820,14 +885,12 @@ if (!Authentication::isAuthenticated())
                   </div>
                   
                   <div class="form-item">
-                     <div class="form-label hide-on-mobile">Inspection</div>
                      <table class="inspection-table">
                         <?php echo getInspections(); ?>
                      </table>
                   </div>
             
                   <div class="form-item">
-                     <div class="form-label hide-on-mobile">Comments</div>
                      <textarea form="input-form" class="comments-input" type="text" name="comments" placeholder="Enter comments ..." <?php echo !isEditable(InspectionInputField::COMMENTS) ? "disabled" : ""; ?>><?php echo getComments(); ?></textarea>
                   </div>
          
@@ -841,8 +904,12 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         var jobNumberValidator = new SelectValidator("job-number-input");
+         var wcNumberValidator = new SelectValidator("wc-number-input");
          var operatorValidator = new SelectValidator("operator-input");
 
+         jobNumberValidator.init();
+         wcNumberValidator.init();
          operatorValidator.init();
 
          function onInspectionStatusUpdate(element)

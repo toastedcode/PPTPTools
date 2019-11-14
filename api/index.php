@@ -663,82 +663,90 @@ $router->add("saveInspection", function($params) {
    if ($result->success)
    {
       if (isset($params["templateId"]) &&
-          isset($params["jobNumber"]) &&
-          isset($params["wcNumber"]) &&
           isset($params["inspector"]) &&
-          isset($params["operator"]) &&
           isset($params["comments"]))
       {
-         $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
+         $inspection->templateId = intval($params["templateId"]);
+         $inspection->inspector = intval($params["inspector"]);
+         $inspection->comments = $params["comments"];
          
-         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
+         
+         if ($inspectionTemplate)
          {
-            $inspection->templateId = intval($params["templateId"]);
-            $inspection->jobId = $jobId;
-            $inspection->inspector = intval($params["inspector"]);
-            $inspection->operator = intval($params["operator"]);
-            $inspection->comments = $params["comments"];
+            $inspection->initialize($inspectionTemplate);
             
-            $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
-            
-            if ($inspectionTemplate)
+            if (isset($params["jobNumber"]))
             {
-               $inspection->initialize($inspectionTemplate);
+               $inspection->jobNumber = $params->get("jobNumber");
+            }
+            
+            if (isset($params["wcNumber"]))
+            {
+               $inspection->wcNumber = $params->get("wcNumber");
+            }
+
+            if (isset($params["operator"]))
+            {
+               $inspection->operator = $params->get("operator");
+            }
+            
+            $jobId = JobInfo::getJobIdByComponents($params->get("jobNumber"), $params->getInt("wcNumber"));
                
-               foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+            if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+            {
+               $inspection->jobId = $jobId;
+            }
+            
+            foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+            {
+               for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
                {
-                  for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
+                  $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
+                  $dataName = $name . "_data";
+
+                  if ((isset($params[$name])) &&
+                      (isset($params[$dataName])))
                   {
-                     $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
-                     $dataName = $name . "_data";
+                     $inspectionResult = new InspectionResult();
+                     $inspectionResult->propertyId = $inspectionProperty->propertyId;
+                     $inspectionResult->sampleIndex = $sampleIndex;
+                     $inspectionResult->status = intval($params[$name]);
+                     $inspectionResult->data = $params[$dataName];
                      
-                     if (isset($params[$name]))
-                     {
-                        $inspectionResult = new InspectionResult();
-                        $inspectionResult->propertyId = $inspectionProperty->propertyId;
-                        $inspectionResult->sampleIndex = $sampleIndex;
-                        $inspectionResult->status = intval($params[$name]);
-                        $inspectionResult->data = $params[$dataName];
-                        
-                        $inspection->inspectionResults[$inspectionResult->propertyId][$sampleIndex] = $inspectionResult;
-                     }
-                     else
-                     {
-                        $result->success = false;
-                        $result->error = "Missing property [$name]";
-                        break;
-                     }
-                  }
-               }
-                     
-               if ($result->success)
-               {
-                  if ($inspection->inspectionId == Inspection::UNKNOWN_INSPECTION_ID)
-                  {
-                     $dbaseResult = $database->newInspection($inspection);
+                     $inspection->inspectionResults[$inspectionResult->propertyId][$sampleIndex] = $inspectionResult;
                   }
                   else
                   {
-                     $dbaseResult = $database->updateInspection($inspection);
-                  }
-                  
-                  if (!$dbaseResult)
-                  {
                      $result->success = false;
-                     $result->error = "Database query failed.";
+                     $result->error = "Missing property [$name]";
+                     break;
                   }
                }
             }
-            else
+                 
+            if ($result->success)
             {
-               $result->success = false;
-               $result->error = "Failed to lookup inspection template.";
+               if ($inspection->inspectionId == Inspection::UNKNOWN_INSPECTION_ID)
+               {
+                  $dbaseResult = $database->newInspection($inspection);
+               }
+               else
+               {
+                  $dbaseResult = $database->updateInspection($inspection);
+               }
+               
+               if (!$dbaseResult)
+               {
+                  $result->success = false;
+                  $result->error = "Database query failed.";
+               }
             }
          }
          else
          {
             $result->success = false;
-            $result->error = "Failed to lookup job ID.";
+            $result->error = "Failed to lookup inspection template.";
          }
       }
       else
@@ -829,28 +837,58 @@ $router->add("saveInspectionTemplate", function($params) {
          $inspectionTemplate->inspectionType = intval($params["inspectionType"]);
          $inspectionTemplate->sampleSize = intval($params["sampleSize"]);
          
-         // Clear properties list.
-         $inspectionTemplate->inspectionProperties = array();
+         // Optional properties
+         if ($inspectionTemplate->inspectionType == InspectionType::GENERIC)
+         {
+            for ($optionalProperty = OptionalInspectionProperties::FIRST;
+                 $optionalProperty < OptionalInspectionProperties::LAST;
+                 $optionalProperty++)
+            {
+               $name = "optional-property-$optionalProperty-input";
+               
+               if (isset($params[$name]))
+               {
+                  $inspectionTemplate->setOptionalProperty($optionalProperty);
+               }
+               else
+               {
+                  $inspectionTemplate->clearOptionalProperty($optionalProperty);
+               }
+            }
+         }
          
          $propertyIndex = 0;
          $name = "property" . $propertyIndex;
          
          while (isset($params[$name . "_name"]))
          {
-            if (isset($params[$name . "_specification"]) &&
+            if (isset($params[$name . "_propertyId"]) &&
+                isset($params[$name . "_ordering"]) &&
+                isset($params[$name . "_specification"]) &&
                 isset($params[$name . "_dataType"]) &&
-                isset($params[$name . "_dataUnits"]))
+                isset($params[$name . "_dataUnits"]) &&
+                isset($params[$name . "_ordering"]))
             {
                $inspectionProperty = new InspectionProperty();
-               
+
+               $inspectionProperty->propertyId = intval($params[$name . "_propertyId"]);
                $inspectionProperty->templateId = $inspectionTemplate->templateId;
                $inspectionProperty->name = $params[$name . "_name"];
                $inspectionProperty->specification = $params[$name . "_specification"];
                $inspectionProperty->dataType = intval($params[$name . "_dataType"]);
                $inspectionProperty->dataUnits = intval($params[$name . "_dataUnits"]);
-               $inspectionProperty->ordering = $propertyIndex;
+               $inspectionProperty->ordering = intval($params[$name . "_ordering"]);
                
-               $inspectionTemplate->inspectionProperties[] = $inspectionProperty;
+               if ($inspectionProperty->propertyId == InspectionProperty::UNKNOWN_PROPERTY_ID)
+               {
+                  // New property.
+                  $inspectionTemplate->inspectionProperties[] = $inspectionProperty;
+               }
+               else
+               {
+                  // Updated property.
+                  $inspectionTemplate->inspectionProperties[$inspectionProperty->propertyId] = $inspectionProperty;
+               }
             }
             else
             {

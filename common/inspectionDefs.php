@@ -48,6 +48,13 @@ abstract class InspectionType
       
       return ($labels[$inspectionType]);
    }
+   
+   public static function getDefaultOptionalProperties($inspectionType)
+   {
+      $optionalProperties = array(0b0000, 0b1110, 0b1110, 0b1110, 0b1110, 0b0000);
+         
+      return ($optionalProperties[$inspectionType]);
+   }
 }
 
 abstract class InspectionDataType
@@ -90,6 +97,24 @@ abstract class InspectionDataUnits
       $labels = array("", "in", "mm", "deg");
       
       return ($labels[$dataType]);
+   }
+}
+
+abstract class OptionalInspectionProperties
+{
+   const UNKNOWN = 0;
+   const FIRST = 1;
+   const JOB_NUMBER = OptionalInspectionProperties::FIRST;
+   const WC_NUMBER = 2;
+   const OPERATOR = 3;
+   const LAST = 4;
+   const COUNT = OptionalInspectionProperties::LAST - OptionalInspectionProperties::FIRST;
+   
+   public static function getLabel($optionalProperty)
+   {
+      $labels = array("", "Job Number", "WC Number", "Operator");
+      
+      return ($labels[$optionalProperty]);
    }
 }
 ?>

@@ -72,24 +72,32 @@ class Inspection
    const UNKNOWN_INSPECTION_ID = 0;
    
    public $inspectionId;
-   public $templateId;
    public $dateTime;
+   public $templateId;
    public $inspector;
-   public $operator;
-   public $jobId;
-   public $inspectionResults;
    public $comments;
+   
+   // Properties for job-based inspections (LINE, QCP, IN_PROCESS).
+   public $jobId;
+   public $operator;
+   
+   // Optional properties for GENERIC inspections.
+   public $jobNumber;
+   public $wcNumber;
+
+   public $inspectionResults;
    
    public function __construct()
    {
       $this->inspectionId = Inspection::UNKNOWN_INSPECTION_ID;
-      
       $this->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
       $this->inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
-      $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
-      $this->jobId = JobInfo::UNKNOWN_JOB_ID;
-      $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
       $this->comments = "";
+      $this->jobId = JobInfo::UNKNOWN_JOB_ID;
+      $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+      $this->wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
+      $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
    }
    
    public function initialize($inspectionTemplate)
@@ -128,9 +136,11 @@ class Inspection
             $inspection->templateId = intval($row['templateId']);
             $inspection->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $inspection->inspector = intval($row['inspector']);
-            $inspection->operator = intval($row['operator']);
-            $inspection->jobId = $row['jobId'];
             $inspection->comments = $row['comments'];
+            $inspection->jobId = $row['jobId'];
+            $inspection->operator = intval($row['operator']);
+            $inspection->jobNumber = $row['jobNumber'];
+            $inspection->wcNumber = intval($row['wcNumber']);
             
             $result = $database->getInspectionResults($inspectionId);
             
@@ -239,8 +249,10 @@ if (isset($_GET["inspectionId"]))
       echo "templateId: " .   $inspection->templateId .   "<br/>";
       echo "dateTime: " .     $inspection->dateTime .     "<br/>";
       echo "inspector: " .    $inspection->inspector .    "<br/>";
-      echo "operator: " .     $inspection->operator .     "<br/>";
       echo "jobId: " .        $inspection->jobId .        "<br/>";
+      echo "operator: " .     $inspection->operator .     "<br/>";
+      echo "jobNumber: " .    $inspection->jobNumber .    "<br/>";
+      echo "wcNumber: " .     $inspection->wcNumber .     "<br/>";
       
       echo "inspections: " .  count($inspection->inspectionResults) . "<br/>";
  

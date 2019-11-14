@@ -74,24 +74,37 @@ function onDeleteInspection(inspectionId)
    }
 }
 
-function set(elementId, value)
+function isJobBasedInspection(inspectionType)
 {
-   document.getElementById(elementId).value = value;
+   return((inspectionType == OASIS) ||
+          (inspectionType == LINE) ||
+          (inspectionType == QCP) || 
+          (inspectionType == IN_PROCESS));
 }
 
-function clear(elementId)
+function onInspectionTypeChange()
 {
-   document.getElementById(elementId).value = null;
-}
+   var inspectionType = document.getElementById("inspection-type-input").value;
+   
+   clear("job-number-input");
+   clear("wc-number-input");
 
-function enable(elementId)
-{
-   document.getElementById(elementId).disabled = false;
-}
-
-function disable(elementId)
-{
-   document.getElementById(elementId).disabled = true;
+   if (isJobBasedInspection(inspectionType))
+   {
+      show("job-number-input-container", "flex");
+      show("wc-number-input-container", "flex");
+      
+      enable("job-number-input");
+      enable("wc-number-input");
+   }
+   else
+   {
+      hide("job-number-input-container");
+      hide("wc-number-input-container");
+      
+      disable("job-number-input");
+      disable("wc-number-input");
+   }
 }
 
 function onJobNumberChange()
@@ -163,11 +176,6 @@ function updateTemplateId()
                
                if (json.success == true)
                {
-                  //if (json.templates.length == 1)
-                  //{
-                  //   console.log("Selecting template id: " + json.templates[0].templateId);
-                  //}
-                  
                   updateTemplateIdOptions(json.templates);
                }
                else
@@ -245,15 +253,17 @@ function validateInspectionSelection()
 {
    valid = false;
    
+   var inspectionType = document.getElementById("inspection-type-input").value;
+   
    if (!(document.getElementById("inspection-type-input").validator.validate()))
    {
       alert("Start by selecting an inspection type.");    
    }
-   else if (!(document.getElementById("job-number-input").validator.validate()))
+   else if (isJobBasedInspection(inspectionType) && !(document.getElementById("job-number-input").validator.validate()))
    {
       alert("Please select an active job.");    
    }
-   else if (!(document.getElementById("wc-number-input").validator.validate()))
+   else if (isJobBasedInspection(inspectionType) && !(document.getElementById("wc-number-input").validator.validate()))
    {
       alert("Please select a work center.");    
    }
@@ -278,16 +288,24 @@ function validateInspection()
 {
    valid = false;
    
-   if (!(document.getElementById("operator-input").validator.validate()))
+   if (isEnabled("job-number-input") && !validate("job-number-input"))
    {
-      alert("Select an operator.");    
+      alert("Please select an active job.");   
+   }
+   else if (isEnabled("wc-number-input") && !validate("wc-number-input"))
+   {
+      alert("Please select a work center.");   
+   }
+   else if (isEnabled("operator-input") && !validate("operator-input"))
+   {
+      alert("Please select an operator.");    
    }
    else
    {
       valid = true;
    }
    
-   return (valid);   
+   return (valid);  
 }
 
 function showData(button)

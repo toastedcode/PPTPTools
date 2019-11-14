@@ -82,6 +82,20 @@ function onDeleteInspectionTemplate(templateId)
    }
 }
 
+function onInspectionTypeChange()
+{
+   var inspectionType = document.getElementById("inspection-type-input").value;
+
+   if (inspectionType == GENERIC)
+   {
+      show("optional-properties-input-container", "flex");
+   }
+   else
+   {
+      hide("optional-properties-input-container", "flex");         
+   }
+}
+
 function incrementPropertyName(name)
 {
    var PROPERTY = "property";

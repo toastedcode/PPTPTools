@@ -173,12 +173,12 @@ if (!Authentication::isAuthenticated())
                
                   <div class="form-item">
                      <div class="form-label">Inspection Type</div>
-                     <select id="inspection-type-input" class="form-input-medium" name="inspectionType" form="input-form" oninput="updateTemplateId();" <?php echo !isEditable(InspectionInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
+                     <select id="inspection-type-input" class="form-input-medium" name="inspectionType" form="input-form" oninput="onInspectionTypeChange(); updateTemplateId();" <?php echo !isEditable(InspectionInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
                          <?php echo getInspectionTypeOptions(); ?>
                      </select>
                   </div>
          
-                  <div class="form-item">
+                  <div id="job-number-input-container" class="form-item">
                      <div class="form-label">Job Number</div>
                      <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange(); updateTemplateId();" <?php echo !isEditable(InspectionInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
                          <?php echo getJobNumberOptions(); ?>
@@ -187,7 +187,7 @@ if (!Authentication::isAuthenticated())
                      <div id="customer-print-div"></div>
                   </div>
          
-                  <div class="form-item">
+                  <div id="wc-number-input-container" class="form-item">
                      <div class="form-label">WC Number</div>
                      <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="updateTemplateId();" <?php echo !isEditable(InspectionInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                         <?php echo getWcNumberOptions(); ?>
@@ -210,6 +210,12 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         const OASIS = <?php echo InspectionType::OASIS; ?>;
+         const LINE = <?php echo InspectionType::LINE; ?>;
+         const QCP = <?php echo InspectionType::QCP; ?>;
+         const IN_PROCESS = <?php echo InspectionType::IN_PROCESS; ?>;
+         const GENERIC = <?php echo InspectionType::GENERIC; ?>;
+      
          var inspectionTypeValidator = new SelectValidator("inspection-type-input");
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");

@@ -50,9 +50,6 @@ class InspectionTemplate
 {
    const UNKNOWN_TEMPLATE_ID = 0;
    
-   const OASIS_INSPECTION_TEMPLATE_ID = 1;
-   const LINE_INSPECTION_TEMPLATE_ID = 2;
-   
    const DEFAULT_SAMPLE_SIZE = 1;
    
    public $templateId;
@@ -60,6 +57,7 @@ class InspectionTemplate
    public $name;
    public $description;
    public $sampleSize;
+   public $optionalProperties;
    public $inspectionProperties;
    
    public function __construct()
@@ -69,6 +67,7 @@ class InspectionTemplate
       $this->name = "";
       $this->description = "";
       $this->sampleSize = InspectionTemplate::DEFAULT_SAMPLE_SIZE;
+      $this->optionalProperties = 0;
       $this->inspectionProperties = array();
    }
    
@@ -91,6 +90,7 @@ class InspectionTemplate
             $inspectionTemplate->name = $row['name'];
             $inspectionTemplate->description = $row['description'];
             $inspectionTemplate->sampleSize = intval($row['sampleSize']);
+            $inspectionTemplate->optionalProperties = intval($row['optionalProperties']);
             
             $result = $database->getInspectionProperties($templateId);
             
@@ -102,6 +102,29 @@ class InspectionTemplate
       }
       
       return ($inspectionTemplate);
+   }
+   
+   public function setOptionalProperty($optionalProperty)
+   {
+      if (($optionalProperty >= OptionalInspectionProperties::FIRST) &&
+          ($optionalProperty < OptionalInspectionProperties::LAST))
+      {
+         $this->optionalProperties |= (1 << $optionalProperty);
+      }
+   }
+   
+   public function clearOptionalProperty($optionalProperty)
+   {
+      if (($optionalProperty >= OptionalInspectionProperties::FIRST) &&
+          ($optionalProperty < OptionalInspectionProperties::LAST))
+      {
+         $this->optionalProperties &= (~(1 << $optionalProperty));
+      }
+   }
+   
+   public function isOptionalPropertySet($optionalProperty)
+   {
+      return (($this->optionalProperties & (1 << $optionalProperty)) > 0);
    }
    
    public static function getInspectionTemplates($inspectionType)
@@ -133,7 +156,7 @@ class InspectionTemplate
          case InspectionType::LINE:
          case InspectionType::GENERIC:
          {
-            $templateIds[] = getInspectionTemplates($inspectionType);
+            $templateIds = InspectionTemplate::getInspectionTemplates($inspectionType);
             break;
          }
             
@@ -173,12 +196,12 @@ if (isset($_GET["templateId"]))
    $inspectionTemplate = InspectionTemplate::load($templateId);
    if ($inspectionTemplate)
    {
-      echo "templateId: " .     $inspectionTemplate->templateId .                               "<br/>";
-      echo "inspectionType: " . InspectionType::getLabel($inspectionTemplate->inspectionType) . "<br/>";
-      echo "name: " .           $inspectionTemplate->name .                                     "<br/>";
-      echo "description: " .    $inspectionTemplate->description .                              "<br/>";
-      echo "sampleSize: " .     $inspectionTemplate->sampleSize .                               "<br/>";
-      
+      echo "templateId: " .         $inspectionTemplate->templateId .                               "<br/>";
+      echo "inspectionType: " .     InspectionType::getLabel($inspectionTemplate->inspectionType) . "<br/>";
+      echo "name: " .               $inspectionTemplate->name .                                     "<br/>";
+      echo "description: " .        $inspectionTemplate->description .                              "<br/>";
+      echo "sampleSize: " .         $inspectionTemplate->sampleSize .                               "<br/>";
+      echo "optionalProperties: " . $inspectionTemplate->optionalProperties .                       "<br/>";
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {

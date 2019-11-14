@@ -307,6 +307,32 @@ function isEditable($field)
    return ($isEditable);
 }
 
+function getOptionalProperties()
+{
+   $html = "";
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      for ($optionalProperty = OptionalInspectionProperties::FIRST; 
+           $optionalProperty < OptionalInspectionProperties::LAST; 
+           $optionalProperty++)
+      {
+         $name = "optional-property-$optionalProperty-input";
+         $label = OptionalInspectionProperties::getLabel($optionalProperty);
+         $checked = $inspectionTemplate->isOptionalPropertySet($optionalProperty) ? "checked" : "";
+         
+         $html .=
+<<<HEREDOC
+         <input type="checkbox" name="$name" form="input-form" value="1" $checked>$label&nbsp;&nbsp;
+HEREDOC;
+      }
+   }
+   
+   return ($html);
+}
+
 function getInspectionPropertyCount()
 {
    $count = 0;
@@ -347,6 +373,7 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    
    $name = "property" . $propertyIndex;
    
+   $propertyId = $inspectionProperty ? $inspectionProperty->propertyId : "0";
    $propertyName = $inspectionProperty ? $inspectionProperty->name : "";
    $specification = $inspectionProperty ? $inspectionProperty->specification : "";
    $dataType = $inspectionProperty ? $inspectionProperty->dataType : InspectionDataType::UNKNOWN;
@@ -358,6 +385,7 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    $html =
 <<<HEREDOC
    <tr>
+      <input name = "{$name}_propertyId" type="hidden" form="input-form" value="$propertyId">
       <input name="{$name}_ordering" type="hidden" form="input-form" value="0">
       <td></td>
       <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName"></td>
@@ -434,7 +462,7 @@ if (!Authentication::isAuthenticated())
                   
                      <div class="form-item">
                         <div class="form-label">Inspection Type</div>
-                        <select name="inspectionType" class="form-input-medium" form="input-form" <?php echo !isEditable(InspectionTemplateInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
+                        <select id="inspection-type-input" name="inspectionType" class="form-input-medium" form="input-form" oninput="onInspectionTypeChange();" <?php echo !isEditable(InspectionTemplateInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
                             <?php echo getInspectionTypeOptions(); ?>
                         </select>
                      </div>
@@ -452,6 +480,11 @@ if (!Authentication::isAuthenticated())
                      <div class="form-item">
                         <div class="form-label">Sample Size</div>
                         <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>">
+                     </div>
+                     
+                     <div id="optional-properties-input-container" class="form-item">
+                        <div class="form-label">Optional Properties</div>
+                        <?php echo getOptionalProperties() ?>                     
                      </div>
                      
                      <div class="form-item">
@@ -483,6 +516,12 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         const OASIS = <?php echo InspectionType::OASIS; ?>;
+         const LINE = <?php echo InspectionType::LINE; ?>;
+         const QCP = <?php echo InspectionType::QCP; ?>;
+         const IN_PROCESS = <?php echo InspectionType::IN_PROCESS; ?>;
+         const GENERIC = <?php echo InspectionType::GENERIC; ?>;
+      
          var propertyCount = <?php echo getInspectionPropertyCount(); ?>;
       
          function getNewInspectionRow()
@@ -496,6 +535,9 @@ if (!Authentication::isAuthenticated())
 
             return (innerHtml);
          }
+
+         // Initialize visibility of optional properties.
+         onInspectionTypeChange();
       </script>
      
    </div>

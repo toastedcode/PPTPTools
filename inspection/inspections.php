@@ -157,6 +157,7 @@ function getTable($filter)
          <table class="part-weight-log-table">
             <tr>
                <th>Inspection<br/>Type</th>               
+               <th>Name</th>
                <th>Date</th>
                <th>Time</th>
                <th>Inspector</th>
@@ -176,9 +177,7 @@ HEREDOC;
          
          $inspectionTemplate = InspectionTemplate::load($row["templateId"]);
          
-         $jobInfo = JobInfo::load($row["jobId"]);
-         
-         if ($inspection && $inspectionTemplate && $jobInfo)
+         if ($inspection && $inspectionTemplate)
          {
             $inspectionTypeLabel = InspectionType::getLabel($inspectionTemplate->inspectionType);
             
@@ -196,7 +195,10 @@ HEREDOC;
                $inspectorName = $user->getFullName();
             }
             
-            $operatorName = "unknown";
+            $jobNumber = $inspection->jobNumber;
+            $wcNumber = ($inspection->wcNumber != JobInfo::UNKNOWN_WC_NUMBER) ? $inspection->wcNumber : "";
+            
+            $operatorName = "";
             $user = UserInfo::load($inspection->operator);
             if ($user)
             {
@@ -210,14 +212,6 @@ HEREDOC;
 <<<HEREDOC
             <div class="inspection-status $class">$label</div>
 HEREDOC;
-            
-            //$passFail = $inspection->fail() ? "<div class=\"inspection-status fail\">FAIL</div>" : "bummer";
-               
-            /*
-            $passFail = $inspection->fail() ? "<div class=\"inspection-status fail\">FAIL</div>" : 
-                           $inspection->warning() ? "<div class=\"inspection-status warning\">WARNING</div>" :
-                              "<div class=\"inspection-status pass\">PASS</div>";
-                              */
 
             $viewEditIcon = "";
             $deleteIcon = "";
@@ -241,12 +235,13 @@ HEREDOC;
 <<<HEREDOC
             <tr>
                <td>$inspectionTypeLabel</td>
+               <td>$inspectionTemplate->name</td>
                <td>$inspectionDate $new</td>                        
                <td class="hide-on-tablet">$inspectionTime</td>
                <td class="hide-on-tablet">$inspectorName</td>
                <td class="hide-on-tablet">$operatorName</td>
-               <td>$jobInfo->jobNumber</td>
-               <td>$jobInfo->wcNumber</td>
+               <td>$jobNumber</td>
+               <td>$wcNumber</td>
                <td>$passCount/$count</td>
                <td>$passFail</td>
                <td>$viewEditIcon</td>

@@ -27,6 +27,8 @@ class JobInfo
    
    const UNKNOWN_JOB_NUMBER = "";
    
+   const UNKNOWN_WC_NUMBER = 0;
+   
    const SECONDS_PER_MINUTE = 60;
    
    const SECONDS_PER_HOUR = 3600;
@@ -42,7 +44,7 @@ class JobInfo
    public $netPercentage;
    public $status = JobStatus::PENDING;
    public $inProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
-   public $qcpProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $qcpTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    public $customerPrint;
    
    public function isActive()
