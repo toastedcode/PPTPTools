@@ -199,6 +199,26 @@ function getInspectionType()
    return ($inspectionType);
 }
 
+function hasData($inspection, $inspectionPropertyId)
+{
+   $hasData = false;
+   
+   if (isset($inspection->inspectionResults[$inspectionPropertyId]))
+   {
+      foreach ($inspection->inspectionResults[$inspectionPropertyId] as $inspectionResult)
+      {
+         if (!(($inspectionResult->data == null) ||
+               ($inspectionResult->data === "")))
+         {
+            $hasData = true;
+            break;
+         }
+      }
+   }
+   
+   return ($hasData);
+}
+
 function showOptionalProperty($optionalProperty)
 {
    $showOptionalProperty = true;
@@ -648,11 +668,16 @@ HEREDOC;
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {
+         $hasData = hasData($inspection, $inspectionProperty->propertyId);
+         $dataRowDisplayStyle = $hasData ? "" : "none";
+         $expandButtonDisplayStyle = $hasData ? "none" : "";
+         $condenseButtonDisplayStyle = $hasData ? "" : "none";
+         
          $html .= "<tr>";
          
          $html .= 
 <<<HEREDOC
-         <td><div class="expand-button" onclick="showData(this)">+</div><div class="condense-button" style="display:none;" onclick="hideData(this)">-</div></td>
+         <td><div class="expand-button" style="display:$expandButtonDisplayStyle;" onclick="showData(this)">+</div><div class="condense-button" style="display:$condenseButtonDisplayStyle;" onclick="hideData(this)">-</div></td>
          <td>
             <div class="flex-vertical">
                <div class="inspection-property-name">$inspectionProperty->name</div>
@@ -674,7 +699,7 @@ HEREDOC;
             
          $html .= "</tr>";
          
-         $html .= "<tr style=\"display:none;\"><td/><td/>";
+         $html .= "<tr style=\"display:$dataRowDisplayStyle;\"><td/><td/>";
          
          for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
          {
