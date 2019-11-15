@@ -143,9 +143,9 @@ HEREDOC;
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getInspections($this->filter->get('operator')->selectedEmployeeNumber, 
+         $result = $database->getInspections(InspectionType::UNKNOWN,  // TODO: Use filter value.
+                                             $this->filter->get('operator')->selectedEmployeeNumber, 
                                              $this->filter->get('jobNumber')->selectedJobNumber,
-                                             InspectionType::UNKNOWN,  // TODO: Use filter value.
                                              $startDateString, 
                                              $endDateString);
         

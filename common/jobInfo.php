@@ -1,5 +1,6 @@
 <?php
 require_once 'database.php';
+require_once 'inspectionTemplate.php';
 
 abstract class JobStatus
 {
@@ -26,6 +27,8 @@ class JobInfo
    
    const UNKNOWN_JOB_NUMBER = "";
    
+   const UNKNOWN_WC_NUMBER = 0;
+   
    const SECONDS_PER_MINUTE = 60;
    
    const SECONDS_PER_HOUR = 3600;
@@ -40,6 +43,8 @@ class JobInfo
    public $cycleTime;
    public $netPercentage;
    public $status = JobStatus::PENDING;
+   public $inProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $qcpTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    public $customerPrint;
    
    public function isActive()
@@ -73,6 +78,8 @@ class JobInfo
             $jobInfo->cycleTime =     doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
             $jobInfo->status =        $row['status'];
+            $jobInfo->inProcessTemplateId = intval($row['inProcessTemplateId']);
+            $jobInfo->qcpTemplateId = intval($row['qcpTemplateId']);
             $jobInfo->customerPrint = $row['customerPrint'];
          }
       }
@@ -186,7 +193,9 @@ if (isset($_GET["$jobId"]))
       echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
       echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
       echo "netPercentage: " . $jobInfo->netPercentage .   "<br/>";
-      echo "customerPrint: " . $jobInfo->customerPrint .   "<br/>";
+      echo "inProcessTemplateId: " . $jobInfo->inProcessTemplateId . "<br/>";
+      echo "qcpTemplateId: " . $jobInfo->qcpTemplateId .    "<br/>";
+      echo "customerPrint: " . $jobInfo->customerPrint .    "<br/>";
       
       echo "status: " . JobStatus::getName($jobInfo->status) . "<br/>";
    }

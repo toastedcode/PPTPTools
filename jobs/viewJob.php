@@ -176,6 +176,32 @@ HEREDOC;
          $statusOptions .= "<option $selected value=\"" . $status . "\">" . $statusName . "</option>";
       }
       
+      $qcpOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::QCP);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->qcpTemplateId == $inspectionTemplate->templateId) ? "selected" : "";
+            $qcpOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
+      $inProcessOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::IN_PROCESS);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->inProcessTemplateId == $inspectionTemplate->templateId)? "selected" : "";
+            $inProcessOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
       $prefix = JobInfo::getJobPrefix($jobInfo->jobNumber);
       $prefix = ($prefix != "") ? $prefix : "M";
       $suffix = JobInfo::getJobSuffix($jobInfo->jobNumber);
@@ -251,6 +277,16 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label-long">Job status</div>
             <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">In Process Template</div>
+            <div><select class="medium-text-input" name="inProcessTemplateId" form="input-form" $disabled>$inProcessOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">QCP Template</div>
+            <div><select class="medium-text-input" name="qcpTemplateId" form="input-form" $disabled>$qcpOptions</select></div>
          </div>
 
          <div class="form-item">
@@ -356,6 +392,33 @@ HEREDOC;
       }
       
       return ($workcenters);
+   }
+   
+   function getInspectionTemplateIds($inspectionType)
+   {
+      $templateIds = array();
+      
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->getInspectionTemplates($inspectionType);
+      }
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getWorkCenters();
+         
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $workcenters[] = $row["wcNumber"];
+            }
+         }
+      }
+      
+      return ($templateIds);
    }
 }
 ?>

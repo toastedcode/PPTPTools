@@ -222,6 +222,16 @@ function updateJobInfo()
          $_SESSION["jobInfo"]->customerPrint = basename($_FILES["customerPrint"]["name"]);
       }
    }
+   
+   if (isset($_POST['qcpTemplateId']))
+   {
+      $_SESSION["jobInfo"]->qcpTemplateId = $_POST['qcpTemplateId'];
+   }
+   
+   if (isset($_POST['inProcessTemplateId']))
+   {
+      $_SESSION["jobInfo"]->inProcessTemplateId = $_POST['inProcessTemplateId'];
+   }
 }
 
 function deleteJob($jobId)

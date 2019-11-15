@@ -833,9 +833,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO job " .
-      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, cycleTime, netPercentage, status, customerPrint) " .
+      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, cycleTime, netPercentage, status, customerPrint, inProcessTemplateId, qcpTemplateId) " .
       "VALUES " .
-      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint');";
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint', '$jobInfo->inProcessTemplateId', '$jobInfo->qcpTemplateId');";
 
       $result = $this->query($query);
       
@@ -848,7 +848,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "UPDATE job " .
-         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint' " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
          "WHERE jobId = '$jobInfo->jobId';";
 
       $result = $this->query($query);
@@ -1019,10 +1019,146 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                            Inspection Templates
+   // **************************************************************************
+   
+   public function getInspectionTemplates($inspectionType)
+   {
+      $typeClause = "";
+      if ($inspectionType != InspectionType::UNKNOWN)
+      {
+         $typeClause = "WHERE inspectionType = $inspectionType ";
+      }
+      
+      $query = "SELECT * FROM inspectiontemplate $typeClause ORDER BY templateId ASC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getInspectionTemplate($templateId)
+   {
+      $query = "SELECT * FROM inspectiontemplate WHERE templateId = $templateId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getInspectionProperties($templateId)
+   {
+      $query = "SELECT * FROM inspectionproperty WHERE templateId = $templateId ORDER BY ordering ASC;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newInspectionTemplate($inspectionTemplate)
+   {
+      $query =
+      "INSERT INTO inspectiontemplate " .
+      "(name, description, inspectionType, sampleSize, optionalProperties) " .
+      "VALUES " .
+      "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize', '$inspectionTemplate->optionalProperties');";
+
+      $result = $this->query($query);
+      
+      if ($result)
+      {
+         // Get the last auto-increment id, which should be the inspection id.
+         $templateId = mysqli_insert_id($this->getConnection());
+         
+         foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+         {
+            $query =
+            "INSERT INTO inspectionproperty " .
+            "(templateId, name, specification, dataType, dataUnits, ordering) " .
+            "VALUES " .
+            "('$templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
+
+            $result &= $this->query($query);
+            
+            if (!$result)
+            {
+               break;
+            }
+         }
+      }
+      
+      return ($result);
+   }
+   
+   public function updateInspectionTemplate($inspectionTemplate)
+   {
+      $query =
+      "UPDATE inspectiontemplate " .
+      "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize', optionalProperties = '$inspectionTemplate->optionalProperties' " .
+      "WHERE templateId = '$inspectionTemplate->templateId';";
+
+      $result = $this->query($query);
+      
+      if ($result)
+      {
+         foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+         {
+            if ($inspectionProperty->propertyId == InspectionProperty::UNKNOWN_PROPERTY_ID)
+            {
+               // New property.
+               $query =
+               "INSERT INTO inspectionproperty " .
+               "(templateId, name, specification, dataType, dataUnits, ordering) " .
+               "VALUES " .
+               "('$inspectionTemplate->templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
+               
+               $result &= $this->query($query);
+            }
+            else
+            {
+               // Updated property.
+               $query =
+               "UPDATE inspectionproperty " .
+               "SET name = '$inspectionProperty->name', specification = '$inspectionProperty->specification', dataType =  '$inspectionProperty->dataType', dataUnits = '$inspectionProperty->dataUnits', ordering = '$inspectionProperty->ordering' " .
+               "WHERE propertyId = '$inspectionProperty->propertyId';";
+               
+               $result &= $this->query($query);
+            }
+            
+            if (!$result)
+            {
+               break;
+            }
+         }
+      }
+      
+      return ($result);
+   }
+   
+   public function deleteInspectionTemplate($templateId)
+   {
+      $query = "DELETE FROM inspectiontemplate WHERE templateId = $templateId;";
+      $result = $this->query($query);
+      
+      $query = "DELETE FROM inspectionproperty WHERE templateId = $templateId;";
+      $result &= $this->query($query);
+      
+      $query = "SELECT inspectionId FROM inspection WHERE templateId = $templateId;";
+      $searchResult = $this->query($query);
+
+      while ($searchResult && ($row = $searchResult->fetch_assoc()))
+      {
+         $this->deleteInspection(intval($row['inspectionId']));
+      }
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
    //                                Inspections
    // **************************************************************************
    
-   public function getInspections($jobNumber, $operator, $inspectionType, $startDate, $endDate)
+   public function getInspections($inspectionType, $jobNumber, $operator, $startDate, $endDate)
    {
       $operatorClause = "";
       if ($operator != 0)
@@ -1033,17 +1169,19 @@ class PPTPDatabase extends MySqlDatabase
       $jobNumberClause = "";
       if ($jobNumber != "All")
       {
-         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
+         $jobNumberClause = "job.jobNumber = '$jobNumber' AND ";  // TODO: Removed inner join on job.  What do to?
       }
       
       $typeClause = "";
       if ($inspectionType != InspectionType::UNKNOWN)
       {
-         $jobNumberClause = "inspectionType = $inspectionType AND ";
+         $typeClause = "inspectiontemplate.inspectionType = $inspectionType AND ";
       }
       
-      $query = "SELECT * FROM inspection WHERE $operatorClause $jobNumberClause $typeClause dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, inspectionId DESC;";
-
+      $query = "SELECT * FROM inspection " .
+               "INNER JOIN inspectiontemplate ON inspection.templateId = inspectiontemplate.templateId " .
+               "WHERE $operatorClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
+      
       $result = $this->query($query);
       
       return ($result);
@@ -1062,38 +1200,103 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query = "SELECT * FROM inspectionresult " .
                "INNER JOIN inspectionproperty ON inspectionresult.propertyId = inspectionproperty.propertyId " .
-               "WHERE inspectionresult.inspectionId = $inspectionId ORDER BY inspectionproperty.ordering ASC;";
-      
+               "WHERE inspectionresult.inspectionId = $inspectionId ORDER BY inspectionproperty.ordering ASC, inspectionresult.sampleIndex ASC;";
+
       $result = $this->query($query);
 
       return ($result);
    }
    
-   public function newInspection($inspectionInfo)
+   public function newInspection($inspection)
    {
-      $dateTime = Time::toMySqlDate($inspectionInfo->dateTime);
+      $dateTime = Time::toMySqlDate($inspection->dateTime);
       
       $query =
       "INSERT INTO inspection " .
-      "(templateId, dateTime, inspector, operator, jobId, comments) " .
+      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator) " .
       "VALUES " .
-      "('$templateId', '$dateTime', '$inspectionInfo->inspector', '$inspectionInfo->operator', '$inspectionInfo->jobId', '$inspectionInfo->comments');";
-      
+      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator');";
+
       $result = $this->query($query);
+      
+      if ($result)
+      {
+         // Get the last auto-increment id, which should be the inspection id.
+         $inspectionId = mysqli_insert_id($this->getConnection());
+         
+         foreach ($inspection->inspectionResults as $inspectionRow)
+         {
+            foreach ($inspectionRow as $inspectionResult)
+            {
+               $query =
+               "INSERT INTO inspectionresult " .
+               "(inspectionId, propertyId, sampleIndex, status, data) " .
+               "VALUES " .
+               "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$inspectionResult->status', '$inspectionResult->data');";
+
+               $result &= $this->query($query);
+               
+               if (!$result)
+               {
+                  break;
+               }
+            }
+         }
+      }
       
       return ($result);
    }
    
-   public function updateInspection($inspectionInfo)
+   public function updateInspection($inspection)
    {
-      $dateTime = Time::toMySqlDate($inspectionInfo->dateTime);
+      // $dateTime = Time::toMySqlDate($inspection->dateTime);
       
       $query =
       "UPDATE inspection " .
-      "SET templateId = '$inspectionInfo->templateId', dateTime = '$dateTime',  inspector = '$inspectionInfo->inspector', operator = '$inspectionInfo->operator', jobId = '$inspectionInfo->jobId', comments = '$inspectionInfo->comments' " .
-      "WHERE inspectionId = '$inspectionInfo->inspectionId';";
+      "SET inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator'  " .
+      "WHERE inspectionId = '$inspection->inspectionId';";
       
       $result = $this->query($query);
+      
+      if ($result)
+      {
+         foreach ($inspection->inspectionResults as $inspectionRow)
+         {
+            foreach ($inspectionRow as $inspectionResult)
+            {
+               $query = 
+               "SELECT * FROM inspectionresult " .
+               "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId' AND sampleIndex='$inspectionResult->sampleIndex';";
+
+               if (MySqlDatabase::countResults($this->query($query)) == 0)
+               {
+                  // New result.
+                  $query =
+                  "INSERT INTO inspectionresult " .
+                  "(inspectionId, propertyId, sampleIndex, status, data) " .
+                  "VALUES " .
+                  "('$inspection->inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$inspectionResult->status', '$inspectionResult->data');";
+
+                  $result &= $this->query($query);
+               }
+               else
+               {
+                  // Updated result.
+                  $query =
+                  "UPDATE inspectionresult " .
+                  "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
+                  "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId' AND sampleIndex='$inspectionResult->sampleIndex';";
+                  
+                  $result &= $this->query($query);
+               }
+
+               if (!$result)
+               {
+                  break;
+               }
+            }
+         }
+      }
       
       return ($result);
    }
@@ -1106,7 +1309,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query = "DELETE FROM inspectionresult WHERE inspectionId = $inspectionId;";
       
-      $result = $this->query($query);
+      $result &= $this->query($query);
+      
+      return ($result);
    }
    
    // **************************************************************************
