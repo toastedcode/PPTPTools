@@ -453,7 +453,7 @@ function getJobNumber()
 
 function getWcNumber()
 {
-   $wcNumber = 0;
+   $wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
    
    $jobId = getJobId();
    
@@ -461,7 +461,7 @@ function getWcNumber()
    
    if ($jobInfo)
    {
-      $wcNumber = $jobInfo->$wcNumber;
+      $wcNumber = $jobInfo->wcNumber;
    }
    
    return ($wcNumber);
