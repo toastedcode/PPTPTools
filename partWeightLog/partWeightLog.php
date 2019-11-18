@@ -6,6 +6,7 @@ require_once '../common/filter.php';
 require_once '../common/header.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
+require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 
@@ -105,6 +106,7 @@ function getTable($filter)
                <th class="hide-on-tablet">Weigh Time</th>
                <th class="hide-on-mobile">Basket Count</th>
                <th>Weight</th>
+               <th class="hide-on-mobile">Estimated<br>Part Count</th>
                <th></th>
                <th></th>
             </tr>
@@ -155,19 +157,18 @@ HEREDOC;
                }
             }
             
-            // Check for a mismatch between the part weight pan count and the part weight man count.
-            /*
-             $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
-             if ($partWeightEntry)
-             {
-             $otherPanCount = $partWeightEntry->getPanCount();
-             
-             if ($partWeightEntry->panCount != $otherPanCount)
-             {
-             $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
-             }
-             }
-             */
+            //
+            // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
+            //
+            
+            $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId);
+            $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId);
+            
+            // Check for a mismatch.
+            if ($partWeightLogPanCount != $partWasherLogPanCount)
+            {
+               $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; wash log = $partWasherLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+            }
             
             // Use the job id to fill in the job number and work center number.
             $jobNumber = "unknown";
@@ -207,7 +208,6 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=edit_part_weight_entry\">mode_edit</i>";
                "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=edit_part_weight_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWeightEntry($partWeightEntry->partWeightEntryId)\">delete</i>";
@@ -215,7 +215,6 @@ HEREDOC;
             else
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"onViewPartWeightEntry('$partWeightEntry->partWeightEntryId')\">visibility</i>";
                "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=view_part_weight_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
@@ -231,6 +230,7 @@ HEREDOC;
                <td class="hide-on-tablet">$weighTime</td>
                <td class="hide-on-mobile">$panCount $mismatch</td>                           
                <td>$partWeightEntry->weight</td>
+               <td>{$partWeightEntry->calculatePartCount()}</td>
                <td>$viewEditIcon</td>
                <td>$deleteIcon</td>
             </tr>

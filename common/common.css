@@ -312,6 +312,13 @@ tr:hover {
    width: 100px;
 }
 
+.mismatch-indicator {
+   vertical-align: super;
+   font-size: 10px;
+   color: red;
+   white-space: nowrap;
+}
+
 /* 
 Device = Most of the Smartphones Mobiles (Portrait)
 Screen = B/w 320px to 479px

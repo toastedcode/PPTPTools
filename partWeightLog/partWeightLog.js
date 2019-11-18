@@ -341,6 +341,29 @@ function updateTimeCardInfo(timeCardInfo, jobNumber, wcNumber, operatorName)
    set("pan-count-input", panCount);
 }
 
+function updateCalculatedPartCount()
+{
+   var panCount = parseInt(document.getElementById('pan-count-input').value);
+   var partWeight = parseFloat(document.getElementById('part-weight-input').value);
+   var panWeight = parseFloat(document.getElementById('pan-weight-input').value);
+   var palletWeight = parseFloat(document.getElementById('pallet-weight-input').value);
+  
+   var partCount = 0;
+   
+   if ((sampleWeight > 0) &&
+       (panCount > 0) &&
+       (partWeight > 0))       
+   {
+      partCount = ((partWeight - ((panCount * panWeight) + palletWeight)) / sampleWeight);
+      
+      partCount = Math.round(partCount);
+   }
+   
+   document.getElementById('part-count-input').value = ((partCount > 0) ? partCount : "");
+   
+   return (partCount) 
+}
+
 function formattedDate(date)
 {
    // Convert to Y-M-D format, per HTML5 Date control.

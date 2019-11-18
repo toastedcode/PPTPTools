@@ -7,6 +7,7 @@ require_once '../common/header.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
 require_once '../common/partWasherEntry.php';
+require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 
 function getNavBar()
@@ -151,19 +152,18 @@ HEREDOC;
                }
             }
             
-            // Check for a mismatch between the part weight pan count and the part washer man count.
-            /*
-             $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
-             if ($partWeightEntry)
-             {
-             $otherPanCount = $partWeightEntry->getPanCount();
-             
-             if ($partWasherEntry->panCount != $otherPanCount)
-             {
-             $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
-             }
-             }
-             */
+            //
+            // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
+            //
+            
+            $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId);
+            $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId);
+            
+            // Check for a mismatch.
+            if ($partWeightLogPanCount != $partWasherLogPanCount)
+            {
+               $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"wash log = $partWasherLogPanCount; weight log = $partWeightLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+            }
             
             // Use the job id to fill in the job number and work center number.
             $jobNumber = "unknown";
@@ -203,7 +203,6 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\">mode_edit</i>";
                "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
@@ -211,7 +210,6 @@ HEREDOC;
             else
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
                "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=view_part_washer_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             

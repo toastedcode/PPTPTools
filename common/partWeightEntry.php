@@ -8,12 +8,19 @@ class PartWeightEntry
    const UNKNOWN_TIME_CARD_ID = 0;
    const UNKNOWN_JOB_ID = 0;
    const UNKNOWN_OPERATOR = 0;
+   const UNKNOWN_PAN_WEIGHT = 0;
+   const UNKNOWN_PALLET_WEIGHT = 0;
+   
+   const STANDARD_PAN_WEIGHT = 7.1;  // lbs
+   const STANDARD_PALLET_WEIGHT = 20.0;  // lbs   
    
    public $partWeightEntryId;
    public $dateTime;
    public $employeeNumber;
    public $timeCardId = PartWeightEntry::UNKNOWN_TIME_CARD_ID;
    public $weight;
+   public $panWeight = PartWeightEntry::STANDARD_PAN_WEIGHT;
+   public $palletWeight = PartWeightEntry::STANDARD_PALLET_WEIGHT;   
    
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
@@ -71,16 +78,35 @@ class PartWeightEntry
       
       return ($panCount);
    }
+   
+   public function calculatePartCount()
+   {
+      $partCount = 0;
+      
+      $jobId = $this->getJobId();
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo && ($jobInfo->sampleWeight > JobInfo::UNKNOWN_SAMPLE_WEIGHT))
+      {
+         $panCount = $this->getPanCount();
+         
+         $partCount = 
+            ($this->weight - ($this->palletWeight + ($panCount * $this->panWeight))) / ($jobInfo->sampleWeight);
+         
+         $partCount = round($partCount, 0);
+      }
+      
+      return ($partCount);
+   }
 
    public static function load($partWeightEntryId)
    {
       $partWeightEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWeightEntry($partWeightEntryId);
          
@@ -112,11 +138,9 @@ class PartWeightEntry
    {
       $partWeightEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWeightEntriesByTimeCard($timeCardId);
          
@@ -129,26 +153,38 @@ class PartWeightEntry
       return ($partWeightEntry);
    }
    
-   public static function getPartWeightEntryForJob($jobId)
+   public static function getPartWeightEntriesForJob($jobId)
    {
-      $partWeightEntry = null;
+      $partWeightEntries = array();
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWeightEntriesByJob($jobId);
          
-         if ($result && ($row = $result->fetch_assoc()))
+         while ($result && ($row = $result->fetch_assoc()))
          {
-            // Note: Assumes one entry per job.
-            $partWeightEntry = PartWeightEntry::load(intval($row['partWeightEntryId']));
+            $partWeightEntries[] = PartWeightEntry::load(intval($row['partWeightEntryId']));
          }
       }
       
-      return ($partWeightEntry);
+      return ($partWeightEntries);
+   }
+   
+   public static function getPanCountForJob($jobId)
+   {
+      $panCount = 0;
+      
+      $partWeightEntries = PartWeightEntry::getPartWeightEntriesForJob($jobId);
+      
+      // Get a total pan count from all part weight entries.
+      foreach ($partWeightEntries as $partWeightEntry)
+      {
+         $panCount += $partWeightEntry->panCount;
+      }
+      
+      return ($panCount);
    }
 }
 

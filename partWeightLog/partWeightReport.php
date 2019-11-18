@@ -78,7 +78,7 @@ class PartWeightReport extends Report
    
    protected function getHeaders()
    {
-      return (array("Job #", "WC #", "Operator", "Mfg. Date", "Laborer", "Weigh Date", "Weigh Time", "Basket Count", "Weight"));
+      return (array("Job #", "WC #", "Operator", "Mfg. Date", "Laborer", "Weigh Date", "Weigh Time", "Basket Count", "Weight", "Estimated Part Count"));
    }
    
    protected function getData()
@@ -114,7 +114,7 @@ class PartWeightReport extends Report
                    $jobId = $partWeightEntry->getJobId();
                    $operatorEmployeeNumber =  $partWeightEntry->getOperator();
                   
-                  // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
+                  // If we have a timeCardId, use that to fill in the job id, operator, and manufacture date.
                   $mfgDate = "unknown";
                   $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
                   if ($timeCardInfo)
@@ -125,6 +125,15 @@ class PartWeightReport extends Report
                      $mfgDate = $dateTime->format("m-d-Y");
                      
                      $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
+                  }
+                  else
+                  {
+                     // Otherwise, use any manually entered manufacuture date.
+                     if ($partWeightEntry->manufactureDate)
+                     {
+                        $dateTime = new DateTime($partWeightEntry->manufactureDate);
+                        $mfgDate = $dateTime->format("m-d-Y");
+                     }
                   }
                   
                   // Use the job id to fill in the job number and work center number.
@@ -157,7 +166,7 @@ class PartWeightReport extends Report
                   $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
                   $washTime = $dateTime->format("h:i a");
                   
-                  $dataRow = array($jobNumber, $wcNumber, $operatorName, $mfgDate, $laborerName, $washDate, $washTime, $partWeightEntry->panCount, $partWeightEntry->weight);
+                  $dataRow = array($jobNumber, $wcNumber, $operatorName, $mfgDate, $laborerName, $washDate, $washTime, $partWeightEntry->panCount, $partWeightEntry->weight, $partWeightEntry->calculatePartCount());
                     
                   $data[] = $dataRow;
                }

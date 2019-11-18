@@ -23,7 +23,10 @@ abstract class PartWeightLogInputField
    const LABORER = 6;
    const PAN_COUNT = 7;
    const PART_WEIGHT = 8;
-   const LAST = 9;
+   const PAN_WEIGHT = 9;
+   const PALLET_WEIGHT = 10;
+   const PART_COUNT = 11;
+   const LAST = 12;
    const COUNT = PartWeightLogInputField::LAST - PartWeightLogInputField::FIRST;
 }
 
@@ -143,6 +146,13 @@ function isEditable($field)
                             ($userInfo->roles == Role::ADMIN));
          }
          break;
+      }
+      
+      case PartWeightLogInputField::PAN_WEIGHT:
+      case PartWeightLogInputField::PALLET_WEIGHT:
+      case PartWeightLogInputField::PART_COUNT:
+      {
+         $isEditable = false;
       }
       
       case PartWeightLogInputField::TIME_CARD_ID:
@@ -395,10 +405,8 @@ function getTimeCardId()
    return ($timeCardId);
 }
 
-function getJobNumber()
+function getJobId()
 {
-   $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
-   
    $partWeightEntry = getPartWeightEntry();
    
    if ($partWeightEntry)
@@ -420,13 +428,22 @@ function getJobNumber()
       {
          $jobId = $partWeightEntry->jobId;
       }
+   }
+   
+   return ($jobId);
+}
 
-      $jobInfo = JobInfo::load($jobId);
-            
-      if ($jobInfo)
-      {
-         $jobNumber = $jobInfo->jobNumber;
-      }
+function getJobNumber()
+{
+   $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+   
+   $jobId = getJobId();
+   
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
+   {
+      $jobNumber = $jobInfo->jobNumber;
    }
    
    return ($jobNumber);
@@ -436,37 +453,32 @@ function getWcNumber()
 {
    $wcNumber = 0;
    
-   $partWeightEntry = getPartWeightEntry();
+   $jobId = getJobId();
    
-   if ($partWeightEntry)
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
    {
-      $timeCardId = $partWeightEntry->timeCardId;
-      
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $jobId = $timeCardInfo->jobId;
-         }
-      }
-      else
-      {
-         $jobId = $partWeightEntry->jobId;
-      }
-      
-      $jobInfo = JobInfo::load($jobId);
-      
-      if ($jobInfo)
-      {
-         $wcNumber = $jobInfo->wcNumber;
-      }
+      $wcNumber = $jobInfo->$wcNumber;
    }
    
    return ($wcNumber);
+}
+
+function getSampleWeight()
+{
+   $sampleWeight = 0.0;
+   
+   $jobId = getJobId();
+   
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
+   {
+      $sampleWeight = $jobInfo->sampleWeight;
+   }
+   
+   return ($sampleWeight);
 }
 
 function getOperator()
@@ -564,6 +576,48 @@ function getPartWeight()
    }
    
    return ($partWeight);
+}
+
+function getPanWeight()
+{
+   $panWeight = 0;
+   
+   $partWeightEntry = getPartWeightEntry();
+   
+   if ($partWeightEntry)
+   {
+      $panWeight = $partWeightEntry->panWeight;
+   }
+   
+   return ($panWeight);
+}
+
+function getPalletWeight()
+{
+   $palletWeight = 0;
+   
+   $partWeightEntry = getPartWeightEntry();
+   
+   if ($partWeightEntry)
+   {
+      $palletWeight = $partWeightEntry->palletWeight;
+   }
+   
+   return ($palletWeight);
+}
+
+function getCalculatedPartCount()
+{
+   $partCount = 0;
+   
+   $partWeightEntry = getPartWeightEntry();
+   
+   if ($partWeightEntry)
+   {
+      $partCount = $partWeightEntry->calculatePartCount();
+   }
+   
+   return ($partCount);
 }
 
 // *****************************************************************************
@@ -681,12 +735,27 @@ if (!Authentication::isAuthenticated())
                               
                <div class="form-item">
                   <div class="form-label">Pan Count</div>
-                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
+                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                            
                <div class="form-item">
                   <div class="form-label">Part Weight</div>
-                  <input id="part-weight-input" class="form-input-medium" type="number" name="partWeight" form="input-form" oninput="this.validator.validate();" value="<?php echo getPartWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_WEIGHT) ? "disabled" : ""; ?>>
+                  <input id="part-weight-input" class="form-input-medium" type="number" name="partWeight" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPartWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Pan Weight</div>
+                  <input id="pan-weight-input" class="form-input-medium" type="number" style="width:50px;" name="panWeight" form="input-form" value="<?php echo getPanWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Pallet Weight</div>
+                  <input id="pallet-weight-input" class="form-input-medium" type="number" style="width:50px;" name="palletWeight" form="input-form" value="<?php echo getPalletWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PALLET_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Estimated Part Count</div>
+                  <input id="part-count-input" class="form-input-medium" type="number" style="width:100px;" value="<?php echo getCalculatedPartCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_COUNT) ? "disabled" : ""; ?>>
                </div>
                
             </div>
@@ -714,6 +783,8 @@ if (!Authentication::isAuthenticated())
          laborerValidator.init();
          panCountValidator.init();
          partWeightValidator.init();
+
+         var sampleWeight = <?php echo getSampleWeight(); ?>;
       </script>
      
    </div>

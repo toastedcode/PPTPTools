@@ -76,11 +76,9 @@ class PartWasherEntry
    {
       $partWasherEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntry($partWasherEntryId);
          
@@ -112,11 +110,9 @@ class PartWasherEntry
    {
       $partWasherEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntriesByTimeCard($timeCardId);
          
@@ -129,26 +125,38 @@ class PartWasherEntry
       return ($partWasherEntry);
    }
    
-   public static function getPartWasherEntryForJob($jobId)
+   public static function getPartWasherEntriesForJob($jobId)
    {
-      $partWasherEntry = null;
+      $partWasherEntries = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntriesByJob($jobId);
          
-         if ($result && ($row = $result->fetch_assoc()))
+         while ($result && ($row = $result->fetch_assoc()))
          {
-            // Note: Assumes one entry per job.
-            $partWasherEntry = PartWasherEntry::load(intval($row['partWasherEntryId']));
+            $partWasherEntries[] = PartWasherEntry::load(intval($row['partWasherEntryId']));
          }
       }
       
-      return ($partWasherEntry);
+      return ($partWasherEntries);
+   }
+   
+   public static function getPanCountForJob($jobId)
+   {
+      $panCount = 0;
+      
+      $partWasherEntries = PartWasherEntry::getPartWasherEntriesForJob($jobId);
+      
+      // Get a total pan count from all part washer entries.
+      foreach ($partWasherEntries as $partWasherEntry)
+      {
+         $panCount += $partWasherEntry->panCount;
+      }
+         
+      return ($panCount);
    }
 }
 
