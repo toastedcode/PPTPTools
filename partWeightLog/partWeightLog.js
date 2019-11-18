@@ -184,6 +184,51 @@ function onJobNumberChange()
    }
 }
 
+function onWcNumberChange()
+{
+   var jobNumber = document.getElementById("job-number-input").value;
+   var wcNumber = document.getElementById("wc-number-input").value;
+      
+   // Lookup sample weight based on selected job.
+   
+   // AJAX call to populate WC numbers based on selected job number.
+   requestUrl = "../api/jobInfo/?jobNumber=" + jobNumber + "&wcNumber=" + wcNumber;
+   
+   var xhttp = new XMLHttpRequest();
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {
+         try
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               sampleWeight = json.jobInfo.sampleWeight;          
+            }
+            else
+            {
+               console.log("API call to retrieve job info failed.");
+               
+               sampleWeight = 0.0;
+            }
+            
+            console.log("Updated sample weight: " + sampleWeight);
+            
+            updateCalculatedPartCount();  
+         }
+         catch (exception)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      }
+   };
+   xhttp.open("GET", requestUrl, true);
+   xhttp.send();  
+}
+
 function onTodayButton()
 {
    var today = new Date();

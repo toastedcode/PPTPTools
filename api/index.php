@@ -63,6 +63,49 @@ $router->add("timeCardInfo", function($params) {
    echo json_encode($result);
 });
 
+$router->add("jobInfo", function($params) {
+   $result = new stdClass();
+   
+   $jobInfo = null;
+   
+   if (isset($params["jobId"]))
+   {
+      $jobInfo = JobInfo::Load(intval($params["jobId"]));
+   }
+   else if ((isset($params["jobNumber"])) &&
+            (isset($params["wcNumber"])))
+   {
+      $jobNumber = $params["jobNumber"];
+      $wcNumber = intval($params["wcNumber"]);
+      
+      $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+      
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         $jobInfo = JobInfo::load($jobId);   
+         
+         if (!$jobInfo)
+         {
+            $result->success = false;
+            $result->error = "Failed to look up job from components.";
+         }
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   if ($jobInfo)
+   {
+      $result->success = true;
+      $result->jobInfo = $jobInfo;
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("jobs", function($params) {
    $result = new stdClass();
    

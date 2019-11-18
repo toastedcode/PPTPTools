@@ -407,6 +407,8 @@ function getTimeCardId()
 
 function getJobId()
 {
+   $jobId = JobInfo::UNKNOWN_JOB_ID;
+   
    $partWeightEntry = getPartWeightEntry();
    
    if ($partWeightEntry)
@@ -580,7 +582,7 @@ function getPartWeight()
 
 function getPanWeight()
 {
-   $panWeight = 0;
+   $panWeight = PartWeightEntry::STANDARD_PAN_WEIGHT;
    
    $partWeightEntry = getPartWeightEntry();
    
@@ -594,7 +596,7 @@ function getPanWeight()
 
 function getPalletWeight()
 {
-   $palletWeight = 0;
+   $palletWeight = PartWeightEntry::STANDARD_PALLET_WEIGHT;
    
    $partWeightEntry = getPartWeightEntry();
    
@@ -608,7 +610,7 @@ function getPalletWeight()
 
 function getCalculatedPartCount()
 {
-   $partCount = 0;
+   $partCount = "";
    
    $partWeightEntry = getPartWeightEntry();
    
@@ -695,7 +697,7 @@ if (!Authentication::isAuthenticated())
                
                <div class="form-item">
                   <div class="form-label">Work Center</div>
-                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWeightLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate(); onWcNumberChange();" <?php echo !isEditable(PartWeightLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                      <?php echo getWcNumberOptions(); ?>
                   </select>
                </div>
