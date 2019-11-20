@@ -493,8 +493,6 @@ function getOperator()
    {
       $timeCardId = $partWeightEntry->timeCardId;
       
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
       if (getTimeCardId() != 0)
       {
          $timeCardInfo = TimeCardInfo::load($timeCardId);

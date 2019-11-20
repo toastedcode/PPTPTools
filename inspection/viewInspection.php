@@ -651,7 +651,7 @@ function getInspections()
       $html .=
 <<<HEREDOC
       <tr>
-         <td></td>
+         <td><i class="material-icons" onclick="approveAll()">thumb_up</i></td>
          <td></td>
 HEREDOC;
       
@@ -929,6 +929,8 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         const PASS = <?php echo InspectionStatus::PASS; ?>;
+      
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
          var operatorValidator = new SelectValidator("operator-input");

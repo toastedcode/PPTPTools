@@ -335,3 +335,14 @@ function hideData(button)
    // Show the "+" button.
    button.previousSibling.style.display = "block";
 }
+
+function approveAll()
+{
+   var inspectionInputs = document.getElementsByClassName('inspection-status-input');
+   
+   for (var input of inspectionInputs)
+   {
+      input.value = PASS;
+      onInspectionStatusUpdate(input);
+   }
+}
