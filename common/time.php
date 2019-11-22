@@ -42,6 +42,20 @@ class Time
       
       return ($dateTime->format("Y-m-d"));
    }
+   
+   static public function startOfDay($dateTime)
+   {
+      $startDateTime = new DateTime($dateTime, new DateTimeZone('America/New_York'));
+      
+      return ($startDateTime->format("Y-m-d 00:00:00"));
+   }
+   
+   static public function endOfDay($dateTime)
+   {
+      $endDateTime = new DateTime($dateTime, new DateTimeZone('America/New_York'));
+      
+      return ($endDateTime->format("Y-m-d 23:59:59"));
+   }
 }
 
 /*

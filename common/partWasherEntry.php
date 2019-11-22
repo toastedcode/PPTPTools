@@ -125,37 +125,27 @@ class PartWasherEntry
       return ($partWasherEntry);
    }
    
-   public static function getPartWasherEntriesForJob($jobId)
+   public static function getPanCountForJob($jobId, $startDate, $endDate)
    {
-      $partWasherEntries = null;
+      $panCount = 0;
       
       $database = PPTPDatabase::getInstance();
       
       if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWasherEntriesByJob($jobId);
+         $result = $database->getPartWasherEntries(
+            $jobId,
+            UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
+            $startDate,
+            $endDate,
+            true);  // $useMfgDate
          
          while ($result && ($row = $result->fetch_assoc()))
          {
-            $partWasherEntries[] = PartWasherEntry::load(intval($row['partWasherEntryId']));
+            $panCount += intval($row["panCount"]);
          }
       }
       
-      return ($partWasherEntries);
-   }
-   
-   public static function getPanCountForJob($jobId)
-   {
-      $panCount = 0;
-      
-      $partWasherEntries = PartWasherEntry::getPartWasherEntriesForJob($jobId);
-      
-      // Get a total pan count from all part washer entries.
-      foreach ($partWasherEntries as $partWasherEntry)
-      {
-         $panCount += $partWasherEntry->panCount;
-      }
-         
       return ($panCount);
    }
 }

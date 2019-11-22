@@ -648,10 +648,12 @@ function getInspections()
    
    if ($inspection && $inspectionTemplate)
    {
+      $quickInspection = getQuickInspectionButton();
+      
       $html .=
 <<<HEREDOC
       <tr>
-         <td><i class="material-icons" onclick="approveAll()">thumb_up</i></td>
+         <td>$quickInspection</td>
          <td></td>
 HEREDOC;
       
@@ -799,6 +801,21 @@ HEREDOC;
    
    $html .= "</td>";
    
+   return ($html);
+}
+
+function getQuickInspectionButton()
+{
+   $html = "";
+   
+   if (Authentication::checkPermissions(Permission::QUICK_INSPECTION))
+   {
+      $html =
+<<<HEREDOC
+      <i class="material-icons" onclick="approveAll()">thumb_up</i>
+HEREDOC;
+   }
+
    return ($html);
 }
 

@@ -40,7 +40,7 @@ class Upload
       {
          $returnStatus = UploadStatus::BAD_FILE_TYPE;
       }
-      else if (!Upload::validateFileSize($file, 500000))  // 500Kb
+      else if (!Upload::validateFileSize($file, 1000000))  // 1MB
       {
          $returnStatus = UploadStatus::BAD_FILE_SIZE;
       }

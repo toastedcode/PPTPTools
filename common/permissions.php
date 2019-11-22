@@ -21,9 +21,10 @@ class Permission
    const APPROVE_TIME_CARDS      = 15;
    const VIEW_SIGN               = 16;
    const EDIT_SIGN               = 17;
-   const VIEW_LINE_INSPECTION    = 18;
-   const EDIT_LINE_INSPECTION    = 19;
-   const LAST                    = Permission::EDIT_LINE_INSPECTION;
+   const VIEW_INSPECTION         = 18;
+   const EDIT_INSPECTION         = 19;
+   const QUICK_INSPECTION        = 20;   
+   const LAST                    = Permission::QUICK_INSPECTION;
    
    const NO_PERMISSIONS = 0x0000;
    const ALL_PERMISSIONS = 0xFFFF;
@@ -56,9 +57,9 @@ class Permission
                   new Permission(Permission::APPROVE_TIME_CARDS,      "Approve time cards"),
                   new Permission(Permission::VIEW_SIGN,               "View digital signs"),
                   new Permission(Permission::EDIT_SIGN,               "Edit digital signs"),
-                  new Permission(Permission::VIEW_LINE_INSPECTION,    "View line inspection"), 
-                  new Permission(Permission::EDIT_LINE_INSPECTION,    "Edit line inspection"), 
-            );
+                  new Permission(Permission::VIEW_INSPECTION,         "View inspection"), 
+                  new Permission(Permission::EDIT_INSPECTION,         "Edit inspection"),
+                  new Permission(Permission::QUICK_INSPECTION,        "Enable \"quick\" inspections"));
       }
       
       return (Permission::$permissions);

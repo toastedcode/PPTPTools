@@ -355,6 +355,8 @@ function validateTimeCard()
    {
       alert("Please enter a valid setup time.")
    }
+   // J. Orbin requested that users be able enter incomplete time sheets.  (11/21/2019)
+   /*
    else if ((document.getElementById("setup-time-hour-input").value == 0) &&
             (document.getElementById("setup-time-minute-input").value == 0) &&
             (document.getElementById("run-time-hour-input").value == 0) &&
@@ -362,6 +364,7 @@ function validateTimeCard()
    {
       alert("Please enter some valid times.")  
    }
+   */
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
       alert("Please enter a valid basket count.");    
@@ -374,11 +377,14 @@ function validateTimeCard()
    {
       alert("Please enter a valid scrap count.");    
    }
+   // J. Orbin requested that users be able enter incomplete time sheets.  (11/21/2019)
+   /*
    else if ((document.getElementById("part-count-input").value == 0) &&
             (document.getElementById("scrap-count-input").value == 0))
    {
       alert("Please enter some part counts.");   
    }
+   */
    else
    {
       valid = true;

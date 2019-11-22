@@ -113,7 +113,14 @@ function onTimeCardIdChange()
             
             if (json.success == true)
             {
-               updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName);                   
+               if (!json.isComplete)
+               {
+                  alert('Selected time card is incomplete.  Please choose another.');
+               }
+               else
+               {
+                  updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName);
+               }
             }
             else
             {

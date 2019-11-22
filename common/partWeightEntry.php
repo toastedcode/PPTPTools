@@ -153,35 +153,25 @@ class PartWeightEntry
       return ($partWeightEntry);
    }
    
-   public static function getPartWeightEntriesForJob($jobId)
+   public static function getPanCountForJob($jobId, $mfgStartDate, $mfgEndDate)
    {
-      $partWeightEntries = array();
+      $panCount = 0;
       
       $database = PPTPDatabase::getInstance();
       
       if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWeightEntriesByJob($jobId);
+         $result = $database->getPartWeightEntries(
+                      $jobId, 
+                      UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
+                      $mfgStartDate,
+                      $mfgEndDate,
+                      true);  // $useMfgDate
          
          while ($result && ($row = $result->fetch_assoc()))
          {
-            $partWeightEntries[] = PartWeightEntry::load(intval($row['partWeightEntryId']));
+            $panCount += intval($row["panCount"]);
          }
-      }
-      
-      return ($partWeightEntries);
-   }
-   
-   public static function getPanCountForJob($jobId)
-   {
-      $panCount = 0;
-      
-      $partWeightEntries = PartWeightEntry::getPartWeightEntriesForJob($jobId);
-      
-      // Get a total pan count from all part weight entries.
-      foreach ($partWeightEntries as $partWeightEntry)
-      {
-         $panCount += $partWeightEntry->panCount;
       }
       
       return ($panCount);

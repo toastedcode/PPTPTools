@@ -503,23 +503,37 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    public function getPartWasherEntries(
+      $jobId,
       $employeeNumber,
       $startDate,
-      $endDate)
+      $endDate,
+      $useMfgDate)
    {
-      $result = NULL;
-      if ($employeeNumber == 0)
+      $jobClause = "";
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
       {
-         $query = "SELECT * FROM partwasher WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-
-         $result = $this->query($query);
+         $jobClause = "jobId = '$jobId' AND";
+      }
+      
+      $employeeClause = "";
+      if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
+      {
+         $employeeClause = "employeeNumber = '$employeeNumber' AND";
+      }
+      
+      $dateTimeClause = "";
+      if ($useMfgDate == true)
+      {
+         $dateTimeClause = "manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       else
       {
-         $query = "SELECT * FROM partwasher WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-         
-         $result = $this->query($query);
+         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
+      
+      $query = "SELECT * FROM partwasher WHERE $jobClause $employeeClause $dateTimeClause ORDER BY dateTime DESC;";
+      
+      $result = $this->query($query);
       
       return ($result);
    }
@@ -623,23 +637,37 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    public function getPartWeightEntries(
+      $jobId,
       $employeeNumber,
       $startDate,
-      $endDate)
+      $endDate,
+      $useMfgDate)
    {
-      $result = NULL;
-      if ($employeeNumber == 0)
+      $jobClause = "";
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
       {
-         $query = "SELECT * FROM partweight WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-         
-         $result = $this->query($query);
+         $jobClause = "jobId = '$jobId' AND";
+      }
+      
+      $employeeClause = "";
+      if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
+      {
+         $employeeClause = "employeeNumber = '$employeeNumber' AND";
+      }
+      
+      $dateTimeClause = "";
+      if ($useMfgDate == true)
+      {
+         $dateTimeClause = "manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       else
       {
-         $query = "SELECT * FROM partweight WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-         
-         $result = $this->query($query);
+         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";         
       }
+      
+      $query = "SELECT * FROM partweight WHERE $jobClause $employeeClause $dateTimeClause ORDER BY dateTime DESC;";
+
+      $result = $this->query($query);
       
       return ($result);
    }

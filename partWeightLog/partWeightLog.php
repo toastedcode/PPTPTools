@@ -88,7 +88,7 @@ function getTable($filter)
    $endDate->modify('+1 day');
    $endDateString = $endDate->format("Y-m-d");
    
-   $result = PPTPDatabase::getInstance()->getPartWeightEntries($filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString);
+   $result = PPTPDatabase::getInstance()->getPartWeightEntries(JobInfo::UNKNOWN_WC_NUMBER, $filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
    
    if ($result && (MySqlDatabase::countResults($result) > 0))
    {
@@ -124,25 +124,17 @@ HEREDOC;
             $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
-            $mfgDate = "unknown";
+            $mfgDate = null;
             $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
             if ($timeCardInfo)
             {
                $jobId = $timeCardInfo->jobId;
                
-               $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-               $mfgDate = $dateTime->format("m-d-Y");
+               $mfgDate = $timeCardInfo->dateTime;
                
                $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
                
                $panCount = $timeCardInfo->panCount;
-               
-               /*
-                if ($partWeightEntry->panCount != $timeCardInfo->panCount)
-                {
-                $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
-                }
-                */
             }
             else
             {
@@ -152,8 +144,7 @@ HEREDOC;
                
                if ($partWeightEntry->manufactureDate)
                {
-                  $dateTime = new DateTime($partWeightEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $mfgDate = $dateTime->format("m-d-Y");
+                  $mfgDate = $partWeightEntry->manufactureDate;
                }
             }
             
@@ -161,13 +152,16 @@ HEREDOC;
             // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
             //
             
-            $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId);
-            $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId);
-            
-            // Check for a mismatch.
-            if ($partWeightLogPanCount != $partWasherLogPanCount)
+            if ($mfgDate)
             {
-               $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; wash log = $partWasherLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+               $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+               $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+               
+               // Check for a mismatch.
+               if ($partWeightLogPanCount != $partWasherLogPanCount)
+               {
+                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; wash log = $partWasherLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+               }
             }
             
             // Use the job id to fill in the job number and work center number.
@@ -192,6 +186,16 @@ HEREDOC;
             if ($laborer)
             {
                $laborerName= $laborer->getFullName();
+            }
+            
+            if ($mfgDate)
+            {
+               $dateTime = new DateTime($mfgDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+               $mfgDate = $dateTime->format("m-d-Y");
+            }
+            else
+            {
+               $mfgDate = "---";
             }
             
             $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class

@@ -264,6 +264,12 @@ tr:hover {
    color: black;
 }
 
+.incomplete-indicator {
+   vertical-align: super;
+   font-size: 10px;
+   color: orange;
+}
+
 .filter-component
 {
 	margin-right: 10px;

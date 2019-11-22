@@ -162,6 +162,22 @@ HEREDOC;
                }
             }
             
+            $incompleteTime = "";
+            $incompletePanCount = "";
+            $incompletePartCount = "";
+            if ($timeCardInfo->incompleteTime())
+            {
+               $incompleteTime = "<span class=\"incomplete-indicator\">incomplete</span>";
+            }
+            else if ($timeCardInfo->incompletePanCount())
+            {
+               $incompletePanCount = "<span class=\"incomplete-indicator\">incomplete</span>";
+            }
+            else if ($timeCardInfo->incompletePartCount())
+            {
+               $incompletePartCount = "<span class=\"incomplete-indicator\">incomplete</span>";
+            }
+            
             $viewEditIcon = "";
             $deleteIcon = "";
             if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
@@ -188,14 +204,14 @@ HEREDOC;
                <td>$jobInfo->jobNumber</td>
                <td class="hide-on-mobile">$wcNumber</td>
                <td class="hide-on-tablet">$timeCardInfo->materialNumber</td>
-               <td class="hide-on-tablet">{$timeCardInfo->formatRunTime()}</td>
+               <td class="hide-on-tablet">{$timeCardInfo->formatRunTime()} $incompleteTime</td>
                <td class="$approval hide-on-tablet">
                   {$timeCardInfo->formatSetupTime()}
                   <div class="approval $approval" $tooltip>Approved</div>
                   <div class="unapproval $approval">Unapproved</div>
                </td>
-               <td class="hide-on-tablet">$timeCardInfo->panCount</td>
-               <td>$timeCardInfo->partCount</td>
+               <td class="hide-on-tablet">$timeCardInfo->panCount $incompletePanCount</td>
+               <td>$timeCardInfo->partCount $incompletePartCount</td>
                <td class="hide-on-tablet">$timeCardInfo->scrapCount</td>
                <td>$viewEditIcon</td>
                <td>$deleteIcon</td>

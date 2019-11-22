@@ -31,6 +31,8 @@ $router->add("timeCardInfo", function($params) {
          
          if ($params->getBool("expandedProperties"))
          {
+            $result->isComplete = ($timeCardInfo->isComplete());
+            
             $jobInfo = JobInfo::load($timeCardInfo->jobId);
             
             if ($jobInfo)

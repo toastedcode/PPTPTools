@@ -32,7 +32,7 @@ class Role
                   new Role(Role::LABORER, "Laborer", Permission::getBits(Permission::VIEW_PART_WEIGHT_LOG, Permission::EDIT_PART_WEIGHT_LOG)),
                   new Role(Role::PART_WASHER, "Part Washer", Permission::getBits(Permission::VIEW_PART_WASHER_LOG, Permission::EDIT_PART_WASHER_LOG)),
                   new Role(Role::SHIPPER, "Shipper", Permission::getBits(Permission::VIEW_PART_WASHER_LOG, Permission::EDIT_PART_WASHER_LOG)),
-                  new Role(Role::INSPECTOR, "Inspector", Permission::getBits(Permission::VIEW_PART_INSPECTION, Permission::VIEW_LINE_INSPECTION, Permission::EDIT_LINE_INSPECTION)),
+                  new Role(Role::INSPECTOR, "Inspector", Permission::getBits(Permission::VIEW_PART_INSPECTION, Permission::VIEW_INSPECTION, Permission::EDIT_INSPECTION)),
             );
       }
       

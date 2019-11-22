@@ -88,7 +88,7 @@ function getTable($filter)
    $endDate->modify('+1 day');
    $endDateString = $endDate->format("Y-m-d");
    
-   $result = PPTPDatabase::getInstance()->getPartWasherEntries($filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString);
+   $result = PPTPDatabase::getInstance()->getPartWasherEntries(JobInfo::UNKNOWN_JOB_NUMBER, $filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
    
    if ($result && (MySqlDatabase::countResults($result) > 0))
    {
@@ -122,23 +122,15 @@ HEREDOC;
             $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
-            $mfgDate = "unknown";
+            $mfgDate = null;
             $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
             if ($timeCardInfo)
             {
                $jobId = $timeCardInfo->jobId;
                
-               $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-               $mfgDate = $dateTime->format("m-d-Y");
+               $mfgDate = $timeCardInfo->dateTime;
                
                $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
-               
-               /*
-                if ($partWasherEntry->panCount != $timeCardInfo->panCount)
-                {
-                $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
-                }
-                */
             }
             else
             {
@@ -147,8 +139,7 @@ HEREDOC;
                
                if ($partWasherEntry->manufactureDate)
                {
-                  $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $mfgDate = $dateTime->format("m-d-Y");
+                  $mfgDate = $partWasherEntry->manufactureDate;
                }
             }
             
@@ -156,8 +147,8 @@ HEREDOC;
             // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
             //
             
-            $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId);
-            $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId);
+            $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+            $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
             
             // Check for a mismatch.
             if ($partWeightLogPanCount != $partWasherLogPanCount)
@@ -187,6 +178,16 @@ HEREDOC;
             if ($washer)
             {
                $partWasherName= $washer->getFullName();
+            }
+            
+            if ($mfgDate)
+            {
+               $dateTime = new DateTime($mfgDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+               $mfgDate = $dateTime->format("m-d-Y");
+            }
+            else
+            {
+               $mfgDate = "---";
             }
             
             $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
