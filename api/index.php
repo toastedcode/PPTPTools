@@ -768,6 +768,26 @@ $router->add("saveInspection", function($params) {
                      break;
                   }
                }
+               
+               // Comment.
+               $name = InspectionResult::getInputName($inspectionProperty->propertyId, InspectionResult::COMMENT_SAMPLE_INDEX);
+
+               if (isset($params[$name]))
+               {
+                  $inspectionResult = new InspectionResult();
+                  $inspectionResult->propertyId = $inspectionProperty->propertyId;
+                  $inspectionResult->sampleIndex = InspectionResult::COMMENT_SAMPLE_INDEX;
+                  $inspectionResult->status = InspectionStatus::UNKNOWN;
+                  $inspectionResult->data = $params[$name];
+                  
+                  $inspection->inspectionResults[$inspectionResult->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX] = $inspectionResult;                  
+               }
+               else
+               {
+                  $result->success = false;
+                  $result->error = "Missing property [$name]";
+                  break;
+               }
             }
                  
             if ($result->success)

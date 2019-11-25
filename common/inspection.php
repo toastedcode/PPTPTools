@@ -9,6 +9,8 @@ class InspectionResult
    
    const UNKNOWN_PROPERTY_ID = 0;
    
+   const COMMENT_SAMPLE_INDEX = 99;
+   
    public $inspectionId;
    public $propertyId;
    public $status;
