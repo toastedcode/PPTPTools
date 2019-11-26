@@ -174,7 +174,13 @@ class Inspection
       {
          foreach ($this->inspectionResults as $inspectionRow)
          {
-            $count += count($inspectionRow);
+            foreach ($inspectionRow as $inspectionResult)
+            {
+               if ($inspectionResult->sampleIndex != InspectionResult::COMMENT_SAMPLE_INDEX)
+               {
+                  $count++;
+               }
+            }
          }
       }
       
@@ -191,7 +197,8 @@ class Inspection
          {
             foreach ($inspectionRow as $inspectionResult)
             {
-               if ($inspectionResult->status == $inspectionStatus)
+               if (($inspectionResult->sampleIndex != InspectionResult::COMMENT_SAMPLE_INDEX) &&
+                   ($inspectionResult->status == $inspectionStatus))
                {
                   $count++;
                }
