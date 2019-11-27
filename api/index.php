@@ -8,6 +8,8 @@ require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
+require_once '../printer/printJob.php';
+require_once '../printer/printQueue.php';
 
 // *****************************************************************************
 //                                   Begin
@@ -1027,6 +1029,131 @@ $router->add("deleteInspectionTemplate", function($params) {
          $result->success = false;
          $result->error = "No existing template found.";
       }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("queuePrintJob", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["owner"]) &&
+       is_numeric($params["printerId"]) &&
+       isset($params["xml"]))
+   {
+      $printJob = new PrintJob();
+      
+      $printJob->owner = intval($params["owner"]);
+      $printJob->dateTime = Time::now("Y-m-d H:i:s");
+      $printJob->printerId = intval($params["printerId"]);
+      $printJob->status = PrintJobStatus::QUEUED;
+      $printJob->xml = $params["xml"];
+
+      $dbaseResult = $database->newPrintJob($printJob);
+
+      if ($dbaseResult)
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("printQueue", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["printerId"]))
+   {
+      $printQueue = PrintQueue::load(intval($params["printerId"]));
+      
+      $result->success = true;
+      $result->queue = $printQueue->queue;
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("setPrintJobStatus", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["printJobId"]) &&
+       is_numeric($params["status"]))
+   {
+      $printJobId = intval($params["printJobId"]);
+      $status = intval($params["status"]);
+      
+      $dbaseResult = $database->setPrintJobStatus($printJobId, $status);
+
+      if ($dbaseResult && ($database->rowsAffected() == 1))
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("cancelPrintJob", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["printJobId"]))
+   {
+      $printJobId = intval($params["printJobId"]);
+      
+      $dbaseResult = $database->deletePrintJob($printJobId);
+      
+      if ($dbaseResult && ($database->rowsAffected() == 1))
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
    }
    
    echo json_encode($result);
