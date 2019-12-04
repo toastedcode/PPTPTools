@@ -1386,9 +1386,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO printjob " .
-      "(owner, dateTime, printerId, status, xml) " . 
+      "(owner, dateTime, description, printerId, copies, status, xml) " . 
       "VAlUES " .
-      "('$printJob->owner', '$dateTime', '$printJob->printerId', '$printJob->status', '$printJob->xml');";
+      "('$printJob->owner', '$dateTime', '$printJob->description', '$printJob->printerId', '$printJob->copies', '$printJob->status', '$printJob->xml');";
 
       $result = $this->query($query);
       

@@ -11,10 +11,14 @@ class PrintJob
    
    const UNKNOWN_PRINTER_ID = 0;
    
+   const MIN_COPIES = 1;
+   
    public $printJobId;
    public $owner;
    public $dateTime;
+   public $description;
    public $printerId;
+   public $copies;
    public $status;
    public $xml;
    
@@ -23,7 +27,9 @@ class PrintJob
       $this->printJobId = PrintJob::UNKNOWN_PRINT_JOB_ID;
       $this->owner = PrintJob::UNKNOWN_OWNER_ID;
       $this->dateTime = null;
+      $this->description = "";
       $this->printerId = PrintJob::UNKNOWN_PRINTER_ID;
+      $this->copies = PrintJob::MIN_COPIES;
       $this->status = PrintJobStatus::UNKNOWN;
       $this->xml = "";
    }
@@ -45,7 +51,9 @@ class PrintJob
             $printJob->printJobId = intval($row['printJobId']);
             $printJob->owner = intval($row['owner']);
             $printJob->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $printJob->description = $row['description'];
             $printJob->printerId = intval($row['printerId']);
+            $printJob->copies = intval($row['copies']);
             $printJob->status = intval($row['status']);
             $printJob->xml = $row['xml'];
          }
@@ -64,12 +72,14 @@ if (isset($_GET["printJobId"]))
  
    if ($printJob)
    {
-      echo "printJobId: " . $printJob->printJobId .                       "<br/>";
-      echo "owner: " .      $printJob->owner .                            "<br/>";
-      echo "dateTime: " .   $printJob->dateTime .                         "<br/>";
-      echo "printerId: " .  $printJob->printerId .                        "<br/>";      
-      echo "status: " .     PrintJobStatus::getLabel($printJob->status) . "<br/>";
-      echo "xml: " .        htmlspecialchars($printJob->xml) .            "<br/>";
+      echo "printJobId: " .  $printJob->printJobId .                       "<br/>";
+      echo "owner: " .       $printJob->owner .                            "<br/>";
+      echo "dateTime: " .    $printJob->dateTime .                         "<br/>";
+      echo "description: " . $printJob->description .                      "<br/>";
+      echo "printerId: " .   $printJob->printerId .                        "<br/>"; 
+      echo "copies: " .      $printJob->copies .                           "<br/>";     
+      echo "status: " .      PrintJobStatus::getLabel($printJob->status) . "<br/>";
+      echo "xml: " .         htmlspecialchars($printJob->xml) .            "<br/>";
    }
    else
    {

@@ -1,39 +1,50 @@
 // Be sure to keep in sync with PrintJobStatus in printDefs.php
 var PrintJobStatus = {
+   UNKNOWN:  0,
    QUEUED:   1,
    PENDING:  2,
    PRINTING: 3,
    COMPLETE: 4,
-   DELETED:  5,
+   DELETED:  5
 };
+
+var PrintJobStatusLabels = ["", "Queued", "Pending", "Printing", "Complete", "Deleted"];
 
 function PrintQueue(container)
 {
-   this.container = container;
+   var container = container;
    
-   this.printJobs = null;
+   var printJobs = null;
+   
+   PrintQueue.prototype.setPrintJobs = function(newPrintJobs)
+   {
+      printJobs = newPrintJobs;
+   }
    
    PrintQueue.prototype.nextPrintJob = function()
    {
-      var nextJob = nullptr;
+      var nextJob = null;
       
-      for (printJob of this.printJobs)
+      if (printJobs != null)
       {
-         if (printJob.status == PrintJobStatus.PENDING)
+         for (printJob of printJobs)
          {
-            nextJob = printJob;
-            break;
+            if (printJob.status == PrintJobStatus.PENDING)
+            {
+               nextJob = printJob;
+               break;
+            }
          }
       }
-      
+
       return (nextJob);
-   }
+   }.bind(this)
    
    PrintQueue.prototype.render = function()
    {
       const HEADINGS = new Array("Date", "Owner", "Description", "Status");
       
-      if (this.container != null)
+      if (container != null)
       {
          // Clear table.
          while (container.firstChild)
@@ -61,9 +72,9 @@ function PrintQueue(container)
          // Build table rows
          //
          
-         if (this.printJobs != null)
+         if (printJobs != null)
          {
-            for (printJob of this.printJobs)
+            for (printJob of printJobs)
             {
                var row = table.insertRow();
                
@@ -74,7 +85,7 @@ function PrintQueue(container)
                
                // Owner
                cell = row.insertCell();
-               text = document.createTextNode(printJob.owner);
+               text = document.createTextNode(printJob.ownerName);
                cell.appendChild(text);
                
                // Description
@@ -84,45 +95,111 @@ function PrintQueue(container)
                
                // Status
                cell = row.insertCell();
-               text = document.createTextNode(printJob.status);
+               text = document.createTextNode(PrintJobStatusLabels[printJob.status]);
                cell.appendChild(text);
             }
          }
          
-         this.container.appendChild(table);
+         container.appendChild(table);
       }
    }.bind(this);
 }
 
 
-function Printer()
+function Printer(preview)
 {   
-   PrintManager.prototype.print = function(printJob)
-   {
-      console.log("Printing job " + printJob.printJobId);
-   }
+   var preview = preview;
    
-   PrintManager.prototype.cancel = function()
-   {
-   }
+   var printJob = null;
    
-   PrintManager.prototype.isPrinting = function()
+   Printer.prototype.updatePreview = function()
    {
-      return (false);
-   }
+      if (printJob != null)
+      {
+         var label = dymo.label.framework.openLabelXml(printJob.xml);
+         
+         var pngData = label.render();
 
+         preview.src = "data:image/png;base64," + pngData;
+         
+         preview.style.display  = "block";         
+      }
+      else
+      {
+         preview.style.display  = "none";
+      }
+   }
+   
+   Printer.prototype.print = function(newPrintJob)
+   {
+      if (newPrintJob != null)
+      {
+         printJob = newPrintJob;
+         
+         console.log("Printing job " + printJob.printJobId);
+         
+         this.updatePreview();
+      }
+   }.bind(this);
+   
+   Printer.prototype.cancel = function()
+   {
+      printJob = null;
+   }
+   
+   Printer.prototype.isPrinting = function()
+   {
+      return (printJob != null);
+   }
 }
 
-function PrintManager(container)
+function PrintManager(container, preview)
 {
+   var frameworkInitialized = false;
+   
    var interval = null;
    
    var printQueue = new PrintQueue(container);
    
-   var printer = new Printer();
+   this.printer = new Printer(preview);  // Why must this be a member of PrintManager?
+   
+   PrintManager.prototype.onFrameworkInitialized = function()
+   {
+      console.log("DYMO framework initialized");
+      
+      frameworkInitialized = true;
+      
+      if (dymo.label.framework.checkEnvironment())
+      {
+         console.log("Printing enabled.");
+      }
+      else
+      {
+         console.log("Printing not supported.");         
+      }
+
+      var printers = dymo.label.framework.getPrinters();
+      if (printers.length == 0)
+      {
+         console.log("No printers available.");
+      }
+      else
+      {
+         var printerList = "";
+         for (printer of printers)
+         {
+            printerList += printer.name;
+            printerList += ", ";
+         }
+         console.log("Available printers: " + printerList);
+      }
+   }
    
    PrintManager.prototype.start = function()
    {
+      // Initialize framework.
+      dymo.label.framework.init(this.onFrameworkInitialized);
+      
       // Initial update.
       this.update();
       
@@ -138,16 +215,22 @@ function PrintManager(container)
    PrintManager.prototype.update = function()
    {
       console.log("PrintManager::update()");
+      
       this.fetchPrintQueue();
+      
+      this.printer.updatePreview();
       
       if (!this.printer.isPrinting())
       {
-         var printJob = this.printQueue.nextPrintJob();
+         var printJob = printQueue.nextPrintJob();
          
-         if (printJob != nullptr)
+         if (printJob != null)
          {
-            this.printer.print(printJob.xml);
-            this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PRINTING)
+            this.printer.print(printJob);
+            
+            this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PRINTING);
+            
+            // TODO: Find way to make status in print queue update immediately.
          }
       }
    }.bind(this)
@@ -206,11 +289,11 @@ function PrintManager(container)
                
                if (json.success == true)
                {
-                  console.log("Print job " + json.printJobId + " status updated.");            
+                  console.log("Print job " + json.printJobId + " status updated: " + PrintJobStatusLabels[json.status]);            
                }
                else
                {
-                  console.log("API call to retrieve print queue failed.");
+                  console.log("API call to update print job status failed.");
                }
             }
             catch (expection)
@@ -226,7 +309,20 @@ function PrintManager(container)
    
    PrintManager.prototype.updatePrintQueue = function(printJobs)
    {
-      printQueue.printJobs = printJobs;
+      // Mark all QUEUED print jobs as PENDING.
+      if (frameworkInitialized)
+      {
+         for (printJob of printJobs)
+         {
+            if (printJob.status == PrintJobStatus.QUEUED)
+            {
+               printJob.status = PrintJobStatus.PENDING;
+               this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PENDING);
+            }
+         }
+      }
+         
+      printQueue.setPrintJobs(printJobs);
       printQueue.render();
-   };
+   }.bind(this);
 }

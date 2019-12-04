@@ -4,6 +4,7 @@ require_once 'rest.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
+require_once '../common/panTicket.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
@@ -1041,14 +1042,18 @@ $router->add("queuePrintJob", function($params) {
    $database = PPTPDatabase::getInstance();
    
    if (is_numeric($params["owner"]) &&
+       isset($params["description"]) &&
        is_numeric($params["printerId"]) &&
+       is_numeric($params["copies"]) &&
        isset($params["xml"]))
    {
       $printJob = new PrintJob();
       
       $printJob->owner = intval($params["owner"]);
       $printJob->dateTime = Time::now("Y-m-d H:i:s");
+      $printJob->description = $params["description"];
       $printJob->printerId = intval($params["printerId"]);
+      $printJob->copies = intval($params["copies"]);
       $printJob->status = PrintJobStatus::QUEUED;
       $printJob->xml = $params["xml"];
 
@@ -1077,11 +1082,19 @@ $router->add("printQueue", function($params) {
    $result = new stdClass();
    $result->success = true;
    
-   $database = PPTPDatabase::getInstance();
-   
    if (is_numeric($params["printerId"]))
    {
       $printQueue = PrintQueue::load(intval($params["printerId"]));
+      
+      // Add user names
+      foreach ($printQueue->queue as $printJob)
+      {
+         $userInfo = UserInfo::load($printJob->owner);
+         if ($userInfo)
+         {
+            $printJob->ownerName = $userInfo->getFullName();
+         }
+      }
       
       $result->success = true;
       $result->queue = $printQueue->queue;
@@ -1112,10 +1125,13 @@ $router->add("setPrintJobStatus", function($params) {
       if ($dbaseResult && ($database->rowsAffected() == 1))
       {
          $result->success = true;
+         $result->printJobId = $printJobId;
+         $result->status = $status;
       }
       else
       {
          $result->success = false;
+         $result->printJobId = $printJobId;
          $result->error = "Database query failed.";
       }
    }
@@ -1148,6 +1164,35 @@ $router->add("cancelPrintJob", function($params) {
       {
          $result->success = false;
          $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("panTicket", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   if (is_numeric($params["panTicketId"]))
+   {
+      $panTicket = new PanTicket(intval($params["panTicketId"]));
+      
+      if ($panTicket)
+      {
+         $result->success = true;
+         $result->panTicketId = $panTicket->panTicketId;
+         $result->labelXML = $panTicket->labelXML;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Failed to create pan ticket.";
       }
    }
    else
