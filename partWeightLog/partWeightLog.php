@@ -88,7 +88,7 @@ function getTable($filter)
    $endDate->modify('+1 day');
    $endDateString = $endDate->format("Y-m-d");
    
-   $result = PPTPDatabase::getInstance()->getPartWeightEntries(JobInfo::UNKNOWN_WC_NUMBER, $filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
+   $result = PPTPDatabase::getInstance()->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, $filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
    
    if ($result && (MySqlDatabase::countResults($result) > 0))
    {

@@ -12,6 +12,7 @@ class PartWeightReport extends Report
 {
    function __construct()
    {
+      $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
       $this->employeeNumber = 0;
       $this->startDate = Time::now("Y-m-d H:i:s");
       $this->endDate = Time::now("Y-m-d H:i:s");
@@ -101,7 +102,7 @@ class PartWeightReport extends Report
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWeightEntries($this->employeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, $this->employeeNumber, $startDateString, $endDateString, false);
          
          if ($result && ($database->countResults($result) > 0))
          {

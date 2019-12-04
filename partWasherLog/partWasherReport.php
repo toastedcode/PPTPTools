@@ -101,7 +101,7 @@ class PartWasherReport extends Report
          $endDate->modify('+1 day');
          $endDateString = $endDate->format("Y-m-d");
          
-         $result = $database->getPartWasherEntries($this->employeeNumber, $startDateString, $endDateString);
+         $result = $database->getPartWasherEntries(JobInfo::UNKNOWN_JOB_ID, $this->employeeNumber, $startDateString, $endDateString, false);
          
          if ($result && ($database->countResults($result) > 0))
          {
