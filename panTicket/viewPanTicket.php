@@ -59,13 +59,13 @@ function getNavBar()
    
    if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
-      $navBar->cancelButton("location.href = '../home.php'");
-      
       $navBar->highlightNavButton("Edit Time Card", "location.href = '../timeCard/viewTimeCard.php?timeCardId=$timeCardId'", false);
    
       $navBar->highlightNavButton("Weigh Parts", "location.href = '../partWeightLog/partWeightLogEntry.php?timeCardId=$timeCardId'", false);
    
       $navBar->highlightNavButton("Wash Parts", "location.href = '../partWasherLog/partWasherLogEntry.php?timeCardId=$timeCardId'", false);
+      
+      $navBar->highlightNavButton("Print Copies", "location.href = 'printPanTicket.php?panTicketId=$timeCardId'", false);
    }
    else
    {
@@ -123,12 +123,10 @@ if (!Authentication::isAuthenticated())
 
         <div class="description">Select the action you want to take with this pan ticket.  All the relevant data will be automatically entered for you.</div>
 
-        <div class="flex-vertical inner-content">
-        
-           <div>
-              <img id="pan-ticket-image" src="" alt="pan ticket"/>
-           </div>
-      
+        <div class="flex-vertical inner-content" style="align-items:center; width:100%;">
+ 
+           <img id="pan-ticket-image" src="" style="display:none;" alt="pan ticket"/>
+       
         </div>
         
         <?php echo getNavBar(); ?>

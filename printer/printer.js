@@ -42,7 +42,7 @@ function PrintQueue(container)
    
    PrintQueue.prototype.render = function()
    {
-      const HEADINGS = new Array("Date", "Owner", "Description", "Status");
+      const HEADINGS = new Array("Date", "Owner", "Description", "Copies", "Status", "");
       
       if (container != null)
       {
@@ -93,10 +93,20 @@ function PrintQueue(container)
                text = document.createTextNode(printJob.description);
                cell.appendChild(text);
                
+               // Copies
+               cell = row.insertCell();
+               text = document.createTextNode(printJob.copies);
+               cell.appendChild(text);
+               
                // Status
                cell = row.insertCell();
                text = document.createTextNode(PrintJobStatusLabels[printJob.status]);
                cell.appendChild(text);
+               
+               // Delete icon
+               cell = row.insertCell();
+               cell.innerHTML = 
+                  "<i class=\"material-icons table-function-button\" onclick=\"printManager.cancelPrintJob(" + printJob.printJobId + ")\">delete</i>";
             }
          }
          
@@ -110,8 +120,7 @@ function Printer(preview)
 {   
    var preview = preview;
    
-   var printJob = null;
-   
+   /*
    Printer.prototype.updatePreview = function()
    {
       if (printJob != null)
@@ -129,28 +138,33 @@ function Printer(preview)
          preview.style.display  = "none";
       }
    }
+   */
    
-   Printer.prototype.print = function(newPrintJob)
+   Printer.prototype.print = function(printJob, callback)
    {
-      if (newPrintJob != null)
+      console.log("Printing job " + printJob.printJobId);
+      
+      //this.updatePreview();
+      
+      var printParams = {};
+      printParams.copies = printJob.copies;
+      printParams.jobTitle = printJob.description;
+      
+      try
       {
-         printJob = newPrintJob;
+         var printParamsXML = dymo.label.framework.createLabelWriterPrintParamsXml(printParams);
+
+         dymo.label.framework.printLabel("DYMO LabelWriter 450", printParamsXML, printJob.xml);
          
-         console.log("Printing job " + printJob.printJobId);
+         console.log("Printed!");
          
-         this.updatePreview();
+         callback(printJob, true);
+      }
+      catch (exception)
+      {
+         callback(printJob, false);
       }
    }.bind(this);
-   
-   Printer.prototype.cancel = function()
-   {
-      printJob = null;
-   }
-   
-   Printer.prototype.isPrinting = function()
-   {
-      return (printJob != null);
-   }
 }
 
 function PrintManager(container, preview)
@@ -211,27 +225,24 @@ function PrintManager(container, preview)
    {
       clearInterval(interval);
    }
-   
+      
    PrintManager.prototype.update = function()
    {
       console.log("PrintManager::update()");
       
       this.fetchPrintQueue();
       
-      this.printer.updatePreview();
+      //this.printer.updatePreview();
       
-      if (!this.printer.isPrinting())
+      var printJob = printQueue.nextPrintJob();
+      
+      if (printJob != null)
       {
-         var printJob = printQueue.nextPrintJob();
+         this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PRINTING);
+
+         this.printer.print(printJob, this.onPrintResult);
          
-         if (printJob != null)
-         {
-            this.printer.print(printJob);
-            
-            this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PRINTING);
-            
-            // TODO: Find way to make status in print queue update immediately.
-         }
+         // TODO: Find way to make status in print queue update immediately.
       }
    }.bind(this)
    
@@ -325,4 +336,56 @@ function PrintManager(container, preview)
       printQueue.setPrintJobs(printJobs);
       printQueue.render();
    }.bind(this);
-}
+   
+   PrintManager.prototype.onPrintResult = function(printJob, success)
+   {
+      if (success)
+      {
+         console.log("PrintManager::onPrintResult: Success!");
+         
+         this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.COMPLETE);
+      }
+      else
+      {
+         console.log("PrintManager::onPrintResult: Failure!");
+      }
+   }.bind(this);
+   
+   PrintManager.prototype.cancelPrintJob = function(printJobId)
+   {
+      var manager = this;
+      
+      // AJAX call to cancel print job.
+      requestUrl = "../api/cancelPrintJob/?printJobId=" + printJobId;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            try
+            {            
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  console.log("Cancelled print job " + json.printJobId);
+                  
+                  manager.update();
+               }
+               else
+               {
+                  alert("Failed to cancel print job.");
+               }
+            }
+            catch (expection)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();  
+   }.bind(this);
+ }

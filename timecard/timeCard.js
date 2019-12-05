@@ -259,7 +259,14 @@ function onSubmit()
    
             if (json.success == true)
             {
-               location.href = "viewTimeCards.php";
+               if (confirm('Print pan tickets?'))
+               {
+                  location.href = "../panTicket/printPanTicket.php?panTicketId=" + json.timeCardId;
+               } 
+               else
+               {
+                  location.href = "viewTimeCards.php";
+               }
             }
             else
             {
@@ -400,8 +407,6 @@ function updateApproval()
    
    var requiresApproval = false;
    var isApproved = document.getElementById("approved-by-input").value != 0;
-   
-   console.log(document.getElementById("approved-by-input").value);
    
    if (setupTimeHourInput.validator.isValid() && 
        setupTimeMinuteInput.validator.isValid())

@@ -18,9 +18,9 @@
 			<IsVariable>False</IsVariable>
 			<GroupID>-1</GroupID>
 			<IsOutlined>False</IsOutlined>
-			<Text>tools.pittsburghprecision.com/panTicket.php?timeCardId=16</Text>
+			<Text>tools.pittsburghprecision.com/panTicket.php?panTicketId=88</Text>
 			<Type>QRCode</Type>
-			<Size>Medium</Size>
+			<Size>Large</Size>
 			<TextPosition>None</TextPosition>
 			<TextFont Family="Arial" Size="7.3125" Bold="False" Italic="False" Underline="False" Strikeout="False" />
 			<CheckSumFont Family="Arial" Size="7.3125" Bold="False" Italic="False" Underline="False" Strikeout="False" />
@@ -29,7 +29,7 @@
 			<HorizontalAlignment>Center</HorizontalAlignment>
 			<QuietZonesPadding Left="0" Top="0" Right="0" Bottom="0" />
 		</BarcodeObject>
-		<Bounds X="82" Y="4147.2001953125" Width="3192" Height="979.200012207031" />
+		<Bounds X="202" Y="3967.2001953125" Width="1527" Height="1579.20001220703" />
 	</ObjectInfo>
 	<ObjectInfo>
 		<AddressObject>
@@ -49,12 +49,89 @@
 			<Verticalized>False</Verticalized>
 			<StyledText>
 				<Element>
-					<String xml:space="preserve">Job: %jobNumber
-WC: %wcNumber
-Operator: %operator
-Mfg date: %mfgDate
-Heat: %heatNumber
-Baskets: %panCount</String>
+					<String xml:space="preserve">Job:</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve"> %jobNumber
+</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve">WC:</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve"> %wcNumber
+</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve">Operator:</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve"> %operator
+</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve">Date:</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve"> %mfgDate
+</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve">Heat:</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve"> %heatNumber
+</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve">Baskets:</String>
+					<Attributes>
+						<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+				<Element>
+					<String xml:space="preserve"> %panCount</String>
 					<Attributes>
 						<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
 						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
@@ -64,12 +141,12 @@ Baskets: %panCount</String>
 			<ShowBarcodeFor9DigitZipOnly>False</ShowBarcodeFor9DigitZipOnly>
 			<BarcodePosition>AboveAddress</BarcodePosition>
 			<LineFonts>
-				<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
-				<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
-				<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
-				<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
-				<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
-				<Font Family="Arial" Size="26" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+				<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+				<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+				<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+				<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+				<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+				<Font Family="Arial" Size="26" Bold="True" Italic="False" Underline="False" Strikeout="False" />
 			</LineFonts>
 		</AddressObject>
 		<Bounds X="82" Y="1552.80004882813" Width="3186.80004882813" Height="2168.39990234375" />
@@ -128,14 +205,42 @@ Baskets: %panCount</String>
 			<Verticalized>False</Verticalized>
 			<StyledText>
 				<Element>
-					<String xml:space="preserve">attach here</String>
+					<String xml:space="preserve">----- attach here -----</String>
 					<Attributes>
-						<Font Family="Arial" Size="14" Bold="False" Italic="True" Underline="False" Strikeout="False" />
+						<Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
 						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
 					</Attributes>
 				</Element>
 			</StyledText>
 		</TextObject>
 		<Bounds X="150" Y="336" Width="3015" Height="930" />
+	</ObjectInfo>
+	<ObjectInfo>
+		<TextObject>
+			<Name>Text_1</Name>
+			<ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+			<LinkedObjectName />
+			<Rotation>Rotation0</Rotation>
+			<IsMirrored>False</IsMirrored>
+			<IsVariable>True</IsVariable>
+			<GroupID>-1</GroupID>
+			<IsOutlined>False</IsOutlined>
+			<HorizontalAlignment>Center</HorizontalAlignment>
+			<VerticalAlignment>Middle</VerticalAlignment>
+			<TextFitMode>ShrinkToFit</TextFitMode>
+			<UseFullFontHeight>True</UseFullFontHeight>
+			<Verticalized>False</Verticalized>
+			<StyledText>
+				<Element>
+					<String xml:space="preserve">%id</String>
+					<Attributes>
+						<Font Family="Arial" Size="36" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+			</StyledText>
+		</TextObject>
+		<Bounds X="1507" Y="4221" Width="1620" Height="1095" />
 	</ObjectInfo>
 </DieCutLabel>

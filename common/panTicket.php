@@ -21,7 +21,7 @@ abstract class PanTicketLabelFields
    
    public static function getKeyword($panTicketLabelField)
    {
-      $keywords = array("%panTicketId", 
+      $keywords = array("%id", 
                         "%jobNumber", 
                         "%wcNumber", 
                         "%operator", 
@@ -56,13 +56,6 @@ class PanTicket
       $xml = "";
       
       $timeCardInfo = TimeCardInfo::load($timeCardId);
-      
-      $operator = "";
-      if ($timeCardInfo)
-      {
-         $userInfo = UserInfo::load($timeCardInfo->employeeNumber);
-         $operator = $userInfo->username . " ($timeCardInfo->employeeNumber)";
-      }
       
       $jobNumber = "";
       $wcNumber = "";
@@ -109,7 +102,7 @@ class PanTicket
                
                case PanTicketLabelFields::OPERATOR:
                {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $operator, $xml);
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->employeeNumber, $xml);
                   break;
                }
                

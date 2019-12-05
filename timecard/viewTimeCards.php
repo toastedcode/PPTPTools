@@ -109,6 +109,7 @@ function getTable($filter)
                <th class="hide-on-tablet">Scrap Count</th>
                <th/>
                <th/>
+               <th/>
             </tr>
 HEREDOC;
       
@@ -196,6 +197,10 @@ HEREDOC;
                "<a href=\"$ROOT/timecard/viewTimeCard.php?timeCardId=$timeCardInfo->timeCardId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
+            $panTicketIcon =
+            "<a href=\"$ROOT/panTicket/viewPanTicket.php?panTicketId=$timeCardInfo->timeCardId\"><i class=\"material-icons table-function-button\">receipt</i></a>";
+            
+            
             $html .=
 <<<HEREDOC
             <tr>
@@ -214,6 +219,7 @@ HEREDOC;
                <td>$timeCardInfo->partCount $incompletePartCount</td>
                <td class="hide-on-tablet">$timeCardInfo->scrapCount</td>
                <td>$viewEditIcon</td>
+               <td>$panTicketIcon</td>
                <td>$deleteIcon</td>
             </tr>
 HEREDOC;

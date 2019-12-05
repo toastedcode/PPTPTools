@@ -82,6 +82,11 @@ class MySqlDatabase implements Database
       return(mysqli_affected_rows($this->connection));
    }
    
+   public function lastInsertId()
+   {
+      return (mysqli_insert_id($this->connection));
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
