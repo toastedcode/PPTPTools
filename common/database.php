@@ -77,6 +77,16 @@ class MySqlDatabase implements Database
       return (mysqli_num_rows($result));
    }
    
+   public function rowsAffected()
+   {
+      return(mysqli_affected_rows($this->connection));
+   }
+   
+   public function lastInsertId()
+   {
+      return (mysqli_insert_id($this->connection));
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
@@ -1338,6 +1348,132 @@ class PPTPDatabase extends MySqlDatabase
       $query = "DELETE FROM inspectionresult WHERE inspectionId = $inspectionId;";
       
       $result &= $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                                 Printer
+   // **************************************************************************
+   
+   public function getPrinter($printerName)
+   {
+      $query = "SELECT * FROM printer WHERE printerName = '$printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newPrinter($printerInfo)
+   {
+      $dateTime = Time::toMySqlDate($printerInfo->lastContact);
+      
+      $query =
+      "INSERT INTO printer " .
+      "(printerName, model, isConnected, lastContact) " .
+      "VALUES " .
+      "('$printerInfo->printerName', '$printerInfo->model', '$printerInfo->isConnected', '$dateTime');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePrinter($printerInfo)
+   {
+      $dateTime = Time::toMySqlDate($printerInfo->lastContact);
+      
+      $query =
+      "UPDATE printer " .
+      "SET model = '$printerInfo->model', isConnected = '$printerInfo->isConnected', lastContact = '$dateTime' " .
+      "WHERE printerName = '$printerInfo->printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePrinter($printerName)
+   {
+      $query = "DELETE FROM printer WHERE printerName = '$printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPrinters()
+   {
+      $query = "SELECT * FROM printer;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                                 Print Job
+   // **************************************************************************
+   
+   public function getPrintJob($printJobId)
+   {
+      $query = "SELECT * FROM printjob WHERE printJobId = $printJobId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPrintJobIds($printerId)
+   {
+      $printerClause = "";
+      if ($printerId != PrintJob::UNKNOWN_PRINTER_ID)
+      {
+         $printerClause = "WHERE printerId = $printerId";
+      }
+
+      $queued = PrintJobStatus::QUEUED;
+      $pending = PrintJobStatus::PENDING;
+      $printing = PrintJobStatus::PRINTING;
+      $statusClause = "status IN ($queued, $pending, $printing)";
+      
+      $query = "SELECT printJobId FROM printjob $printerClause AND $statusClause ORDER BY dateTime ASC;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newPrintJob($printJob)
+   {
+      $dateTime = Time::toMySqlDate($printJob->dateTime);
+      
+      $query =
+      "INSERT INTO printjob " .
+      "(owner, dateTime, description, printerId, copies, status, xml) " . 
+      "VAlUES " .
+      "('$printJob->owner', '$dateTime', '$printJob->description', '$printJob->printerId', '$printJob->copies', '$printJob->status', '$printJob->xml');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function setPrintJobStatus($printJobId, $status)
+   {
+      $query = "UPDATE printjob SET status = '$status' WHERE printJobId = $printJobId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePrintJob($printJobId)
+   {
+      $query = "DELETE FROM printjob WHERE printJobId = $printJobId;";
+      
+      $result = $this->query($query);
       
       return ($result);
    }

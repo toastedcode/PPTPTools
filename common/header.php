@@ -11,7 +11,7 @@ class Header
       echo 
 <<<HEREDOC
       <div class="header-div">
-         <span class="page-title">$pageTitle</span>
+         <span class="page-title" onclick="location.href = '$ROOT/home.php'">$pageTitle</span>
 HEREDOC;
          
       if (Authentication::isAuthenticated())

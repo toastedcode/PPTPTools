@@ -20,7 +20,8 @@ class Activity
    const PRODUCTION_SUMMARY = 9;
    const USER = 10;
    const SIGNAGE = 11;
-   const LAST = Activity::SIGNAGE;
+   const PRINT_MANAGER = 12;
+   const LAST = Activity::PRINT_MANAGER;
       
    private static $permissionMasks = null;
    
@@ -39,7 +40,9 @@ class Activity
             Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
             Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
             Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
-            Permission::getPermission(Permission::VIEW_SIGN)->bits);               // SIGNAGE
+            Permission::getPermission(Permission::VIEW_SIGN)->bits,                // SIGNAGE
+            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits        // PRINT_MANAGER
+         );
       }
       
       return (Activity::$permissionMasks);
@@ -275,6 +278,20 @@ HEREDOC;
 HEREDOC;
    }
    
+   // Print Manager
+   $printManagerButton = "";
+   if (Activity::isAllowed(Activity::PRINT_MANAGER, $permissions))
+   {
+      $printManagerButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='printer/printer.php';">
+        <i class="material-icons action-button-icon">print</i>
+        <div>Print</div>
+        <div>Manager</div>
+     </div>
+HEREDOC;
+   }
+   
    echo
 <<<HEREDOC
    <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
@@ -310,6 +327,8 @@ HEREDOC;
             $productionSummaryButton
             
             $digitalSignageButton
+
+            $printManagerButton
    
          </div>
          
