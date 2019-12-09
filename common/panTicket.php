@@ -41,6 +41,8 @@ class PanTicket
    
    public $panTicketId = PanTicket::UNKNOWN_PAN_TICKET_ID;
    
+   public $printDescription = "";
+   
    public $labelXML = "";
    
    public function __construct($panTicketId)
@@ -49,6 +51,29 @@ class PanTicket
       $this->panTicketId = $panTicketId;
       
       $this->labelXML = PanTicket::generateLabelXml($this->panTicketId);
+      
+      $this->printDescription = PanTicket::generatePrintDescription($this->panTicketId);
+   }
+   
+   private static function generatePrintDescription($timeCardId)
+   {
+      $description = "PanTicket";
+      
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      
+      if ($timeCardInfo)
+      {
+         $jobInfo = JobInfo::load($timeCardInfo->jobId);
+         
+         if ($jobInfo)
+         {
+            $description .= "_" . $jobInfo->jobNumber;
+         }
+      }
+      
+      $description .= ".label";
+      
+      return ($description);
    }
 
    private static function generateLabelXml($timeCardId)

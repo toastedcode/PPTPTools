@@ -11,7 +11,7 @@ class PrintQueue
       $this->queue = array();
    }
    
-   public static function load($printerId)
+   public static function load()
    {
       $printQueue = new PrintQueue();
       
@@ -19,7 +19,7 @@ class PrintQueue
       
       if ($database && $database->isConnected())
       {
-         $result = $database->getPrintJobIds($printerId);
+         $result = $database->getPrintJobIds();
          
          while ($result && ($row = $result->fetch_assoc()))
          {

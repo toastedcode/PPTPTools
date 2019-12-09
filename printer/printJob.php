@@ -9,7 +9,7 @@ class PrintJob
    
    const UNKNOWN_OWNER_ID = 0;
    
-   const UNKNOWN_PRINTER_ID = 0;
+   const UNKNOWN_PRINTER_NAME = "";
    
    const MIN_COPIES = 1;
    
@@ -17,7 +17,7 @@ class PrintJob
    public $owner;
    public $dateTime;
    public $description;
-   public $printerId;
+   public $printerName;
    public $copies;
    public $status;
    public $xml;
@@ -28,7 +28,7 @@ class PrintJob
       $this->owner = PrintJob::UNKNOWN_OWNER_ID;
       $this->dateTime = null;
       $this->description = "";
-      $this->printerId = PrintJob::UNKNOWN_PRINTER_ID;
+      $this->printerName = PrintJob::UNKNOWN_PRINTER_NAME;
       $this->copies = PrintJob::MIN_COPIES;
       $this->status = PrintJobStatus::UNKNOWN;
       $this->xml = "";
@@ -52,7 +52,7 @@ class PrintJob
             $printJob->owner = intval($row['owner']);
             $printJob->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $printJob->description = $row['description'];
-            $printJob->printerId = intval($row['printerId']);
+            $printJob->printerName = $row['printerName'];
             $printJob->copies = intval($row['copies']);
             $printJob->status = intval($row['status']);
             $printJob->xml = $row['xml'];
@@ -76,7 +76,7 @@ if (isset($_GET["printJobId"]))
       echo "owner: " .       $printJob->owner .                            "<br/>";
       echo "dateTime: " .    $printJob->dateTime .                         "<br/>";
       echo "description: " . $printJob->description .                      "<br/>";
-      echo "printerId: " .   $printJob->printerId .                        "<br/>"; 
+      echo "printerName: " . $printJob->printerName .                      "<br/>"; 
       echo "copies: " .      $printJob->copies .                           "<br/>";     
       echo "status: " .      PrintJobStatus::getLabel($printJob->status) . "<br/>";
       echo "xml: " .         htmlspecialchars($printJob->xml) .            "<br/>";

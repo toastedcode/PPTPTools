@@ -705,9 +705,9 @@ if (!Authentication::isAuthenticated())
          <div class="pptp-form">
             <div class="form-row">
             <div class="form-col" style="margin-right: 20px;">  
-               <div class="form-section-header">Time Card Entry</div>               
+               <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
-                  <div class="form-label">Time Card ID</div>
+                  <div class="form-label">Pan Ticket ID</div>
                   <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" oninput="this.validator.validate(); onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable(PartWeightLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
                </div>               
             

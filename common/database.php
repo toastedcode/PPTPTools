@@ -1369,11 +1369,13 @@ class PPTPDatabase extends MySqlDatabase
    {
       $dateTime = Time::toMySqlDate($printerInfo->lastContact);
       
+      $isConnected = intval($printerInfo->isConnected);
+      
       $query =
       "INSERT INTO printer " .
       "(printerName, model, isConnected, lastContact) " .
       "VALUES " .
-      "('$printerInfo->printerName', '$printerInfo->model', '$printerInfo->isConnected', '$dateTime');";
+      "('$printerInfo->printerName', '$printerInfo->model', '$isConnected', '$dateTime');";
       
       $result = $this->query($query);
       
@@ -1384,11 +1386,13 @@ class PPTPDatabase extends MySqlDatabase
    {
       $dateTime = Time::toMySqlDate($printerInfo->lastContact);
       
+      $isConnected = intval($printerInfo->isConnected);
+      
       $query =
       "UPDATE printer " .
-      "SET model = '$printerInfo->model', isConnected = '$printerInfo->isConnected', lastContact = '$dateTime' " .
+      "SET model = '$printerInfo->model', isConnected = '$isConnected', lastContact = '$dateTime' " .
       "WHERE printerName = '$printerInfo->printerName';";
-      
+
       $result = $this->query($query);
       
       return ($result);
@@ -1425,20 +1429,14 @@ class PPTPDatabase extends MySqlDatabase
       return ($result);
    }
    
-   public function getPrintJobIds($printerId)
+   public function getPrintJobIds()
    {
-      $printerClause = "";
-      if ($printerId != PrintJob::UNKNOWN_PRINTER_ID)
-      {
-         $printerClause = "WHERE printerId = $printerId";
-      }
-
       $queued = PrintJobStatus::QUEUED;
       $pending = PrintJobStatus::PENDING;
       $printing = PrintJobStatus::PRINTING;
-      $statusClause = "status IN ($queued, $pending, $printing)";
+      $statusClause = "WHERE status IN ($queued, $pending, $printing)";
       
-      $query = "SELECT printJobId FROM printjob $printerClause AND $statusClause ORDER BY dateTime ASC;";
+      $query = "SELECT printJobId FROM printjob $statusClause ORDER BY dateTime ASC;";
 
       $result = $this->query($query);
       
@@ -1451,9 +1449,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO printjob " .
-      "(owner, dateTime, description, printerId, copies, status, xml) " . 
+      "(owner, dateTime, description, printerName, copies, status, xml) " . 
       "VAlUES " .
-      "('$printJob->owner', '$dateTime', '$printJob->description', '$printJob->printerId', '$printJob->copies', '$printJob->status', '$printJob->xml');";
+      "('$printJob->owner', '$dateTime', '$printJob->description', '$printJob->printerName', '$printJob->copies', '$printJob->status', '$printJob->xml');";
 
       $result = $this->query($query);
       

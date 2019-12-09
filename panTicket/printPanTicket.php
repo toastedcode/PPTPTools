@@ -61,7 +61,7 @@ function getNavBar()
    if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
       $navBar->highlightNavButton("Print", "printPanTicket()", false);
-      $navBar->cancelButton("location.href = '../timeCard/viewTimeCards.php?timeCardId=$timeCardId'", false);
+      $navBar->cancelButton("location.href = '../timecard/viewTimeCards.php'", false);
    }
    else
    {
@@ -87,7 +87,7 @@ function getPrinterOptions()
       {
          $printerInfo = PrinterInfo::load($row["printerName"]);
 
-         if ($printerInfo)
+         if ($printerInfo && $printerInfo->isCurrent())
          {
             $displayName = $printerInfo->printerName;
             $disabled = "";
@@ -164,7 +164,7 @@ if (!Authentication::isAuthenticated())
 
                   <div class="form-item">
                      <div class="form-label">Printer</div>
-                     <select id="printer-input" class="form-input-medium" type="text" name="printerId" form="input-form">
+                     <select id="printer-input" class="form-input-medium" type="text" name="printerName" form="input-form">
                         <?php echo getPrinterOptions(); ?>
                      </select>
                   </div>

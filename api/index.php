@@ -1105,7 +1105,7 @@ $router->add("queuePrintJob", function($params) {
    
    if (is_numeric($params["owner"]) &&
        isset($params["description"]) &&
-       is_numeric($params["printerId"]) &&
+       isset($params["printerName"]) &&
        is_numeric($params["copies"]) &&
        isset($params["xml"]))
    {
@@ -1114,7 +1114,7 @@ $router->add("queuePrintJob", function($params) {
       $printJob->owner = intval($params["owner"]);
       $printJob->dateTime = Time::now("Y-m-d H:i:s");
       $printJob->description = $params["description"];
-      $printJob->printerId = intval($params["printerId"]);
+      $printJob->printerName = $params["printerName"];
       $printJob->copies = intval($params["copies"]);
       $printJob->status = PrintJobStatus::QUEUED;
       $printJob->xml = $params["xml"];
@@ -1142,30 +1142,21 @@ $router->add("queuePrintJob", function($params) {
 
 $router->add("printQueue", function($params) {
    $result = new stdClass();
-   $result->success = true;
    
-   if (is_numeric($params["printerId"]))
+   $printQueue = PrintQueue::load();
+   
+   // Add user names
+   foreach ($printQueue->queue as $printJob)
    {
-      $printQueue = PrintQueue::load(intval($params["printerId"]));
-      
-      // Add user names
-      foreach ($printQueue->queue as $printJob)
+      $userInfo = UserInfo::load($printJob->owner);
+      if ($userInfo)
       {
-         $userInfo = UserInfo::load($printJob->owner);
-         if ($userInfo)
-         {
-            $printJob->ownerName = $userInfo->getFullName();
-         }
+         $printJob->ownerName = $userInfo->getFullName();
       }
-      
-      $result->success = true;
-      $result->queue = $printQueue->queue;
    }
-   else
-   {
-      $result->success = false;
-      $result->error = "Missing parameters.";
-   }
+   
+   $result->success = true;
+   $result->queue = $printQueue->queue;
    
    echo json_encode($result);
 });
@@ -1275,18 +1266,18 @@ $router->add("printPanTicket", function($params) {
    $database = PPTPDatabase::getInstance();
    
    if (is_numeric($params["panTicketId"]) &&
-       is_numeric($params["printerId"]) &&
+       isset($params["printerName"]) &&
        is_numeric($params["copies"]))
    {
       $panTicket = new PanTicket(intval($params["panTicketId"]));
       
       if ($panTicket)
-      {
+      {         
          $printJob = new PrintJob();
          $printJob->owner = Authentication::getAuthenticatedUser()->employeeNumber;
          $printJob->dateTime = Time::now("Y-m-d H:i:s");
-         $printJob->description = "PanTicket_" . $panTicket->panTicketId;
-         $printJob->printerId = intval($params["printerId"]);
+         $printJob->description = $panTicket->printDescription;
+         $printJob->printerName = $params["printerName"];
          $printJob->copies = intval($params["copies"]);
          $printJob->status = PrintJobStatus::QUEUED;
          $printJob->xml = $panTicket->labelXML;
