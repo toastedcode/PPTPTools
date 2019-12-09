@@ -5,178 +5,35 @@ var PrintJobStatus = {
    PENDING:  2,
    PRINTING: 3,
    COMPLETE: 4,
-   DELETED:  5
+   DELETED:  6
 };
 
 var PrintJobStatusLabels = ["", "Queued", "Pending", "Printing", "Complete", "Deleted"];
 
-function PrintQueue(container)
+function PrintManager(printerContainerId, printQueueContainerId, previewId)
 {
-   var container = container;
+   // The div element containing the printer table
+   var printerContainer = document.getElementById(printerContainerId);
    
-   var printJobs = null;
+   // The div element containing the print queue table.
+   var printQueueContainer = document.getElementById(printQueueContainerId);
    
-   PrintQueue.prototype.setPrintJobs = function(newPrintJobs)
-   {
-      printJobs = newPrintJobs;
-   }
+   // The img element to be used as the print preview.
+   var previewImg = document.getElementById(previewId);
    
-   PrintQueue.prototype.nextPrintJob = function()
-   {
-      var nextJob = null;
-      
-      if (printJobs != null)
-      {
-         for (printJob of printJobs)
-         {
-            if (printJob.status == PrintJobStatus.PENDING)
-            {
-               nextJob = printJob;
-               break;
-            }
-         }
-      }
-
-      return (nextJob);
-   }.bind(this)
-   
-   PrintQueue.prototype.render = function()
-   {
-      const HEADINGS = new Array("Date", "Owner", "Description", "Copies", "Status", "");
-      
-      if (container != null)
-      {
-         // Clear table.
-         while (container.firstChild)
-         {
-            container.removeChild(container.firstChild);
-         }
-         
-         //
-         // Build table heading
-         //
-         
-         var table = document.createElement("table");
-         var thead = table.createTHead();
-         var row = thead.insertRow();
-         
-         for (heading of HEADINGS)
-         {
-            var th = document.createElement("th");
-            var text = document.createTextNode(heading);
-            th.appendChild(text);
-            row.appendChild(th);
-         }
-         
-         //
-         // Build table rows
-         //
-         
-         if (printJobs != null)
-         {
-            for (printJob of printJobs)
-            {
-               var row = table.insertRow();
-               
-               // Date
-               var cell = row.insertCell();
-               var text = document.createTextNode(printJob.dateTime);
-               cell.appendChild(text);
-               
-               // Owner
-               cell = row.insertCell();
-               text = document.createTextNode(printJob.ownerName);
-               cell.appendChild(text);
-               
-               // Description
-               cell = row.insertCell();
-               text = document.createTextNode(printJob.description);
-               cell.appendChild(text);
-               
-               // Copies
-               cell = row.insertCell();
-               text = document.createTextNode(printJob.copies);
-               cell.appendChild(text);
-               
-               // Status
-               cell = row.insertCell();
-               text = document.createTextNode(PrintJobStatusLabels[printJob.status]);
-               cell.appendChild(text);
-               
-               // Delete icon
-               cell = row.insertCell();
-               cell.innerHTML = 
-                  "<i class=\"material-icons table-function-button\" onclick=\"printManager.cancelPrintJob(" + printJob.printJobId + ")\">delete</i>";
-            }
-         }
-         
-         container.appendChild(table);
-      }
-   }.bind(this);
-}
-
-
-function Printer(preview)
-{   
-   var preview = preview;
-   
-   /*
-   Printer.prototype.updatePreview = function()
-   {
-      if (printJob != null)
-      {
-         var label = dymo.label.framework.openLabelXml(printJob.xml);
-         
-         var pngData = label.render();
-
-         preview.src = "data:image/png;base64," + pngData;
-         
-         preview.style.display  = "block";         
-      }
-      else
-      {
-         preview.style.display  = "none";
-      }
-   }
-   */
-   
-   Printer.prototype.print = function(printJob, callback)
-   {
-      console.log("Printing job " + printJob.printJobId);
-      
-      //this.updatePreview();
-      
-      var printParams = {};
-      printParams.copies = printJob.copies;
-      printParams.jobTitle = printJob.description;
-      
-      try
-      {
-         var printParamsXML = dymo.label.framework.createLabelWriterPrintParamsXml(printParams);
-
-         dymo.label.framework.printLabel("DYMO LabelWriter 450", printParamsXML, printJob.xml);
-         
-         console.log("Printed!");
-         
-         callback(printJob, true);
-      }
-      catch (exception)
-      {
-         callback(printJob, false);
-      }
-   }.bind(this);
-}
-
-function PrintManager(container, preview)
-{
+   // Indicator that the DYMO framework has been initialized.
    var frameworkInitialized = false;
    
+   // Timer for refreshing the print queue from the server.
    var interval = null;
    
-   var printQueue = new PrintQueue(container);
+   // Array of print jobs representing the current print queue.
+   var printQueue = null;
    
-   this.printer = new Printer(preview);  // Why must this be a member of PrintManager?
-   
+   // Array of dymo.label.framework.PrinterInfo objects representing the printers detected on the client PC.
+   var printers = null;
+
+   // Callback from DYMO framework.
    PrintManager.prototype.onFrameworkInitialized = function()
    {
       console.log("DYMO framework initialized");
@@ -191,22 +48,42 @@ function PrintManager(container, preview)
       {
          console.log("Printing not supported.");         
       }
-
-      var printers = dymo.label.framework.getPrinters();
-      if (printers.length == 0)
+      
+   }.bind(this)
+   
+   // Registers all detected printers with the server.
+   PrintManager.prototype.registerPrinters = function()
+   {
+      for (printer of printers)
       {
-         console.log("No printers available.");
+         this.registerPrinter(printer);
       }
-      else
+      
+   }.bind(this)
+   
+   // Queries DYMO framework for printers detected on the client PC
+   PrintManager.prototype.refreshPrinters = function()
+   {
+      printers = dymo.label.framework.getPrinters();
+     
+      this.renderPrinters();
+      
+   }.bind(this)
+   
+   PrintManager.prototype.isPrinterOnline = function(printerName)
+   {
+      var isOnline = false;
+      
+      for (printer of printers)
       {
-         var printerList = "";
-         for (printer of printers)
+         if (printer.name == printerName)
          {
-            printerList += printer.name;
-            printerList += ", ";
-         }
-         console.log("Available printers: " + printerList);
+            isOnline = printer.isConnected;
+            break;
+         }           
       }
+      
+      return (isOnline);
    }
    
    PrintManager.prototype.start = function()
@@ -228,23 +105,53 @@ function PrintManager(container, preview)
       
    PrintManager.prototype.update = function()
    {
-      console.log("PrintManager::update()");
+      this.refreshPrinters();
+      
+      this.registerPrinters();
       
       this.fetchPrintQueue();
-      
-      //this.printer.updatePreview();
-      
-      var printJob = printQueue.nextPrintJob();
-      
-      if (printJob != null)
-      {
-         this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PRINTING);
-
-         this.printer.print(printJob, this.onPrintResult);
-         
-         // TODO: Find way to make status in print queue update immediately.
-      }
+ 
    }.bind(this)
+   
+   PrintManager.prototype.registerPrinter = function(printerInfo)
+   {
+      var xhttp = new XMLHttpRequest();
+   
+      // Bind the form data.
+      var formData = new FormData();
+      formData.set("printerName", printerInfo.name);
+      formData.set("model", printerInfo.modelName);
+      formData.set("isConnected", printerInfo.isConnected);
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         try
+         {
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == false)
+            {
+               console.log("Failed to register printer. " + json.error);
+            }
+         }
+         catch (exception)
+         {
+            console.log("JSON syntax error. " + exception.message);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/registerPrinter/"
+      xhttp.open("POST", requestUrl);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);         
+   }
    
    PrintManager.prototype.fetchPrintQueue = function()
    {
@@ -264,16 +171,16 @@ function PrintManager(container, preview)
                
                if (json.success == true)
                {
-                  manager.updatePrintQueue(json.queue);               
+                  manager.onPrintQueueUpdate(json.queue);               
                }
                else
                {
                   console.log("API call to retrieve print queue failed.");
                }
             }
-            catch (expection)
+            catch (exception)
             {
-               console.log("JSON syntax error");
+               console.log("JSON syntax error: " + exception.message);
                console.log(this.responseText);
             }
          }
@@ -282,7 +189,7 @@ function PrintManager(container, preview)
       xhttp.send();  
    };
    
-   PrintManager.prototype.setPrintJobStatus = function(printJobId, status)
+   PrintManager.prototype.updatePrintJobStatus = function(printJobId, status)
    {
       // AJAX call to fetch print queue.
       requestUrl = "../api/setPrintJobStatus/?printJobId=" + printJobId + "&status=" + status;
@@ -304,51 +211,57 @@ function PrintManager(container, preview)
                }
                else
                {
-                  console.log("API call to update print job status failed.");
+                  console.log("API call to update print job status failed: " + json.error);
                }
             }
-            catch (expection)
+            catch (exception)
             {
-               console.log("JSON syntax error");
+               console.log("JSON syntax error: " + exception.message);
                console.log(this.responseText);
             }
          }
       };
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
+      
    }.bind(this);
    
-   PrintManager.prototype.updatePrintQueue = function(printJobs)
+   PrintManager.prototype.onPrintQueueUpdate = function(updatedPrintQueue)
    {
-      // Mark all QUEUED print jobs as PENDING.
+      printQueue = updatedPrintQueue;
+      
+      // Attempt to print any queued print jobs.
       if (frameworkInitialized)
       {
-         for (printJob of printJobs)
+         for (printJob of printQueue)
          {
             if (printJob.status == PrintJobStatus.QUEUED)
             {
-               printJob.status = PrintJobStatus.PENDING;
-               this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.PENDING);
+               if (this.print(printJob) == true)
+               {
+                  printJob.status = PrintJobStatus.COMPLETE;
+                  
+                  this.updatePrintJobStatus(printJob.printJobId, printJob.status);   
+               }
+               else
+               {
+                  // Leave in QUEUED state.                                 
+               }
             }
          }
       }
-         
-      printQueue.setPrintJobs(printJobs);
-      printQueue.render();
-   }.bind(this);
-   
-   PrintManager.prototype.onPrintResult = function(printJob, success)
-   {
-      if (success)
+
+      this.renderPrintQueue();
+      
+      if (printQueue.length > 0)
       {
-         console.log("PrintManager::onPrintResult: Success!");
-         
-         this.setPrintJobStatus(printJob.printJobId, PrintJobStatus.COMPLETE);
+         this.renderPreview(printQueue[0]);
       }
       else
       {
-         console.log("PrintManager::onPrintResult: Failure!");
+         this.renderPreview(null);
       }
+      
    }.bind(this);
    
    PrintManager.prototype.cancelPrintJob = function(printJobId)
@@ -388,4 +301,198 @@ function PrintManager(container, preview)
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
    }.bind(this);
+   
+   PrintManager.prototype.renderPrinters = function()
+   {
+      const HEADINGS = new Array("Name", "Model", "Location", "Status");
+      
+      if (printerContainer != null)
+      {
+         // Clear table.
+         while (printerContainer.firstChild)
+         {
+            printerContainer.removeChild(printerContainer.firstChild);
+         }
+         
+         //
+         // Build table heading
+         //
+         
+         var table = document.createElement("table");
+         var thead = table.createTHead();
+         var row = thead.insertRow();
+         
+         for (heading of HEADINGS)
+         {
+            var th = document.createElement("th");
+            var text = document.createTextNode(heading);
+            th.appendChild(text);
+            row.appendChild(th);
+         }
+         
+         //
+         // Build table rows
+         //
+         
+         if (printers != null)
+         {
+            for (printer of printers)
+            {
+               var row = table.insertRow();
+               
+               // Name
+               var cell = row.insertCell();
+               var text = document.createTextNode(printer.name);
+               cell.appendChild(text);
+               
+               // Model
+               cell = row.insertCell();
+               text = document.createTextNode(printer.modelName);
+               cell.appendChild(text);
+               
+               // Location
+               cell = row.insertCell();
+               text = document.createTextNode(printer.isLocal ? "Local" : "Network");
+               cell.appendChild(text);
+               
+               // Status
+               cell = row.insertCell();
+               text = document.createTextNode(printer.isConnected ? "Online" : "Offline");
+               cell.appendChild(text);
+            }
+         }
+         
+         printerContainer.appendChild(table);
+      }
+      
+   }.bind(this);
+   
+   PrintManager.prototype.renderPrintQueue = function()
+   {
+      const HEADINGS = new Array("Date", "Owner", "Description", "Copies", "Status", "");
+      
+      if (printQueueContainer != null)
+      {
+         // Clear table.
+         while (printQueueContainer.firstChild)
+         {
+            printQueueContainer.removeChild(printQueueContainer.firstChild);
+         }
+         
+         //
+         // Build table heading
+         //
+         
+         var table = document.createElement("table");
+         var thead = table.createTHead();
+         var row = thead.insertRow();
+         
+         for (heading of HEADINGS)
+         {
+            var th = document.createElement("th");
+            var text = document.createTextNode(heading);
+            th.appendChild(text);
+            row.appendChild(th);
+         }
+         
+         //
+         // Build table rows
+         //
+         
+         if (printQueue != null)
+         {
+            for (printJob of printQueue)
+            {
+               var row = table.insertRow();
+               //row.onmouseover = this.renderPreview(printJob);
+               
+               // Date
+               var cell = row.insertCell();
+               var text = document.createTextNode(printJob.dateTime);
+               cell.appendChild(text);
+               
+               // Owner
+               cell = row.insertCell();
+               text = document.createTextNode(printJob.ownerName);
+               cell.appendChild(text);
+               
+               // Description
+               cell = row.insertCell();
+               text = document.createTextNode(printJob.description);
+               cell.appendChild(text);
+               
+               // Copies
+               cell = row.insertCell();
+               text = document.createTextNode(printJob.copies);
+               cell.appendChild(text);
+               
+               // Status
+               cell = row.insertCell();
+               text = document.createTextNode(PrintJobStatusLabels[printJob.status]);
+               cell.appendChild(text);
+               
+               // Delete icon
+               cell = row.insertCell();
+               cell.innerHTML = 
+                  "<i class=\"material-icons table-function-button\" onclick=\"printManager.cancelPrintJob(" + printJob.printJobId + ")\">delete</i>";
+            }
+         }
+         
+         printQueueContainer.appendChild(table);
+      }
+   }.bind(this);
+   
+   PrintManager.prototype.renderPreview = function(printJob)
+   {
+      if (previewImg != null)
+      {
+         if (printJob != null)
+         {
+            var label = dymo.label.framework.openLabelXml(printJob.xml);
+            
+            var pngData = label.render();
+   
+            previewImg.src = "data:image/png;base64," + pngData;
+            
+            previewImg.style.display  = "block";         
+         }
+         else
+         {
+            previewImg.style.display  = "none";
+         }
+      }
+   }
+   
+   PrintManager.prototype.print = function(printJob)
+   {
+      var success = false;
+      
+      if (this.isPrinterOnline("DYMO LabelWriter 450"))
+      {      
+         console.log("Printing job " + printJob.printJobId);
+         
+         var printParams = {};
+         printParams.copies = printJob.copies;
+         printParams.jobTitle = printJob.description;
+         
+         try
+         {
+            var printParamsXML = dymo.label.framework.createLabelWriterPrintParamsXml(printParams);
+   
+            dymo.label.framework.printLabel("DYMO LabelWriter 450", printParamsXML, printJob.xml);  // TODO: Use printJob.printer
+            
+            console.log("Printed!");
+            
+            success = true;
+         }
+         catch (exception)
+         {
+            console.log("Print error! " + exception.message);
+         }
+         
+         return (success);
+      }
+      
+   }.bind(this);
+   
  }

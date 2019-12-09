@@ -125,7 +125,7 @@ if (!Authentication::isAuthenticated())
 
         <div class="flex-vertical inner-content" style="align-items:center; width:100%;">
  
-           <img id="pan-ticket-image" src="" style="display:none;" alt="pan ticket"/>
+           <img id="pan-ticket-image" src="" width="20%" style="display:none;" alt="pan ticket"/>
        
         </div>
         

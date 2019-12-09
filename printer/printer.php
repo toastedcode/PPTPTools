@@ -3,6 +3,7 @@
 require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/header.php';
+require_once '../common/navigation.php';
 require_once 'printJob.php';
 require_once 'printQueue.php';
 
@@ -17,6 +18,17 @@ if (!Authentication::isAuthenticated())
    header('Location: ../pptpTools.php');
    exit;
 }
+
+function getNavBar()
+{
+   $navBar = new Navigation();
+   
+   $navBar->start();
+   $navBar->mainMenuButton();
+   $navBar->end();
+   
+   return ($navBar->getHtml());
+}
 ?>
 
 <!DOCTYPE html>
@@ -30,6 +42,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
@@ -53,23 +66,32 @@ if (!Authentication::isAuthenticated())
 
         <div class="description">Something something cloud.  Something something print.</div>
 
-        <div class="flex-horizontal inner-content">
+        <div class="flex-vertical inner-content">
         
-           <div id="print-job-table-container" style="margin-right: 25px;"></div>
-           
-           <div id="preview-image-container">
-              <img id="preview-image" src="" alt="label preview"/>
+           <div class="form-section-header">Printers</div>        
+           <div id="printer-table-container" style="margin-bottom: 50px"></div>
+
+           <div class="form-section-header">Print Queue</div>        
+           <div class="flex-horizontal" style="align-items: flex-start;">
+              <div id="print-job-table-container" style="margin-right: 25px;"></div>
+              
+              <div id="preview-image-container">
+                 <img id="preview-image" src="" alt="label preview"/>
+              </div>
            </div>
-      
+         
         </div>
+        
+        <?php echo getNavBar(); ?>
          
      </div>
      
    </div>
    
    <script>
-      var printManager = new PrintManager(document.getElementById("print-job-table-container"),
-                                          document.getElementById("preview-image"));
+      var printManager = new PrintManager("printer-table-container",
+                                          "print-job-table-container",
+                                          "preview-image");
    
       printManager.start();
    </script>

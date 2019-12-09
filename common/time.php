@@ -56,6 +56,19 @@ class Time
       
       return ($endDateTime->format("Y-m-d 23:59:59"));
    }
+   
+   static public function differenceSeconds($startTime, $endTime)
+   {
+      $startDateTime = new DateTime($startTime);
+      $endDateTime = new DateTime($endTime);
+      
+      $diff = $startDateTime->diff($endDateTime);
+      
+      // Convert to seconds.
+      $seconds = (($diff->d * 12 * 60 * 60) + ($diff->h * 60 * 60) + ($diff->i * 60) + $diff->s);
+      
+      return ($seconds);
+   }
 }
 
 /*

@@ -1353,6 +1353,66 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                                 Printer
+   // **************************************************************************
+   
+   public function getPrinter($printerName)
+   {
+      $query = "SELECT * FROM printer WHERE printerName = '$printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newPrinter($printerInfo)
+   {
+      $dateTime = Time::toMySqlDate($printerInfo->lastContact);
+      
+      $query =
+      "INSERT INTO printer " .
+      "(printerName, model, isConnected, lastContact) " .
+      "VALUES " .
+      "('$printerInfo->printerName', '$printerInfo->model', '$printerInfo->isConnected', '$dateTime');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePrinter($printerInfo)
+   {
+      $dateTime = Time::toMySqlDate($printerInfo->lastContact);
+      
+      $query =
+      "UPDATE printer " .
+      "SET model = '$printerInfo->model', isConnected = '$printerInfo->isConnected', lastContact = '$dateTime' " .
+      "WHERE printerName = '$printerInfo->printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePrinter($printerName)
+   {
+      $query = "DELETE FROM printer WHERE printerName = '$printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPrinters()
+   {
+      $query = "SELECT * FROM printer;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
    //                                 Print Job
    // **************************************************************************
    

@@ -6,6 +6,7 @@ require_once '../common/header.php';
 require_once '../common/navigation.php';
 require_once '../common/panTicket.php';
 require_once '../common/params.php';
+require_once '../common/printerInfo.php';
 require_once '../common/timeCardInfo.php';
 
 function getParams()
@@ -74,7 +75,32 @@ function getNavBar()
 
 function getPrinterOptions()
 {
-   $options = "<option value=\"101\">Default printer</option>";
+   $options = "";
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $result = $database->getPrinters();
+      
+      while ($result && ($row = $result->fetch_assoc()))
+      {
+         $printerInfo = PrinterInfo::load($row["printerName"]);
+
+         if ($printerInfo)
+         {
+            $displayName = $printerInfo->printerName;
+            $disabled = "";
+            if (!$printerInfo->isConnected)
+            {
+               $displayName .= " (offline)";
+               $disabled = "disabled";
+            }
+            
+            $options .= "<option value=\"$printerInfo->printerName\" $disabled>$displayName</option>";
+         }
+      }      
+   }
    
    return ($options);
 }
@@ -132,7 +158,7 @@ if (!Authentication::isAuthenticated())
 
         <div class="flex-horizontal inner-content" style="align-items:center; width:100%;">
  
-           <img id="pan-ticket-image" src="" style="display:none; margin-right:50px;" alt="pan ticket"/>
+           <img id="pan-ticket-image" src="" width="25%" style="display:none; margin-right:50px;" alt="pan ticket"/>
            
             <div class="pptp-form">
 

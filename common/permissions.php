@@ -24,7 +24,8 @@ class Permission
    const VIEW_INSPECTION         = 18;
    const EDIT_INSPECTION         = 19;
    const QUICK_INSPECTION        = 20;   
-   const LAST                    = Permission::QUICK_INSPECTION;
+   const VIEW_PRINT_MANAGER      = 21;   
+   const LAST                    = Permission::VIEW_PRINT_MANAGER;
    
    const NO_PERMISSIONS = 0x0000;
    const ALL_PERMISSIONS = 0xFFFF;
@@ -59,7 +60,9 @@ class Permission
                   new Permission(Permission::EDIT_SIGN,               "Edit digital signs"),
                   new Permission(Permission::VIEW_INSPECTION,         "View inspection"), 
                   new Permission(Permission::EDIT_INSPECTION,         "Edit inspection"),
-                  new Permission(Permission::QUICK_INSPECTION,        "Enable \"quick\" inspections"));
+                  new Permission(Permission::QUICK_INSPECTION,        "Enable \"quick\" inspections"),
+                  new Permission(Permission::VIEW_PRINT_MANAGER,      "View print manager")
+            );
       }
       
       return (Permission::$permissions);

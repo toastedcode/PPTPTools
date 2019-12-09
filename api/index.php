@@ -8,6 +8,7 @@ require_once '../common/jobInfo.php';
 require_once '../common/panTicket.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
+require_once '../common/printerInfo.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
 require_once '../printer/printJob.php';
@@ -1046,6 +1047,56 @@ $router->add("deleteInspectionTemplate", function($params) {
    echo json_encode($result);
 });
 
+$router->add("registerPrinter", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["printerName"]) &&
+       isset($params["model"]) &&
+       isset($params["isConnected"]))
+   {
+      $printerInfo = PrinterInfo::load($params["printerName"]);
+
+      if ($printerInfo)
+      {
+         $printerInfo->isConnected = $params->getBool("isConnected");
+         $printerInfo->lastContact = Time::now("Y-m-d H:i:s");
+         
+         $dbaseResult = $database->updatePrinter($printerInfo);
+      }
+      else
+      {
+         $printerInfo = new PrinterInfo($printerInfo);
+         
+         $printerInfo->printerName =  $params["printerName"];
+         $printerInfo->model =  $params["model"];
+         $printerInfo->isConnected = $params->getBool("isConnected");
+         $printerInfo->lastContact = Time::now("Y-m-d H:i:s");
+         
+         $dbaseResult = $database->newPrinter($printerInfo);
+      }
+      
+      if ($dbaseResult)
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("queuePrintJob", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -1133,7 +1184,7 @@ $router->add("setPrintJobStatus", function($params) {
       
       $dbaseResult = $database->setPrintJobStatus($printJobId, $status);
 
-      if ($dbaseResult && ($database->rowsAffected() == 1))
+      if ($dbaseResult)
       {
          $result->success = true;
          $result->printJobId = $printJobId;
