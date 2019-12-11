@@ -18,7 +18,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Time Card", "location.replace('viewTimeCard.php');", true);
+   $navBar->highlightNavButton("New Time Card", "location.href = 'viewTimeCard.php';", true);
    $navBar->end();
    
    return ($navBar->getHtml());

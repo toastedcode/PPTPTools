@@ -169,7 +169,7 @@ HEREDOC;
    {
       $partWeightButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
+     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php';">
         <i class="material-icons action-button-icon">fingerprint</i>
         <div>Part Weight</div>
         <div>Log</div>
@@ -183,7 +183,7 @@ HEREDOC;
    {
       $partWashButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
+     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php';">
         <i class="material-icons action-button-icon">opacity</i>
         <div>Part Washer</div>
         <div>Log</div>

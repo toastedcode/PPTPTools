@@ -16,7 +16,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Log Entry", "location.replace('partWeightLogEntry.php?view=new_part_weight_entry');", true);
+   $navBar->highlightNavButton("New Log Entry", "location.href = 'partWeightLogEntry.php';", true);
    $navBar->end();
    
    return ($navBar->getHtml());

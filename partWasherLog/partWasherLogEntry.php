@@ -99,7 +99,7 @@ function getNavBar()
       // Creating a new entry.
       // Editing an existing entry.
       
-      $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
+      $navBar->cancelButton("window.history.back();");
       //$navBar->highlightNavButton("Save", "submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');", false);
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }

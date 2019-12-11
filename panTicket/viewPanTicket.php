@@ -101,6 +101,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/panTicket.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
@@ -125,7 +126,8 @@ if (!Authentication::isAuthenticated())
 
         <div class="flex-vertical inner-content" style="align-items:center; width:100%;">
  
-           <img id="pan-ticket-image" src="" width="20%" style="display:none;" alt="pan ticket"/>
+           <!-- img id="pan-ticket-image" src="" width="20%" style="display:none;" alt="pan ticket"/-->
+           <?php $panTicket = new PanTicket(getPanTicketId()); $panTicket->render(); ?>
        
         </div>
         
@@ -136,9 +138,11 @@ if (!Authentication::isAuthenticated())
    </div>
    
    <script>
+      /*
       dymo.label.framework.init(function() {
-         var label = new PanTicket(<?php echo getPanTicketId(); ?>, "pan-ticket-image", );
+         var label = new PanTicket(<!-- ?php echo getPanTicketId(); ?-->, "pan-ticket-image", );
       });
+      */
    </script>
 
 </body>

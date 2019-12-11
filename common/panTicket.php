@@ -159,22 +159,82 @@ class PanTicket
       
       return ($xml);
    }
+   
+   function render()
+   {
+      $jobNumber = "";
+      $wcNumber = "";
+      $operator = "";
+      $mfgDate = "";
+      $materialNumber = "";
+      $panCount = "";      
+      
+      $timeCardInfo = TimeCardInfo::load($this->panTicketId);
+      
+      if ($timeCardInfo)
+      {
+         $operator = $timeCardInfo->employeeNumber;
+         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+         $mfgDate = $dateTime->format("m-d-Y");
+         $materialNumber = $timeCardInfo->materialNumber;
+         $panCount = $timeCardInfo->panCount;
+         
+         $jobInfo = JobInfo::load($timeCardInfo->jobId);
+         
+         if ($jobInfo)
+         {
+            $jobNumber = $jobInfo->jobNumber;
+            $wcNumber = $jobInfo->wcNumber;
+         }
+      }
+      
+      echo
+<<<HEREDOC
+      <div class="pan-ticket">
+         <div class="top-panel">
+            <div>----- attach here -----</div>
+         </div>
+         <div class="middle-panel"> 
+            <div class="content-panel">
+               <div><b>Job:</b>&nbsp;$jobNumber</div>
+               <div><b>WC:</b>&nbsp;$wcNumber</div>
+               <div><b>Operator:</b>&nbsp;$operator</div>
+               <div><b>Date:</b>&nbsp;$mfgDate</div>
+               <div><b>Heat:</b>&nbsp;$materialNumber</div>
+               <div><b>Baskets:</b>&nbsp;$panCount</div>
+            </div>
+         </div>
+         <div class="bottom-panel">$this->panTicketId</div>
+      </div>
+HEREDOC;
+   }
 }
 
+/*
 if (isset($_GET["preview"]) &&
     isset($_GET["panTicketId"]))
 {
    $panTicketId = $_GET["panTicketId"];
    
+   $panTicket = new PanTicket($panTicketId);
+   
    echo
 <<<HEREDOC
    <html>
       <head>
+         <link rel="stylesheet" type="text/css" href="panTicket.css"/>
+
          <script src="http://www.labelwriter.com/software/dls/sdk/js/DYMO.Label.Framework.3.0.js" type="text/javascript" charset="UTF-8"></script>
          <script src="panTicket.js"></script>
       </head>
       <body>
          <img id="pan-ticket-image" src="" alt="pan ticket"/>
+HEREDOC;
+   
+   $panTicket->render();
+   
+   echo 
+<<<HEREDOC
       </body>
       <script>
          dymo.label.framework.init(function() {
@@ -184,5 +244,5 @@ if (isset($_GET["preview"]) &&
    </html>
 HEREDOC;
 }
-
+*/
 ?>

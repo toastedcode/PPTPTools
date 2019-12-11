@@ -111,7 +111,7 @@ function getNavBar()
       // Creating a new entry.
       // Editing an existing entry.
       
-      $navBar->cancelButton("submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'cancel_part_weight_entry')");
+      $navBar->cancelButton("window.history.back();");
       //$navBar->highlightNavButton("Save", "submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'save_part_weight_entry');", false);
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }

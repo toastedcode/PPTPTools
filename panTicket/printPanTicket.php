@@ -60,8 +60,8 @@ function getNavBar()
    
    if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
+      $navBar->cancelButton("window.history.back();", false);
       $navBar->highlightNavButton("Print", "printPanTicket()", false);
-      $navBar->cancelButton("location.href = '../timecard/viewTimeCards.php'", false);
    }
    else
    {
@@ -130,6 +130,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/form.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/panTicket.css"/>
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
@@ -158,7 +159,10 @@ if (!Authentication::isAuthenticated())
 
         <div class="flex-horizontal inner-content" style="align-items:center; width:100%;">
  
-           <img id="pan-ticket-image" src="" width="25%" style="display:none; margin-right:50px;" alt="pan ticket"/>
+           <!-- img id="pan-ticket-image" src="" width="25%" style="display:none; margin-right:50px;" alt="pan ticket"/-->
+           <div style="margin-right: 50px;">
+              <?php $panTicket = new PanTicket(getPanTicketId()); $panTicket->render(); ?>
+           </div>
            
             <div class="pptp-form">
 
@@ -185,9 +189,11 @@ if (!Authentication::isAuthenticated())
    </div>
    
    <script>
+      /*
       dymo.label.framework.init(function() {
-         var label = new PanTicket(<?php echo getPanTicketId(); ?>, "pan-ticket-image", );
+         var label = new PanTicket(<!--php echo getPanTicketId(); ?-->, "pan-ticket-image", );
       });
+      */
 
       function printPanTicket()
       {

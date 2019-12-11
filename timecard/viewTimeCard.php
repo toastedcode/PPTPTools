@@ -540,7 +540,7 @@ function getNavBar()
       // Creating a new time card.
       // Editing an existing time card.
       
-      $navBar->cancelButton("location.href = 'viewTimeCards.php'");
+      $navBar->cancelButton("window.history.back();");
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
    else if ($view == View::VIEW_TIME_CARD)
