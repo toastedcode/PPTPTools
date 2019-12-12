@@ -1358,8 +1358,10 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getPrinter($printerName)
    {
-      $query = "SELECT * FROM printer WHERE printerName = '$printerName';";
+      $printerName = addslashes($printerName);
       
+      $query = "SELECT * FROM printer WHERE printerName = '$printerName';";
+
       $result = $this->query($query);
       
       return ($result);
@@ -1367,6 +1369,8 @@ class PPTPDatabase extends MySqlDatabase
    
    public function newPrinter($printerInfo)
    {
+      $printerName = addslashes($printerInfo->printerName);
+      
       $dateTime = Time::toMySqlDate($printerInfo->lastContact);
       
       $isConnected = intval($printerInfo->isConnected);
@@ -1375,8 +1379,8 @@ class PPTPDatabase extends MySqlDatabase
       "INSERT INTO printer " .
       "(printerName, model, isConnected, lastContact) " .
       "VALUES " .
-      "('$printerInfo->printerName', '$printerInfo->model', '$isConnected', '$dateTime');";
-      
+      "('$printerName', '$printerInfo->model', '$isConnected', '$dateTime');";
+
       $result = $this->query($query);
       
       return ($result);
@@ -1384,14 +1388,16 @@ class PPTPDatabase extends MySqlDatabase
    
    public function updatePrinter($printerInfo)
    {
+      $printerName = addslashes($printerInfo->printerName);
+      
       $dateTime = Time::toMySqlDate($printerInfo->lastContact);
       
       $isConnected = intval($printerInfo->isConnected);
-      
+
       $query =
       "UPDATE printer " .
       "SET model = '$printerInfo->model', isConnected = '$isConnected', lastContact = '$dateTime' " .
-      "WHERE printerName = '$printerInfo->printerName';";
+      "WHERE printerName = '$printerName';";
 
       $result = $this->query($query);
       
@@ -1445,13 +1451,15 @@ class PPTPDatabase extends MySqlDatabase
    
    public function newPrintJob($printJob)
    {
+      $printerName = addslashes($printJob->printerName);
+      
       $dateTime = Time::toMySqlDate($printJob->dateTime);
       
       $query =
       "INSERT INTO printjob " .
       "(owner, dateTime, description, printerName, copies, status, xml) " . 
       "VAlUES " .
-      "('$printJob->owner', '$dateTime', '$printJob->description', '$printJob->printerName', '$printJob->copies', '$printJob->status', '$printJob->xml');";
+      "('$printJob->owner', '$dateTime', '$printJob->description', '$printerName', '$printJob->copies', '$printJob->status', '$printJob->xml');";
 
       $result = $this->query($query);
       

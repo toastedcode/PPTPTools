@@ -137,6 +137,7 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
          catch (exception)
          {
             console.log("JSON syntax error. " + exception.message);
+            console.log(event.target.responseText);
          }
       });
    
@@ -341,8 +342,9 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
                var row = table.insertRow();
                
                // Name
+               var printFriendlyName = printer.name.substring(printer.name.lastIndexOf("\\") + 1);
                var cell = row.insertCell();
-               var text = document.createTextNode(printer.name);
+               var text = document.createTextNode(printFriendlyName);
                cell.appendChild(text);
                
                // Model
@@ -467,7 +469,7 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
    {
       var success = false;
       
-      if (this.isPrinterOnline("DYMO LabelWriter 450"))
+      if (this.isPrinterOnline(printJob.printerName))
       {      
          console.log("Printing job " + printJob.printJobId);
          
@@ -479,7 +481,7 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
          {
             var printParamsXML = dymo.label.framework.createLabelWriterPrintParamsXml(printParams);
    
-            dymo.label.framework.printLabel("DYMO LabelWriter 450", printParamsXML, printJob.xml);  // TODO: Use printJob.printer
+            dymo.label.framework.printLabel(printJob.printerName, printParamsXML, printJob.xml);  // TODO: Use printJob.printer
             
             console.log("Printed!");
             
@@ -489,9 +491,9 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
          {
             console.log("Print error! " + exception.message);
          }
-         
-         return (success);
       }
+      
+      return (success);
       
    }.bind(this);
    

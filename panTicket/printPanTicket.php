@@ -89,7 +89,7 @@ function getPrinterOptions()
 
          if ($printerInfo && $printerInfo->isCurrent())
          {
-            $displayName = $printerInfo->printerName;
+            $displayName = substr($printerInfo->printerName, strrpos($printerInfo->printerName, "\\") + 1);
             $disabled = "";
             if (!$printerInfo->isConnected)
             {
