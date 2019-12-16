@@ -342,7 +342,11 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
                var row = table.insertRow();
                
                // Name
-               var printFriendlyName = printer.name.substring(printer.name.lastIndexOf("\\") + 1);
+               var printFriendlyName = printer.name;
+               if (printer.name.lastIndexOf("\\") != -1)
+               {
+                  printFriendlyName = printer.name.substring(printer.name.lastIndexOf("\\") + 1);
+               }
                var cell = row.insertCell();
                var text = document.createTextNode(printFriendlyName);
                cell.appendChild(text);
