@@ -207,7 +207,8 @@ function hasData($inspection, $inspectionPropertyId)
    {
       foreach ($inspection->inspectionResults[$inspectionPropertyId] as $inspectionResult)
       {
-         if (!(($inspectionResult->data == null) ||
+         if (!(($inspectionResult->sampleIndex == InspectionResult::COMMENT_SAMPLE_INDEX) ||
+               ($inspectionResult->data == null) ||
                ($inspectionResult->data === "")))
          {
             $hasData = true;
@@ -648,10 +649,12 @@ function getInspections()
    
    if ($inspection && $inspectionTemplate)
    {
+      $quickInspection = getQuickInspectionButton();
+      
       $html .=
 <<<HEREDOC
       <tr>
-         <td></td>
+         <td>$quickInspection</td>
          <td></td>
 HEREDOC;
       
@@ -664,6 +667,8 @@ HEREDOC;
 HEREDOC;
       }
          
+      $html .= "<th>Comment</tr>";
+      
       $html .= "</tr>";
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
@@ -696,6 +701,16 @@ HEREDOC;
             
             $html .= getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult);
          }
+         
+         $comment = "";
+         if (isset($inspection->inspectionResults[$inspectionProperty->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX]))
+         {
+            $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX];         
+            
+            $comment = $inspectionResult->data;
+         }
+         
+         $html .= getInspectionCommentInput($inspectionProperty, $comment);
             
          $html .= "</tr>";
          
@@ -726,7 +741,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
    if ($inspectionProperty)
    {
       $name = InspectionResult::getInputName($inspectionProperty->propertyId, $sampleIndex);
-
+      
       $pass = "";
       $warning = "";
       $fail = "";      
@@ -747,7 +762,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       $warningValue = InspectionStatus::WARNING;
       $failValue = InspectionStatus::FAIL;
       
-      $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
+      $disabled = !isEditable(InspectionInputField::INSPECTION) ? "disabled" : "";
       
       $html .=
 <<<HEREDOC
@@ -760,6 +775,24 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
 HEREDOC;
    }
       
+   $html .= "</td>";
+   
+   return ($html);
+}
+
+function getInspectionCommentInput($inspectionProperty, $comment)
+{
+   $html = "<td>";
+   
+   if ($inspectionProperty)
+   {
+      $name = InspectionResult::getInputName($inspectionProperty->propertyId, InspectionResult::COMMENT_SAMPLE_INDEX);
+      
+      $disabled = !isEditable(InspectionInputField::INSPECTION) ? "disabled" : "";
+      
+      $html .= "<input name=\"$name\" type=\"text\" form=\"input-form\" maxlength=\"80\" value=\"$comment\" $disabled>";
+   }
+   
    $html .= "</td>";
    
    return ($html);
@@ -799,6 +832,21 @@ HEREDOC;
    
    $html .= "</td>";
    
+   return ($html);
+}
+
+function getQuickInspectionButton()
+{
+   $html = "";
+   
+   if (Authentication::checkPermissions(Permission::QUICK_INSPECTION))
+   {
+      $html =
+<<<HEREDOC
+      <i class="material-icons" onclick="approveAll()">thumb_up</i>
+HEREDOC;
+   }
+
    return ($html);
 }
 
@@ -929,6 +977,8 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         const PASS = <?php echo InspectionStatus::PASS; ?>;
+      
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
          var operatorValidator = new SelectValidator("operator-input");

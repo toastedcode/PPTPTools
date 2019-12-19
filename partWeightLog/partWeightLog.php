@@ -6,6 +6,7 @@ require_once '../common/filter.php';
 require_once '../common/header.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
+require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 
@@ -15,7 +16,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Log Entry", "location.replace('partWeightLogEntry.php?view=new_part_weight_entry');", true);
+   $navBar->highlightNavButton("New Log Entry", "location.href = 'partWeightLogEntry.php';", true);
    $navBar->end();
    
    return ($navBar->getHtml());
@@ -87,7 +88,7 @@ function getTable($filter)
    $endDate->modify('+1 day');
    $endDateString = $endDate->format("Y-m-d");
    
-   $result = PPTPDatabase::getInstance()->getPartWeightEntries($filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString);
+   $result = PPTPDatabase::getInstance()->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, $filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
    
    if ($result && (MySqlDatabase::countResults($result) > 0))
    {
@@ -105,6 +106,7 @@ function getTable($filter)
                <th class="hide-on-tablet">Weigh Time</th>
                <th class="hide-on-mobile">Basket Count</th>
                <th>Weight</th>
+               <th class="hide-on-mobile">Estimated<br>Part Count</th>
                <th></th>
                <th></th>
             </tr>
@@ -122,25 +124,17 @@ HEREDOC;
             $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
-            $mfgDate = "unknown";
+            $mfgDate = null;
             $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
             if ($timeCardInfo)
             {
                $jobId = $timeCardInfo->jobId;
                
-               $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-               $mfgDate = $dateTime->format("m-d-Y");
+               $mfgDate = $timeCardInfo->dateTime;
                
                $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
                
                $panCount = $timeCardInfo->panCount;
-               
-               /*
-                if ($partWeightEntry->panCount != $timeCardInfo->panCount)
-                {
-                $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
-                }
-                */
             }
             else
             {
@@ -150,24 +144,25 @@ HEREDOC;
                
                if ($partWeightEntry->manufactureDate)
                {
-                  $dateTime = new DateTime($partWeightEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $mfgDate = $dateTime->format("m-d-Y");
+                  $mfgDate = $partWeightEntry->manufactureDate;
                }
             }
             
-            // Check for a mismatch between the part weight pan count and the part weight man count.
-            /*
-             $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
-             if ($partWeightEntry)
-             {
-             $otherPanCount = $partWeightEntry->getPanCount();
-             
-             if ($partWeightEntry->panCount != $otherPanCount)
-             {
-             $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
-             }
-             }
-             */
+            //
+            // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
+            //
+            
+            if ($mfgDate)
+            {
+               $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+               $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+               
+               // Check for a mismatch.
+               if ($partWeightLogPanCount != $partWasherLogPanCount)
+               {
+                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; wash log = $partWasherLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+               }
+            }
             
             // Use the job id to fill in the job number and work center number.
             $jobNumber = "unknown";
@@ -193,6 +188,16 @@ HEREDOC;
                $laborerName= $laborer->getFullName();
             }
             
+            if ($mfgDate)
+            {
+               $dateTime = new DateTime($mfgDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+               $mfgDate = $dateTime->format("m-d-Y");
+            }
+            else
+            {
+               $mfgDate = "---";
+            }
+            
             $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
             $weighDate = $dateTime->format("m-d-Y");
             
@@ -207,7 +212,6 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=edit_part_weight_entry\">mode_edit</i>";
                "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=edit_part_weight_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWeightEntry($partWeightEntry->partWeightEntryId)\">delete</i>";
@@ -215,7 +219,6 @@ HEREDOC;
             else
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"onViewPartWeightEntry('$partWeightEntry->partWeightEntryId')\">visibility</i>";
                "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=view_part_weight_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
@@ -231,6 +234,7 @@ HEREDOC;
                <td class="hide-on-tablet">$weighTime</td>
                <td class="hide-on-mobile">$panCount $mismatch</td>                           
                <td>$partWeightEntry->weight</td>
+               <td>{$partWeightEntry->calculatePartCount()}</td>
                <td>$viewEditIcon</td>
                <td>$deleteIcon</td>
             </tr>

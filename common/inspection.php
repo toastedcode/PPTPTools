@@ -9,6 +9,8 @@ class InspectionResult
    
    const UNKNOWN_PROPERTY_ID = 0;
    
+   const COMMENT_SAMPLE_INDEX = 99;
+   
    public $inspectionId;
    public $propertyId;
    public $status;
@@ -172,7 +174,13 @@ class Inspection
       {
          foreach ($this->inspectionResults as $inspectionRow)
          {
-            $count += count($inspectionRow);
+            foreach ($inspectionRow as $inspectionResult)
+            {
+               if ($inspectionResult->sampleIndex != InspectionResult::COMMENT_SAMPLE_INDEX)
+               {
+                  $count++;
+               }
+            }
          }
       }
       
@@ -189,7 +197,8 @@ class Inspection
          {
             foreach ($inspectionRow as $inspectionResult)
             {
-               if ($inspectionResult->status == $inspectionStatus)
+               if (($inspectionResult->sampleIndex != InspectionResult::COMMENT_SAMPLE_INDEX) &&
+                   ($inspectionResult->status == $inspectionStatus))
                {
                   $count++;
                }

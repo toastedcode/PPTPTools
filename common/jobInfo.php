@@ -32,13 +32,15 @@ class JobInfo
    const SECONDS_PER_MINUTE = 60;
    
    const SECONDS_PER_HOUR = 3600;
+   
+   const UNKNOWN_SAMPLE_WEIGHT = 0.0;
       
    public $jobId = JobInfo::UNKNOWN_JOB_ID;
    public $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    public $creator;
    public $dateTime;
    public $partNumber;
-   public $sampleWeight = 0.0;
+   public $sampleWeight = JobInfo::UNKNOWN_SAMPLE_WEIGHT;
    public $wcNumber;
    public $cycleTime;
    public $netPercentage;

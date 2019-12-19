@@ -259,7 +259,14 @@ function onSubmit()
    
             if (json.success == true)
             {
-               location.href = "viewTimeCards.php";
+               if (confirm('Print pan tickets?'))
+               {
+                  location.href = "../panTicket/printPanTicket.php?panTicketId=" + json.timeCardId;
+               } 
+               else
+               {
+                  location.href = "viewTimeCards.php";
+               }
             }
             else
             {
@@ -355,6 +362,8 @@ function validateTimeCard()
    {
       alert("Please enter a valid setup time.")
    }
+   // J. Orbin requested that users be able enter incomplete time sheets.  (11/21/2019)
+   /*
    else if ((document.getElementById("setup-time-hour-input").value == 0) &&
             (document.getElementById("setup-time-minute-input").value == 0) &&
             (document.getElementById("run-time-hour-input").value == 0) &&
@@ -362,6 +371,7 @@ function validateTimeCard()
    {
       alert("Please enter some valid times.")  
    }
+   */
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
       alert("Please enter a valid basket count.");    
@@ -374,11 +384,14 @@ function validateTimeCard()
    {
       alert("Please enter a valid scrap count.");    
    }
+   // J. Orbin requested that users be able enter incomplete time sheets.  (11/21/2019)
+   /*
    else if ((document.getElementById("part-count-input").value == 0) &&
             (document.getElementById("scrap-count-input").value == 0))
    {
       alert("Please enter some part counts.");   
    }
+   */
    else
    {
       valid = true;
@@ -394,8 +407,6 @@ function updateApproval()
    
    var requiresApproval = false;
    var isApproved = document.getElementById("approved-by-input").value != 0;
-   
-   console.log(document.getElementById("approved-by-input").value);
    
    if (setupTimeHourInput.validator.isValid() && 
        setupTimeMinuteInput.validator.isValid())

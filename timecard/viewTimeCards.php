@@ -18,7 +18,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Time Card", "location.replace('viewTimeCard.php');", true);
+   $navBar->highlightNavButton("New Time Card", "location.href = 'viewTimeCard.php';", true);
    $navBar->end();
    
    return ($navBar->getHtml());
@@ -109,6 +109,7 @@ function getTable($filter)
                <th class="hide-on-tablet">Scrap Count</th>
                <th/>
                <th/>
+               <th/>
             </tr>
 HEREDOC;
       
@@ -162,6 +163,22 @@ HEREDOC;
                }
             }
             
+            $incompleteTime = "";
+            $incompletePanCount = "";
+            $incompletePartCount = "";
+            if ($timeCardInfo->incompleteTime())
+            {
+               $incompleteTime = "<span class=\"incomplete-indicator\">incomplete</span>";
+            }
+            else if ($timeCardInfo->incompletePanCount())
+            {
+               $incompletePanCount = "<span class=\"incomplete-indicator\">incomplete</span>";
+            }
+            else if ($timeCardInfo->incompletePartCount())
+            {
+               $incompletePartCount = "<span class=\"incomplete-indicator\">incomplete</span>";
+            }
+            
             $viewEditIcon = "";
             $deleteIcon = "";
             if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
@@ -180,6 +197,10 @@ HEREDOC;
                "<a href=\"$ROOT/timecard/viewTimeCard.php?timeCardId=$timeCardInfo->timeCardId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
+            $panTicketIcon =
+            "<a href=\"$ROOT/panTicket/viewPanTicket.php?panTicketId=$timeCardInfo->timeCardId\"><i class=\"material-icons table-function-button\">receipt</i></a>";
+            
+            
             $html .=
 <<<HEREDOC
             <tr>
@@ -188,16 +209,17 @@ HEREDOC;
                <td>$jobInfo->jobNumber</td>
                <td class="hide-on-mobile">$wcNumber</td>
                <td class="hide-on-tablet">$timeCardInfo->materialNumber</td>
-               <td class="hide-on-tablet">{$timeCardInfo->formatRunTime()}</td>
+               <td class="hide-on-tablet">{$timeCardInfo->formatRunTime()} $incompleteTime</td>
                <td class="$approval hide-on-tablet">
                   {$timeCardInfo->formatSetupTime()}
                   <div class="approval $approval" $tooltip>Approved</div>
                   <div class="unapproval $approval">Unapproved</div>
                </td>
-               <td class="hide-on-tablet">$timeCardInfo->panCount</td>
-               <td>$timeCardInfo->partCount</td>
+               <td class="hide-on-tablet">$timeCardInfo->panCount $incompletePanCount</td>
+               <td>$timeCardInfo->partCount $incompletePartCount</td>
                <td class="hide-on-tablet">$timeCardInfo->scrapCount</td>
                <td>$viewEditIcon</td>
+               <td>$panTicketIcon</td>
                <td>$deleteIcon</td>
             </tr>
 HEREDOC;

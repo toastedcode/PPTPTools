@@ -47,9 +47,3 @@
    font-size: 30px;
    cursor: pointer;
 }
-
-.mismatch-indicator {
-   vertical-align: super;
-   font-size: 10px;
-   color: red;
-}

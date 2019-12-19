@@ -1,0 +1,52 @@
+@CHARSET "ISO-8859-1";
+
+.pan-ticket {
+	
+	display: flex;
+   flex-direction: column;
+   align-items: stretch;
+   justify-content: space-evenly;
+	
+	width:215px;
+	height:400px;
+   background-color: #fff;
+   box-shadow: 5px 5px 5px  rgba(0,0,0,1.0);
+   -moz-box-shadow: 5px 5px 5px  rgba(0,0,0,1.0);
+   -webkit-box-shadow: 5px 5px 5px  rgba(0,0,0,1.0);
+   -o-box-shadow: 5px 5px 5px  rgba(0,0,0,1.0);
+   border-radius:25px;
+   
+   padding: 5px;
+}
+
+.pan-ticket .top-panel {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	   
+   font: 15px arial, sans-serif;
+}
+
+.pan-ticket .middle-panel {
+	display: flex;
+   justify-content: center;
+   align-items: center; 
+      
+   border-style: solid;
+   border-width: 3px 0px 3px 0px;
+      
+   font: 20px arial, sans-serif;
+   padding: 10px 0px 10px 0px;
+}
+
+.pan-ticket .content-panel {
+}
+
+.pan-ticket .bottom-panel {
+	display: flex;
+   justify-content: center;
+   align-items: center; 
+   
+   font: bold 50px arial, sans-serif;
+}
+

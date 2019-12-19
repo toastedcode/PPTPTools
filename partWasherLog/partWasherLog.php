@@ -7,6 +7,7 @@ require_once '../common/header.php';
 require_once '../common/navigation.php';
 require_once '../common/newIndicator.php';
 require_once '../common/partWasherEntry.php';
+require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 
 function getNavBar()
@@ -15,7 +16,7 @@ function getNavBar()
    
    $navBar->start();
    $navBar->mainMenuButton();
-   $navBar->highlightNavButton("New Log Entry", "location.replace('partWasherLogEntry.php?view=new_part_washer_entry');", true);
+   $navBar->highlightNavButton("New Log Entry", "location.href = 'partWasherLogEntry.php';", true);
    $navBar->end();
    
    return ($navBar->getHtml());
@@ -87,7 +88,7 @@ function getTable($filter)
    $endDate->modify('+1 day');
    $endDateString = $endDate->format("Y-m-d");
    
-   $result = PPTPDatabase::getInstance()->getPartWasherEntries($filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString);
+   $result = PPTPDatabase::getInstance()->getPartWasherEntries(JobInfo::UNKNOWN_JOB_ID, $filter->get('washer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
    
    if ($result && (MySqlDatabase::countResults($result) > 0))
    {
@@ -121,23 +122,15 @@ HEREDOC;
             $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
-            $mfgDate = "unknown";
+            $mfgDate = null;
             $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
             if ($timeCardInfo)
             {
                $jobId = $timeCardInfo->jobId;
                
-               $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-               $mfgDate = $dateTime->format("m-d-Y");
+               $mfgDate = $timeCardInfo->dateTime;
                
                $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
-               
-               /*
-                if ($partWasherEntry->panCount != $timeCardInfo->panCount)
-                {
-                $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Time card count =  $timeCardInfo->panCount\" tooltip-position=\"top\">mismatch</span>";
-                }
-                */
             }
             else
             {
@@ -146,24 +139,22 @@ HEREDOC;
                
                if ($partWasherEntry->manufactureDate)
                {
-                  $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $mfgDate = $dateTime->format("m-d-Y");
+                  $mfgDate = $partWasherEntry->manufactureDate;
                }
             }
             
-            // Check for a mismatch between the part weight pan count and the part washer man count.
-            /*
-             $partWeightEntry = PartWeightEntry::getPartWeightEntryForJob($jobId);
-             if ($partWeightEntry)
-             {
-             $otherPanCount = $partWeightEntry->getPanCount();
-             
-             if ($partWasherEntry->panCount != $otherPanCount)
-             {
-             $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"Part weight log count = $otherPanCount\" tooltip-position=\"top\">mismatch</span>";
-             }
-             }
-             */
+            //
+            // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
+            //
+            
+            $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+            $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+            
+            // Check for a mismatch.
+            if ($partWeightLogPanCount != $partWasherLogPanCount)
+            {
+               $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"wash log = $partWasherLogPanCount; weight log = $partWeightLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+            }
             
             // Use the job id to fill in the job number and work center number.
             $jobNumber = "unknown";
@@ -189,6 +180,16 @@ HEREDOC;
                $partWasherName= $washer->getFullName();
             }
             
+            if ($mfgDate)
+            {
+               $dateTime = new DateTime($mfgDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+               $mfgDate = $dateTime->format("m-d-Y");
+            }
+            else
+            {
+               $mfgDate = "---";
+            }
+            
             $dateTime = new DateTime($partWasherEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
             $washDate = $dateTime->format("m-d-Y");
             
@@ -203,7 +204,6 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\">mode_edit</i>";
                "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
@@ -211,7 +211,6 @@ HEREDOC;
             else
             {
                $viewEditIcon =
-               //"<i class=\"material-icons table-function-button\" onclick=\"onViewPartWasherEntry('$partWasherEntry->partWasherEntryId')\">visibility</i>";
                "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=view_part_washer_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             

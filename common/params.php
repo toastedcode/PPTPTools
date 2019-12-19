@@ -48,6 +48,6 @@ class Params extends ArrayObject
    
    public function getBool($key)
    {
-      return (boolval($this->get($key)));
+      return (filter_var($this->get($key), FILTER_VALIDATE_BOOLEAN));
    }
 }

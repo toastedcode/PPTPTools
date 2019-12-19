@@ -76,11 +76,9 @@ class PartWasherEntry
    {
       $partWasherEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntry($partWasherEntryId);
          
@@ -112,11 +110,9 @@ class PartWasherEntry
    {
       $partWasherEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntriesByTimeCard($timeCardId);
          
@@ -129,26 +125,28 @@ class PartWasherEntry
       return ($partWasherEntry);
    }
    
-   public static function getPartWasherEntryForJob($jobId)
+   public static function getPanCountForJob($jobId, $startDate, $endDate)
    {
-      $partWasherEntry = null;
+      $panCount = 0;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWasherEntriesByJob($jobId);
+         $result = $database->getPartWasherEntries(
+            $jobId,
+            UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
+            $startDate,
+            $endDate,
+            true);  // $useMfgDate
          
-         if ($result && ($row = $result->fetch_assoc()))
+         while ($result && ($row = $result->fetch_assoc()))
          {
-            // Note: Assumes one entry per job.
-            $partWasherEntry = PartWasherEntry::load(intval($row['partWasherEntryId']));
+            $panCount += intval($row["panCount"]);
          }
       }
       
-      return ($partWasherEntry);
+      return ($panCount);
    }
 }
 

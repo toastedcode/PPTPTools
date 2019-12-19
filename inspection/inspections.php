@@ -215,7 +215,7 @@ HEREDOC;
 
             $viewEditIcon = "";
             $deleteIcon = "";
-            if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
+            if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
             {
                $viewEditIcon =
                   "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=edit_inspection\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";

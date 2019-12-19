@@ -113,7 +113,7 @@ HEREDOC;
       
       $navBar->mainMenuButton();
       
-      if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
+      if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
       {
          $navBar->highlightNavButton("New Inspection", "onNewLineInspection()", true);
       }
@@ -201,7 +201,7 @@ HEREDOC;
                   
                   $viewEditIcon = "";
                   $deleteIcon = "";
-                  if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
+                  if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
                   {
                      $viewEditIcon =
                      "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditLineInspection($lineInspectionInfo->entryId)\">mode_edit</i>";

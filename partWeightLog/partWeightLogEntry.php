@@ -23,16 +23,46 @@ abstract class PartWeightLogInputField
    const LABORER = 6;
    const PAN_COUNT = 7;
    const PART_WEIGHT = 8;
-   const LAST = 9;
+   const PAN_WEIGHT = 9;
+   const PALLET_WEIGHT = 10;
+   const PART_COUNT = 11;
+   const LAST = 12;
    const COUNT = PartWeightLogInputField::LAST - PartWeightLogInputField::FIRST;
 }
 
+abstract class View
+{
+   const NEW_PART_WEIGHT_ENTRY = 0;
+   const VIEW_PART_WEIGHT_ENTRY = 1;
+   const EDIT_PART_WEIGHT_ENTRY = 2;
+}
+
+function getParams()
+{
+   static $params = null;
+   
+   if (!$params)
+   {
+      $params = Params::parse();
+   }
+   
+   return ($params);
+}
 
 function getView()
 {
-   $params = Params::parse();
+   $view = View::VIEW_PART_WEIGHT_ENTRY;
    
-   return ($params->keyExists("view") ? $params->get("view") : "");
+   if (getEntryId() == PartWeightEntry::UNKNOWN_ENTRY_ID)
+   {
+      $view = View::NEW_PART_WEIGHT_ENTRY;
+   }
+   else if (Authentication::checkPermissions(Permission::EDIT_PART_WEIGHT_LOG))
+   {
+      $view = View::EDIT_PART_WEIGHT_ENTRY;
+   }
+   
+   return ($view);
 }
 
 function getPartWeightEntry()
@@ -74,18 +104,18 @@ function getNavBar()
    
    $view = getView();
    
-   if (($view == "new_part_weight_entry") ||
-       ($view == "edit_part_weight_entry"))
+   if (($view == View::NEW_PART_WEIGHT_ENTRY) ||
+       ($view == View::EDIT_PART_WEIGHT_ENTRY))
    {
       // Case 1
       // Creating a new entry.
       // Editing an existing entry.
       
-      $navBar->cancelButton("submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'cancel_part_weight_entry')");
+      $navBar->cancelButton("window.history.back();");
       //$navBar->highlightNavButton("Save", "submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'save_part_weight_entry');", false);
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
-   else if ($view == "view_part_weight_entry")
+   else if ($view == View::VIEW_PART_WEIGHT_ENTRY)
    {
       // Case 2
       // Viewing an existing entry.
@@ -103,8 +133,8 @@ function isEditable($field)
    $view = getView();
    
    // Start with the edit mode, as dictated by the view.
-   $isEditable = (($view == "new_part_weight_entry") ||
-                  ($view == "edit_part_weight_entry"));
+   $isEditable = (($view == View::NEW_PART_WEIGHT_ENTRY) ||
+                  ($view == View::EDIT_PART_WEIGHT_ENTRY));
    
    switch ($field)
    {      
@@ -145,6 +175,13 @@ function isEditable($field)
          break;
       }
       
+      case PartWeightLogInputField::PAN_WEIGHT:
+      case PartWeightLogInputField::PALLET_WEIGHT:
+      case PartWeightLogInputField::PART_COUNT:
+      {
+         $isEditable = false;
+      }
+      
       case PartWeightLogInputField::TIME_CARD_ID:
       case PartWeightLogInputField::PAN_COUNT:
       default:
@@ -163,15 +200,15 @@ function getHeading()
    
    $view = getView();
    
-   if ($view == "new_part_weight_entry")
+   if ($view == View::NEW_PART_WEIGHT_ENTRY)
    {
       $heading = "Add to the Part Weight Log";
    }
-   else if ($view == "edit_part_weight_entry")
+   else if ($view == View::EDIT_PART_WEIGHT_ENTRY)
    {
       $heading = "Update the Part Weight Log";
    }
-   else if ($view == "view_part_weight_entry")
+   else if ($view == View::VIEW_PART_WEIGHT_ENTRY)
    {
       $heading = "View a Part Weight Log Entry";
    }
@@ -185,15 +222,15 @@ function getDescription()
    
    $view = getView();
    
-   if ($view == "new_part_weight_entry")
+   if ($view == View::NEW_PART_WEIGHT_ENTRY)
    {
       $description = "Create a new entry in the part weight log.  Starting with the time card ID is the fastest and most accurate way of entering the required job information, or simply enter the information manually if a time card is not available.";
    }
-   else if ($view == "edit_part_weight_entry")
+   else if ($view == View::EDIT_PART_WEIGHT_ENTRY)
    {
       $description = "You may revise any of the fields for this log entry and then select save when you're satisfied with the changes.";
    }
-   else if ($view == "view_part_weight_entry")
+   else if ($view == View::VIEW_PART_WEIGHT_ENTRY)
    {
       $description = "View a previously saved log entry in detail.";
    }
@@ -260,26 +297,21 @@ function getManufactureDate()
 {
    $manufactureDate = null;
    
-   $partWeightEntry = getPartWeightEntry();
+   $timeCardInfo = getTimeCardInfo();
    
-   if ($partWeightEntry)
+   if ($timeCardInfo)
    {
-      $timeCardId = $partWeightEntry->timeCardId;
+      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
+   }
+   else
+   {
+      $partWeightEntry = getPartWeightEntry();
       
-      if (getTimeCardId() != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
-            $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
-         }
-      }
-      else if ($partWeightEntry->manufactureDate)
+      if ($partWeightEntry)
       {
          $dateTime = new DateTime($partWeightEntry->manufactureDate, new DateTimeZone('America/New_York'));
-         $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
+         $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);         
       }
    }
    
@@ -383,7 +415,7 @@ function getLaborerOptions()
 
 function getTimeCardId()
 {
-   $timeCardId = 0;
+   $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    
    $partWeightEntry = getPartWeightEntry();
    
@@ -391,42 +423,67 @@ function getTimeCardId()
    {
       $timeCardId = $partWeightEntry->timeCardId;
    }
+   else
+   {
+      $params = getParams();
+      
+      if ($params->keyExists("timeCardId"))
+      {
+         $timeCardId = $params->getInt("timeCardId");
+      }
+   }
    
    return ($timeCardId);
+}
+
+function getTimeCardInfo()
+{
+   $timeCardInfo = null;
+   
+   $timeCardId = getTimeCardId();
+   
+   if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+   {
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+   }
+   
+   return ($timeCardInfo);
+}
+
+function getJobId()
+{
+   $jobId = JobInfo::UNKNOWN_JOB_ID;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $jobId = $timeCardInfo->jobId;
+   }
+   else
+   {
+      $partWeightEntry = getPartWeightEntry();
+      
+      if ($partWeightEntry)
+      {
+         $jobId = $partWeightEntry->jobId;
+      }
+   }
+   
+   return ($jobId);
 }
 
 function getJobNumber()
 {
    $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    
-   $partWeightEntry = getPartWeightEntry();
+   $jobId = getJobId();
    
-   if ($partWeightEntry)
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
    {
-      $timeCardId = $partWeightEntry->timeCardId;
-      
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $jobId = $timeCardInfo->jobId;
-         }
-      }
-      else
-      {
-         $jobId = $partWeightEntry->jobId;
-      }
-
-      $jobInfo = JobInfo::load($jobId);
-            
-      if ($jobInfo)
-      {
-         $jobNumber = $jobInfo->jobNumber;
-      }
+      $jobNumber = $jobInfo->jobNumber;
    }
    
    return ($jobNumber);
@@ -434,63 +491,51 @@ function getJobNumber()
 
 function getWcNumber()
 {
-   $wcNumber = 0;
+   $wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
    
-   $partWeightEntry = getPartWeightEntry();
+   $jobId = getJobId();
    
-   if ($partWeightEntry)
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
    {
-      $timeCardId = $partWeightEntry->timeCardId;
-      
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $jobId = $timeCardInfo->jobId;
-         }
-      }
-      else
-      {
-         $jobId = $partWeightEntry->jobId;
-      }
-      
-      $jobInfo = JobInfo::load($jobId);
-      
-      if ($jobInfo)
-      {
-         $wcNumber = $jobInfo->wcNumber;
-      }
+      $wcNumber = $jobInfo->wcNumber;
    }
    
    return ($wcNumber);
+}
+
+function getSampleWeight()
+{
+   $sampleWeight = 0.0;
+   
+   $jobId = getJobId();
+   
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
+   {
+      $sampleWeight = $jobInfo->sampleWeight;
+   }
+   
+   return ($sampleWeight);
 }
 
 function getOperator()
 {
    $operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    
-   $partWeightEntry = getPartWeightEntry();
+   $timeCardInfo = getTimeCardInfo();
    
-   if ($partWeightEntry)
+   if ($timeCardInfo)
    {
-      $timeCardId = $partWeightEntry->timeCardId;
+      $operator = $timeCardInfo->employeeNumber;
+   }
+   else
+   {
+      $partWeightEntry = getPartWeightEntry();
       
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $operator = $timeCardInfo->employeeNumber;
-         }
-      }
-      else
+      if ($partWeightEntry)
       {
          $operator = $partWeightEntry->operator;
       }
@@ -526,24 +571,17 @@ function getPanCount()
 {
    $panCount = 0;
    
-   $partWeightEntry = getPartWeightEntry();
+   $timeCardInfo = getTimeCardInfo();
    
-   if ($partWeightEntry)
+   if ($timeCardInfo)
    {
-      $timeCardId = $partWeightEntry->timeCardId;
+      $panCount = $timeCardInfo->panCount;
+   }
+   else
+   {
+      $partWeightEntry = getPartWeightEntry();
       
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $panCount = $timeCardInfo->panCount;
-         }
-      }
-      else
+      if ($partWeightEntry)
       {
          $panCount = $partWeightEntry->panCount;
       }
@@ -564,6 +602,48 @@ function getPartWeight()
    }
    
    return ($partWeight);
+}
+
+function getPanWeight()
+{
+   $panWeight = PartWeightEntry::STANDARD_PAN_WEIGHT;
+   
+   $partWeightEntry = getPartWeightEntry();
+   
+   if ($partWeightEntry)
+   {
+      $panWeight = $partWeightEntry->panWeight;
+   }
+   
+   return ($panWeight);
+}
+
+function getPalletWeight()
+{
+   $palletWeight = PartWeightEntry::STANDARD_PALLET_WEIGHT;
+   
+   $partWeightEntry = getPartWeightEntry();
+   
+   if ($partWeightEntry)
+   {
+      $palletWeight = $partWeightEntry->palletWeight;
+   }
+   
+   return ($palletWeight);
+}
+
+function getCalculatedPartCount()
+{
+   $partCount = "";
+   
+   $partWeightEntry = getPartWeightEntry();
+   
+   if ($partWeightEntry)
+   {
+      $partCount = $partWeightEntry->calculatePartCount();
+   }
+   
+   return ($partCount);
 }
 
 // *****************************************************************************
@@ -625,9 +705,9 @@ if (!Authentication::isAuthenticated())
          <div class="pptp-form">
             <div class="form-row">
             <div class="form-col" style="margin-right: 20px;">  
-               <div class="form-section-header">Time Card Entry</div>               
+               <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
-                  <div class="form-label">Time Card ID</div>
+                  <div class="form-label">Pan Ticket ID</div>
                   <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" oninput="this.validator.validate(); onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable(PartWeightLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
                </div>               
             
@@ -641,7 +721,7 @@ if (!Authentication::isAuthenticated())
                
                <div class="form-item">
                   <div class="form-label">Work Center</div>
-                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWeightLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate(); onWcNumberChange();" <?php echo !isEditable(PartWeightLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                      <?php echo getWcNumberOptions(); ?>
                   </select>
                </div>
@@ -681,12 +761,27 @@ if (!Authentication::isAuthenticated())
                               
                <div class="form-item">
                   <div class="form-label">Pan Count</div>
-                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
+                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                            
                <div class="form-item">
                   <div class="form-label">Part Weight</div>
-                  <input id="part-weight-input" class="form-input-medium" type="number" name="partWeight" form="input-form" oninput="this.validator.validate();" value="<?php echo getPartWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_WEIGHT) ? "disabled" : ""; ?>>
+                  <input id="part-weight-input" class="form-input-medium" type="number" name="partWeight" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPartWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Pan Weight</div>
+                  <input id="pan-weight-input" class="form-input-medium" type="number" style="width:50px;" name="panWeight" form="input-form" value="<?php echo getPanWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Pallet Weight</div>
+                  <input id="pallet-weight-input" class="form-input-medium" type="number" style="width:50px;" name="palletWeight" form="input-form" value="<?php echo getPalletWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PALLET_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label">Estimated Part Count</div>
+                  <input id="part-count-input" class="form-input-medium" type="number" style="width:100px;" value="<?php echo getCalculatedPartCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_COUNT) ? "disabled" : ""; ?>>
                </div>
                
             </div>
@@ -714,6 +809,8 @@ if (!Authentication::isAuthenticated())
          laborerValidator.init();
          panCountValidator.init();
          partWeightValidator.init();
+
+         var sampleWeight = <?php echo getSampleWeight(); ?>;
       </script>
      
    </div>

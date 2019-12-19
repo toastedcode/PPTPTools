@@ -20,7 +20,8 @@ class Activity
    const PRODUCTION_SUMMARY = 9;
    const USER = 10;
    const SIGNAGE = 11;
-   const LAST = Activity::SIGNAGE;
+   const PRINT_MANAGER = 12;
+   const LAST = Activity::PRINT_MANAGER;
       
    private static $permissionMasks = null;
    
@@ -35,11 +36,13 @@ class Activity
             Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
             Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
             Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // INSPECTION_TEMPLATE
-            Permission::getPermission(Permission::VIEW_LINE_INSPECTION)->bits,     // LINE_INSPECTION
+            Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          // LINE_INSPECTION
             Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
             Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
             Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
-            Permission::getPermission(Permission::VIEW_SIGN)->bits);               // SIGNAGE
+            Permission::getPermission(Permission::VIEW_SIGN)->bits,                // SIGNAGE
+            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits        // PRINT_MANAGER
+         );
       }
       
       return (Activity::$permissionMasks);
@@ -166,7 +169,7 @@ HEREDOC;
    {
       $partWeightButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
+     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php';">
         <i class="material-icons action-button-icon">fingerprint</i>
         <div>Part Weight</div>
         <div>Log</div>
@@ -180,7 +183,7 @@ HEREDOC;
    {
       $partWashButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
+     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php';">
         <i class="material-icons action-button-icon">opacity</i>
         <div>Part Washer</div>
         <div>Log</div>
@@ -275,6 +278,20 @@ HEREDOC;
 HEREDOC;
    }
    
+   // Print Manager
+   $printManagerButton = "";
+   if (Activity::isAllowed(Activity::PRINT_MANAGER, $permissions))
+   {
+      $printManagerButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='printer/printer.php';">
+        <i class="material-icons action-button-icon">print</i>
+        <div>Print</div>
+        <div>Manager</div>
+     </div>
+HEREDOC;
+   }
+   
    echo
 <<<HEREDOC
    <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
@@ -310,6 +327,8 @@ HEREDOC;
             $productionSummaryButton
             
             $digitalSignageButton
+
+            $printManagerButton
    
          </div>
          

@@ -53,7 +53,7 @@ function getView()
    {
       $view = View::NEW_INSPECTION_TEMPLATE;
    }
-   else if (Authentication::checkPermissions(Permission::EDIT_LINE_INSPECTION))
+   else if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
    {
       $view = View::EDIT_INSPECTION_TEMPLATE;
    }

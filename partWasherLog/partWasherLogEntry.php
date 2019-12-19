@@ -27,6 +27,24 @@ abstract class PartWasherLogInputField
    const COUNT = PartWasherLogInputField::LAST - PartWasherLogInputField::FIRST;
 }
 
+abstract class View
+{
+   const NEW_PART_WASHER_ENTRY = 0;
+   const VIEW_PART_WASHER_ENTRY = 1;
+   const EDIT_PART_WASHER_ENTRY = 2;
+}
+
+function getParams()
+{
+   static $params = null;
+   
+   if (!$params)
+   {
+      $params = Params::parse();
+   }
+   
+   return ($params);
+}
 
 function getView()
 {
@@ -74,18 +92,18 @@ function getNavBar()
    
    $view = getView();
    
-   if (($view == "new_part_washer_entry") ||
-       ($view == "edit_part_washer_entry"))
+   if (($view == View::NEW_PART_WASHER_ENTRY) ||
+       ($view == View::EDIT_PART_WASHER_ENTRY))
    {
       // Case 1
       // Creating a new entry.
       // Editing an existing entry.
       
-      $navBar->cancelButton("submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'cancel_part_washer_entry')");
+      $navBar->cancelButton("window.history.back();");
       //$navBar->highlightNavButton("Save", "submitForm('input-form', 'partWasherLog.php', 'view_part_washer_log', 'save_part_washer_entry');", false);
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
-   else if ($view == "view_part_washer_entry")
+   else if ($view == View::VIEW_PART_WASHER_ENTRY)
    {
       // Case 2
       // Viewing an existing entry.
@@ -103,8 +121,8 @@ function isEditable($field)
    $view = getView();
    
    // Start with the edit mode, as dictated by the view.
-   $isEditable = (($view == "new_part_washer_entry") ||
-                  ($view == "edit_part_washer_entry"));
+   $isEditable = (($view == View::NEW_PART_WASHER_ENTRY) ||
+                  ($view == View::EDIT_PART_WASHER_ENTRY));
    
    switch ($field)
    {      
@@ -119,8 +137,9 @@ function isEditable($field)
       
       case PartWasherLogInputField::WC_NUMBER:
       {
-         // Edit status determined by job number selection.
-         $isEditable &= (getJobNumber() != JobInfo::UNKNOWN_JOB_NUMBER);
+         // Edit status determined by both time card ID and job number selection.
+         $isEditable &= ((getTimeCardId() == TimeCardInfo::UNKNOWN_TIME_CARD_ID) &&
+                         (getJobNumber() != JobInfo::UNKNOWN_JOB_NUMBER));
          break;
       }
       
@@ -162,15 +181,15 @@ function getHeading()
    
    $view = getView();
    
-   if ($view == "new_part_washer_entry")
+   if ($view == View::NEW_PART_WASHER_ENTRY)
    {
       $heading = "Add to the Part Washer Log";
    }
-   else if ($view == "edit_part_washer_entry")
+   else if ($view == View::EDIT_PART_WASHER_ENTRY)
    {
       $heading = "Update the Part Washer Log";
    }
-   else if ($view == "view_part_washer_entry")
+   else if ($view == View::VIEW_PART_WASHER_ENTRY)
    {
       $heading = "View a Part Washer Log Entry";
    }
@@ -184,15 +203,15 @@ function getDescription()
    
    $view = getView();
    
-   if ($view == "new_part_washer_entry")
+   if ($view == View::NEW_PART_WASHER_ENTRY)
    {
       $description = "Create a new entry in the part washer log.  Starting with the time card ID is the fastest and most accurate way of entering the required job information, or simply enter the information manually if a time card is not available.";
    }
-   else if ($view == "edit_part_washer_entry")
+   else if ($view == View::EDIT_PART_WASHER_ENTRY)
    {
       $description = "You may revise any of the fields for this log entry and then select save when you're satisfied with the changes.";
    }
-   else if ($view == "view_part_washer_entry")
+   else if ($view == View::VIEW_PART_WASHER_ENTRY)
    {
       $description = "View a previously saved log entry in detail.";
    }
@@ -259,23 +278,18 @@ function getManufactureDate()
 {
    $manufactureDate = null;
    
-   $partWasherEntry = getPartWasherEntry();
+   $timeCardInfo = getTimeCardInfo();
    
-   if ($partWasherEntry)
+   if ($timeCardInfo)
    {
-      $timeCardId = $partWasherEntry->timeCardId;
+      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
+   }
+   else
+   {
+      $partWasherEntry = getPartWasherEntry();
       
-      if (getTimeCardId() != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
-            $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
-         }
-      }
-      else if ($partWasherEntry->manufactureDate)
+      if ($partWasherEntry)
       {
          $dateTime = new DateTime($partWasherEntry->manufactureDate, new DateTimeZone('America/New_York'));
          $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
@@ -382,7 +396,7 @@ function getWasherOptions()
 
 function getTimeCardId()
 {
-   $timeCardId = 0;
+   $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    
    $partWasherEntry = getPartWasherEntry();
    
@@ -390,42 +404,67 @@ function getTimeCardId()
    {
       $timeCardId = $partWasherEntry->timeCardId;
    }
+   else
+   {
+      $params = getParams();
+      
+      if ($params->keyExists("timeCardId"))
+      {
+         $timeCardId = $params->getInt("timeCardId");
+      }
+   }
    
    return ($timeCardId);
 }
 
-function getJobNumber()
+function getTimeCardInfo()
 {
-   $jobNumber = "";
+   $timeCardInfo = null;
    
-   $partWasherEntry = getPartWasherEntry();
+   $timeCardId = getTimeCardId();
    
-   if ($partWasherEntry)
+   if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
-      $timeCardId = $partWasherEntry->timeCardId;
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+   }
+   
+   return ($timeCardInfo);
+}
+
+function getJobId()
+{
+   $jobId = JobInfo::UNKNOWN_JOB_ID;
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if ($timeCardInfo)
+   {
+      $jobId = $timeCardInfo->jobId;
+   }
+   else
+   {
+      $partWasherEntry = getPartWasherEntry();
       
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $jobId = $timeCardInfo->jobId;
-         }
-      }
-      else
+      if ($partWasherEntry)
       {
          $jobId = $partWasherEntry->jobId;
       }
+   }
+   
+   return ($jobId);
+}
 
-      $jobInfo = JobInfo::load($jobId);
-            
-      if ($jobInfo)
-      {
-         $jobNumber = $jobInfo->jobNumber;
-      }
+function getJobNumber()
+{
+   $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+   
+   $jobId = getJobId();
+   
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
+   {
+      $jobNumber = $jobInfo->jobNumber;
    }
    
    return ($jobNumber);
@@ -433,36 +472,15 @@ function getJobNumber()
 
 function getWcNumber()
 {
-   $wcNumber = 0;
+   $wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
    
-   $partWasherEntry = getPartWasherEntry();
+   $jobId = getJobId();
    
-   if ($partWasherEntry)
+   $jobInfo = JobInfo::load($jobId);
+   
+   if ($jobInfo)
    {
-      $timeCardId = $partWasherEntry->timeCardId;
-      
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $jobId = $timeCardInfo->jobId;
-         }
-      }
-      else
-      {
-         $jobId = $partWasherEntry->jobId;
-      }
-      
-      $jobInfo = JobInfo::load($jobId);
-      
-      if ($jobInfo)
-      {
-         $wcNumber = $jobInfo->wcNumber;
-      }
+      $wcNumber = $jobInfo->wcNumber;
    }
    
    return ($wcNumber);
@@ -472,24 +490,17 @@ function getOperator()
 {
    $operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    
-   $partWasherEntry = getPartWasherEntry();
+   $timeCardInfo = getTimeCardInfo();
    
-   if ($partWasherEntry)
+   if ($timeCardInfo)
    {
-      $timeCardId = $partWasherEntry->timeCardId;
+      $operator = $timeCardInfo->employeeNumber;
+   }
+   else
+   {
+      $partWasherEntry = getPartWasherEntry();
       
-      $jobId = JobInfo::UNKNOWN_JOB_ID;
-      
-      if (getTimeCardId() != 0)
-      {
-         $timeCardInfo = TimeCardInfo::load($timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $operator = $timeCardInfo->employeeNumber;
-         }
-      }
-      else
+      if ($partWasherEntry)
       {
          $operator = $partWasherEntry->operator;
       }
@@ -609,9 +620,9 @@ if (!Authentication::isAuthenticated())
          <div class="pptp-form">
             <div class="form-row">
             <div class="form-col" style="margin-right: 20px;">  
-               <div class="form-section-header">Time Card Entry</div>               
+               <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
-                  <div class="form-label">Time Card ID</div>
+                  <div class="form-label">Pan Ticket ID</div>
                   <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" oninput="this.validator.validate(); onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable(PartWasherLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
                </div>               
             

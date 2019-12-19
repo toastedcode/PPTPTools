@@ -178,6 +178,28 @@ class TimeCardInfo
       // A time card is considered approved if there was no setup time, or if a manager has approved the setup time.
       return (!$this->requiresApproval() || ($this->approvedBy > 0));
    }
+   
+   public function incompleteTime()
+   {
+      return (($this->setupTime == 0) && ($this->runTime == 0));
+   }
+   
+   public function incompletePanCount()
+   {
+      return ($this->panCount == 0);
+   }
+   
+   public function incompletePartCount()
+   {
+      return (($this->partCount == 0) && ($this->scrapCount == 0));
+   }
+   
+   public function isComplete()
+   {
+      return (!($this->incompleteTime() || 
+               $this->incompletePanCount() || 
+               $this->incompletePartCount()));
+   }
 }
 
 /*

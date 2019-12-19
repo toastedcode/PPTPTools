@@ -1,16 +1,23 @@
 <?php
 
 require_once 'rest.php';
+require_once '../common/authentication.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
+require_once '../common/panTicket.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
+require_once '../common/printerInfo.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
+require_once '../printer/printJob.php';
+require_once '../printer/printQueue.php';
 
 // *****************************************************************************
 //                                   Begin
+
+session_start();
 
 $router = new Router();
 $router->setLogging(false);
@@ -31,6 +38,8 @@ $router->add("timeCardInfo", function($params) {
          
          if ($params->getBool("expandedProperties"))
          {
+            $result->isComplete = ($timeCardInfo->isComplete());
+            
             $jobInfo = JobInfo::load($timeCardInfo->jobId);
             
             if ($jobInfo)
@@ -58,6 +67,49 @@ $router->add("timeCardInfo", function($params) {
    {
       $result->success = false;
       $result->error = "No time card ID specified.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("jobInfo", function($params) {
+   $result = new stdClass();
+   
+   $jobInfo = null;
+   
+   if (isset($params["jobId"]))
+   {
+      $jobInfo = JobInfo::Load(intval($params["jobId"]));
+   }
+   else if ((isset($params["jobNumber"])) &&
+            (isset($params["wcNumber"])))
+   {
+      $jobNumber = $params["jobNumber"];
+      $wcNumber = intval($params["wcNumber"]);
+      
+      $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+      
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         $jobInfo = JobInfo::load($jobId);   
+         
+         if (!$jobInfo)
+         {
+            $result->success = false;
+            $result->error = "Failed to look up job from components.";
+         }
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   if ($jobInfo)
+   {
+      $result->success = true;
+      $result->jobInfo = $jobInfo;
    }
    
    echo json_encode($result);
@@ -198,8 +250,10 @@ $router->add("saveTimeCard", function($params) {
        is_numeric($params["timeCardId"]) &&
        (intval($params["timeCardId"]) != TimeCardInfo::UNKNOWN_TIME_CARD_ID))
    {
+      $timeCardId = intval($params["timeCardId"]);
+      
       //  Updated entry
-      $timeCardInfo = TimeCardInfo::load(intval($params["timeCardId"]));
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
       
       if (!$timeCardInfo)
       {
@@ -265,10 +319,16 @@ $router->add("saveTimeCard", function($params) {
             if ($timeCardInfo->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID)
             {
                $dbaseResult = $database->newTimeCard($timeCardInfo);
+               
+               if ($dbaseResult)
+               {
+                  $result->timeCardId = $database->lastInsertId();
+               }
             }
             else
             {
                $dbaseResult = $database->updateTimeCard($timeCardInfo);
+               $result->timeCardId = $timeCardInfo->timeCardId;
             }
             
             if (!$dbaseResult)
@@ -723,6 +783,26 @@ $router->add("saveInspection", function($params) {
                      break;
                   }
                }
+               
+               // Comment.
+               $name = InspectionResult::getInputName($inspectionProperty->propertyId, InspectionResult::COMMENT_SAMPLE_INDEX);
+
+               if (isset($params[$name]))
+               {
+                  $inspectionResult = new InspectionResult();
+                  $inspectionResult->propertyId = $inspectionProperty->propertyId;
+                  $inspectionResult->sampleIndex = InspectionResult::COMMENT_SAMPLE_INDEX;
+                  $inspectionResult->status = InspectionStatus::UNKNOWN;
+                  $inspectionResult->data = $params[$name];
+                  
+                  $inspection->inspectionResults[$inspectionResult->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX] = $inspectionResult;                  
+               }
+               else
+               {
+                  $result->success = false;
+                  $result->error = "Missing property [$name]";
+                  break;
+               }
             }
                  
             if ($result->success)
@@ -962,6 +1042,268 @@ $router->add("deleteInspectionTemplate", function($params) {
          $result->success = false;
          $result->error = "No existing template found.";
       }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("registerPrinter", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["printerName"]) &&
+       isset($params["model"]) &&
+       isset($params["isConnected"]))
+   {
+      $printerInfo = PrinterInfo::load($params["printerName"]);
+
+      if ($printerInfo)
+      {
+         $printerInfo->isConnected = $params->getBool("isConnected");
+         $printerInfo->lastContact = Time::now("Y-m-d H:i:s");
+         
+         $dbaseResult = $database->updatePrinter($printerInfo);
+      }
+      else
+      {
+         $printerInfo = new PrinterInfo($printerInfo);
+         
+         $printerInfo->printerName =  $params["printerName"];
+         $printerInfo->model =  $params["model"];
+         $printerInfo->isConnected = $params->getBool("isConnected");
+         $printerInfo->lastContact = Time::now("Y-m-d H:i:s");
+         
+         $dbaseResult = $database->newPrinter($printerInfo);
+      }
+      
+      if ($dbaseResult)
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("queuePrintJob", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["owner"]) &&
+       isset($params["description"]) &&
+       isset($params["printerName"]) &&
+       is_numeric($params["copies"]) &&
+       isset($params["xml"]))
+   {
+      $printJob = new PrintJob();
+      
+      $printJob->owner = intval($params["owner"]);
+      $printJob->dateTime = Time::now("Y-m-d H:i:s");
+      $printJob->description = $params["description"];
+      $printJob->printerName = $params["printerName"];
+      $printJob->copies = intval($params["copies"]);
+      $printJob->status = PrintJobStatus::QUEUED;
+      $printJob->xml = $params["xml"];
+
+      $dbaseResult = $database->newPrintJob($printJob);
+
+      if ($dbaseResult)
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("printQueue", function($params) {
+   $result = new stdClass();
+   
+   $printQueue = PrintQueue::load();
+   
+   // Add user names
+   foreach ($printQueue->queue as $printJob)
+   {
+      $userInfo = UserInfo::load($printJob->owner);
+      if ($userInfo)
+      {
+         $printJob->ownerName = $userInfo->getFullName();
+      }
+   }
+   
+   $result->success = true;
+   $result->queue = $printQueue->queue;
+   
+   echo json_encode($result);
+});
+
+$router->add("setPrintJobStatus", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["printJobId"]) &&
+       is_numeric($params["status"]))
+   {
+      $printJobId = intval($params["printJobId"]);
+      $status = intval($params["status"]);
+      
+      $dbaseResult = $database->setPrintJobStatus($printJobId, $status);
+
+      if ($dbaseResult)
+      {
+         $result->success = true;
+         $result->printJobId = $printJobId;
+         $result->status = $status;
+      }
+      else
+      {
+         $result->success = false;
+         $result->printJobId = $printJobId;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("cancelPrintJob", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["printJobId"]))
+   {
+      $printJobId = intval($params["printJobId"]);
+      
+      $dbaseResult = $database->deletePrintJob($printJobId);
+      
+      if ($dbaseResult && ($database->rowsAffected() == 1))
+      {
+         $result->success = true;
+         $result->printJobId = $printJobId;
+      }
+      else
+      {
+         $result->success = false;
+         $result->printJobId = $printJobId;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("panTicket", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   if (is_numeric($params["panTicketId"]))
+   {
+      $panTicket = new PanTicket(intval($params["panTicketId"]));
+      
+      if ($panTicket)
+      {
+         $result->success = true;
+         $result->panTicketId = $panTicket->panTicketId;
+         $result->labelXML = $panTicket->labelXML;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Failed to create pan ticket.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("printPanTicket", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (is_numeric($params["panTicketId"]) &&
+       isset($params["printerName"]) &&
+       is_numeric($params["copies"]))
+   {
+      $panTicket = new PanTicket(intval($params["panTicketId"]));
+      
+      if ($panTicket)
+      {         
+         $printJob = new PrintJob();
+         $printJob->owner = Authentication::getAuthenticatedUser()->employeeNumber;
+         $printJob->dateTime = Time::now("Y-m-d H:i:s");
+         $printJob->description = $panTicket->printDescription;
+         $printJob->printerName = $params["printerName"];
+         $printJob->copies = intval($params["copies"]);
+         $printJob->status = PrintJobStatus::QUEUED;
+         $printJob->xml = $panTicket->labelXML;
+         
+         $dbaseResult = $database->newPrintJob($printJob);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Failed to create pan ticket.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
    }
    
    echo json_encode($result);

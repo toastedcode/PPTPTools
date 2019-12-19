@@ -77,6 +77,16 @@ class MySqlDatabase implements Database
       return (mysqli_num_rows($result));
    }
    
+   public function rowsAffected()
+   {
+      return(mysqli_affected_rows($this->connection));
+   }
+   
+   public function lastInsertId()
+   {
+      return (mysqli_insert_id($this->connection));
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
@@ -503,23 +513,37 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    public function getPartWasherEntries(
+      $jobId,
       $employeeNumber,
       $startDate,
-      $endDate)
+      $endDate,
+      $useMfgDate)
    {
-      $result = NULL;
-      if ($employeeNumber == 0)
+      $jobClause = "";
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
       {
-         $query = "SELECT * FROM partwasher WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-
-         $result = $this->query($query);
+         $jobClause = "jobId = '$jobId' AND";
+      }
+      
+      $employeeClause = "";
+      if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
+      {
+         $employeeClause = "employeeNumber = '$employeeNumber' AND";
+      }
+      
+      $dateTimeClause = "";
+      if ($useMfgDate == true)
+      {
+         $dateTimeClause = "manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       else
       {
-         $query = "SELECT * FROM partwasher WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-         
-         $result = $this->query($query);
+         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
+      
+      $query = "SELECT * FROM partwasher WHERE $jobClause $employeeClause $dateTimeClause ORDER BY dateTime DESC;";
+      
+      $result = $this->query($query);
       
       return ($result);
    }
@@ -623,23 +647,37 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    public function getPartWeightEntries(
+      $jobId,
       $employeeNumber,
       $startDate,
-      $endDate)
+      $endDate,
+      $useMfgDate)
    {
-      $result = NULL;
-      if ($employeeNumber == 0)
+      $jobClause = "";
+      if ($jobId != JobInfo::UNKNOWN_JOB_ID)
       {
-         $query = "SELECT * FROM partweight WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-         
-         $result = $this->query($query);
+         $jobClause = "jobId = '$jobId' AND";
+      }
+      
+      $employeeClause = "";
+      if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
+      {
+         $employeeClause = "employeeNumber = '$employeeNumber' AND";
+      }
+      
+      $dateTimeClause = "";
+      if ($useMfgDate == true)
+      {
+         $dateTimeClause = "manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       else
       {
-         $query = "SELECT * FROM partweight WHERE employeeNumber =" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC;";
-         
-         $result = $this->query($query);
+         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";         
       }
+      
+      $query = "SELECT * FROM partweight WHERE $jobClause $employeeClause $dateTimeClause ORDER BY dateTime DESC;";
+
+      $result = $this->query($query);
       
       return ($result);
    }
@@ -1310,6 +1348,138 @@ class PPTPDatabase extends MySqlDatabase
       $query = "DELETE FROM inspectionresult WHERE inspectionId = $inspectionId;";
       
       $result &= $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                                 Printer
+   // **************************************************************************
+   
+   public function getPrinter($printerName)
+   {
+      $printerName = addslashes($printerName);
+      
+      $query = "SELECT * FROM printer WHERE printerName = '$printerName';";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newPrinter($printerInfo)
+   {
+      $printerName = addslashes($printerInfo->printerName);
+      
+      $dateTime = Time::toMySqlDate($printerInfo->lastContact);
+      
+      $isConnected = intval($printerInfo->isConnected);
+      
+      $query =
+      "INSERT INTO printer " .
+      "(printerName, model, isConnected, lastContact) " .
+      "VALUES " .
+      "('$printerName', '$printerInfo->model', '$isConnected', '$dateTime');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePrinter($printerInfo)
+   {
+      $printerName = addslashes($printerInfo->printerName);
+      
+      $dateTime = Time::toMySqlDate($printerInfo->lastContact);
+      
+      $isConnected = intval($printerInfo->isConnected);
+
+      $query =
+      "UPDATE printer " .
+      "SET model = '$printerInfo->model', isConnected = '$isConnected', lastContact = '$dateTime' " .
+      "WHERE printerName = '$printerName';";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePrinter($printerName)
+   {
+      $query = "DELETE FROM printer WHERE printerName = '$printerName';";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPrinters()
+   {
+      $query = "SELECT * FROM printer;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                                 Print Job
+   // **************************************************************************
+   
+   public function getPrintJob($printJobId)
+   {
+      $query = "SELECT * FROM printjob WHERE printJobId = $printJobId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPrintJobIds()
+   {
+      $queued = PrintJobStatus::QUEUED;
+      $pending = PrintJobStatus::PENDING;
+      $printing = PrintJobStatus::PRINTING;
+      $statusClause = "WHERE status IN ($queued, $pending, $printing)";
+      
+      $query = "SELECT printJobId FROM printjob $statusClause ORDER BY dateTime ASC;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newPrintJob($printJob)
+   {
+      $printerName = addslashes($printJob->printerName);
+      
+      $dateTime = Time::toMySqlDate($printJob->dateTime);
+      
+      $query =
+      "INSERT INTO printjob " .
+      "(owner, dateTime, description, printerName, copies, status, xml) " . 
+      "VAlUES " .
+      "('$printJob->owner', '$dateTime', '$printJob->description', '$printerName', '$printJob->copies', '$printJob->status', '$printJob->xml');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function setPrintJobStatus($printJobId, $status)
+   {
+      $query = "UPDATE printjob SET status = '$status' WHERE printJobId = $printJobId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deletePrintJob($printJobId)
+   {
+      $query = "DELETE FROM printjob WHERE printJobId = $printJobId;";
+      
+      $result = $this->query($query);
       
       return ($result);
    }
