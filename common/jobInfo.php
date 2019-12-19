@@ -46,6 +46,7 @@ class JobInfo
    public $netPercentage;
    public $status = JobStatus::PENDING;
    public $inProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $lineTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    public $qcpTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    public $customerPrint;
    
@@ -81,6 +82,7 @@ class JobInfo
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
             $jobInfo->status =        $row['status'];
             $jobInfo->inProcessTemplateId = intval($row['inProcessTemplateId']);
+            $jobInfo->lineTemplateId = intval($row['lineTemplateId']);
             $jobInfo->qcpTemplateId = intval($row['qcpTemplateId']);
             $jobInfo->customerPrint = $row['customerPrint'];
          }
@@ -186,18 +188,19 @@ if (isset($_GET["$jobId"]))
    
    if ($jobInfo)
    {
-      echo "jobId: " .         $jobInfo->jobId .           "<br/>";
-      echo "jobNumber: " .     $jobInfo->jobNumber .       "<br/>";
-      echo "creator: " .       $jobInfo->creator .         "<br/>";
-      echo "dateTime: " .      $jobInfo->dateTime .        "<br/>";
-      echo "partNumber: " .    $jobInfo->partNumber .      "<br/>";
-      echo "sampleWeight: " .  $jobInfo->sampleWeight .    "<br/>";
-      echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
-      echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
-      echo "netPercentage: " . $jobInfo->netPercentage .   "<br/>";
+      echo "jobId: " .               $jobInfo->jobId .               "<br/>";
+      echo "jobNumber: " .           $jobInfo->jobNumber .           "<br/>";
+      echo "creator: " .             $jobInfo->creator .             "<br/>";
+      echo "dateTime: " .            $jobInfo->dateTime .            "<br/>";
+      echo "partNumber: " .          $jobInfo->partNumber .          "<br/>";
+      echo "sampleWeight: " .        $jobInfo->sampleWeight .        "<br/>";
+      echo "wcNumber: " .            $jobInfo->wcNumber .            "<br/>";
+      echo "cycleTime: " .           $jobInfo->cycleTime .           "<br/>";
+      echo "netPercentage: " .       $jobInfo->netPercentage .       "<br/>";
       echo "inProcessTemplateId: " . $jobInfo->inProcessTemplateId . "<br/>";
-      echo "qcpTemplateId: " . $jobInfo->qcpTemplateId .    "<br/>";
-      echo "customerPrint: " . $jobInfo->customerPrint .    "<br/>";
+      echo "lineTemplateId: " .      $jobInfo->lineTemplateId .      "<br/>";
+      echo "qcpTemplateId: " .       $jobInfo->qcpTemplateId .       "<br/>";
+      echo "customerPrint: " .       $jobInfo->customerPrint .       "<br/>";
       
       echo "status: " . JobStatus::getName($jobInfo->status) . "<br/>";
    }

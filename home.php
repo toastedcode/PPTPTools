@@ -30,18 +30,18 @@ class Activity
       if (Activity::$permissionMasks == null)
       {
          Activity::$permissionMasks = array(
-            Permission::getPermission(Permission::VIEW_JOB)->bits,                 // JOBS
-            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           // TIME_CARD
-            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
-            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // INSPECTION_TEMPLATE
-            Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          // LINE_INSPECTION
-            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
-            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
-            Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
-            Permission::getPermission(Permission::VIEW_SIGN)->bits,                // SIGNAGE
-            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits        // PRINT_MANAGER
+            Permission::getPermission(Permission::VIEW_JOB)->bits,                  // JOBS
+            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,            // TIME_CARD
+            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,      // PART_WEIGHT
+            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,      // PART_WASH
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,      // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_INSPECTION_TEMPLATE)->bits,  // INSPECTION_TEMPLATE
+            Permission::getPermission(Permission::VIEW_INSPECTION)->bits,           // LINE_INSPECTION
+            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,       // MACHINE_STATUS
+            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,   // PRODUCTION_SUMMARY
+            Permission::getPermission(Permission::VIEW_USER)->bits,                 // USER
+            Permission::getPermission(Permission::VIEW_SIGN)->bits,                 // SIGNAGE
+            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits         // PRINT_MANAGER
          );
       }
       

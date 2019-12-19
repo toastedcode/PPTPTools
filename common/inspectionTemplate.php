@@ -153,26 +153,30 @@ class InspectionTemplate
       switch ($inspectionType)
       {
          case InspectionType::OASIS:
-         case InspectionType::LINE:
          case InspectionType::GENERIC:
          {
             $templateIds = InspectionTemplate::getInspectionTemplates($inspectionType);
             break;
          }
             
-         case InspectionType::QCP:
          case InspectionType::IN_PROCESS:
+         case InspectionType::LINE:
+         case InspectionType::QCP:
          {
            $jobInfo = JobInfo::load($jobId);
            if ($jobInfo)
            {
-              if ($inspectionType == InspectionType::QCP)
-              {
-                 $templateIds[] = $jobInfo->qcpTemplateId;
-              }
-              else if ($inspectionType == InspectionType::IN_PROCESS)
+              if ($inspectionType == InspectionType::IN_PROCESS)
               {
                  $templateIds[] = $jobInfo->inProcessTemplateId;
+              }
+              else if ($inspectionType == InspectionType::LINE)
+              {
+                 $templateIds[] = $jobInfo->lineTemplateId;
+              }
+              else if ($inspectionType == InspectionType::QCP)
+              {
+                 $templateIds[] = $jobInfo->qcpTemplateId;
               }
            }
            break;

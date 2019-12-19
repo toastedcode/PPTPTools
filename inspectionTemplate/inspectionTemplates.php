@@ -129,10 +129,10 @@ HEREDOC;
          {
             $viewEditIcon = "";
             $deleteIcon = "";
-            if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+            if (Authentication::checkPermissions(Permission::EDIT_INSPECTION_TEMPLATE))
             {
                $viewEditIcon =
-                  "<a href=\"$ROOT/inspectionTemplate/viewInspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+                  "<a href=\"$ROOT/inspectionTemplate/viewInspectionTemplate.php?templateId=$inspectionTemplate->templateId\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                   "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspectionTemplate($inspectionTemplate->templateId)\">delete</i>";
             }

@@ -53,7 +53,7 @@ function getView()
    {
       $view = View::NEW_INSPECTION_TEMPLATE;
    }
-   else if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
+   else if (Authentication::checkPermissions(Permission::EDIT_INSPECTION_TEMPLATE))
    {
       $view = View::EDIT_INSPECTION_TEMPLATE;
    }
@@ -322,10 +322,11 @@ function getOptionalProperties()
          $name = "optional-property-$optionalProperty-input";
          $label = OptionalInspectionProperties::getLabel($optionalProperty);
          $checked = $inspectionTemplate->isOptionalPropertySet($optionalProperty) ? "checked" : "";
+         $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : "";
          
          $html .=
 <<<HEREDOC
-         <input type="checkbox" name="$name" form="input-form" value="1" $checked>$label&nbsp;&nbsp;
+         <input type="checkbox" name="$name" form="input-form" value="1" $checked $disabled>$label&nbsp;&nbsp;
 HEREDOC;
       }
    }
@@ -382,16 +383,18 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    $dataTypeOptions = getDataTypeOptions($dataType);
    $dataUnitsOptions = getDataUnitsOptions($dataUnits);
    
+   $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : "";
+   
    $html =
 <<<HEREDOC
    <tr>
-      <input name = "{$name}_propertyId" type="hidden" form="input-form" value="$propertyId">
-      <input name="{$name}_ordering" type="hidden" form="input-form" value="0">
+      <input name = "{$name}_propertyId" type="hidden" form="input-form" value="$propertyId" $disabled>
+      <input name="{$name}_ordering" type="hidden" form="input-form" value="0" $disabled>
       <td></td>
-      <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName"></td>
-      <td><input name="{$name}_specification" type="text" form="input-form" value="$specification"></td>
-      <td><select name="{$name}_dataType" form="input-form">$dataTypeOptions</select></td>
-      <td><select name="{$name}_dataUnits" form="input-form">$dataUnitsOptions</select></td>
+      <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName" $disabled></td>
+      <td><input name="{$name}_specification" type="text" form="input-form" value="$specification" $disabled></td>
+      <td><select name="{$name}_dataType" form="input-form" $disabled>$dataTypeOptions</select></td>
+      <td><select name="{$name}_dataUnits" form="input-form" $disabled>$dataUnitsOptions</select></td>
       <td></td>
    </tr>
 HEREDOC;
@@ -469,17 +472,17 @@ if (!Authentication::isAuthenticated())
                   
                      <div class="form-item">
                         <div class="form-label">Inspection Name</div>
-                        <input name="templateName" type="text" class="form-input-medium" style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>">
+                        <input name="templateName" type="text" class="form-input-medium" style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>" <?php echo !isEditable(InspectionTemplateInputField::NAME) ? "disabled" : ""; ?>>
                      </div>
                      
                      <div class="form-item">
                         <div class="form-label">Description</div>
-                        <input name="templateDescription" type="text" class="form-input-medium" style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>">
+                        <input name="templateDescription" type="text" class="form-input-medium" style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>" <?php echo !isEditable(InspectionTemplateInputField::DESCRIPTION) ? "disabled" : ""; ?>>
                      </div>
                      
                      <div class="form-item">
                         <div class="form-label">Sample Size</div>
-                        <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>">
+                        <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>" <?php echo !isEditable(InspectionTemplateInputField::SAMPLE_SIZE) ? "disabled" : ""; ?>>
                      </div>
                      
                      <div id="optional-properties-input-container" class="form-item">
@@ -502,7 +505,7 @@ if (!Authentication::isAuthenticated())
                      </div>
                      
                      <div class="form-item" style="justify-content: flex-end;">
-                        <button style="width: 50px; height: 30px;" onclick="onAddProperty()">+</button>
+                        <button style="width: 50px; height: 30px;" onclick="onAddProperty()" <?php echo !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : ""; ?>>+</button>
                      </div>
             
                   </div>

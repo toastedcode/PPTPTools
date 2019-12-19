@@ -228,6 +228,11 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->qcpTemplateId = $_POST['qcpTemplateId'];
    }
    
+   if (isset($_POST['lineTemplateId']))
+   {
+      $_SESSION["jobInfo"]->lineTemplateId = $_POST['lineTemplateId'];
+   }
+   
    if (isset($_POST['inProcessTemplateId']))
    {
       $_SESSION["jobInfo"]->inProcessTemplateId = $_POST['inProcessTemplateId'];
