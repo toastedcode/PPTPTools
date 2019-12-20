@@ -291,6 +291,20 @@ HEREDOC;
      </div>
 HEREDOC;
    }
+      
+   // Scanner
+   $scannerButton = "";
+   if (Activity::isAllowed(Activity::PRINT_MANAGER, $permissions))
+   {
+      $scannerButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='panTicket/scanPanTicket.php';">
+        <i class="material-icons action-button-icon">photo_camera</i>
+        <div>Pan Ticket</div>
+        <div>Scanner</div>
+     </div>
+HEREDOC;
+   }
    
    echo
 <<<HEREDOC
@@ -329,6 +343,8 @@ HEREDOC;
             $digitalSignageButton
 
             $printManagerButton
+            
+            $scannerButton
    
          </div>
          
