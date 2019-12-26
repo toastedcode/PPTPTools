@@ -1,9 +1,10 @@
 <?php
 
 require_once 'jobInfo.php';
+require_once 'qrCode.php';
 require_once 'timeCardInfo.php';
 require_once 'userInfo.php';
-
+require_once '../phpqrcode/phpqrcode.php';
 require_once '../printer/printJob.php';
 
 abstract class PanTicketLabelFields
@@ -16,7 +17,8 @@ abstract class PanTicketLabelFields
    const MFG_DATE = 4;
    const HEAT_NUMBER = 5;
    const PAN_COUNT = 6;
-   const LAST = 7;
+   const URL = 7;
+   const LAST = 8;
    const COUNT = PanTicketLabelFields::LAST - PanTicketLabelFields::FIRST;
    
    public static function getKeyword($panTicketLabelField)
@@ -27,7 +29,9 @@ abstract class PanTicketLabelFields
                         "%operator", 
                         "%mfgDate",
                         "%heatNumber",
-                        "%panCount");
+                        "%panCount",
+                        "%url"
+      );
       
       return ($keywords[$panTicketLabelField]);
    }
@@ -55,112 +59,7 @@ class PanTicket
       $this->printDescription = PanTicket::generatePrintDescription($this->panTicketId);
    }
    
-   private static function generatePrintDescription($timeCardId)
-   {
-      $description = "PanTicket";
-      
-      $timeCardInfo = TimeCardInfo::load($timeCardId);
-      
-      if ($timeCardInfo)
-      {
-         $jobInfo = JobInfo::load($timeCardInfo->jobId);
-         
-         if ($jobInfo)
-         {
-            $description .= "_" . $jobInfo->jobNumber;
-         }
-      }
-      
-      $description .= ".label";
-      
-      return ($description);
-   }
-
-   private static function generateLabelXml($timeCardId)
-   {
-      $xml = "";
-      
-      $timeCardInfo = TimeCardInfo::load($timeCardId);
-      
-      $jobNumber = "";
-      $wcNumber = "";
-      $jobInfo = JobInfo::load($timeCardInfo->jobId);
-      if ($jobInfo)
-      {
-         $jobNumber = $jobInfo->jobNumber;
-         $wcNumber = $jobInfo->wcNumber;
-      }
-      
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
-      $mfgDate = $dateTime->format("m-d-Y");
-      
-      $file = fopen(PanTicket::LABEL_TEMPLATE_FILENAME, "r");
-      
-      if ($file)
-      {
-         $xml = fread($file, filesize(PanTicket::LABEL_TEMPLATE_FILENAME));
-         $xml = substr($xml, 3);  // Three odd characters at beginning when reading from file.
-   
-         fclose($file);
-
-         for ($field = PanTicketLabelFields::FIRST; $field < PanTicketLabelFields::LAST; $field++)
-         {
-            switch ($field)
-            {
-               case PanTicketLabelFields::PAN_TICKET_ID:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardId, $xml);
-                  break;
-               }
-                  
-               case PanTicketLabelFields::JOB_NUMBER:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $jobNumber, $xml);
-                  break;
-               }
-               
-               case PanTicketLabelFields::WC_NUMBER:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $wcNumber, $xml);
-                  break;
-               }
-               
-               case PanTicketLabelFields::OPERATOR:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->employeeNumber, $xml);
-                  break;
-               }
-               
-               case PanTicketLabelFields::MFG_DATE:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $mfgDate, $xml);
-                  break;
-               }
-               
-               case PanTicketLabelFields::HEAT_NUMBER:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->materialNumber, $xml);
-                  break;
-               }
-               
-               case PanTicketLabelFields::PAN_COUNT:
-               {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->panCount, $xml);
-                  break;
-               }
-               
-               default:
-               {
-                  break;
-               }
-            }
-         }
-      }
-      
-      return ($xml);
-   }
-   
-   function render()
+   public function render()
    {
       $jobNumber = "";
       $wcNumber = "";
@@ -188,6 +87,8 @@ class PanTicket
          }
       }
       
+      $qrCodeSrc = "../common/qrCode.php?qrCodeContent=" . $this->getQRCodeURL($this->panTicketId);
+      
       echo
 <<<HEREDOC
       <div class="pan-ticket">
@@ -204,9 +105,128 @@ class PanTicket
                <div><b>Baskets:</b>&nbsp;$panCount</div>
             </div>
          </div>
-         <div class="bottom-panel">$this->panTicketId</div>
+         <div class="bottom-panel">
+            <img src="$qrCodeSrc" width="100px">
+            $this->panTicketId
+         </div>
       </div>
 HEREDOC;
+   }
+   
+   private static function generatePrintDescription($timeCardId)
+   {
+      $description = "PanTicket";
+      
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      
+      if ($timeCardInfo)
+      {
+         $jobInfo = JobInfo::load($timeCardInfo->jobId);
+         
+         if ($jobInfo)
+         {
+            $description .= "_" . $jobInfo->jobNumber;
+         }
+      }
+      
+      $description .= ".label";
+      
+      return ($description);
+   }
+   
+   private static function generateLabelXml($timeCardId)
+   {
+      $xml = "";
+      
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      
+      $jobNumber = "";
+      $wcNumber = "";
+      $jobInfo = JobInfo::load($timeCardInfo->jobId);
+      if ($jobInfo)
+      {
+         $jobNumber = $jobInfo->jobNumber;
+         $wcNumber = $jobInfo->wcNumber;
+      }
+      
+      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $mfgDate = $dateTime->format("m-d-Y");
+      
+      $file = fopen(PanTicket::LABEL_TEMPLATE_FILENAME, "r");
+      
+      if ($file)
+      {
+         $xml = fread($file, filesize(PanTicket::LABEL_TEMPLATE_FILENAME));
+         $xml = substr($xml, 3);  // Three odd characters at beginning when reading from file.
+         
+         fclose($file);
+         
+         for ($field = PanTicketLabelFields::FIRST; $field < PanTicketLabelFields::LAST; $field++)
+         {
+            switch ($field)
+            {
+               case PanTicketLabelFields::PAN_TICKET_ID:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardId, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::JOB_NUMBER:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $jobNumber, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::WC_NUMBER:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $wcNumber, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::OPERATOR:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->employeeNumber, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::MFG_DATE:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $mfgDate, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::HEAT_NUMBER:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->materialNumber, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::PAN_COUNT:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardInfo->panCount, $xml);
+                  break;
+               }
+                  
+               case PanTicketLabelFields::URL:
+               {
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), PanTicket::getQRCodeURL($timeCardId), $xml);
+                  break;
+               }
+                  
+               default:
+               {
+                  break;
+               }
+            }
+         }
+      }
+      
+      return ($xml);
+   }
+   
+   private static function getQRCodeURL($panTicketId)
+   {
+      return (urlencode("http://tools.pittsburghprecision.com/panticket/viewPanTicket.php?panTicketId=" . $panTicketId));
    }
 }
 

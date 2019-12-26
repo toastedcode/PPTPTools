@@ -8,6 +8,16 @@ require_once '../common/panTicket.php';
 require_once '../common/params.php';
 require_once '../common/timeCardInfo.php';
 
+abstract class ScanToFunction
+{
+   const FIRST = 0;
+   const UNKNOWN = ScanToFunction::FIRST;
+   const PART_WEIGHT_LOG = 1;
+   const PART_WASHER_LOG = 2;
+   const LAST = 3;
+   const COUNT = ScanToFunction::LAST - ScanToFunction::FIRST;
+}
+
 function getNavBar()
 {
    $navBar = new Navigation();
@@ -17,6 +27,20 @@ function getNavBar()
    $navBar->end();
    
    return ($navBar->getHtml());
+}
+
+function getScanToFunction()
+{
+   $scanTo = ScanToFunction::UNKNOWN;
+   
+   $params = Params::parse();
+   
+   if ($params->keyExists("scanTo"))
+   {
+      $scanTo = $params->getInt("scanTo");
+   }
+   
+   return ($scanTo);
 }
 
 // *********************************** BEGIN ***********************************
@@ -79,42 +103,61 @@ if (!Authentication::isAuthenticated())
       {
          if (result != null)
          {
-         console.log("onScanResult: " + result);
+            console.log("onScanResult: " + result);
 
-         let panTicketId = parseInt(result);
-
-         // AJAX call to retrieve gross parts per hour by selected job.
-         let requestUrl = "../api/timeCardInfo/?timeCardId=" + panTicketId;
-      
-         var xhttp = new XMLHttpRequest();
-         xhttp.onreadystatechange = function()
-         {
-            if (this.readyState == 4 && this.status == 200)
+            // Extract the pan ticket ID from the URL.
+            let panTicketId = 0;
+            let startPos = (result.lastIndexOf("panTicketId=") + 1);
+            if (startPos > 0) 
             {
-               try
-               {
-                  var json = JSON.parse(this.responseText);
-               
-                  if (json.success == true)
-                  {
-                     location.href = "viewPanTicket.php?panTicketId=" + json.timeCardId;     
-                  }
-                  else
-                  {
-                     alert("Sorry. This pan ticket is no longer valid.");
-                  }
-               }
-               catch (expection)
-               {
-                  console.log("JSON syntax error");
-                  console.log(this.responseText);
-               }
+               panTicketId = parseInt(result.substring(startPos));
             }
-         };
-         xhttp.open("GET", requestUrl, true);
-         xhttp.send();
+
+            // AJAX call to retrieve gross parts per hour by selected job.
+            let requestUrl = "../api/timeCardInfo/?timeCardId=" + panTicketId;
+      
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function()
+            {
+               if (this.readyState == 4 && this.status == 200)
+               {
+                  try
+                  {
+                     var json = JSON.parse(this.responseText);
+             
+                     if (json.success == true)
+                     {
+                        if (scanTo == <?php echo (ScanToFunction::PART_WASHER_LOG); ?>)
+                        {
+                           location.href = "../partWeightLog/partWeightLogEntry.php?timeCardId=" + panTicketId;  
+                        }
+                        else if (scanTo == <?php echo (ScanToFunction::PART_WEIGHT_LOG); ?>)
+                        {
+                           location.href = "../partWasherLog/partWasherLogEntry.php?timeCardId=" + panTicketId;
+                        }
+                        else
+                        {
+                           location.href = result;
+                        }
+                     }
+                     else
+                     {
+                        alert("Sorry. This pan ticket is no longer valid.");
+                     }
+                  }
+                  catch (expection)
+                  {
+                     console.log("JSON syntax error");
+                     console.log(this.responseText);
+                  }
+               }
+            };
+            xhttp.open("GET", requestUrl, true);
+            xhttp.send();
          }
       }
+
+      var scanTo = <?php echo (getScanToFunction()); ?>;
 
       import QrScanner from "./qr-scanner.min.js";
       QrScanner.WORKER_PATH = './qr-scanner-worker.min.js';

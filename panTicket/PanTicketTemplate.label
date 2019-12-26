@@ -18,7 +18,7 @@
 			<IsVariable>False</IsVariable>
 			<GroupID>-1</GroupID>
 			<IsOutlined>False</IsOutlined>
-			<Text>tools.pittsburghprecision.com/panTicket.php?panTicketId=88</Text>
+			<Text>%url</Text>
 			<Type>QRCode</Type>
 			<Size>Large</Size>
 			<TextPosition>None</TextPosition>
