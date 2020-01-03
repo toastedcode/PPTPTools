@@ -44,9 +44,10 @@
 
 .pan-ticket .bottom-panel {
 	display: flex;
+	flex-direction: column;
    justify-content: center;
    align-items: center; 
    
-   font: bold 50px arial, sans-serif;
+   font: bold 30px arial, sans-serif;
 }
 

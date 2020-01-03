@@ -10,7 +10,7 @@ require_once '../printer/printJob.php';
 abstract class PanTicketLabelFields
 {
    const FIRST = 0;
-   const PAN_TICKET_ID = PanTicketLabelFields::FIRST;
+   const PAN_TICKET_CODE = PanTicketLabelFields::FIRST;
    const JOB_NUMBER = 1;
    const WC_NUMBER = 2;
    const OPERATOR = 3;
@@ -72,6 +72,7 @@ class PanTicket
       
       if ($timeCardInfo)
       {
+         $panTicketCode = PanTicket::getPanTicketCode($this->panTicketId);
          $operator = $timeCardInfo->employeeNumber;
          $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
          $mfgDate = $dateTime->format("m-d-Y");
@@ -106,11 +107,21 @@ class PanTicket
             </div>
          </div>
          <div class="bottom-panel">
-            <img src="$qrCodeSrc" width="100px">
-            $this->panTicketId
+            <div><img src="$qrCodeSrc" width="100px"></div>
+            <div>$panTicketCode</div>
          </div>
       </div>
 HEREDOC;
+   }
+   
+   public static function getPanTicketCode($panTicketId)
+   {
+      return (sprintf('%04X', $panTicketId));
+   }
+   
+   public static function getPanTicketId($panTicketCode)
+   {
+      return (ctype_xdigit($panTicketCode) ? hexdec($panTicketCode) : PanTicket::UNKNOWN_PAN_TICKET_ID);
    }
    
    private static function generatePrintDescription($timeCardId)
@@ -140,6 +151,8 @@ HEREDOC;
       
       $timeCardInfo = TimeCardInfo::load($timeCardId);
       
+      $panTicketCode = PanTicket::getPanTicketCode($timeCardId);
+      
       $jobNumber = "";
       $wcNumber = "";
       $jobInfo = JobInfo::load($timeCardInfo->jobId);
@@ -165,9 +178,9 @@ HEREDOC;
          {
             switch ($field)
             {
-               case PanTicketLabelFields::PAN_TICKET_ID:
+               case PanTicketLabelFields::PAN_TICKET_CODE:
                {
-                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $timeCardId, $xml);
+                  $xml = str_replace(PanTicketLabelFields::getKeyword($field), $panTicketCode, $xml);
                   break;
                }
                   

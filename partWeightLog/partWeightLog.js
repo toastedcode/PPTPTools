@@ -29,11 +29,12 @@ function onDeletePartWeightEntry(partWeightEntryId)
    }
 }
 
-function onTimeCardIdChange()
+function onPanTicketCodeChange()
 {
-   timeCardId = parseInt(document.getElementById("time-card-id-input").value);
+   var element = document.getElementById("pan-ticket-code-input");
+   var panTicketCode = element.value;
    
-   if (isNaN(timeCardId) || (timeCardId == 0))
+   if (document.getElementById("pan-ticket-code-input").value == "")
    {
       // Clear fields.
       clear("job-number-input");
@@ -111,7 +112,7 @@ function onTimeCardIdChange()
       disable("pan-count-input");
       
       // AJAX call to populate input fields based on time card selection.
-      requestUrl = "../api/timeCardInfo/?timeCardId=" + timeCardId + "&expandedProperties=true";
+      requestUrl = "../api/timeCardInfo/?panTicketCode=" + panTicketCode + "&expandedProperties=true";
       
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function()
@@ -143,7 +144,7 @@ function onTimeCardIdChange()
                clear("pan-count-input");
                
                // Invalidate time card input.
-               document.getElementById("time-card-id-input").validator.color("#FF0000");
+               document.getElementById("pan-ticket-code-input").validator.color("#FF0000");
             }
          }
       };
@@ -432,16 +433,16 @@ function validatePartWeightEntry()
 {
    valid = false;
    
-   $validTimeCardId = (document.getElementById("time-card-id-input").validator.validate() &&
-                       (document.getElementById("time-card-id-input").style.color != "#FF0000"));
+   $validPanTicketCode = (document.getElementById("pan-ticket-code-input").validator.validate() &&
+                          (document.getElementById("pan-ticket-code-input").style.color != "#FF0000"));
 
-   if (!$validTimeCardId)
+   if (!$validPanTicketCode)
    {
-      alert("Please enter a valid time card ID.");    
+      alert("Please enter a valid pan ticket code.");    
    }
    else if (!(document.getElementById("job-number-input").validator.validate()))
    {
-      alert("Start by selecting a valid time card ID or active job.");    
+      alert("Start by selecting a valid pan ticket or active job.");    
    }
    else if (!(document.getElementById("wc-number-input").validator.validate()))
    {

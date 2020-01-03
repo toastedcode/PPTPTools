@@ -25,11 +25,18 @@ $router->setLogging(false);
 $router->add("timeCardInfo", function($params) {
    $result = new stdClass();
 
-   if (isset($params["timeCardId"]))
+   if (isset($params["timeCardId"]) || isset($params["panTicketCode"]))
    {
-      $result->timeCardId = $params["timeCardId"];
+      if (isset($params["timeCardId"]))
+      {
+         $result->timeCardId = intval($params["timeCardId"]);         
+      }
+      else
+      {
+         $result->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);  
+      }
       
-      $timeCardInfo = TimeCardInfo::load($params["timeCardId"]);
+      $timeCardInfo = TimeCardInfo::load($result->timeCardId);
       
       if ($timeCardInfo)
       {
@@ -535,13 +542,13 @@ $router->add("savePartWeightEntry", function($params) {
    
    if ($result->success)
    {
-      if (isset($params["timeCardId"]) && is_numeric($params["timeCardId"]))
+      if (isset($params["panTicketCode"]))
       {
          //
-         // Time card entry
+         // Pan ticket entry
          //
          
-         $partWeightEntry->timeCardId = intval($params["timeCardId"]);
+         $partWeightEntry->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);
       }
       else if (isset($params["jobNumber"]) &&
                isset($params["wcNumber"]) &&

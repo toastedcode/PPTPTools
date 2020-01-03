@@ -121,7 +121,6 @@ HEREDOC;
             $jobId = JobInfo::UNKNOWN_JOB_ID;
             $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
             $panCount = 0;
-            $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
             $mfgDate = null;
@@ -147,23 +146,7 @@ HEREDOC;
                   $mfgDate = $partWeightEntry->manufactureDate;
                }
             }
-            
-            //
-            // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
-            //
-            
-            if ($mfgDate)
-            {
-               $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
-               $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
-               
-               // Check for a mismatch.
-               if ($partWeightLogPanCount != $partWasherLogPanCount)
-               {
-                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; wash log = $partWasherLogPanCount\" tooltip-position=\"top\">mismatch</span>";
-               }
-            }
-            
+                        
             // Use the job id to fill in the job number and work center number.
             $jobNumber = "unknown";
             $wcNumber = "unknown";
@@ -232,7 +215,7 @@ HEREDOC;
                <td>$laborerName</td>
                <td>$weighDate $new</td>
                <td class="hide-on-tablet">$weighTime</td>
-               <td class="hide-on-mobile">$panCount $mismatch</td>                           
+               <td class="hide-on-mobile">$panCount</td>                           
                <td>$partWeightEntry->weight</td>
                <td>{$partWeightEntry->calculatePartCount()}</td>
                <td>$viewEditIcon</td>
