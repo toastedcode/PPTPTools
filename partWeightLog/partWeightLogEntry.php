@@ -732,8 +732,8 @@ if (!Authentication::isAuthenticated())
                      <div class="form-label">Manufacture Date</div>
                      <div class="flex-horizontal">
                         <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>
-                        &nbsp<button id="today-button" form="" onclick="onTodayButton()">Today</button>
-                        &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()">Yesterday</button>
+                        &nbsp<button id="today-button" form="" onclick="onTodayButton()" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>Today</button>
+                        &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>Yesterday</button>
                      </div>
                   </div>
                </div>

@@ -443,13 +443,13 @@ $router->add("savePartWasherEntry", function($params) {
    
    if ($result->success)
    {      
-      if (isset($params["timeCardId"]) && is_numeric($params["timeCardId"]))
+      if (isset($params["panTicketCode"]))
       {
          //
-         // Time card entry
+         // Pan ticket entry
          //
          
-         $partWasherEntry->timeCardId = intval($params["timeCardId"]);
+         $partWasherEntry->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);
       }
       else if (isset($params["jobNumber"]) &&
                isset($params["wcNumber"]) &&

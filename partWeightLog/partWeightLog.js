@@ -31,10 +31,9 @@ function onDeletePartWeightEntry(partWeightEntryId)
 
 function onPanTicketCodeChange()
 {
-   var element = document.getElementById("pan-ticket-code-input");
-   var panTicketCode = element.value;
+   var panTicketCode = document.getElementById("pan-ticket-code-input").value;
    
-   if (document.getElementById("pan-ticket-code-input").value == "")
+   if (panTicketCode == "")
    {
       // Clear fields.
       clear("job-number-input");
@@ -111,7 +110,7 @@ function onPanTicketCodeChange()
       disable("operator-input");
       disable("pan-count-input");
       
-      // AJAX call to populate input fields based on time card selection.
+      // AJAX call to populate input fields based on pan ticket selection.
       requestUrl = "../api/timeCardInfo/?panTicketCode=" + panTicketCode + "&expandedProperties=true";
       
       var xhttp = new XMLHttpRequest();
