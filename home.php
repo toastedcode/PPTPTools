@@ -430,6 +430,7 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
    <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
 
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="common/common.js"></script>
    
 </head>
 
@@ -454,6 +455,10 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
       loginPage();
    }
    ?>
+
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

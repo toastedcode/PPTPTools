@@ -69,6 +69,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="../common/common.js"></script>
 
 </head>
 
@@ -99,6 +100,8 @@ if (!Authentication::isAuthenticated())
    </div>
    
    <script  type="module">
+      preserveSession();
+
       function onScanResult(result)
       {
          if (result != null)

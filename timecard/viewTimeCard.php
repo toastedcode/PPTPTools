@@ -586,6 +586,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="timeCard.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="timeCard.js"></script>
 
@@ -737,7 +738,8 @@ if (!Authentication::isAuthenticated())
       </div>
       
       <script>
-
+         preserveSession();
+         
          function userCanApprove()
          {
             return (<?php echo canApprove() ? "true" : "false"; ?>);

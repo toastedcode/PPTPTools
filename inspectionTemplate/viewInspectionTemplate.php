@@ -68,6 +68,13 @@ function getTemplateId()
    return ($params->keyExists("templateId") ? $params->get("templateId") : InspectionTemplate::UNKNOWN_TEMPLATE_ID);
 }
 
+function getCopyFromTemplateId()
+{
+   $params = getParams();
+   
+   return ($params->keyExists("copyFrom") ? $params->get("copyFrom") : InspectionTemplate::UNKNOWN_TEMPLATE_ID);
+}
+
 function getInspectionTemplate()
 {
    static $inspectionTemplate = null;
@@ -75,10 +82,20 @@ function getInspectionTemplate()
    if (!$inspectionTemplate)
    {
       $templateId = getTemplateId();
+      
+      $copyFromTemplateId = getCopyFromTemplateId();
 
       if ($templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
       {
          $inspectionTemplate = InspectionTemplate::load($templateId);
+      }
+      else if ($copyFromTemplateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
+      {
+         $inspectionTemplate = InspectionTemplate::load($copyFromTemplateId);
+         
+         // Clear/modify select fields.
+         $inspectionTemplate->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+         $inspectionTemplate->name = $inspectionTemplate->name . "_copy";
       }
       else
       {
@@ -432,9 +449,9 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="inspectionTemplate.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="inspectionTemplate.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="inspectionTemplate.js"></script>
 
 </head>
 
@@ -519,6 +536,8 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         preserveSession();
+      
          const OASIS = <?php echo InspectionType::OASIS; ?>;
          const LINE = <?php echo InspectionType::LINE; ?>;
          const QCP = <?php echo InspectionType::QCP; ?>;

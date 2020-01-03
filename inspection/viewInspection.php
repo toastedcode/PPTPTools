@@ -880,9 +880,9 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="inspection.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="inspection.js"></script>
 
 </head>
 
@@ -977,6 +977,8 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         preserveSession();
+      
          const PASS = <?php echo InspectionStatus::PASS; ?>;
       
          var jobNumberValidator = new SelectValidator("job-number-input");

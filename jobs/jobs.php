@@ -317,9 +317,9 @@ processAction(getAction());
    <link rel="stylesheet" type="text/css" href="jobs.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="jobs.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="jobs.js"></script>
    
 </head>
 
@@ -334,6 +334,10 @@ processAction(getAction());
       <?php processView(getView())?>
    
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 
