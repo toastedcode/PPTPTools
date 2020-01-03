@@ -795,6 +795,8 @@ if (!Authentication::isAuthenticated())
       </div>
       
       <script>
+         preserveSession();
+         
          var panTicketCodeValidator = new HexValidator("pan-ticket-code-input", 4, 1, 65536, true);
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");

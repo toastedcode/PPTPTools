@@ -69,3 +69,39 @@ function validate(elementId)
 {
    return (document.getElementById(elementId).validator.validate());
 }
+
+function preserveSession()
+{
+   setInterval(function(){ 
+      // AJAX call to populate WC numbers based on selected job number.
+      requestUrl = "../api/ping/";
+   
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            try
+            {
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  console.log("Session preserved.");
+               }
+               else
+               {
+                  console.log("API call to preserve session failed.");
+               }
+            }
+            catch (exception)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();
+   }, 60000);
+}

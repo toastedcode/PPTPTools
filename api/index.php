@@ -22,6 +22,13 @@ session_start();
 $router = new Router();
 $router->setLogging(false);
 
+$router->add("ping", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   echo json_encode($result);
+});
+
 $router->add("timeCardInfo", function($params) {
    $result = new stdClass();
 
