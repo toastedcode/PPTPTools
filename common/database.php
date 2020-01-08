@@ -1097,9 +1097,9 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "INSERT INTO inspectiontemplate " .
-      "(name, description, inspectionType, sampleSize, optionalProperties) " .
+      "(name, description, inspectionType, sampleSize, optionalProperties, notes) " .
       "VALUES " .
-      "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize', '$inspectionTemplate->optionalProperties');";
+      "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize', '$inspectionTemplate->optionalProperties', '$inspectionTemplate->notes');";
 
       $result = $this->query($query);
       
@@ -1132,7 +1132,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "UPDATE inspectiontemplate " .
-      "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize', optionalProperties = '$inspectionTemplate->optionalProperties' " .
+      "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize', optionalProperties = '$inspectionTemplate->optionalProperties', notes = '$inspectionTemplate->notes' " .
       "WHERE templateId = '$inspectionTemplate->templateId';";
 
       $result = $this->query($query);

@@ -924,12 +924,14 @@ $router->add("saveInspectionTemplate", function($params) {
       if (isset($params["templateName"]) &&
           isset($params["templateDescription"]) &&
           isset($params["inspectionType"]) &&
-          isset($params["sampleSize"]))
+          isset($params["sampleSize"]) &&
+          isset($params["notes"]))
       {
          $inspectionTemplate->name = $params["templateName"];
          $inspectionTemplate->description = $params["templateDescription"];
          $inspectionTemplate->inspectionType = intval($params["inspectionType"]);
          $inspectionTemplate->sampleSize = intval($params["sampleSize"]);
+         $inspectionTemplate->notes = $params["notes"];
          
          // Optional properties
          if ($inspectionTemplate->inspectionType == InspectionType::GENERIC)

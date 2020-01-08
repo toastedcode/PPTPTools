@@ -58,6 +58,7 @@ class InspectionTemplate
    public $description;
    public $sampleSize;
    public $optionalProperties;
+   public $notes;
    public $inspectionProperties;
    
    public function __construct()
@@ -68,6 +69,7 @@ class InspectionTemplate
       $this->description = "";
       $this->sampleSize = InspectionTemplate::DEFAULT_SAMPLE_SIZE;
       $this->optionalProperties = 0;
+      $this->notes = "";
       $this->inspectionProperties = array();
    }
    
@@ -91,6 +93,7 @@ class InspectionTemplate
             $inspectionTemplate->description = $row['description'];
             $inspectionTemplate->sampleSize = intval($row['sampleSize']);
             $inspectionTemplate->optionalProperties = intval($row['optionalProperties']);
+            $inspectionTemplate->notes = $row['notes'];
             
             $result = $database->getInspectionProperties($templateId);
             
@@ -206,6 +209,7 @@ if (isset($_GET["templateId"]))
       echo "description: " .        $inspectionTemplate->description .                              "<br/>";
       echo "sampleSize: " .         $inspectionTemplate->sampleSize .                               "<br/>";
       echo "optionalProperties: " . $inspectionTemplate->optionalProperties .                       "<br/>";
+      echo "notes: " .              $inspectionTemplate->notes .                                    "<br/>";
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {

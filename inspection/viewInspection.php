@@ -349,6 +349,20 @@ function getOperator()
    return ($operator);
 }
 
+function getNotes()
+{
+   $notes = "";
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $notes = $inspectionTemplate->notes;
+   }
+   
+   return ($notes);
+}
+
 function getComments()
 {
    $comments = "";
@@ -949,12 +963,17 @@ if (!Authentication::isAuthenticated())
                         <?php echo getWcNumberOptions(); ?>
                      </select>
                   </div>
-         
+                  
                   <div class="form-item optional-property-container <?php echo showOptionalProperty(OptionalInspectionProperties::OPERATOR) ? "" : "hidden";?>">
                      <div class="form-label">Operator</div>
                      <select id="operator-input" class="form-input-medium" name="operator" form="input-form" <?php echo !isEditable(InspectionInputField::OPERATOR) ? "disabled" : ""; ?>>
                         <?php echo getOperatorOptions(); ?>
                      </select>
+                  </div>
+                  
+                  <div class="form-item" style="display: <?php echo (getNotes() == "") ? "none" : "flex"; ?>">
+                     <div class="form-label">Notes</div>
+                     <textarea id="notes-input" style="width: 250px"><?php echo getNotes(); ?></textarea>
                   </div>
                   
                   <div class="form-item">
@@ -978,6 +997,10 @@ if (!Authentication::isAuthenticated())
                
       <script>
          preserveSession();
+
+         // Resize notes text area to fit text.
+         var notes = document.getElementById('notes-input');
+         notes.style.height = notes.scrollHeight + "px";
       
          const PASS = <?php echo InspectionStatus::PASS; ?>;
       

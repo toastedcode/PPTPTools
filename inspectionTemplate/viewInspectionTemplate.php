@@ -21,8 +21,9 @@ abstract class InspectionTemplateInputField
    const DESCRIPTION = 1;
    const INSPECTION_TYPE = 2;
    const SAMPLE_SIZE = 3;
-   const PROPERTIES = 4;
-   const LAST = 5;
+   const NOTES = 4;
+   const PROPERTIES = 5;
+   const LAST = 6;
    const COUNT = InspectionTemplateInputField::LAST - InspectionTemplateInputField::FIRST;
 }
 
@@ -351,6 +352,20 @@ HEREDOC;
    return ($html);
 }
 
+function getNotes()
+{
+   $notes = "";
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $notes = $inspectionTemplate->notes;
+   }
+   
+   return ($notes);
+}
+
 function getInspectionPropertyCount()
 {
    $count = 0;
@@ -505,6 +520,11 @@ if (!Authentication::isAuthenticated())
                      <div id="optional-properties-input-container" class="form-item">
                         <div class="form-label">Optional Properties</div>
                         <?php echo getOptionalProperties() ?>                     
+                     </div>
+                     
+                     <div class="form-item">
+                        <div class="form-label">Notes</div>
+                        <textarea name="notes" rows="4" cols="50" form="input-form" <?php echo !isEditable(InspectionTemplateInputField::NOTES) ? "disabled" : ""; ?>><?php echo getNotes() ?></textarea>
                      </div>
                      
                      <div class="form-item">
