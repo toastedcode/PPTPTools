@@ -528,6 +528,49 @@ $router->add("savePartWasherEntry", function($params) {
    echo json_encode($result);
 });
 
+$router->add("deletePartWasherEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != PartWasherEntry::UNKNOWN_ENTRY_ID))
+   {
+      $partWasherEntryId = intval($params["entryId"]);
+      
+      $partWasherEntry = PartWasherEntry::load($partWasherEntryId);
+      
+      if ($partWasherEntry)
+      {
+         $dbaseResult = $database->deletePartWasherEntry($partWasherEntryId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing entry found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("savePartWeightEntry", function($params) {
    $result = new stdClass();
    $result->success = true;

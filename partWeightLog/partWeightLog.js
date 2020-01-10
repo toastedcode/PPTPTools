@@ -10,7 +10,6 @@ function onDeletePartWeightEntry(partWeightEntryId)
       {
          if (this.readyState == 4 && this.status == 200)
          {
-            console.log(this.responseText);
             var json = JSON.parse(this.responseText);
             
             if (json.success == true)

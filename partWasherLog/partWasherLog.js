@@ -2,24 +2,29 @@ function onDeletePartWasherEntry(partWasherEntryId)
 {
    if (confirm("Are you sure you want to delete this log entry?"))
    {
-      form = document.createElement('form');
-      form.setAttribute('method', 'POST');
-      form.setAttribute('action', 'partWasherLog.php');
+      // AJAX call to delete part weight entry.
+      requestUrl = "../api/deletePartWasherEntry/?entryId=" + partWasherEntryId;
       
-      input = document.createElement('input');
-      input.setAttribute('name', 'action');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', 'delete_part_washer_entry');
-      form.appendChild(input);
-      
-      input = document.createElement('input');
-      input.setAttribute('name', 'partWasherEntryId');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', partWasherEntryId);
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      form.submit();
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               location.href = "partWasherLog.php";
+            }
+            else
+            {
+               console.log("API call to delete part washer entry failed.");
+               alert(json.error);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send(); 
    }
 }
 
