@@ -264,15 +264,23 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "partWeightLog.php";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "partWeightLog.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
+            console.log("JSON syntax error");
+            console.log(this.responseText);
          }
       });
    
@@ -461,7 +469,7 @@ function validatePartWeightEntry()
    }
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
-      alert("Please enter a valid pan count.");
+      alert("Please enter a valid basket count.");
    }
    else if (!(document.getElementById("part-weight-input").validator.validate()))
    {

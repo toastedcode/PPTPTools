@@ -973,7 +973,7 @@ if (!Authentication::isAuthenticated())
                   
                   <div class="form-item" style="display: <?php echo (getNotes() == "") ? "none" : "flex"; ?>">
                      <div class="form-label">Notes</div>
-                     <textarea id="notes-input" style="width: 250px"><?php echo getNotes(); ?></textarea>
+                     <textarea id="notes-input" style="width: 250px" disabled><?php echo getNotes(); ?></textarea>
                   </div>
                   
                   <div class="form-item">

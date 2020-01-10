@@ -18,6 +18,7 @@ class PartWeightEntry
    public $dateTime;
    public $employeeNumber;
    public $timeCardId = PartWeightEntry::UNKNOWN_TIME_CARD_ID;
+   public $panCount = 0;
    public $weight;
    public $panWeight = PartWeightEntry::STANDARD_PAN_WEIGHT;
    public $palletWeight = PartWeightEntry::STANDARD_PALLET_WEIGHT;   
@@ -26,7 +27,6 @@ class PartWeightEntry
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
    public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
    public $manufactureDate = null;
-   public $panCount = 0;
    
    public function getJobId()
    {
@@ -62,23 +62,6 @@ class PartWeightEntry
       return ($operator);
    }
    
-   public function getPanCount()
-   {
-      $panCount = $this->panCount;
-      
-      if ($this->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
-      {
-         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
-         
-         if ($timeCardInfo)
-         {
-            $panCount = $timeCardInfo->panCount;
-         }
-      }
-      
-      return ($panCount);
-   }
-   
    public function calculatePartCount()
    {
       $partCount = 0;
@@ -89,10 +72,8 @@ class PartWeightEntry
       
       if ($jobInfo && ($jobInfo->sampleWeight > JobInfo::UNKNOWN_SAMPLE_WEIGHT))
       {
-         $panCount = $this->getPanCount();
-         
          $partCount = 
-            ($this->weight - ($this->palletWeight + ($panCount * $this->panWeight))) / ($jobInfo->sampleWeight);
+            ($this->weight - ($this->palletWeight + ($this->panCount * $this->panWeight))) / ($jobInfo->sampleWeight);
          
          $partCount = round($partCount, 0);
       }
@@ -118,6 +99,7 @@ class PartWeightEntry
             $partWeightEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $partWeightEntry->employeeNumber = intval($row['employeeNumber']);
             $partWeightEntry->timeCardId = intval($row['timeCardId']);
+            $partWeightEntry->panCount = intval($row['panCount']);
             $partWeightEntry->weight = doubleval($row['weight']);
             
             // These attributes were added for manual entry when no time card is available.
@@ -127,7 +109,6 @@ class PartWeightEntry
             {
                $partWeightEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
             }
-            $partWeightEntry->panCount = intval($row['panCount']);
          }
       }
       
@@ -190,11 +171,11 @@ if (isset($_GET["id"]))
       echo "dateTime: " .          $partWeightEntry->dateTime .          "<br/>";
       echo "employeeNumber: " .    $partWeightEntry->employeeNumber .    "<br/>";
       echo "timeCardId: " .        $partWeightEntry->timeCardId .        "<br/>";
+      echo "panCount: " .          $partWasherEntry->panCount .          "<br/>";
       echo "weight: " .            $partWeightEntry->weight .            "<br/>";
       echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
       echo "operator: " .          $partWasherEntry->operator .          "<br/>";
       echo "manufactureDate: " .   $partWasherEntry->manufactureDate .   "<br/>";
-      echo "panCount: " .          $partWasherEntry->panCount .          "<br/>";
    }
    else
    {

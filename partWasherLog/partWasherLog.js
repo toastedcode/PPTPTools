@@ -209,15 +209,23 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "partWasherLog.php?view=view_part_washer_log";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "partWasherLog.php?view=view_part_washer_log";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
+            console.log("JSON syntax error");
+            console.log(this.responseText);
          }
       });
    
@@ -381,7 +389,7 @@ function validatePartWasherEntry()
    }
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
-      alert("Please enter a valid pan count.");
+      alert("Please enter a valid basket count.");
    }
    else if (!(document.getElementById("part-count-input").validator.validate()))
    {

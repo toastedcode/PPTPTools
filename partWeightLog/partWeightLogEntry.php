@@ -142,7 +142,6 @@ function isEditable($field)
       case PartWeightLogInputField::JOB_NUMBER:
       case PartWeightLogInputField::OPERATOR:
       case PartWeightLogInputField::MANUFACTURE_DATE:
-      case PartWeightLogInputField::PAN_COUNT:
       {
          // Edit status disabled by time card ID.
          $isEditable &= (getTimeCardId() == TimeCardInfo::UNKNOWN_TIME_CARD_ID);
@@ -184,6 +183,7 @@ function isEditable($field)
       }
       
       case PartWeightLogInputField::TIME_CARD_ID:
+      case PartWeightLogInputField::PART_WEIGHT:
       case PartWeightLogInputField::PAN_COUNT:
       default:
       {
@@ -572,20 +572,11 @@ function getPanCount()
 {
    $panCount = 0;
    
-   $timeCardInfo = getTimeCardInfo();
+   $partWeightEntry = getPartWeightEntry();
    
-   if ($timeCardInfo)
+   if ($partWeightEntry)
    {
-      $panCount = $timeCardInfo->panCount;
-   }
-   else
-   {
-      $partWeightEntry = getPartWeightEntry();
-      
-      if ($partWeightEntry)
-      {
-         $panCount = $partWeightEntry->panCount;
-      }
+      $panCount = $partWeightEntry->panCount;
    }
    
    return ($panCount);
@@ -761,7 +752,7 @@ if (!Authentication::isAuthenticated())
                </div>               
                               
                <div class="form-item">
-                  <div class="form-label">Pan Count</div>
+                  <div class="form-label">Basket Count</div>
                   <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                            

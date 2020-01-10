@@ -442,14 +442,26 @@ $router->add("savePartWasherEntry", function($params) {
    }
    
    if ($result->success)
-   {      
-      if (isset($params["panTicketCode"]))
+   {
+      if (isset($params["panTicketCode"]) &&
+          ($params["panTicketCode"] != ""))
       {
          //
          // Pan ticket entry
          //
          
-         $partWasherEntry->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);
+         $panTicketId = PanTicket::getPanTicketId($params["panTicketCode"]);
+         
+         // Validate panTicketId.
+         if (TimeCardInfo::load($panTicketId) != null)
+         {
+            $partWasherEntry->timeCardId = $panTicketId;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Invalid pan ticket code.";
+         }
       }
       else if (isset($params["jobNumber"]) &&
                isset($params["wcNumber"]) &&
@@ -549,19 +561,30 @@ $router->add("savePartWeightEntry", function($params) {
    
    if ($result->success)
    {
-      if (isset($params["panTicketCode"]))
+      if (isset($params["panTicketCode"]) &&
+          ($params["panTicketCode"] != ""))
       {
          //
          // Pan ticket entry
          //
          
-         $partWeightEntry->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);
+         $panTicketId = PanTicket::getPanTicketId($params["panTicketCode"]);
+         
+         // Validate panTicketId.
+         if (TimeCardInfo::load($panTicketId) != null)
+         {
+            $partWeightEntry->timeCardId = $panTicketId;            
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Invalid pan ticket code.";
+         }
       }
       else if (isset($params["jobNumber"]) &&
                isset($params["wcNumber"]) &&
                isset($params["manufactureDate"]) &&
-               isset($params["operator"]) &&
-               isset($params["panCount"]))
+               isset($params["operator"]))
       {
          //
          // Manual entry
@@ -592,9 +615,11 @@ $router->add("savePartWeightEntry", function($params) {
       if ($result->success)
       {
          if (isset($params["laborer"]) &&
+             isset($params["panCount"]) &&
              isset($params["partWeight"]))
          {
             $partWeightEntry->employeeNumber = intval($params["laborer"]);
+            $partWeightEntry->panCount = intval($params["panCount"]);
             $partWeightEntry->weight = floatval($params["partWeight"]);
             
             if ($partWeightEntry->partWeightEntryId == PartWeightEntry::UNKNOWN_ENTRY_ID)

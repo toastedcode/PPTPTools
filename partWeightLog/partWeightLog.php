@@ -120,7 +120,7 @@ HEREDOC;
          {
             $jobId = JobInfo::UNKNOWN_JOB_ID;
             $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
-            $panCount = 0;
+            $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
             $mfgDate = null;
@@ -132,18 +132,31 @@ HEREDOC;
                $mfgDate = $timeCardInfo->dateTime;
                
                $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
-               
-               $panCount = $timeCardInfo->panCount;
             }
             else
             {
                $jobId = $partWeightEntry->getJobId();
                $operatorEmployeeNumber =  $partWeightEntry->getOperator();
-               $panCount = $partWeightEntry->panCount;
                
                if ($partWeightEntry->manufactureDate)
                {
                   $mfgDate = $partWeightEntry->manufactureDate;
+               }
+            }
+            
+            //
+            // Check for a mismatch between the Time Card pan count and the Part Washer Log pan count.
+            //
+            
+            if ($timeCardInfo != null)
+            {
+               $timeCardPanCount = $timeCardInfo->panCount;               
+               $partWeightLogPanCount = $partWeightEntry->panCount;
+               
+               // Check for a mismatch.
+               if ($timeCardPanCount != $partWeightLogPanCount)
+               {
+                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; time card = $timeCardPanCount; \" tooltip-position=\"top\">mismatch</span>";
                }
             }
                         
@@ -215,7 +228,7 @@ HEREDOC;
                <td>$laborerName</td>
                <td>$weighDate $new</td>
                <td class="hide-on-tablet">$weighTime</td>
-               <td class="hide-on-mobile">$panCount</td>                           
+               <td class="hide-on-mobile">$partWeightEntry->panCount $mismatch</td>                           
                <td>$partWeightEntry->weight</td>
                <td>{$partWeightEntry->calculatePartCount()}</td>
                <td>$viewEditIcon</td>

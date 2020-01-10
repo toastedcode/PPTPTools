@@ -685,7 +685,7 @@ if (!Authentication::isAuthenticated())
                </div>
                
                <div class="form-item">
-                  <div class="form-label">Pan Count</div>
+                  <div class="form-label">Basket Count</div>
                   <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWasherLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                
