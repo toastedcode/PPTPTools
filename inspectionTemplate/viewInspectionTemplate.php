@@ -389,6 +389,9 @@ function getInspectionProperties()
    
    if ($inspectionTemplate)
    {
+      // TODO: Remove.
+      reorderProperties($inspectionTemplate);
+      
       $propertyIndex = 0;
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {        
@@ -411,6 +414,7 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    $specification = $inspectionProperty ? $inspectionProperty->specification : "";
    $dataType = $inspectionProperty ? $inspectionProperty->dataType : InspectionDataType::UNKNOWN;
    $dataUnits = $inspectionProperty ? $inspectionProperty->dataUnits : InspectionDataUnits::UNKNOWN;
+   $ordering = $inspectionProperty ? $inspectionProperty->ordering : "$propertyIndex";
    
    $dataTypeOptions = getDataTypeOptions($dataType);
    $dataUnitsOptions = getDataUnitsOptions($dataUnits);
@@ -419,19 +423,45 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    
    $html =
 <<<HEREDOC
-   <tr>
-      <input name = "{$name}_propertyId" type="hidden" form="input-form" value="$propertyId" $disabled>
-      <input name="{$name}_ordering" type="hidden" form="input-form" value="0" $disabled>
+   <tr id="{$name}_row">
+      <input name="{$name}_propertyId" type="hidden" form="input-form" value="$propertyId" $disabled>
+      <input name="{$name}_ordering" type="hidden" form="input-form" value="$ordering" $disabled>
       <td></td>
       <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName" $disabled></td>
       <td><input name="{$name}_specification" type="text" form="input-form" value="$specification" $disabled></td>
       <td><select name="{$name}_dataType" form="input-form" $disabled>$dataTypeOptions</select></td>
       <td><select name="{$name}_dataUnits" form="input-form" $disabled>$dataUnitsOptions</select></td>
-      <td></td>
+      <td><div class="flex-vertical"><button onclick="onReorderProperty($propertyIndex, -1)">&#x25B2</button><button onclick="onReorderProperty($propertyIndex, 1)">&#x25BC</button></div></td>
    </tr>
 HEREDOC;
    
    return ($html);
+}
+
+function reorderProperties(&$inspectionTemplate)
+{
+   // Temporary function for adding in ordering to existing templates.
+   
+   // Detect the condition where all properties have an ordering of zero.
+   $allZeros = true;
+   foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+   {
+      if ($inspectionProperty->ordering != 0)
+      {
+         $allZeros = false;
+         break;
+      }
+   } 
+   
+   if ($allZeros)
+   {
+      $propertyIndex = 0;
+      foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+      {
+         $inspectionProperty->ordering = $propertyIndex;
+         $propertyIndex++;
+      }
+   }
 }
 
 // *****************************************************************************
