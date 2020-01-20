@@ -40,7 +40,7 @@ function getFilter()
       if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
       {
          // Allow selection from all operators.
-         $operators = UserInfo::getUsersByRole(Role::PART_WASHER);
+         $operators = UserInfo::getUsersByRoles(array(Role::LABORER, Role::PART_WASHER));
          $selectedOperator = "All";
          $allowAll = true;
       }

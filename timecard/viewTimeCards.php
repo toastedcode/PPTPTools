@@ -107,6 +107,7 @@ function getTable($filter)
                <th class="hide-on-tablet">Basket Count</th>
                <th>Part Count</th>
                <th class="hide-on-tablet">Scrap Count</th>
+               <th class="hide-on-tablet">Efficiency</th>
                <th/>
                <th/>
                <th/>
@@ -179,6 +180,8 @@ HEREDOC;
                $incompletePartCount = "<span class=\"incomplete-indicator\">incomplete</span>";
             }
             
+            $efficiency = number_format($timeCardInfo->getEfficiency(), 2);
+            
             $viewEditIcon = "";
             $deleteIcon = "";
             if (Authentication::checkPermissions(Permission::EDIT_TIME_CARD))
@@ -218,6 +221,7 @@ HEREDOC;
                <td class="hide-on-tablet">$timeCardInfo->panCount $incompletePanCount</td>
                <td>$timeCardInfo->partCount $incompletePartCount</td>
                <td class="hide-on-tablet">$timeCardInfo->scrapCount</td>
+               <td class="hide-on-tablet">$efficiency%</td>
                <td>$viewEditIcon</td>
                <td>$panTicketIcon</td>
                <td>$deleteIcon</td>
@@ -245,6 +249,10 @@ HEREDOC;
 <!-- ********************************** BEGIN ********************************************* -->
 
 <?php 
+
+header("Cache-Control: no cache");
+session_cache_limiter("private_no_expire");
+
 Time::init();
 
 session_start();

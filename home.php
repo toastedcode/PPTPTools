@@ -213,7 +213,7 @@ HEREDOC;
 <<<HEREDOC
      <div class="action-button" onclick="location.href='partInspection/partInspection.php?view=view_part_inspections';">
         <i class="material-icons action-button-icon">search</i>
-        <div>Part</div>
+        <div>Oasis</div>
         <div>Inspections</div>
      </div>
 HEREDOC;

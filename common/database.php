@@ -305,7 +305,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUsers()
    {
-      $query = "SELECT * FROM user ORDER BY username ASC;";
+      $query = "SELECT * FROM user ORDER BY firstName ASC;";
       
       $result = $this->query($query);
       
@@ -314,9 +314,40 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUsersByRole($role)
    {
-      $query = "SELECT * FROM user WHERE roles = $role ORDER BY username ASC;";
+      $query = "SELECT * FROM user WHERE roles = $role ORDER BY firstName ASC;";
 
       $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getUsersByRoles($roles)
+   {
+      $result = null;
+      
+      if (sizeof($roles) > 0)
+      {
+         $rolesClause = "roles in (";
+         
+         $count = 0;
+         foreach ($roles as $role)
+         {
+            $rolesClause .= "'$role'";
+            
+            $count++;
+            
+            if ($count < sizeof($roles))
+            {
+               $rolesClause .= ", ";
+            }
+         }
+         
+         $rolesClause .= ")";
+         
+         $query = "SELECT * FROM user WHERE $rolesClause ORDER BY firstName ASC;";
+         echo $query;
+         $result = $this->query($query);
+      }
       
       return ($result);
    }
