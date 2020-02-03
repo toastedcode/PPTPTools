@@ -26,7 +26,7 @@ class ViewJob
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="#" method="POST" enctype="multipart/form-data">
+      <form id="input-form" method="POST" enctype="multipart/form-data">
          <input id="job-number-input" type="hidden" name="jobNumber" value="$jobInfo->jobNumber"/>
          <input id="part-number-input" type="hidden" name="partNumber" value="$jobInfo->partNumber"/>
       </form>

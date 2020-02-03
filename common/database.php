@@ -345,7 +345,7 @@ class PPTPDatabase extends MySqlDatabase
          $rolesClause .= ")";
          
          $query = "SELECT * FROM user WHERE $rolesClause ORDER BY firstName ASC;";
-         echo $query;
+
          $result = $this->query($query);
       }
       

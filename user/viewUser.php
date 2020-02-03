@@ -38,7 +38,7 @@ class ViewUser
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="#" method="POST"></form>
+      <form id="input-form" method="POST"></form>
 
       <div class="flex-vertical content">
 

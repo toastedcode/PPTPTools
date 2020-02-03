@@ -39,7 +39,7 @@ class ViewSign
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="#" method="POST">
+      <form id="input-form" method="POST">
          <input id="sign-id-input" type="hidden" name="signId" value="$signInfo->signId"/>
       </form>
 

@@ -129,7 +129,7 @@ class ViewJobs
          
          </div>
 
-         $navBar;
+         $navBar
 
       </div>
 HEREDOC;
