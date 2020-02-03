@@ -40,7 +40,7 @@ function getFilter()
       if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
       {
          // Allow selection from all operators.
-         $operators = UserInfo::getUsersByRole(Role::PART_WASHER);
+         $operators = UserInfo::getUsersByRoles(array(Role::LABORER, Role::PART_WASHER));
          $selectedOperator = "All";
          $allowAll = true;
       }
@@ -120,7 +120,6 @@ HEREDOC;
          {
             $jobId = JobInfo::UNKNOWN_JOB_ID;
             $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
-            $panCount = 0;
             $mismatch = "";
             
             // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
@@ -133,14 +132,11 @@ HEREDOC;
                $mfgDate = $timeCardInfo->dateTime;
                
                $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
-               
-               $panCount = $timeCardInfo->panCount;
             }
             else
             {
                $jobId = $partWeightEntry->getJobId();
                $operatorEmployeeNumber =  $partWeightEntry->getOperator();
-               $panCount = $partWeightEntry->panCount;
                
                if ($partWeightEntry->manufactureDate)
                {
@@ -149,21 +145,21 @@ HEREDOC;
             }
             
             //
-            // Check for a mismatch between the Part Weight Log pan count and the Part Washer Log pan count.
+            // Check for a mismatch between the Time Card pan count and the Part Washer Log pan count.
             //
             
-            if ($mfgDate)
+            if ($timeCardInfo != null)
             {
-               $partWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
-               $partWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($mfgDate), Time::endOfDay($mfgDate));
+               $timeCardPanCount = $timeCardInfo->panCount;               
+               $partWeightLogPanCount = $partWeightEntry->panCount;
                
                // Check for a mismatch.
-               if ($partWeightLogPanCount != $partWasherLogPanCount)
+               if ($timeCardPanCount != $partWeightLogPanCount)
                {
-                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; wash log = $partWasherLogPanCount\" tooltip-position=\"top\">mismatch</span>";
+                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; time card = $timeCardPanCount; \" tooltip-position=\"top\">mismatch</span>";
                }
             }
-            
+                        
             // Use the job id to fill in the job number and work center number.
             $jobNumber = "unknown";
             $wcNumber = "unknown";
@@ -212,14 +208,14 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-               "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=edit_part_weight_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+               "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWeightEntry($partWeightEntry->partWeightEntryId)\">delete</i>";
             }
             else
             {
                $viewEditIcon =
-               "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId&view=view_part_weight_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+               "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
             $html .=
@@ -232,7 +228,7 @@ HEREDOC;
                <td>$laborerName</td>
                <td>$weighDate $new</td>
                <td class="hide-on-tablet">$weighTime</td>
-               <td class="hide-on-mobile">$panCount $mismatch</td>                           
+               <td class="hide-on-mobile">$partWeightEntry->panCount $mismatch</td>                           
                <td>$partWeightEntry->weight</td>
                <td>{$partWeightEntry->calculatePartCount()}</td>
                <td>$viewEditIcon</td>
@@ -267,11 +263,21 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
 $filter = getFilter();
+
+// Post/Redirect/Get idiom.
+// getFilter() stores all $_POST data in the $_SESSION variable.
+// header() redirects to this page, but with a GET request.
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+   // Redirect to this page.
+   header("Location: " . $_SERVER['REQUEST_URI']);
+   exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -289,7 +295,7 @@ $filter = getFilter();
    <link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWeightLog.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="partWeightLog.js"></script>
 
@@ -322,6 +328,10 @@ $filter = getFilter();
      </div>
      
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

@@ -564,7 +564,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -586,6 +586,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="timeCard.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="timeCard.js"></script>
 
@@ -737,7 +738,8 @@ if (!Authentication::isAuthenticated())
       </div>
       
       <script>
-
+         preserveSession();
+         
          function userCanApprove()
          {
             return (<?php echo canApprove() ? "true" : "false"; ?>);
@@ -747,9 +749,9 @@ if (!Authentication::isAuthenticated())
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
          var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
-         var runTimeHourValidator = new IntValidator("run-time-hour-input", 2, 0, 10, true);
+         var runTimeHourValidator = new IntValidator("run-time-hour-input", 2, 0, 16, true);
          var runTimeMinuteValidator = new IntValidator("run-time-minute-input", 2, 0, 59, true);
-         var setupTimeHourValidator = new IntValidator("setup-time-hour-input", 2, 0, 10, true);
+         var setupTimeHourValidator = new IntValidator("setup-time-hour-input", 2, 0, 16, true);
          var setupTimeMinuteValidator = new IntValidator("setup-time-minute-input", 2, 0, 59, true);
          var panCountValidator = new IntValidator("pan-count-input", 2, 0, 40, true);
          var partsCountValidator = new IntValidator("part-count-input", 6, 0, 100000, true);

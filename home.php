@@ -30,18 +30,18 @@ class Activity
       if (Activity::$permissionMasks == null)
       {
          Activity::$permissionMasks = array(
-            Permission::getPermission(Permission::VIEW_JOB)->bits,                 // JOBS
-            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           // TIME_CARD
-            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
-            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // INSPECTION_TEMPLATE
-            Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          // LINE_INSPECTION
-            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
-            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
-            Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
-            Permission::getPermission(Permission::VIEW_SIGN)->bits,                // SIGNAGE
-            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits        // PRINT_MANAGER
+            Permission::getPermission(Permission::VIEW_JOB)->bits,                  // JOBS
+            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,            // TIME_CARD
+            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,      // PART_WEIGHT
+            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,      // PART_WASH
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,      // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_INSPECTION_TEMPLATE)->bits,  // INSPECTION_TEMPLATE
+            Permission::getPermission(Permission::VIEW_INSPECTION)->bits,           // LINE_INSPECTION
+            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,       // MACHINE_STATUS
+            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,   // PRODUCTION_SUMMARY
+            Permission::getPermission(Permission::VIEW_USER)->bits,                 // USER
+            Permission::getPermission(Permission::VIEW_SIGN)->bits,                 // SIGNAGE
+            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits         // PRINT_MANAGER
          );
       }
       
@@ -213,7 +213,7 @@ HEREDOC;
 <<<HEREDOC
      <div class="action-button" onclick="location.href='partInspection/partInspection.php?view=view_part_inspections';">
         <i class="material-icons action-button-icon">search</i>
-        <div>Part</div>
+        <div>Oasis</div>
         <div>Inspections</div>
      </div>
 HEREDOC;
@@ -291,6 +291,20 @@ HEREDOC;
      </div>
 HEREDOC;
    }
+      
+   // Scanner
+   $scannerButton = "";
+   if (Activity::isAllowed(Activity::PRINT_MANAGER, $permissions))
+   {
+      $scannerButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='panTicket/scanPanTicket.php';">
+        <i class="material-icons action-button-icon">photo_camera</i>
+        <div>Pan Ticket</div>
+        <div>Scanner</div>
+     </div>
+HEREDOC;
+   }
    
    echo
 <<<HEREDOC
@@ -329,6 +343,8 @@ HEREDOC;
             $digitalSignageButton
 
             $printManagerButton
+            
+            $scannerButton
    
          </div>
          
@@ -414,6 +430,7 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
    <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
 
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="common/common.js"></script>
    
 </head>
 
@@ -438,6 +455,10 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
       loginPage();
    }
    ?>
+
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

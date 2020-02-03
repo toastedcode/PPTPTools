@@ -54,3 +54,6 @@ Temporary Items
 # Uploads
 uploads/
 *.pdf
+
+#QR Code cache
+phpqrcode/cache

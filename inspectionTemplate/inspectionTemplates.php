@@ -114,6 +114,7 @@ function getTable($filter)
                <th>Property Count</th>
                <th></th>
                <th></th>
+               <th></th>
             </tr>
 HEREDOC;
       
@@ -128,11 +129,16 @@ HEREDOC;
          if ($inspectionTemplate)
          {
             $viewEditIcon = "";
+            $copyIcon = "";
             $deleteIcon = "";
-            if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+            if (Authentication::checkPermissions(Permission::EDIT_INSPECTION_TEMPLATE))
             {
                $viewEditIcon =
-                  "<a href=\"$ROOT/inspectionTemplate/viewInspectionTemplate.php?templateId=$inspectionTemplate->templateId&view=edit_inspection_template\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+                  "<a href=\"$ROOT/inspectionTemplate/viewInspectionTemplate.php?templateId=$inspectionTemplate->templateId\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+               
+               $copyIcon =
+               "<i class=\"material-icons table-function-button\" onclick=\"location.href = 'viewInspectionTemplate.php?copyFrom=$inspectionTemplate->templateId';\">file_copy</i>";
+               
                $deleteIcon =
                   "<i class=\"material-icons table-function-button\" onclick=\"onDeleteInspectionTemplate($inspectionTemplate->templateId)\">delete</i>";
             }
@@ -150,6 +156,7 @@ HEREDOC;
                <td>$inspectionTemplate->description</td>
                <td>$propertyCount</td>
                <td>$viewEditIcon</td>
+               <td>$copyIcon</td>
                <td>$deleteIcon</td>
             </tr>
 HEREDOC;
@@ -181,7 +188,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -203,6 +210,7 @@ $filter = getFilter();
    <link rel="stylesheet" type="text/css" href="inspectionTemplate.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="inspectionTemplate.js"></script>
 
@@ -235,6 +243,10 @@ $filter = getFilter();
      </div>
      
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

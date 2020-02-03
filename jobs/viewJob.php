@@ -26,7 +26,7 @@ class ViewJob
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="#" method="POST" enctype="multipart/form-data">
+      <form id="input-form" method="POST" enctype="multipart/form-data">
          <input id="job-number-input" type="hidden" name="jobNumber" value="$jobInfo->jobNumber"/>
          <input id="part-number-input" type="hidden" name="partNumber" value="$jobInfo->partNumber"/>
       </form>
@@ -176,19 +176,6 @@ HEREDOC;
          $statusOptions .= "<option $selected value=\"" . $status . "\">" . $statusName . "</option>";
       }
       
-      $qcpOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
-      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::QCP);
-      foreach ($inspectionTemplates as $templateId)
-      {
-         $inspectionTemplate = InspectionTemplate::load($templateId);
-         
-         if ($inspectionTemplate)
-         {
-            $selected = ($jobInfo->qcpTemplateId == $inspectionTemplate->templateId) ? "selected" : "";
-            $qcpOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
-         }
-      }
-      
       $inProcessOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
       $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::IN_PROCESS);
       foreach ($inspectionTemplates as $templateId)
@@ -199,6 +186,32 @@ HEREDOC;
          {
             $selected = ($jobInfo->inProcessTemplateId == $inspectionTemplate->templateId)? "selected" : "";
             $inProcessOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
+      $lineOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::LINE);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->lineTemplateId == $inspectionTemplate->templateId)? "selected" : "";
+            $lineOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
+      $qcpOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::QCP);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->qcpTemplateId == $inspectionTemplate->templateId) ? "selected" : "";
+            $qcpOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
          }
       }
       
@@ -282,6 +295,11 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label-long">In Process Template</div>
             <div><select class="medium-text-input" name="inProcessTemplateId" form="input-form" $disabled>$inProcessOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Line Template</div>
+            <div><select class="medium-text-input" name="lineTemplateId" form="input-form" $disabled>$lineOptions</select></div>
          </div>
 
          <div class="form-item">

@@ -54,7 +54,7 @@ class Upload
    
    static function validateFileSize($file, $maxSize)
    {
-      return ($file["size"] > $maxSize);
+      return ($file["size"] < $maxSize);
    }
    
    static function validateFileFormat($file, $extensions)

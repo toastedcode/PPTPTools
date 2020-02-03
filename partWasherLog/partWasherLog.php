@@ -40,7 +40,7 @@ function getFilter()
       if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
       {
          // Allow selection from all operators.
-         $operators = UserInfo::getUsersByRole(Role::PART_WASHER);
+         $operators = UserInfo::getUsersByRoles(array(Role::LABORER, Role::PART_WASHER));
          $selectedOperator = "All";
          $allowAll = true;
       }
@@ -204,14 +204,14 @@ HEREDOC;
             if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
             {
                $viewEditIcon =
-               "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=edit_part_washer_entry\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+               "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
                $deleteIcon =
                "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWasherEntry($partWasherEntry->partWasherEntryId)\">delete</i>";
             }
             else
             {
                $viewEditIcon =
-               "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId&view=view_part_washer_entry\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+               "<a href=\"$ROOT/partWasherLog/partWasherLogEntry.php?entryId=$partWasherEntry->partWasherEntryId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
             $html .=
@@ -258,11 +258,21 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
 $filter = getFilter();
+
+// Post/Redirect/Get idiom.
+// getFilter() stores all $_POST data in the $_SESSION variable.
+// header() redirects to this page, but with a GET request.
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+   // Redirect to this page.
+   header("Location: " . $_SERVER['REQUEST_URI']);
+   exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -280,7 +290,7 @@ $filter = getFilter();
    <link rel="stylesheet" type="text/css" href="partWasherLog.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWasherLog.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="partWasherLog.js"></script>
 
@@ -313,6 +323,10 @@ $filter = getFilter();
      </div>
      
    </div>
+
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

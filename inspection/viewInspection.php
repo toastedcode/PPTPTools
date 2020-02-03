@@ -349,6 +349,20 @@ function getOperator()
    return ($operator);
 }
 
+function getNotes()
+{
+   $notes = "";
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $notes = $inspectionTemplate->notes;
+   }
+   
+   return ($notes);
+}
+
 function getComments()
 {
    $comments = "";
@@ -858,7 +872,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -880,9 +894,9 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="inspection.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="inspection.js"></script>
 
 </head>
 
@@ -949,12 +963,17 @@ if (!Authentication::isAuthenticated())
                         <?php echo getWcNumberOptions(); ?>
                      </select>
                   </div>
-         
+                  
                   <div class="form-item optional-property-container <?php echo showOptionalProperty(OptionalInspectionProperties::OPERATOR) ? "" : "hidden";?>">
                      <div class="form-label">Operator</div>
                      <select id="operator-input" class="form-input-medium" name="operator" form="input-form" <?php echo !isEditable(InspectionInputField::OPERATOR) ? "disabled" : ""; ?>>
                         <?php echo getOperatorOptions(); ?>
                      </select>
+                  </div>
+                  
+                  <div class="form-item" style="display: <?php echo (getNotes() == "") ? "none" : "flex"; ?>">
+                     <div class="form-label">Notes</div>
+                     <textarea id="notes-input" style="width: 250px" disabled><?php echo getNotes(); ?></textarea>
                   </div>
                   
                   <div class="form-item">
@@ -977,6 +996,12 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         preserveSession();
+
+         // Resize notes text area to fit text.
+         var notes = document.getElementById('notes-input');
+         notes.style.height = notes.scrollHeight + "px";
+      
          const PASS = <?php echo InspectionStatus::PASS; ?>;
       
          var jobNumberValidator = new SelectValidator("job-number-input");

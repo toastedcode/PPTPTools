@@ -67,14 +67,38 @@ class UserInfo
    {
       $users = array();
       
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
+      $database = PPTPDatabase::getInstance();
+           
+      if ($database && $database->isConnected())
       {
          $result = $database->getUsersByRole($role);
 
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $userInfo = new UserInfo();
+               
+               $userInfo->initialize($row);
+               
+               $users[] = $userInfo;
+            }
+         }
+      }
+      
+      return ($users);
+   }
+   
+   static public function getUsersByRoles($roles)
+   {
+      $users = array();
+      
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->getUsersByRoles($roles);
+         
          if ($result)
          {
             while ($row = $result->fetch_assoc())

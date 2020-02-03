@@ -334,7 +334,7 @@ class Filter
 <<<HEREDOC
       <script src="$ROOT/common/filter.js"></script>
       
-      <form id="filter-form" action="#" method="POST">
+      <form id="filter-form" method="POST">
       <div class="flex-horizontal">
 HEREDOC;
 

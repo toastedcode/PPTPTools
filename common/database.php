@@ -305,7 +305,7 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUsers()
    {
-      $query = "SELECT * FROM user ORDER BY username ASC;";
+      $query = "SELECT * FROM user ORDER BY firstName ASC;";
       
       $result = $this->query($query);
       
@@ -314,9 +314,40 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUsersByRole($role)
    {
-      $query = "SELECT * FROM user WHERE roles = $role ORDER BY username ASC;";
+      $query = "SELECT * FROM user WHERE roles = $role ORDER BY firstName ASC;";
 
       $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getUsersByRoles($roles)
+   {
+      $result = null;
+      
+      if (sizeof($roles) > 0)
+      {
+         $rolesClause = "roles in (";
+         
+         $count = 0;
+         foreach ($roles as $role)
+         {
+            $rolesClause .= "'$role'";
+            
+            $count++;
+            
+            if ($count < sizeof($roles))
+            {
+               $rolesClause .= ", ";
+            }
+         }
+         
+         $rolesClause .= ")";
+         
+         $query = "SELECT * FROM user WHERE $rolesClause ORDER BY firstName ASC;";
+
+         $result = $this->query($query);
+      }
       
       return ($result);
    }
@@ -871,9 +902,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO job " .
-      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, cycleTime, netPercentage, status, customerPrint, inProcessTemplateId, qcpTemplateId) " .
+      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, cycleTime, netPercentage, status, customerPrint, inProcessTemplateId, lineTemplateId, qcpTemplateId) " .
       "VALUES " .
-      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint', '$jobInfo->inProcessTemplateId', '$jobInfo->qcpTemplateId');";
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint', '$jobInfo->inProcessTemplateId', '$jobInfo->lineTemplateId', '$jobInfo->qcpTemplateId');";
 
       $result = $this->query($query);
       
@@ -886,7 +917,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "UPDATE job " .
-         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId', lineTemplateId = '$jobInfo->lineTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
          "WHERE jobId = '$jobInfo->jobId';";
 
       $result = $this->query($query);
@@ -1097,9 +1128,9 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "INSERT INTO inspectiontemplate " .
-      "(name, description, inspectionType, sampleSize, optionalProperties) " .
+      "(name, description, inspectionType, sampleSize, optionalProperties, notes) " .
       "VALUES " .
-      "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize', '$inspectionTemplate->optionalProperties');";
+      "('$inspectionTemplate->name', '$inspectionTemplate->description', '$inspectionTemplate->inspectionType', '$inspectionTemplate->sampleSize', '$inspectionTemplate->optionalProperties', '$inspectionTemplate->notes');";
 
       $result = $this->query($query);
       
@@ -1132,7 +1163,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "UPDATE inspectiontemplate " .
-      "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize', optionalProperties = '$inspectionTemplate->optionalProperties' " .
+      "SET name = '$inspectionTemplate->name', description = '$inspectionTemplate->description', inspectionType = '$inspectionTemplate->inspectionType', sampleSize = '$inspectionTemplate->sampleSize', optionalProperties = '$inspectionTemplate->optionalProperties', notes = '$inspectionTemplate->notes' " .
       "WHERE templateId = '$inspectionTemplate->templateId';";
 
       $result = $this->query($query);

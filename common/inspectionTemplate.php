@@ -58,6 +58,7 @@ class InspectionTemplate
    public $description;
    public $sampleSize;
    public $optionalProperties;
+   public $notes;
    public $inspectionProperties;
    
    public function __construct()
@@ -68,6 +69,7 @@ class InspectionTemplate
       $this->description = "";
       $this->sampleSize = InspectionTemplate::DEFAULT_SAMPLE_SIZE;
       $this->optionalProperties = 0;
+      $this->notes = "";
       $this->inspectionProperties = array();
    }
    
@@ -91,6 +93,7 @@ class InspectionTemplate
             $inspectionTemplate->description = $row['description'];
             $inspectionTemplate->sampleSize = intval($row['sampleSize']);
             $inspectionTemplate->optionalProperties = intval($row['optionalProperties']);
+            $inspectionTemplate->notes = $row['notes'];
             
             $result = $database->getInspectionProperties($templateId);
             
@@ -153,26 +156,30 @@ class InspectionTemplate
       switch ($inspectionType)
       {
          case InspectionType::OASIS:
-         case InspectionType::LINE:
          case InspectionType::GENERIC:
          {
             $templateIds = InspectionTemplate::getInspectionTemplates($inspectionType);
             break;
          }
             
-         case InspectionType::QCP:
          case InspectionType::IN_PROCESS:
+         case InspectionType::LINE:
+         case InspectionType::QCP:
          {
            $jobInfo = JobInfo::load($jobId);
            if ($jobInfo)
            {
-              if ($inspectionType == InspectionType::QCP)
-              {
-                 $templateIds[] = $jobInfo->qcpTemplateId;
-              }
-              else if ($inspectionType == InspectionType::IN_PROCESS)
+              if ($inspectionType == InspectionType::IN_PROCESS)
               {
                  $templateIds[] = $jobInfo->inProcessTemplateId;
+              }
+              else if ($inspectionType == InspectionType::LINE)
+              {
+                 $templateIds[] = $jobInfo->lineTemplateId;
+              }
+              else if ($inspectionType == InspectionType::QCP)
+              {
+                 $templateIds[] = $jobInfo->qcpTemplateId;
               }
            }
            break;
@@ -202,6 +209,7 @@ if (isset($_GET["templateId"]))
       echo "description: " .        $inspectionTemplate->description .                              "<br/>";
       echo "sampleSize: " .         $inspectionTemplate->sampleSize .                               "<br/>";
       echo "optionalProperties: " . $inspectionTemplate->optionalProperties .                       "<br/>";
+      echo "notes: " .              $inspectionTemplate->notes .                                    "<br/>";
       
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {

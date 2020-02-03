@@ -22,14 +22,28 @@ session_start();
 $router = new Router();
 $router->setLogging(false);
 
+$router->add("ping", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   echo json_encode($result);
+});
+
 $router->add("timeCardInfo", function($params) {
    $result = new stdClass();
 
-   if (isset($params["timeCardId"]))
+   if (isset($params["timeCardId"]) || isset($params["panTicketCode"]))
    {
-      $result->timeCardId = $params["timeCardId"];
+      if (isset($params["timeCardId"]))
+      {
+         $result->timeCardId = intval($params["timeCardId"]);         
+      }
+      else
+      {
+         $result->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);  
+      }
       
-      $timeCardInfo = TimeCardInfo::load($params["timeCardId"]);
+      $timeCardInfo = TimeCardInfo::load($result->timeCardId);
       
       if ($timeCardInfo)
       {
@@ -428,14 +442,26 @@ $router->add("savePartWasherEntry", function($params) {
    }
    
    if ($result->success)
-   {      
-      if (isset($params["timeCardId"]) && is_numeric($params["timeCardId"]))
+   {
+      if (isset($params["panTicketCode"]) &&
+          ($params["panTicketCode"] != ""))
       {
          //
-         // Time card entry
+         // Pan ticket entry
          //
          
-         $partWasherEntry->timeCardId = intval($params["timeCardId"]);
+         $panTicketId = PanTicket::getPanTicketId($params["panTicketCode"]);
+         
+         // Validate panTicketId.
+         if (TimeCardInfo::load($panTicketId) != null)
+         {
+            $partWasherEntry->timeCardId = $panTicketId;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Invalid pan ticket code.";
+         }
       }
       else if (isset($params["jobNumber"]) &&
                isset($params["wcNumber"]) &&
@@ -502,6 +528,49 @@ $router->add("savePartWasherEntry", function($params) {
    echo json_encode($result);
 });
 
+$router->add("deletePartWasherEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != PartWasherEntry::UNKNOWN_ENTRY_ID))
+   {
+      $partWasherEntryId = intval($params["entryId"]);
+      
+      $partWasherEntry = PartWasherEntry::load($partWasherEntryId);
+      
+      if ($partWasherEntry)
+      {
+         $dbaseResult = $database->deletePartWasherEntry($partWasherEntryId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing entry found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("savePartWeightEntry", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -535,19 +604,30 @@ $router->add("savePartWeightEntry", function($params) {
    
    if ($result->success)
    {
-      if (isset($params["timeCardId"]) && is_numeric($params["timeCardId"]))
+      if (isset($params["panTicketCode"]) &&
+          ($params["panTicketCode"] != ""))
       {
          //
-         // Time card entry
+         // Pan ticket entry
          //
          
-         $partWeightEntry->timeCardId = intval($params["timeCardId"]);
+         $panTicketId = PanTicket::getPanTicketId($params["panTicketCode"]);
+         
+         // Validate panTicketId.
+         if (TimeCardInfo::load($panTicketId) != null)
+         {
+            $partWeightEntry->timeCardId = $panTicketId;            
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Invalid pan ticket code.";
+         }
       }
       else if (isset($params["jobNumber"]) &&
                isset($params["wcNumber"]) &&
                isset($params["manufactureDate"]) &&
-               isset($params["operator"]) &&
-               isset($params["panCount"]))
+               isset($params["operator"]))
       {
          //
          // Manual entry
@@ -578,9 +658,11 @@ $router->add("savePartWeightEntry", function($params) {
       if ($result->success)
       {
          if (isset($params["laborer"]) &&
+             isset($params["panCount"]) &&
              isset($params["partWeight"]))
          {
             $partWeightEntry->employeeNumber = intval($params["laborer"]);
+            $partWeightEntry->panCount = intval($params["panCount"]);
             $partWeightEntry->weight = floatval($params["partWeight"]);
             
             if ($partWeightEntry->partWeightEntryId == PartWeightEntry::UNKNOWN_ENTRY_ID)
@@ -910,12 +992,14 @@ $router->add("saveInspectionTemplate", function($params) {
       if (isset($params["templateName"]) &&
           isset($params["templateDescription"]) &&
           isset($params["inspectionType"]) &&
-          isset($params["sampleSize"]))
+          isset($params["sampleSize"]) &&
+          isset($params["notes"]))
       {
          $inspectionTemplate->name = $params["templateName"];
          $inspectionTemplate->description = $params["templateDescription"];
          $inspectionTemplate->inspectionType = intval($params["inspectionType"]);
          $inspectionTemplate->sampleSize = intval($params["sampleSize"]);
+         $inspectionTemplate->notes = $params["notes"];
          
          // Optional properties
          if ($inspectionTemplate->inspectionType == InspectionType::GENERIC)

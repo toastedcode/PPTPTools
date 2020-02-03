@@ -2,32 +2,37 @@ function onDeletePartWasherEntry(partWasherEntryId)
 {
    if (confirm("Are you sure you want to delete this log entry?"))
    {
-      form = document.createElement('form');
-      form.setAttribute('method', 'POST');
-      form.setAttribute('action', 'partWasherLog.php');
+      // AJAX call to delete part weight entry.
+      requestUrl = "../api/deletePartWasherEntry/?entryId=" + partWasherEntryId;
       
-      input = document.createElement('input');
-      input.setAttribute('name', 'action');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', 'delete_part_washer_entry');
-      form.appendChild(input);
-      
-      input = document.createElement('input');
-      input.setAttribute('name', 'partWasherEntryId');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', partWasherEntryId);
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      form.submit();
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               location.href = "partWasherLog.php";
+            }
+            else
+            {
+               console.log("API call to delete part washer entry failed.");
+               alert(json.error);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send(); 
    }
 }
 
-function onTimeCardIdChange()
+function onPanTicketCodeChange()
 {
-   timeCardId = parseInt(document.getElementById("time-card-id-input").value);
+   var panTicketCode = document.getElementById("pan-ticket-code-input").value;
    
-   if (isNaN(timeCardId) || (timeCardId == 0))
+   if (panTicketCode == "")
    {
       // Clear fields.
       clear("job-number-input");
@@ -101,8 +106,8 @@ function onTimeCardIdChange()
       disable("yesterday-button");
       disable("operator-input");
       
-      // AJAX call to populate input fields based on time card selection.
-      requestUrl = "../api/timeCardInfo/?timeCardId=" + timeCardId + "&expandedProperties=true";
+      // AJAX call to populate input fields based on pan ticket selection.
+      requestUrl = "../api/timeCardInfo/?panTicketCode=" + panTicketCode + "&expandedProperties=true";
       
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function()
@@ -133,7 +138,7 @@ function onTimeCardIdChange()
                clear("operator-input");
                
                // Invalidate time card input.
-               document.getElementById("time-card-id-input").validator.color("#FF0000");
+               document.getElementById("pan-ticket-code-input").validator.color("#FF0000");
             }
          }
       };
@@ -209,15 +214,23 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "partWasherLog.php?view=view_part_washer_log";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "partWasherLog.php?view=view_part_washer_log";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
+            console.log("JSON syntax error");
+            console.log(this.responseText);
          }
       });
    
@@ -352,16 +365,16 @@ function validatePartWasherEntry()
 {
    valid = false;
    
-   $validTimeCardId = (document.getElementById("time-card-id-input").validator.validate() &&
-                       (document.getElementById("time-card-id-input").style.color != "#FF0000"));
+   $validPanTicketCode = (document.getElementById("pan-ticket-code-input").validator.validate() &&
+                          (document.getElementById("pan-ticket-code-input").style.color != "#FF0000"));
 
-   if (!$validTimeCardId)
+   if (!$validPanTicketCode)
    {
-      alert("Please enter a valid time card ID.");    
+      alert("Please enter a valid pan ticket code.");    
    }
    else if (!(document.getElementById("job-number-input").validator.validate()))
    {
-      alert("Start by selecting a valid time card ID or active job.");    
+      alert("Start by selecting a valid pan ticket or active job.");    
    }
    else if (!(document.getElementById("wc-number-input").validator.validate()))
    {
@@ -381,7 +394,7 @@ function validatePartWasherEntry()
    }
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
-      alert("Please enter a valid pan count.");
+      alert("Please enter a valid basket count.");
    }
    else if (!(document.getElementById("part-count-input").validator.validate()))
    {

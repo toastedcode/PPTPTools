@@ -122,6 +122,57 @@ function onAddProperty()
    newRow.innerHTML = getNewInspectionRow();
 }
 
+function onReorderProperty(propertyId, orderDelta)
+{
+   var rowId = "property" + propertyId + "_row";
+
+   var row = document.getElementById(rowId);
+   
+   if (row != null)
+   {
+      var nextRow = row.nextElementSibling;
+      var prevRow = row.previousElementSibling;
+      var parent = row.parentNode;
+      
+      if ((orderDelta > 0) &&
+          (nextRow != null))
+      {
+         // Swap ordering of row and next row.
+         row.parentNode.removeChild(row);
+         parent.insertBefore(row, nextRow.nextSibling);
+         
+         reorder();
+      }
+      else if ((orderDelta < 0) &&
+               (prevRow != null))
+      {
+         // Swap ordering of row and previous row.         
+         row.parentNode.removeChild(row);
+         parent.insertBefore(row, prevRow);
+         
+         reorder();
+      }
+   }
+}
+
+function reorder()
+{
+   var table = document.getElementById("property-table");
+   
+   for (var i = 0; i < table.rows.length; i++)
+   {
+      var inputElements = table.rows[i].getElementsByTagName("input");
+      
+      for (var input of inputElements)
+      {
+         if (input.name.includes("ordering"))
+         {
+            input.value = i;   
+         }
+      }
+   }
+}
+
 /*
 function set(elementId, value)
 {

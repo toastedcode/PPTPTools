@@ -21,8 +21,9 @@ abstract class InspectionTemplateInputField
    const DESCRIPTION = 1;
    const INSPECTION_TYPE = 2;
    const SAMPLE_SIZE = 3;
-   const PROPERTIES = 4;
-   const LAST = 5;
+   const NOTES = 4;
+   const PROPERTIES = 5;
+   const LAST = 6;
    const COUNT = InspectionTemplateInputField::LAST - InspectionTemplateInputField::FIRST;
 }
 
@@ -53,7 +54,7 @@ function getView()
    {
       $view = View::NEW_INSPECTION_TEMPLATE;
    }
-   else if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
+   else if (Authentication::checkPermissions(Permission::EDIT_INSPECTION_TEMPLATE))
    {
       $view = View::EDIT_INSPECTION_TEMPLATE;
    }
@@ -68,6 +69,13 @@ function getTemplateId()
    return ($params->keyExists("templateId") ? $params->get("templateId") : InspectionTemplate::UNKNOWN_TEMPLATE_ID);
 }
 
+function getCopyFromTemplateId()
+{
+   $params = getParams();
+   
+   return ($params->keyExists("copyFrom") ? $params->get("copyFrom") : InspectionTemplate::UNKNOWN_TEMPLATE_ID);
+}
+
 function getInspectionTemplate()
 {
    static $inspectionTemplate = null;
@@ -75,10 +83,20 @@ function getInspectionTemplate()
    if (!$inspectionTemplate)
    {
       $templateId = getTemplateId();
+      
+      $copyFromTemplateId = getCopyFromTemplateId();
 
       if ($templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
       {
          $inspectionTemplate = InspectionTemplate::load($templateId);
+      }
+      else if ($copyFromTemplateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
+      {
+         $inspectionTemplate = InspectionTemplate::load($copyFromTemplateId);
+         
+         // Clear/modify select fields.
+         $inspectionTemplate->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+         $inspectionTemplate->name = $inspectionTemplate->name . "_copy";
       }
       else
       {
@@ -322,15 +340,30 @@ function getOptionalProperties()
          $name = "optional-property-$optionalProperty-input";
          $label = OptionalInspectionProperties::getLabel($optionalProperty);
          $checked = $inspectionTemplate->isOptionalPropertySet($optionalProperty) ? "checked" : "";
+         $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : "";
          
          $html .=
 <<<HEREDOC
-         <input type="checkbox" name="$name" form="input-form" value="1" $checked>$label&nbsp;&nbsp;
+         <input type="checkbox" name="$name" form="input-form" value="1" $checked $disabled>$label&nbsp;&nbsp;
 HEREDOC;
       }
    }
    
    return ($html);
+}
+
+function getNotes()
+{
+   $notes = "";
+   
+   $inspectionTemplate = getInspectionTemplate();
+   
+   if ($inspectionTemplate)
+   {
+      $notes = $inspectionTemplate->notes;
+   }
+   
+   return ($notes);
 }
 
 function getInspectionPropertyCount()
@@ -356,6 +389,9 @@ function getInspectionProperties()
    
    if ($inspectionTemplate)
    {
+      // TODO: Remove.
+      reorderProperties($inspectionTemplate);
+      
       $propertyIndex = 0;
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
       {        
@@ -378,25 +414,54 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    $specification = $inspectionProperty ? $inspectionProperty->specification : "";
    $dataType = $inspectionProperty ? $inspectionProperty->dataType : InspectionDataType::UNKNOWN;
    $dataUnits = $inspectionProperty ? $inspectionProperty->dataUnits : InspectionDataUnits::UNKNOWN;
+   $ordering = $inspectionProperty ? $inspectionProperty->ordering : "$propertyIndex";
    
    $dataTypeOptions = getDataTypeOptions($dataType);
    $dataUnitsOptions = getDataUnitsOptions($dataUnits);
    
+   $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : "";
+   
    $html =
 <<<HEREDOC
-   <tr>
-      <input name = "{$name}_propertyId" type="hidden" form="input-form" value="$propertyId">
-      <input name="{$name}_ordering" type="hidden" form="input-form" value="0">
+   <tr id="{$name}_row">
+      <input name="{$name}_propertyId" type="hidden" form="input-form" value="$propertyId" $disabled>
+      <input name="{$name}_ordering" type="hidden" form="input-form" value="$ordering" $disabled>
       <td></td>
-      <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName"></td>
-      <td><input name="{$name}_specification" type="text" form="input-form" value="$specification"></td>
-      <td><select name="{$name}_dataType" form="input-form">$dataTypeOptions</select></td>
-      <td><select name="{$name}_dataUnits" form="input-form">$dataUnitsOptions</select></td>
-      <td></td>
+      <td><input name="{$name}_name" type="text" form="input-form" value="$propertyName" $disabled></td>
+      <td><input name="{$name}_specification" type="text" form="input-form" value="$specification" $disabled></td>
+      <td><select name="{$name}_dataType" form="input-form" $disabled>$dataTypeOptions</select></td>
+      <td><select name="{$name}_dataUnits" form="input-form" $disabled>$dataUnitsOptions</select></td>
+      <td><div class="flex-vertical"><button onclick="onReorderProperty($propertyIndex, -1)">&#x25B2</button><button onclick="onReorderProperty($propertyIndex, 1)">&#x25BC</button></div></td>
    </tr>
 HEREDOC;
    
    return ($html);
+}
+
+function reorderProperties(&$inspectionTemplate)
+{
+   // Temporary function for adding in ordering to existing templates.
+   
+   // Detect the condition where all properties have an ordering of zero.
+   $allZeros = true;
+   foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+   {
+      if ($inspectionProperty->ordering != 0)
+      {
+         $allZeros = false;
+         break;
+      }
+   } 
+   
+   if ($allZeros)
+   {
+      $propertyIndex = 0;
+      foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
+      {
+         $inspectionProperty->ordering = $propertyIndex;
+         $propertyIndex++;
+      }
+   }
 }
 
 // *****************************************************************************
@@ -407,7 +472,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -429,9 +494,9 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="inspectionTemplate.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="inspectionTemplate.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="inspectionTemplate.js"></script>
 
 </head>
 
@@ -469,22 +534,27 @@ if (!Authentication::isAuthenticated())
                   
                      <div class="form-item">
                         <div class="form-label">Inspection Name</div>
-                        <input name="templateName" type="text" class="form-input-medium" style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>">
+                        <input name="templateName" type="text" class="form-input-medium" style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>" <?php echo !isEditable(InspectionTemplateInputField::NAME) ? "disabled" : ""; ?>>
                      </div>
                      
                      <div class="form-item">
                         <div class="form-label">Description</div>
-                        <input name="templateDescription" type="text" class="form-input-medium" style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>">
+                        <input name="templateDescription" type="text" class="form-input-medium" style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>" <?php echo !isEditable(InspectionTemplateInputField::DESCRIPTION) ? "disabled" : ""; ?>>
                      </div>
                      
                      <div class="form-item">
                         <div class="form-label">Sample Size</div>
-                        <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>">
+                        <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>" <?php echo !isEditable(InspectionTemplateInputField::SAMPLE_SIZE) ? "disabled" : ""; ?>>
                      </div>
                      
                      <div id="optional-properties-input-container" class="form-item">
                         <div class="form-label">Optional Properties</div>
                         <?php echo getOptionalProperties() ?>                     
+                     </div>
+                     
+                     <div class="form-item">
+                        <div class="form-label">Notes</div>
+                        <textarea name="notes" rows="4" cols="50" form="input-form" <?php echo !isEditable(InspectionTemplateInputField::NOTES) ? "disabled" : ""; ?>><?php echo getNotes() ?></textarea>
                      </div>
                      
                      <div class="form-item">
@@ -502,7 +572,7 @@ if (!Authentication::isAuthenticated())
                      </div>
                      
                      <div class="form-item" style="justify-content: flex-end;">
-                        <button style="width: 50px; height: 30px;" onclick="onAddProperty()">+</button>
+                        <button style="width: 50px; height: 30px;" onclick="onAddProperty()" <?php echo !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : ""; ?>>+</button>
                      </div>
             
                   </div>
@@ -516,6 +586,8 @@ if (!Authentication::isAuthenticated())
       </div>
                
       <script>
+         preserveSession();
+      
          const OASIS = <?php echo InspectionType::OASIS; ?>;
          const LINE = <?php echo InspectionType::LINE; ?>;
          const QCP = <?php echo InspectionType::QCP; ?>;

@@ -10,7 +10,6 @@ function onDeletePartWeightEntry(partWeightEntryId)
       {
          if (this.readyState == 4 && this.status == 200)
          {
-            console.log(this.responseText);
             var json = JSON.parse(this.responseText);
             
             if (json.success == true)
@@ -29,11 +28,11 @@ function onDeletePartWeightEntry(partWeightEntryId)
    }
 }
 
-function onTimeCardIdChange()
+function onPanTicketCodeChange()
 {
-   timeCardId = parseInt(document.getElementById("time-card-id-input").value);
+   var panTicketCode = document.getElementById("pan-ticket-code-input").value;
    
-   if (isNaN(timeCardId) || (timeCardId == 0))
+   if (panTicketCode == "")
    {
       // Clear fields.
       clear("job-number-input");
@@ -110,8 +109,8 @@ function onTimeCardIdChange()
       disable("operator-input");
       disable("pan-count-input");
       
-      // AJAX call to populate input fields based on time card selection.
-      requestUrl = "../api/timeCardInfo/?timeCardId=" + timeCardId + "&expandedProperties=true";
+      // AJAX call to populate input fields based on pan ticket selection.
+      requestUrl = "../api/timeCardInfo/?panTicketCode=" + panTicketCode + "&expandedProperties=true";
       
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function()
@@ -143,7 +142,7 @@ function onTimeCardIdChange()
                clear("pan-count-input");
                
                // Invalidate time card input.
-               document.getElementById("time-card-id-input").validator.color("#FF0000");
+               document.getElementById("pan-ticket-code-input").validator.color("#FF0000");
             }
          }
       };
@@ -264,15 +263,23 @@ function onSubmit()
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("load", function(event) {
-         var json = JSON.parse(event.target.responseText);
-
-         if (json.success == true)
+         try
          {
-            location.href = "partWeightLog.php";
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "partWeightLog.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
          }
-         else
+         catch (expection)
          {
-            alert(json.error);
+            console.log("JSON syntax error");
+            console.log(this.responseText);
          }
       });
    
@@ -432,16 +439,16 @@ function validatePartWeightEntry()
 {
    valid = false;
    
-   $validTimeCardId = (document.getElementById("time-card-id-input").validator.validate() &&
-                       (document.getElementById("time-card-id-input").style.color != "#FF0000"));
+   $validPanTicketCode = (document.getElementById("pan-ticket-code-input").validator.validate() &&
+                          (document.getElementById("pan-ticket-code-input").style.color != "#FF0000"));
 
-   if (!$validTimeCardId)
+   if (!$validPanTicketCode)
    {
-      alert("Please enter a valid time card ID.");    
+      alert("Please enter a valid pan ticket code.");    
    }
    else if (!(document.getElementById("job-number-input").validator.validate()))
    {
-      alert("Start by selecting a valid time card ID or active job.");    
+      alert("Start by selecting a valid pan ticket or active job.");    
    }
    else if (!(document.getElementById("wc-number-input").validator.validate()))
    {
@@ -461,7 +468,7 @@ function validatePartWeightEntry()
    }
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
-      alert("Please enter a valid pan count.");
+      alert("Please enter a valid basket count.");
    }
    else if (!(document.getElementById("part-weight-input").validator.validate()))
    {

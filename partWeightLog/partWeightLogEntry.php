@@ -4,6 +4,7 @@ require_once '../common/database.php';
 require_once '../common/header.php';
 require_once '../common/jobInfo.php';
 require_once '../common/navigation.php';
+require_once '../common/panTicket.php';
 require_once '../common/params.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
@@ -141,7 +142,6 @@ function isEditable($field)
       case PartWeightLogInputField::JOB_NUMBER:
       case PartWeightLogInputField::OPERATOR:
       case PartWeightLogInputField::MANUFACTURE_DATE:
-      case PartWeightLogInputField::PAN_COUNT:
       {
          // Edit status disabled by time card ID.
          $isEditable &= (getTimeCardId() == TimeCardInfo::UNKNOWN_TIME_CARD_ID);
@@ -183,6 +183,7 @@ function isEditable($field)
       }
       
       case PartWeightLogInputField::TIME_CARD_ID:
+      case PartWeightLogInputField::PART_WEIGHT:
       case PartWeightLogInputField::PAN_COUNT:
       default:
       {
@@ -571,20 +572,11 @@ function getPanCount()
 {
    $panCount = 0;
    
-   $timeCardInfo = getTimeCardInfo();
+   $partWeightEntry = getPartWeightEntry();
    
-   if ($timeCardInfo)
+   if ($partWeightEntry)
    {
-      $panCount = $timeCardInfo->panCount;
-   }
-   else
-   {
-      $partWeightEntry = getPartWeightEntry();
-      
-      if ($partWeightEntry)
-      {
-         $panCount = $partWeightEntry->panCount;
-      }
+      $panCount = $partWeightEntry->panCount;
    }
    
    return ($panCount);
@@ -654,7 +646,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -707,8 +699,8 @@ if (!Authentication::isAuthenticated())
             <div class="form-col" style="margin-right: 20px;">  
                <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
-                  <div class="form-label">Pan Ticket ID</div>
-                  <input id="time-card-id-input" class="form-input-medium" type="number" name="timeCardId" form="input-form" oninput="this.validator.validate(); onTimeCardIdChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : $timeCardId;?>" <?php echo !isEditable(PartWeightLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
+                  <div class="form-label">Pan Ticket #</div>
+                  <input id="pan-ticket-code-input" class="form-input-medium" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo !isEditable(PartWeightLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
                </div>               
             
                <div class="form-section-header">Manual Entry</div>
@@ -731,8 +723,8 @@ if (!Authentication::isAuthenticated())
                      <div class="form-label">Manufacture Date</div>
                      <div class="flex-horizontal">
                         <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>
-                        &nbsp<button id="today-button" form="" onclick="onTodayButton()">Today</button>
-                        &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()">Yesterday</button>
+                        &nbsp<button id="today-button" form="" onclick="onTodayButton()" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>Today</button>
+                        &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>Yesterday</button>
                      </div>
                   </div>
                </div>
@@ -760,7 +752,7 @@ if (!Authentication::isAuthenticated())
                </div>               
                               
                <div class="form-item">
-                  <div class="form-label">Pan Count</div>
+                  <div class="form-label">Basket Count</div>
                   <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                            
@@ -794,7 +786,9 @@ if (!Authentication::isAuthenticated())
       </div>
       
       <script>
-         var timeCardIdValidator = new IntValidator("time-card-id-input", 7, 1, 1000000, true);
+         preserveSession();
+         
+         var panTicketCodeValidator = new HexValidator("pan-ticket-code-input", 4, 1, 65536, true);
          var jobNumberValidator = new SelectValidator("job-number-input");
          var wcNumberValidator = new SelectValidator("wc-number-input");
          var operatorValidator = new SelectValidator("operator-input");
@@ -802,7 +796,7 @@ if (!Authentication::isAuthenticated())
          var panCountValidator = new IntValidator("pan-count-input", 2, 1, 40, false);
          var partWeightValidator = new DecimalValidator("part-weight-input", 7, 1, 10000, 2, false);
 
-         timeCardIdValidator.init();
+         panTicketCodeValidator.init();
          jobNumberValidator.init();
          wcNumberValidator.init();
          operatorValidator.init();

@@ -259,14 +259,7 @@ function onSubmit()
    
             if (json.success == true)
             {
-               if (confirm('Print pan tickets?'))
-               {
-                  location.href = "../panTicket/printPanTicket.php?panTicketId=" + json.timeCardId;
-               } 
-               else
-               {
-                  location.href = "viewTimeCards.php";
-               }
+               location.href = "viewTimeCards.php";
             }
             else
             {
