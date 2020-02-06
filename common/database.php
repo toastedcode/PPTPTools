@@ -1324,13 +1324,13 @@ class PPTPDatabase extends MySqlDatabase
    
    public function updateInspection($inspection)
    {
-      // $dateTime = Time::toMySqlDate($inspection->dateTime);
+      $dateTime = Time::toMySqlDate($inspection->dateTime);
       
       $query =
       "UPDATE inspection " .
-      "SET inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator'  " .
+      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator'  " .
       "WHERE inspectionId = '$inspection->inspectionId';";
-      
+
       $result = $this->query($query);
       
       if ($result)

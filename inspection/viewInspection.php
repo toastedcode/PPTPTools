@@ -673,11 +673,12 @@ function getInspections()
 HEREDOC;
       
       // Sample heading.
+      $label = InspectionType::isTimeBased($inspectionTemplate->inspectionType) ? "Hour" : "Sample";
       for ($sampleId = 1; $sampleId <= $inspectionTemplate->sampleSize; $sampleId++)
       {
          $html .=
 <<<HEREDOC
-         <th>Sample $sampleId</th>
+         <th>$label $sampleId</th>
 HEREDOC;
       }
          
@@ -840,7 +841,7 @@ function getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionRe
       
       $html .=
 <<<HEREDOC
-      <input name="$dataName" type="$inputType" form="input-form" style="width:50px;" value="$dataValue" $disabled>&nbsp$dataUnits
+      <input name="$dataName" type="$inputType" form="input-form" style="width:80px;" value="$dataValue" $disabled>&nbsp$dataUnits
 HEREDOC;
    }
    

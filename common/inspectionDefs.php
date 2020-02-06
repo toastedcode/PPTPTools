@@ -55,6 +55,11 @@ abstract class InspectionType
          
       return ($optionalProperties[$inspectionType]);
    }
+   
+   public static function isTimeBased($inspectionType)
+   {
+      return ($inspectionType == InspectionType::QCP);
+   }
 }
 
 abstract class InspectionDataType
