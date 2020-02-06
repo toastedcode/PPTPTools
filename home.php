@@ -356,7 +356,7 @@ HEREDOC;
 
 function login($username, $password)
 {
-   $result = Authentication::authenticate($username, $password);
+   Authentication::authenticateUser($username, $password);
 }
 
 function logout()

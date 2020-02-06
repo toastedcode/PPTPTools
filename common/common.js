@@ -105,3 +105,16 @@ function preserveSession()
       xhttp.send();
    }, 60000);
 }
+
+function copyToClipboard(elementId)
+{
+   var element = document.getElementById(elementId);
+   
+   element.focus();
+   element.select();
+   element.setSelectionRange(0, 99999);  // For mobile devices
+
+   document.execCommand("copy");
+   
+   alert("Copied " + element.value);
+}

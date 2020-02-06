@@ -13,6 +13,8 @@ Time::init();
 
 session_start();
 
+Authentication::authenticate();
+
 if (!Authentication::isAuthenticated())
 {
    header('Location: ../home.php');

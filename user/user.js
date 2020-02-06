@@ -124,3 +124,19 @@ function validateUser()
    
    return (valid);
 }
+
+function refreshAuthToken()
+{
+   const AUTH_TOKEN_LENGTH = 32;
+   
+   var newToken = "";
+
+   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+   for (var i = 0; i < AUTH_TOKEN_LENGTH; i++)
+   {
+      newToken += possible.charAt(Math.floor(Math.random() * possible.length));
+   }
+   
+   document.getElementById("auth-token-input").value = newToken;
+}

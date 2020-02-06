@@ -314,7 +314,13 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getUsersByRole($role)
    {
-      $query = "SELECT * FROM user WHERE roles = $role ORDER BY firstName ASC;";
+      $roleClause = "";
+      if ($role != Role::UNKNOWN)
+      {
+         $roleClause = "WHERE roles = $role";
+      }
+      
+      $query = "SELECT * FROM user $roleClause ORDER BY firstName ASC;";
 
       $result = $this->query($query);
       
@@ -356,9 +362,9 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "INSERT INTO user " .
-      "(employeeNumber, username, password, roles, permissions, firstName, lastName, email) " .
+      "(employeeNumber, username, password, roles, permissions, firstName, lastName, email, authToken) " .
       "VALUES " .
-      "('$userInfo->employeeNumber', '$userInfo->username', '$userInfo->password', '$userInfo->roles', '$userInfo->permissions', '$userInfo->firstName', '$userInfo->lastName', '$userInfo->email');";
+      "('$userInfo->employeeNumber', '$userInfo->username', '$userInfo->password', '$userInfo->roles', '$userInfo->permissions', '$userInfo->firstName', '$userInfo->lastName', '$userInfo->email', '$userInfo->authToken');";
  
       $result = $this->query($query);
       
@@ -369,7 +375,7 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query =
       "UPDATE user " .
-      "SET username = '$userInfo->username', password = '$userInfo->password', roles = '$userInfo->roles', permissions = '$userInfo->permissions', firstName = '$userInfo->firstName', lastName = '$userInfo->lastName', email = '$userInfo->email' " .
+      "SET username = '$userInfo->username', password = '$userInfo->password', roles = '$userInfo->roles', permissions = '$userInfo->permissions', firstName = '$userInfo->firstName', lastName = '$userInfo->lastName', email = '$userInfo->email', authToken = '$userInfo->authToken' " .
       "WHERE employeeNumber = '$userInfo->employeeNumber';";
       
       $result = $this->query($query);
