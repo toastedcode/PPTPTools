@@ -1244,7 +1244,7 @@ class PPTPDatabase extends MySqlDatabase
       $jobNumberClause = "";
       if ($jobNumber != "All")
       {
-         $jobNumberClause = "job.jobNumber = '$jobNumber' AND ";  // TODO: Removed inner join on job.  What do to?
+         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
       }
       
       $typeClause = "";
