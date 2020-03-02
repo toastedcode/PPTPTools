@@ -1105,7 +1105,7 @@ class PPTPDatabase extends MySqlDatabase
          $typeClause = "WHERE inspectionType = $inspectionType ";
       }
       
-      $query = "SELECT * FROM inspectiontemplate $typeClause ORDER BY templateId ASC;";
+      $query = "SELECT * FROM inspectiontemplate $typeClause ORDER BY name ASC;";
       
       $result = $this->query($query);
       

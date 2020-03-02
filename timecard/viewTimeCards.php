@@ -63,6 +63,8 @@ function getFilter()
       $filter->add(new TodayButton());
       $filter->add(new YesterdayButton());
       $filter->add(new ThisWeekButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new PrintButton());
       
       $_SESSION["timeCardFilter"] = $filter;
    }
@@ -108,9 +110,9 @@ function getTable($filter)
                <th>Part Count</th>
                <th class="hide-on-tablet">Scrap Count</th>
                <th class="hide-on-tablet">Efficiency</th>
-               <th/>
-               <th/>
-               <th/>
+               <th class="hide-on-print"/>
+               <th class="hide-on-print"/>
+               <th class="hide-on-print"/>
             </tr>
 HEREDOC;
       
@@ -222,9 +224,9 @@ HEREDOC;
                <td>$timeCardInfo->partCount $incompletePartCount</td>
                <td class="hide-on-tablet">$timeCardInfo->scrapCount</td>
                <td class="hide-on-tablet">$efficiency%</td>
-               <td>$viewEditIcon</td>
-               <td>$panTicketIcon</td>
-               <td>$deleteIcon</td>
+               <td class="hide-on-print">$viewEditIcon</td>
+               <td class="hide-on-print">$panTicketIcon</td>
+               <td class="hide-on-print">$deleteIcon</td>
             </tr>
 HEREDOC;
          }

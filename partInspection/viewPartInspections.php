@@ -49,7 +49,7 @@ class ViewPartInspections
          $this->filter->add(new YesterdayButton());
          $this->filter->add(new ThisWeekButton());
          $this->filter->add(new FilterDivider());
-         $this->filter->add(new PrintButton("partInspectionReport.php"));
+         $this->filter->add(new PrintButton());
       }
       
       $this->filter->update();

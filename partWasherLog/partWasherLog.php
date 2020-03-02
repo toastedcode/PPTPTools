@@ -62,7 +62,7 @@ function getFilter()
       $filter->add(new YesterdayButton());
       $filter->add(new ThisWeekButton());
       $filter->add(new FilterDivider());
-      $filter->add(new PrintButton("partWasherReport.php"));
+      $filter->add(new PrintButton());
       
       $_SESSION["partWasherFilter"] = $filter;
    }
@@ -106,8 +106,8 @@ function getTable($filter)
                   <th class="hide-on-tablet">Wash Time</th>
                   <th class="hide-on-mobile">Basket Count</th>
                   <th>Part Count</th>
-                  <th></th>
-                  <th></th>
+                  <th class="hide-on-print"/>
+                  <th class="hide-on-print"/>
                </tr>
 HEREDOC;
          
@@ -226,8 +226,8 @@ HEREDOC;
                   <td class="hide-on-tablet">$washTime</td>
                   <td class="hide-on-mobile">$partWasherEntry->panCount $mismatch</td>
                   <td>$partWasherEntry->partCount</td>
-                  <td>$viewEditIcon</td>
-                  <td>$deleteIcon</td>
+                  <td class="hide-on-print">$viewEditIcon</td>
+                  <td class="hide-on-print">$deleteIcon</td>
                </tr>
 HEREDOC;
          }  // end if ($partWasherEntry)

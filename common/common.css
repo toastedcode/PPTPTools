@@ -330,7 +330,7 @@ tr:hover {
 Device = Most of the Smartphones Mobiles (Portrait)
 Screen = B/w 320px to 479px
 */
-@media (min-width: 320px) and (max-width: 479px) {
+@media not print and ((min-width: 320px) and (max-width: 479px)) {
 	
    .description {
       margin-bottom: 30px;
@@ -389,7 +389,7 @@ Screen = B/w 320px to 479px
 Device = Tablets, Ipads (portrait)
 Screen = B/w 768px to 1024px
 */
-@media (min-width: 480px) and (max-width: 1024px) {
+@media not print and ((min-width: 480px) and (max-width: 1024px)) {
    
    .hide-on-tablet {
       display: none;
@@ -408,4 +408,21 @@ Screen = B/w 768px to 1024px
       padding: 10px;
       font-size: 10pt;
    }
+}
+
+/* 
+Print styles
+*/
+@media print {
+  a[href]:after {
+    content: none !important;
+  }
+  
+	.table-container {
+	   max-height: none;
+	}
+	
+	.hide-on-print {
+      display: none;
+   }  
 }
