@@ -12,6 +12,11 @@ class Time
       date_default_timezone_set('America/New_York');
    }
    
+   static public function dateTimeObject($dateTimeString)
+   {
+      return (new DateTime($dateTimeString, new DateTimeZone('America/New_York')));
+   }
+   
    static public function now($format)
    {
       $dateTime = new DateTime();

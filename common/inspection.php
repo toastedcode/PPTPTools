@@ -13,6 +13,7 @@ class InspectionResult
    
    public $inspectionId;
    public $propertyId;
+   public $dateTime;
    public $status;
    public $data;
    
@@ -21,6 +22,7 @@ class InspectionResult
       $this->inspectionId = InspectionResult::UNKNOWN_INSPECTION_ID;
       $this->propertyId = InspectionResult::UNKNOWN_PROPERTY_ID;
       $this->sampleIndex = 0;
+      $this->dateTime = null;
       $this->status = InspectionStatus::UNKNOWN;
       $this->data = null;
    }
@@ -36,6 +38,7 @@ class InspectionResult
          $inspectionResult->inspectionId = intval($row['inspectionId']);
          $inspectionResult->propertyId = intval($row['propertyId']);
          $inspectionResult->sampleIndex = intval($row['sampleIndex']);
+         $inspectionResult->dateTime = $row['dateTime'] ? Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s") : null;
          $inspectionResult->status = intval($row['status']);
          $inspectionResult->data = $row['data'];
       }
@@ -242,6 +245,50 @@ class Inspection
       }
       
       return ($inspectionStatus);
+   }
+   
+   public function getSampleDateTime($sampleIndex, $useUpdateTime)
+   {
+      $dateTimeStr = null;
+      $dateTime = null;
+      
+      if ($this->inspectionResults)
+      {
+         foreach ($this->inspectionResults as $inspectionRow)
+         {
+            foreach ($inspectionRow as $inspectionResult)
+            {
+               if (($inspectionResult->sampleIndex == $sampleIndex) &&
+                   !$inspectionResult->nonApplicable() &&
+                   ($inspectionResult->dateTime != null))
+               {
+                  $compareDateTime = Time::dateTimeObject($inspectionResult->dateTime);
+                  
+                  if ($dateTime == null)
+                  {
+                     $dateTime = $compareDateTime;
+                  }
+                  // Select the most recent time.
+                  else if ($useUpdateTime && ($compareDateTime > $dateTime))
+                  {
+                     $dateTime = $compareDateTime;
+                  }
+                  // Select the initial time.               
+                  else if (!$useUpdateTime && ($compareDateTime < $dateTime))
+                  {
+                     $dateTime = $compareDateTime;
+                  }
+               }
+            }
+         }
+      }
+      
+      if ($dateTime != null)
+      {
+         $dateTimeStr = $dateTime->format("Y-m-d H:i:s");
+      }
+      
+      return ($dateTimeStr);
    }
 }
 

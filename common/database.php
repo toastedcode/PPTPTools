@@ -1173,7 +1173,7 @@ class PPTPDatabase extends MySqlDatabase
       "WHERE templateId = '$inspectionTemplate->templateId';";
 
       $result = $this->query($query);
-      
+
       if ($result)
       {
          foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
@@ -1186,7 +1186,7 @@ class PPTPDatabase extends MySqlDatabase
                "(templateId, name, specification, dataType, dataUnits, ordering) " .
                "VALUES " .
                "('$inspectionTemplate->templateId', '$inspectionProperty->name', '$inspectionProperty->specification', '$inspectionProperty->dataType', '$inspectionProperty->dataUnits', '$inspectionProperty->ordering');";
-               
+
                $result &= $this->query($query);
             }
             else
@@ -1196,7 +1196,7 @@ class PPTPDatabase extends MySqlDatabase
                "UPDATE inspectionproperty " .
                "SET name = '$inspectionProperty->name', specification = '$inspectionProperty->specification', dataType =  '$inspectionProperty->dataType', dataUnits = '$inspectionProperty->dataUnits', ordering = '$inspectionProperty->ordering' " .
                "WHERE propertyId = '$inspectionProperty->propertyId';";
-               
+
                $result &= $this->query($query);
             }
             
@@ -1305,9 +1305,9 @@ class PPTPDatabase extends MySqlDatabase
             {
                $query =
                "INSERT INTO inspectionresult " .
-               "(inspectionId, propertyId, sampleIndex, status, data) " .
+               "(inspectionId, propertyId, sampleIndex, dateTime, status, data) " .
                "VALUES " .
-               "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$inspectionResult->status', '$inspectionResult->data');";
+               "('$inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$dateTime', '$inspectionResult->status', '$inspectionResult->data');";
 
                $result &= $this->query($query);
                
@@ -1343,25 +1343,35 @@ class PPTPDatabase extends MySqlDatabase
                "SELECT * FROM inspectionresult " .
                "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId' AND sampleIndex='$inspectionResult->sampleIndex';";
 
-               if (MySqlDatabase::countResults($this->query($query)) == 0)
+               $seachResult = $this->query($query);
+               
+               if (MySqlDatabase::countResults($seachResult) == 0)
                {
                   // New result.
                   $query =
                   "INSERT INTO inspectionresult " .
-                  "(inspectionId, propertyId, sampleIndex, status, data) " .
+                  "(inspectionId, propertyId, sampleIndex, dateTime, status, data) " .
                   "VALUES " .
-                  "('$inspection->inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$inspectionResult->status', '$inspectionResult->data');";
+                  "('$inspection->inspectionId', '$inspectionResult->propertyId', '$inspectionResult->sampleIndex', '$dateTime', '$inspectionResult->status', '$inspectionResult->data');";
 
                   $result &= $this->query($query);
                }
                else
                {
+                  // Detect a change to the inspection result.
+                  $row = $seachResult->fetch_assoc();
+                  $changed = (($inspectionResult->status != intval($row['status'])) ||
+                              ($inspectionResult->data != $row['data']));
+                  
+                  //  Only update date if a change is detected.
+                  $dateClause = $changed ? "dateTime = '$dateTime', " : "";
+                  
                   // Updated result.
                   $query =
                   "UPDATE inspectionresult " .
-                  "SET status = '$inspectionResult->status', data = '$inspectionResult->data' " .
+                  "SET $dateClause status = '$inspectionResult->status', data = '$inspectionResult->data' " .
                   "WHERE inspectionId = '$inspection->inspectionId' AND propertyId = '$inspectionResult->propertyId' AND sampleIndex='$inspectionResult->sampleIndex';";
-                  
+
                   $result &= $this->query($query);
                }
 
