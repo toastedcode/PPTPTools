@@ -1388,6 +1388,9 @@ $router->add("printPanTicket", function($params) {
          $result->success = false;
          $result->error = "Failed to create pan ticket.";
       }
+      
+      // Store preferred printer for session.
+      $_SESSION["preferredPrinter"] = $params["printerName"];
    }
    else
    {

@@ -59,7 +59,7 @@ function getNavBar()
    
    if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
-      $navBar->highlightNavButton("Edit Time Card", "location.href = '../timeCard/viewTimeCard.php?timeCardId=$timeCardId'", false);
+      $navBar->highlightNavButton("Edit Time Card", "location.href = '../timecard/viewTimeCard.php?timeCardId=$timeCardId'", false);
    
       $navBar->highlightNavButton("Weigh Parts", "location.href = '../partWeightLog/partWeightLogEntry.php?timeCardId=$timeCardId'", false);
    
