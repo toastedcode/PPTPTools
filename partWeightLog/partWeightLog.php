@@ -62,7 +62,7 @@ function getFilter()
       $filter->add(new YesterdayButton());
       $filter->add(new ThisWeekButton());
       $filter->add(new FilterDivider());
-      $filter->add(new PrintButton("partWeightReport.php"));
+      $filter->add(new PrintButton());
       
       $_SESSION["partWeightFilter"] = $filter;
    }
@@ -107,8 +107,8 @@ function getTable($filter)
                <th class="hide-on-mobile">Basket Count</th>
                <th>Weight</th>
                <th class="hide-on-mobile">Estimated<br>Part Count</th>
-               <th></th>
-               <th></th>
+               <th class="hide-on-print"/>
+               <th class="hide-on-print"/>
             </tr>
 HEREDOC;
          
@@ -231,8 +231,8 @@ HEREDOC;
                <td class="hide-on-mobile">$partWeightEntry->panCount $mismatch</td>                           
                <td>$partWeightEntry->weight</td>
                <td>{$partWeightEntry->calculatePartCount()}</td>
-               <td>$viewEditIcon</td>
-               <td>$deleteIcon</td>
+               <td class="hide-on-print">$viewEditIcon</td>
+               <td class="hide-on-print">$deleteIcon</td>
             </tr>
 HEREDOC;
          }  // end if ($partWeightEntry)

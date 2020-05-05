@@ -166,6 +166,11 @@ function updateUserInfo()
       $_SESSION["userInfo"]->email = $_POST['email'];
    }
    
+   if (isset($_POST['authToken']))
+   {
+      $_SESSION["userInfo"]->authToken = $_POST['authToken'];
+   }
+   
    foreach (Permission::getPermissions() as $permission)
    {
       $name = "permission-" . $permission->permissionId;

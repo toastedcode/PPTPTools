@@ -673,12 +673,37 @@ function getInspections()
 HEREDOC;
       
       // Sample heading.
-      for ($sampleId = 1; $sampleId <= $inspectionTemplate->sampleSize; $sampleId++)
+      for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
       {
-         $html .=
+         $sampleId = ($sampleIndex + 1);
+         
+         if (InspectionType::isTimeBased($inspectionTemplate->inspectionType))
+         {
+            $timeStr = "";
+            
+            $dateTime = $inspection->getSampleDateTime($sampleIndex, false);
+            if ($dateTime != null)
+            {
+               $timeStr = Time::dateTimeObject($dateTime)->format("g:i a");
+            }
+            
+            $html .=
 <<<HEREDOC
-         <th>Sample $sampleId</th>
+            <th>
+               <div class="flex-column">
+                  <div>Check $sampleId</div>
+                  <div>$timeStr</div>
+               </div>
+            </th>
 HEREDOC;
+         }
+         else
+         {
+            $html .=
+<<<HEREDOC
+            <th>Sample $sampleId</th>
+HEREDOC;
+         }
       }
          
       $html .= "<th>Comment</tr>";
@@ -760,6 +785,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       $warning = "";
       $fail = "";      
       $nonApplicable = "selected";
+      $updateTime = "";
       $class = "";
       
       if ($inspectionResult)
@@ -769,6 +795,12 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
          $fail = ($inspectionResult->fail()) ? "selected" : "";
          $nonApplicable = ($inspectionResult->nonApplicable()) ? "selected" : "";
          $class = InspectionStatus::getClass($inspectionResult->status);
+         
+         if (!$inspectionResult->nonApplicable() && ($inspectionResult->dateTime))
+         {
+            $dateTime = new DateTime($inspectionResult->dateTime, new DateTimeZone('America/New_York'));
+            $updateTime = $dateTime->format("g:i a");
+         }
       }
       
       $nonApplicableValue = InspectionStatus::NON_APPLICABLE;
@@ -780,12 +812,15 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       
       $html .=
 <<<HEREDOC
-      <select name="$name" class="inspection-status-input $class" form="input-form" oninput="onInspectionStatusUpdate(this)" $disabled>
-         <option value="$nonApplicableValue" $nonApplicable>N/A</option>
-         <option value="$passValue" $pass>PASS</option>
-         <option value="$warningValue" $warning>WARNING</option>
-         <option value="$failValue" $fail>FAIL</option>
-      </select>
+      <div class="flex-vertical">
+         <select name="$name" class="inspection-status-input $class" form="input-form" oninput="onInspectionStatusUpdate(this)" $disabled>
+            <option value="$nonApplicableValue" $nonApplicable>N/A</option>
+            <option value="$passValue" $pass>PASS</option>
+            <option value="$warningValue" $warning>WARNING</option>
+            <option value="$failValue" $fail>FAIL</option>
+         </select>
+         <!--div style="height:20px">$updateTime</div-->
+      </div>
 HEREDOC;
    }
       
@@ -840,7 +875,7 @@ function getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionRe
       
       $html .=
 <<<HEREDOC
-      <input name="$dataName" type="$inputType" form="input-form" style="width:50px;" value="$dataValue" $disabled>&nbsp$dataUnits
+      <input name="$dataName" type="$inputType" form="input-form" style="width:80px;" value="$dataValue" $disabled>&nbsp$dataUnits
 HEREDOC;
    }
    

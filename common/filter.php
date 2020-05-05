@@ -270,9 +270,8 @@ HEREDOC;
 
 class PrintButton extends FilterComponent
 {
-    function __construct($report)
+    function __construct()
     {
-        $this->report = $report;
     }
     
     public function getHtml()
@@ -280,7 +279,7 @@ class PrintButton extends FilterComponent
         $html =
 <<<HEREDOC
         <div>
-           <button class="mdl-button mdl-js-button mdl-button--raised filter-component" onclick="printReport('{$this->report}')">
+           <button class="mdl-button mdl-js-button mdl-button--raised filter-component" onclick="window.print()">
               <i class="material-icons action-button-icon">print</i>
            </button>
          </div>

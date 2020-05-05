@@ -114,7 +114,7 @@ function getFilter()
       $filter->add(new YesterdayButton());
       //$filter->add(new ThisWeekButton());
       $filter->add(new FilterDivider());
-      $filter->add(new PrintButton("inspectionReport.php"));
+      $filter->add(new PrintButton());
       
       $_SESSION["inspectionFilter"] = $filter;
    }
@@ -166,8 +166,8 @@ function getTable($filter)
                <th>Work<br/>Center</th>
                <th>Success Rate</th>
                <th>PASS/FAIL</th>
-               <th></th>
-               <th></th>
+               <th class="hide-on-print"/>
+               <th class="hide-on-print"/>
             </tr>
 HEREDOC;
       
@@ -244,8 +244,8 @@ HEREDOC;
                <td>$wcNumber</td>
                <td>$passCount/$count</td>
                <td>$passFail</td>
-               <td>$viewEditIcon</td>
-               <td>$deleteIcon</td>
+               <td class="hide-on-print">$viewEditIcon</td>
+               <td class="hide-on-print">$deleteIcon</td>
             </tr>
 HEREDOC;
          }  // end if ($inspection && $inspectionTemplate)

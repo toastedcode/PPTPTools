@@ -792,13 +792,18 @@ $router->add("saveInspection", function($params) {
          $result->success = false;
          $result->error = "No existing inspection found.";
       }
+      else
+      {
+         // Use current date/time as the updated entry time.
+         $inspection->dateTime = Time::now("Y-m-d h:i:s A");
+      }
    }
    else
    {
       // New entry.
       $inspection = new Inspection();
       
-      // Use current date/time as entry time.
+      // Use current date/time as the entry time.
       $inspection->dateTime = Time::now("Y-m-d h:i:s A");
    }
    
@@ -1383,6 +1388,9 @@ $router->add("printPanTicket", function($params) {
          $result->success = false;
          $result->error = "Failed to create pan ticket.";
       }
+      
+      // Store preferred printer for session.
+      $_SESSION["preferredPrinter"] = $params["printerName"];
    }
    else
    {

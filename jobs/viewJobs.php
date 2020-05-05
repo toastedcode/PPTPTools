@@ -92,7 +92,7 @@ class ViewJobs
          $this->filter->addByName('jobStatus', new JobStatusFilterComponent());
          $this->filter->add(new FilterButton());
          $this->filter->add(new FilterDivider());
-         $this->filter->add(new PrintButton("jobsReport.php"));
+         $this->filter->add(new PrintButton());
       }
       
       $this->filter->update();
@@ -191,9 +191,9 @@ HEREDOC;
                      <th class="hide-on-tablet">Net Percentage</th>
                      <th class="hide-on-tablet">Customer Print</th>
                      <th>Status</th>
-                     <th/>
-                     <th/>
-                     <th/>
+                     <th class="hide-on-print"/>
+                     <th class="hide-on-print"/>
+                     <th class="hide-on-print"/>
                   </tr>
 HEREDOC;
 
@@ -262,9 +262,9 @@ HEREDOC;
                         <td class="hide-on-tablet">$jobInfo->netPercentage</td>
                         <td class="hide-on-tablet">$customerPrint</td>
                         <td>$status</td>
-                        <td>$viewEditIcon</td>
-                        <td>$copyIcon</td>
-                        <td>$deleteIcon</td>
+                        <td class="hide-on-print">$viewEditIcon</td>
+                        <td class="hide-on-print">$copyIcon</td>
+                        <td class="hide-on-print">$deleteIcon</td>
                      </tr>
 HEREDOC;
                }

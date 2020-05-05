@@ -16,6 +16,7 @@ class UserInfo
    public $roles = Role::UNKNOWN;
    public $permissions = Permission::NO_PERMISSIONS;
    public $email;
+   public $authToken;
    
    public static function load($employeeNumber)
    {
@@ -130,6 +131,7 @@ class UserInfo
       $this->firstName = $row['firstName'];
       $this->lastName = $row['lastName'];
       $this->email = $row['email'];
+      $this->authToken = $row['authToken'];
    }
 }
 
@@ -157,6 +159,7 @@ if ($userInfo)
    echo "firstName: " .      $userInfo->firstName .      "<br/>";
    echo "lastName: " .       $userInfo->lastName .       "<br/>";
    echo "email: " .          $userInfo->email .          "<br/>";
+   echo "authToken: " .      $userInfo->authToken .      "<br/>";
    
    echo "fullName: " . $userInfo->getFullName() . "<br/>";
 }

@@ -178,6 +178,17 @@ HEREDOC;
             <input id="user-password-input" type="password" class="form-input-medium" name="password" form="input-form" style="width:150px;" value="$userInfo->password" $disabled />
          </div>
 
+         <div class="form-item">
+            <div class="form-label">Authentication token</div>
+            <div class="flex-horizontal">
+               <input id="auth-token-input" type="text" class="form-input-medium" name="authToken" form="input-form" style="width:150px;" value="$userInfo->authToken" readonly $disabled/>
+               &nbsp
+               <button onclick="refreshAuthToken()">Refresh</button>
+               &nbsp
+               <button onclick="copyToClipboard('auth-token-input')">Copy</button>
+            </div>
+         </div>
+
       </div>
 HEREDOC;
       

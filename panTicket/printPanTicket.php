@@ -93,16 +93,23 @@ function getPrinterOptions()
             if (strrpos($printerInfo->printerName, "\\") !== false)
             {
                $displayName = substr($printerInfo->printerName, strrpos($printerInfo->printerName, "\\") + 1);
-            }
+            }            
             
             $disabled = "";
+            $selected = "";
             if (!$printerInfo->isConnected)
             {
                $displayName .= " (offline)";
                $disabled = "disabled";
+               
+               if (isset($_SESSION["preferredPrinter"]) &&
+                   ($printerInfo->printerName == $_SESSION["preferredPrinter"]))
+               {
+                 $selected = "selected"; 
+               }
             }
             
-            $options .= "<option value=\"$printerInfo->printerName\" $disabled>$displayName</option>";
+            $options .= "<option value=\"$printerInfo->printerName\" $selected $disabled>$displayName</option>";
          }
       }      
    }
