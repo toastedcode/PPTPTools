@@ -278,6 +278,16 @@ if (!Authentication::isAuthenticated())
 }
 
 $filter = getFilter();
+
+// Post/Redirect/Get idiom.
+// getFilter() stores all $_POST data in the $_SESSION variable.
+// header() redirects to this page, but with a GET request.
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+   // Redirect to this page.
+   header("Location: " . $_SERVER['REQUEST_URI']);
+   exit();
+}
 ?>
 
 <!DOCTYPE html>
