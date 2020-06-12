@@ -32,22 +32,23 @@ function onPanTicketCodeChange()
 {
    var panTicketCode = document.getElementById("pan-ticket-code-input").value;
    
+   // Clear fields.
+   clear("job-number-input");
+   clear("wc-number-input");
+   clear("manufacture-date-input");
+   clear("operator-input");
+   clear("pan-count-input");
+   clear("part-weight-input");   
+   sampleWeight = 0.0;  // global variable
+   
    if (panTicketCode == "")
    {
-      // Clear fields.
-      clear("job-number-input");
-      clear("wc-number-input");
-      clear("manufacture-date-input");
-      clear("operator-input");
-      clear("pan-count-input");
-      
       // Enable fields.
       enable("job-number-input");
       enable("manufacture-date-input");
       enable("today-button");
       enable("yesterday-button");
       enable("operator-input");
-      enable("pan-count-input");
       
       // Disable WC number, as it's dependent on the job number.
       disable("wc-number-input");
@@ -107,7 +108,6 @@ function onPanTicketCodeChange()
       disable("today-button");
       disable("yesterday-button");
       disable("operator-input");
-      disable("pan-count-input");
       
       // AJAX call to populate input fields based on pan ticket selection.
       requestUrl = "../api/timeCardInfo/?panTicketCode=" + panTicketCode + "&expandedProperties=true";
@@ -127,19 +127,16 @@ function onPanTicketCodeChange()
                }
                else
                {
-                  updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName);
+                  sampleWeight = json.sampleWeight;  // global variable
+                  
+                  console.log("Updated sample weight: " + sampleWeight);
+                  
+                  updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName, json.sampleWeight);
                }
             }
             else
             {
                console.log("API call to retrieve time card info failed.");
-               
-               // Clear fields.
-               clear("job-number-input");
-               clear("wc-number-input");
-               clear("manufacture-date-input");
-               clear("operator-input");
-               clear("pan-count-input");
                
                // Invalidate time card input.
                document.getElementById("pan-ticket-code-input").validator.color("#FF0000");
@@ -397,7 +394,8 @@ function updateTimeCardInfo(timeCardInfo, jobNumber, wcNumber, operatorName)
    set("wc-number-input", wcNumber);
    set("operator-input", operator);
    set("manufacture-date-input", manufactureDate);
-   set("pan-count-input", panCount);
+   
+   updateCalculatedPartCount();
 }
 
 function updateCalculatedPartCount()

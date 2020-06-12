@@ -60,6 +60,7 @@ $router->add("timeCardInfo", function($params) {
             {
                $result->jobNumber = $jobInfo->jobNumber;
                $result->wcNumber = $jobInfo->wcNumber;
+               $result->sampleWeight = $jobInfo->sampleWeight;
                $result->isActiveJob = ($jobInfo->status == JobStatus::ACTIVE);
             }
             

@@ -105,7 +105,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="http://www.labelwriter.com/software/dls/sdk/js/DYMO.Label.Framework.3.0.js" type="text/javascript" charset="UTF-8"></script>
+   <script src = "../thirdParty/dymo/DYMO.Label.Framework.3.0.js" type="text/javascript" charset="UTF-8"></script>
    <script src="../common/common.js"></script>
    <script src="../common/panTicket.js"></script>
 

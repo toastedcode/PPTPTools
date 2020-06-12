@@ -142,9 +142,19 @@ function getTable($filter)
    $endDate->modify('+1 day');
    $endDateString = $endDate->format("Y-m-d");
    
+   $user = Authentication::getAuthenticatedUser();
+   
+   $selectedInspector = "All";
+   if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS) == false)
+   {
+      // Limit to own inspections.
+      $selectedInspector = $user->employeeNumber;
+   }
+   
    $result = PPTPDatabase::getInstance()->getInspections(
       $filter->get('inspectionType')->selectedInspectionType,
       $filter->get('jobNumber')->selectedJobNumber,
+      $selectedInspector,
       $filter->get('operator')->selectedEmployeeNumber,
       $startDateString,
       $endDateString);
@@ -215,7 +225,9 @@ HEREDOC;
 
             $viewEditIcon = "";
             $deleteIcon = "";
-            if (Authentication::checkPermissions(Permission::EDIT_INSPECTION))
+            if ((Authentication::checkPermissions(Permission::EDIT_INSPECTION)) &&
+                ((Authentication::checkPermissions(Permission::VIEW_OTHER_USERS)) ||  // Can view others, or
+                 ($inspection->inspector == $user->employeeNumber)))                  // created this inspection
             {
                $viewEditIcon =
                   "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=edit_inspection\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";

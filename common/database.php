@@ -555,30 +555,35 @@ class PPTPDatabase extends MySqlDatabase
       $startDate,
       $endDate,
       $useMfgDate)
-   {
+   {      
       $jobClause = "";
       if ($jobId != JobInfo::UNKNOWN_JOB_ID)
       {
-         $jobClause = "jobId = '$jobId' AND";
+         // Job id may be in the part washer entry itself, or in the associated time card.
+         $jobClause = "(partwasher.jobId = '$jobId' OR timecard.jobId = '$jobId') AND ";
       }
       
       $employeeClause = "";
       if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
       {
-         $employeeClause = "employeeNumber = '$employeeNumber' AND";
+         $employeeClause = "partwasher.employeeNumber = '$employeeNumber' AND";
       }
       
       $dateTimeClause = "";
       if ($useMfgDate == true)
       {
-         $dateTimeClause = "manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+         // Manufacture time may be in the part washer entry itself, or in the associated time card.
+         $dateTimeClause = "((partwasher.manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "') OR" .
+                           " (timecard.manufactureDate BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
       }
       else
       {
-         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+         $dateTimeClause = "partwasher.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       
-      $query = "SELECT * FROM partwasher WHERE $jobClause $employeeClause $dateTimeClause ORDER BY dateTime DESC;";
+      $query = "SELECT partwasher.* FROM partwasher " .
+               "LEFT JOIN timecard ON partwasher.timeCardId = timecard.timeCardId " .
+               "WHERE $jobClause $employeeClause $dateTimeClause ORDER BY partwasher.dateTime DESC;";
       
       $result = $this->query($query);
       
@@ -588,18 +593,6 @@ class PPTPDatabase extends MySqlDatabase
    public function getPartWasherEntriesByTimeCard($timeCardId)
    {
       $query = "SELECT * FROM partwasher WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
-      
-      $result = $this->query($query);
-      
-      return ($result);
-   }
-   
-   public function getPartWasherEntriesByJob($jobId)
-   {
-      // A tricky query because the job might be in the part washer entry, or it might be in the associated time card.
-      $query = "SELECT partWasherEntryId FROM partwasher WHERE jobId = $jobId " .
-               "UNION " .
-               "SELECT partWasherEntryId FROM partwasher INNER JOIN timecard ON partwasher.timeCardId = timecard.timeCardId WHERE timecard.jobId = $jobId";
       
       $result = $this->query($query);
       
@@ -693,26 +686,33 @@ class PPTPDatabase extends MySqlDatabase
       $jobClause = "";
       if ($jobId != JobInfo::UNKNOWN_JOB_ID)
       {
-         $jobClause = "jobId = '$jobId' AND";
+         // Job id may be in the part weight entry itself, or in the associated time card.
+         $jobClause = "(partweight.jobId = '$jobId' OR timecard.jobId = '$jobId') AND ";
       }
-      
+            
       $employeeClause = "";
       if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
       {
-         $employeeClause = "employeeNumber = '$employeeNumber' AND";
+         $employeeClause = "partweight.employeeNumber = '$employeeNumber' AND";
       }
       
       $dateTimeClause = "";
       if ($useMfgDate == true)
       {
-         $dateTimeClause = "manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+         // Manufacture time may be in the part weight entry itself, or in the associated time card.
+         $dateTimeClause = "((partweight.manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "') OR" .
+                           " (timecard.manufactureDate BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
       }
       else
       {
-         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";         
+         $dateTimeClause = "partweight.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       
-      $query = "SELECT * FROM partweight WHERE $jobClause $employeeClause $dateTimeClause ORDER BY dateTime DESC;";
+      
+      
+      $query = "SELECT partweight.* FROM partweight " .
+               "LEFT JOIN timecard ON partweight.timeCardId = timecard.timeCardId " .
+               "WHERE $jobClause $employeeClause $dateTimeClause ORDER BY partweight.dateTime DESC;";
 
       $result = $this->query($query);
       
@@ -723,18 +723,6 @@ class PPTPDatabase extends MySqlDatabase
    {
       $query = "SELECT * FROM partweight WHERE timeCardId = \"$timeCardId\" ORDER BY dateTime DESC;";
       
-      $result = $this->query($query);
-      
-      return ($result);
-   }
-   
-   public function getPartWeightEntriesByJob($jobId)
-   {
-      // A tricky query because the job might be in the part weight entry, or it might be in the associated time card.
-      $query = "SELECT partWeightEntryId FROM partweight WHERE jobId = $jobId " .
-               "UNION " .
-               "SELECT partWeightEntryId FROM partweight INNER JOIN timecard ON partweight.timeCardId = timecard.timeCardId WHERE timecard.jobId = $jobId;";
-
       $result = $this->query($query);
       
       return ($result);
@@ -1233,13 +1221,30 @@ class PPTPDatabase extends MySqlDatabase
    //                                Inspections
    // **************************************************************************
    
-   public function getInspections($inspectionType, $jobNumber, $operator, $startDate, $endDate)
+   public function getInspections($inspectionType, $jobNumber, $inspector, $operator, $startDate, $endDate)
    {
-      $operatorClause = "";
-      if ($operator != 0)
+      $userClause = "";
+      if (($inspector != 0) || ($operator != 0))
       {
-         $operatorClause = "operator = $operator AND ";
-      }
+         $userClause = "(";
+         
+         if ($inspector != 0)
+         {
+            $userClause .= "inspector = $inspector";
+         }
+         
+         if (($inspector != 0) && ($operator != 0))
+         {
+            $userClause .= " OR ";
+         }
+            
+         if ($operator != 0)
+         {
+            $userClause .= "operator = $operator";
+         }
+         
+         $userClause .= ") AND";
+      }         
       
       $jobNumberClause = "";
       if ($jobNumber != "All")
@@ -1255,8 +1260,8 @@ class PPTPDatabase extends MySqlDatabase
       
       $query = "SELECT * FROM inspection " .
                "INNER JOIN inspectiontemplate ON inspection.templateId = inspectiontemplate.templateId " .
-               "WHERE $operatorClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
-      
+               "WHERE $userClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
+
       $result = $this->query($query);
       
       return ($result);
