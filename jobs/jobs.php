@@ -5,6 +5,7 @@ require_once '../common/database.php';
 require_once '../common/jobInfo.php';
 require_once '../common/header.php';
 
+require 'upload.php';
 require 'viewJob.php';
 require 'viewJobs.php';
 
@@ -64,6 +65,30 @@ function processAction($action)
          if ($user = Authentication::getAuthenticatedUser())
          {
             $_SESSION["jobInfo"]->creator = $user->employeeNumber;
+         }
+         break;
+      }
+      
+      case 'copy_job':
+      {
+         if (isset($_POST['jobId']))
+         {
+            // Start with the copy-from job.
+            $_SESSION["jobInfo"] = JobInfo::load($_POST['jobId']);
+            
+            // Clear out key fields.
+            unset($_POST['jobId']);
+            $_SESSION["jobInfo"]->jobId = JobInfo::UNKNOWN_JOB_ID;
+            
+            // Set up new fields.
+            $_SESSION["jobInfo"]->jobNumber = JobInfo::getJobPrefix($_SESSION["jobInfo"]->jobNumber);
+            $_SESSION["jobInfo"]->dateTime = Time::now("Y-m-d h:i:s A");
+            $_SESSION["jobInfo"]->status = JobStatus::PENDING;
+            
+            if ($user = Authentication::getAuthenticatedUser())
+            {
+               $_SESSION["jobInfo"]->creator = $user->employeeNumber;
+            }
          }
          break;
       }
@@ -157,6 +182,11 @@ function updateJobInfo()
       $_SESSION["jobInfo"]->partNumber = $_POST['partNumber'];
    }
    
+   if (isset($_POST['sampleWeight']))
+   {
+      $_SESSION["jobInfo"]->sampleWeight = doubleval($_POST['sampleWeight']);
+   }
+   
    if (isset($_POST['wcNumber']))
    {
       $_SESSION["jobInfo"]->wcNumber = $_POST['wcNumber'];
@@ -164,17 +194,48 @@ function updateJobInfo()
    
    if (isset($_POST['cycleTime']))
    {
-      $_SESSION["jobInfo"]->cycleTime = $_POST['cycleTime'];
+      $_SESSION["jobInfo"]->cycleTime = doubleval($_POST['cycleTime']);
    }
    
    if (isset($_POST['netPercentage']))
    {
-      $_SESSION["jobInfo"]->netPercentage = $_POST['netPercentage'];
+      $_SESSION["jobInfo"]->netPercentage = doubleval($_POST['netPercentage']);
    }
    
    if (isset($_POST['status']))
    {
       $_SESSION["jobInfo"]->status = $_POST['status'];
+   }
+   
+   if (isset($_FILES["customerPrint"]) && ($_FILES["customerPrint"]["name"] != ""))
+   {
+      $uploadStatus = Upload::uploadCustomerPrint($_FILES["customerPrint"]);
+      
+      if ($uploadStatus != UploadStatus::UPLOADED)
+      {
+         $error = UploadStatus::toString($uploadStatus);
+         
+         echo "<script>alert(\"File upload failed! $error\");</script>";
+      }
+      else
+      {
+         $_SESSION["jobInfo"]->customerPrint = basename($_FILES["customerPrint"]["name"]);
+      }
+   }
+   
+   if (isset($_POST['qcpTemplateId']))
+   {
+      $_SESSION["jobInfo"]->qcpTemplateId = $_POST['qcpTemplateId'];
+   }
+   
+   if (isset($_POST['lineTemplateId']))
+   {
+      $_SESSION["jobInfo"]->lineTemplateId = $_POST['lineTemplateId'];
+   }
+   
+   if (isset($_POST['inProcessTemplateId']))
+   {
+      $_SESSION["jobInfo"]->inProcessTemplateId = $_POST['inProcessTemplateId'];
    }
 }
 
@@ -223,18 +284,15 @@ function updateJob($jobInfo)
    return ($success);
 }
 
-?>
+// ********************************** BEGIN ************************************
 
-<!-- ********************************** BEGIN ********************************************* -->
-
-<?php 
 Time::init();
 
 session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -256,9 +314,9 @@ processAction(getAction());
    <link rel="stylesheet" type="text/css" href="jobs.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="jobs.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="jobs.js"></script>
    
 </head>
 
@@ -273,6 +331,10 @@ processAction(getAction());
       <?php processView(getView())?>
    
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

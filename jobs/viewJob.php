@@ -26,7 +26,7 @@ class ViewJob
       
       $html =
 <<<HEREDOC
-      <form id="input-form" action="#" method="POST">
+      <form id="input-form" method="POST" enctype="multipart/form-data">
          <input id="job-number-input" type="hidden" name="jobNumber" value="$jobInfo->jobNumber"/>
          <input id="part-number-input" type="hidden" name="partNumber" value="$jobInfo->partNumber"/>
       </form>
@@ -49,10 +49,12 @@ class ViewJob
       <script>
          var jobNumberPrefixValidator = new PartNumberPrefixValidator("job-number-prefix-input", 5, 1, 9999, false);
          var jobNumberSuffixValidator = new PartNumberSuffixValidator("job-number-suffix-input", 3, 1, 99, false);
+         var sampleWeightValidator = new DecimalValidator("sample-weight-input", 6, 0.001, 10, 3, false);         
          var cycleTimeValidator = new DecimalValidator("cycle-time-input", 5, 1, 60, 2, false);
          var netPercentageValidator = new DecimalValidator("net-percentage-input", 5, 0, 100, 2, false);
 
          jobNumberPrefixValidator.init();
+         sampleWeightValidator.init();
          jobNumberSuffixValidator.init();
          cycleTimeValidator.init();
          netPercentageValidator.init();
@@ -149,6 +151,8 @@ HEREDOC;
    
    protected static function jobDiv($jobInfo, $view)
    {
+      global $ROOT;
+      
       $editable = (($view == "new_job") || ($view == "edit_job"));
       $jobEditable = ($view == "new_job");
       
@@ -165,16 +169,74 @@ HEREDOC;
       }
       
       $statusOptions = "";
-      for ($status = JobStatus::PENDING; $status <= JobStatus::COMPLETE; $status++)
+      for ($status = JobStatus::PENDING; $status <= JobStatus::CLOSED; $status++)
       {
          $statusName = JobStatus::getName($status);
          $selected = ($jobInfo->status == $status) ? "selected" : "";
          $statusOptions .= "<option $selected value=\"" . $status . "\">" . $statusName . "</option>";
       }
       
+      $inProcessOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::IN_PROCESS);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->inProcessTemplateId == $inspectionTemplate->templateId)? "selected" : "";
+            $inProcessOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
+      $lineOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::LINE);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->lineTemplateId == $inspectionTemplate->templateId)? "selected" : "";
+            $lineOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
+      $qcpOptions = "<option value=\"" . InspectionTemplate::UNKNOWN_TEMPLATE_ID . "\"></option>";
+      $inspectionTemplates = InspectionTemplate::getInspectionTemplates(InspectionType::QCP);
+      foreach ($inspectionTemplates as $templateId)
+      {
+         $inspectionTemplate = InspectionTemplate::load($templateId);
+         
+         if ($inspectionTemplate)
+         {
+            $selected = ($jobInfo->qcpTemplateId == $inspectionTemplate->templateId) ? "selected" : "";
+            $qcpOptions .= "<option $selected value=\"$inspectionTemplate->templateId\">$inspectionTemplate->name</option>";
+         }
+      }
+      
       $prefix = JobInfo::getJobPrefix($jobInfo->jobNumber);
       $prefix = ($prefix != "") ? $prefix : "M";
       $suffix = JobInfo::getJobSuffix($jobInfo->jobNumber);
+      
+      $customerPrint = "";
+      if ($jobInfo->customerPrint != "")
+      {
+         $customerPrint =
+<<<HEREDOC
+         <div class="flex-vertical" style="align-items: flex-start;">
+            <a href="$ROOT/uploads/$jobInfo->customerPrint" class="medium-text-input" style="margin-bottom: 10px;" target="_blank">$jobInfo->customerPrint</a> 
+            <input type="file" class="medium-text-input" name="customerPrint" form="input-form" $disabled>
+         </div>
+HEREDOC;
+      }
+      else
+      {
+         $customerPrint =
+<<<HEREDOC
+         <input type="file" class="medium-text-input" name="customerPrint" form="input-form" $disabled>
+HEREDOC;
+      }
       
       $html =
 <<<HEREDOC
@@ -197,6 +259,11 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label-long">Work center #</div>
             <div><select id="work-center-input" class="form-input-medium" name="wcNumber" form="input-form" $disabled>$wcOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Sample weight</div>
+            <input id="sample-weight-input" type="number" class="medium-text-input" name="sampleWeight" form="input-form" style="width:150px;" value="$jobInfo->sampleWeight" oninput="this.validator.validate();" $disabled"/>
          </div>
    
          <div class="form-item">
@@ -223,6 +290,26 @@ HEREDOC;
          <div class="form-item">
             <div class="form-label-long">Job status</div>
             <div><select id="status-input" class="medium-text-input" name="status" form="input-form" $disabled>$statusOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">In Process Template</div>
+            <div><select class="medium-text-input" name="inProcessTemplateId" form="input-form" $disabled>$inProcessOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Line Template</div>
+            <div><select class="medium-text-input" name="lineTemplateId" form="input-form" $disabled>$lineOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">QCP Template</div>
+            <div><select class="medium-text-input" name="qcpTemplateId" form="input-form" $disabled>$qcpOptions</select></div>
+         </div>
+
+         <div class="form-item">
+            <div class="form-label-long">Customer print</div>
+             $customerPrint
          </div>
    
       </div>
@@ -323,6 +410,33 @@ HEREDOC;
       }
       
       return ($workcenters);
+   }
+   
+   function getInspectionTemplateIds($inspectionType)
+   {
+      $templateIds = array();
+      
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->getInspectionTemplates($inspectionType);
+      }
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getWorkCenters();
+         
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $workcenters[] = $row["wcNumber"];
+            }
+         }
+      }
+      
+      return ($templateIds);
    }
 }
 ?>

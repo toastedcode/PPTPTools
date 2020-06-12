@@ -11,7 +11,9 @@ class Role
    const OPERATOR    = 3;
    const LABORER     = 4;
    const PART_WASHER = 5;
-   const LAST        = Role::PART_WASHER;
+   const SHIPPER     = 6;
+   const INSPECTOR   = 7;
+   const LAST        = Role::INSPECTOR;
    
    public $roleId;
    
@@ -28,7 +30,10 @@ class Role
                   new Role(Role::ADMIN, "Admin", Permission::ALL_PERMISSIONS),
                   new Role(Role::OPERATOR, "Operator", Permission::getBits(Permission::VIEW_TIME_CARD, Permission::EDIT_TIME_CARD, Permission::VIEW_PART_INSPECTION)),
                   new Role(Role::LABORER, "Laborer", Permission::getBits(Permission::VIEW_PART_WEIGHT_LOG, Permission::EDIT_PART_WEIGHT_LOG)),
-                  new Role(Role::PART_WASHER, "Part Washer", Permission::getBits(Permission::VIEW_PART_WASHER_LOG, Permission::EDIT_PART_WASHER_LOG)));
+                  new Role(Role::PART_WASHER, "Part Washer", Permission::getBits(Permission::VIEW_PART_WASHER_LOG, Permission::EDIT_PART_WASHER_LOG)),
+                  new Role(Role::SHIPPER, "Shipper", Permission::getBits(Permission::VIEW_PART_WASHER_LOG, Permission::EDIT_PART_WASHER_LOG)),
+                  new Role(Role::INSPECTOR, "Inspector", Permission::getBits(Permission::VIEW_PART_INSPECTION, Permission::VIEW_INSPECTION, Permission::EDIT_INSPECTION)),
+            );
       }
       
       return (Role::$roles);

@@ -166,6 +166,11 @@ function updateUserInfo()
       $_SESSION["userInfo"]->email = $_POST['email'];
    }
    
+   if (isset($_POST['authToken']))
+   {
+      $_SESSION["userInfo"]->authToken = $_POST['authToken'];
+   }
+   
    foreach (Permission::getPermissions() as $permission)
    {
       $name = "permission-" . $permission->permissionId;
@@ -229,18 +234,15 @@ function updateUser($userInfo)
    return ($success);
 }
 
-?>
+// ********************************** BEGIN ************************************
 
-<!-- ********************************** BEGIN ********************************************* -->
-
-<?php 
 Time::init();
 
 session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
@@ -261,9 +263,9 @@ processAction(getAction());
    <link rel="stylesheet" type="text/css" href="../common/form.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="user.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="user.js"></script>
    
 </head>
 
@@ -278,6 +280,10 @@ processAction(getAction());
       <?php processView(getView())?>
    
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

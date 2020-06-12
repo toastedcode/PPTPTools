@@ -54,3 +54,21 @@ function formattedDate(date)
 
    return (formattedDate);
 }
+
+function printReport(report)
+{
+   form = document.getElementById("filter-form");
+   if (form)
+   {
+      // Temporarily redirect to report page, launched in a new tab.
+      form.setAttribute('method', 'POST');
+      form.setAttribute('action', report);
+      form.setAttribute("target", "_blank");
+      
+      form.submit(); 
+      
+      // Switch back.
+      form.setAttribute('action', "");
+      form.setAttribute("target", "");
+   } 
+}

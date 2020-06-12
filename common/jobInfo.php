@@ -1,14 +1,19 @@
 <?php
 require_once 'database.php';
+require_once 'inspectionTemplate.php';
 
 abstract class JobStatus
 {
-   const PENDING = 0;
+   const FIRST = 0;
+   const PENDING = JobStatus::FIRST;
    const ACTIVE = 1;
    const COMPLETE = 2;
-   const DELETED = 3;
+   const CLOSED = 3;
+   const DELETED = 4;
+   const LAST = 5;
+   const COUNT = JobStatus::LAST - JobStatus::FIRST;
    
-   private static $names = array("Pending", "Active", "Complete", "Deleted");
+   private static $names = array("Pending", "Active", "Complete", "Closed", "Deleted");
    
    public static function getName($status)
    {
@@ -22,19 +27,28 @@ class JobInfo
    
    const UNKNOWN_JOB_NUMBER = "";
    
+   const UNKNOWN_WC_NUMBER = 0;
+   
    const SECONDS_PER_MINUTE = 60;
    
    const SECONDS_PER_HOUR = 3600;
+   
+   const UNKNOWN_SAMPLE_WEIGHT = 0.0;
       
    public $jobId = JobInfo::UNKNOWN_JOB_ID;
    public $jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
    public $creator;
    public $dateTime;
    public $partNumber;
+   public $sampleWeight = JobInfo::UNKNOWN_SAMPLE_WEIGHT;
    public $wcNumber;
    public $cycleTime;
    public $netPercentage;
    public $status = JobStatus::PENDING;
+   public $inProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $lineTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $qcpTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
+   public $customerPrint;
    
    public function isActive()
    {
@@ -57,15 +71,20 @@ class JobInfo
          {
             $jobInfo = new JobInfo();
             
-            $jobInfo->jobId =      intval($row['jobId']);
-            $jobInfo->jobNumber =  $row['jobNumber'];
-            $jobInfo->creator =    $row['creator'];
-            $jobInfo->dateTime =   Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $jobInfo->partNumber = $row['partNumber'];
-            $jobInfo->wcNumber =   $row['wcNumber'];
-            $jobInfo->cycleTime = doubleval($row['cycleTime']);
+            $jobInfo->jobId =         intval($row['jobId']);
+            $jobInfo->jobNumber =     $row['jobNumber'];
+            $jobInfo->creator =       $row['creator'];
+            $jobInfo->dateTime =      Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $jobInfo->partNumber =    $row['partNumber'];
+            $jobInfo->sampleWeight =  doubleval($row['sampleWeight']);
+            $jobInfo->wcNumber =      $row['wcNumber'];
+            $jobInfo->cycleTime =     doubleval($row['cycleTime']);
             $jobInfo->netPercentage = doubleval($row['netPercentage']);
-            $jobInfo->status =     $row['status'];
+            $jobInfo->status =        $row['status'];
+            $jobInfo->inProcessTemplateId = intval($row['inProcessTemplateId']);
+            $jobInfo->lineTemplateId = intval($row['lineTemplateId']);
+            $jobInfo->qcpTemplateId = intval($row['qcpTemplateId']);
+            $jobInfo->customerPrint = $row['customerPrint'];
          }
       }
       
@@ -119,6 +138,46 @@ class JobInfo
       
       return ($netPartsPerHour);
    }
+   
+   public static function getJobNumbers($onlyActive)
+   {
+      $jobNumbers = array();
+      
+      $database = new PPTPDatabase();
+      
+      $database->connect();
+      
+      if ($database->isConnected())
+      {
+         $result = $database->getJobNumbers($onlyActive);
+         
+         if ($result)
+         {
+            while ($result && ($row = $result->fetch_assoc()))
+            {
+               $jobNumbers[] = $row["jobNumber"];
+            }
+         }
+      }
+      
+      return ($jobNumbers);
+   }
+   
+   public static function getJobIdByComponents($jobNumber, $wcNumber)
+   {
+      $jobId = JobInfo::UNKNOWN_JOB_ID;
+      
+      $database = PPTPDatabase::getInstance();
+      
+      $result = $database->getJobByComponents($jobNumber, $wcNumber);
+
+      if ($result && ($row = $result->fetch_assoc()))
+      {
+         $jobId = intval($row["jobId"]);
+      }
+      
+      return ($jobId);
+   }
 }
 
 /*
@@ -129,16 +188,21 @@ if (isset($_GET["$jobId"]))
    
    if ($jobInfo)
    {
-      echo "jobId: " .         $jobInfo->jobId .           "<br/>";
-      echo "jobNumber: " .     $jobInfo->jobNumber .       "<br/>";
-      echo "creator: " .       $jobInfo->creator .         "<br/>";
-      echo "dateTime: " .      $jobInfo->dateTime .        "<br/>";
-      echo "partNumber: " .    $jobInfo->partNumber .      "<br/>";
-      echo "wcNumber: " .      $jobInfo->wcNumber .        "<br/>";
-      echo "cycleTime: " .     $jobInfo->cycleTime .       "<br/>";
-      echo "netPercentage: " . $jobInfo->netPercentage . "<br/>";
+      echo "jobId: " .               $jobInfo->jobId .               "<br/>";
+      echo "jobNumber: " .           $jobInfo->jobNumber .           "<br/>";
+      echo "creator: " .             $jobInfo->creator .             "<br/>";
+      echo "dateTime: " .            $jobInfo->dateTime .            "<br/>";
+      echo "partNumber: " .          $jobInfo->partNumber .          "<br/>";
+      echo "sampleWeight: " .        $jobInfo->sampleWeight .        "<br/>";
+      echo "wcNumber: " .            $jobInfo->wcNumber .            "<br/>";
+      echo "cycleTime: " .           $jobInfo->cycleTime .           "<br/>";
+      echo "netPercentage: " .       $jobInfo->netPercentage .       "<br/>";
+      echo "inProcessTemplateId: " . $jobInfo->inProcessTemplateId . "<br/>";
+      echo "lineTemplateId: " .      $jobInfo->lineTemplateId .      "<br/>";
+      echo "qcpTemplateId: " .       $jobInfo->qcpTemplateId .       "<br/>";
+      echo "customerPrint: " .       $jobInfo->customerPrint .       "<br/>";
       
-      echo "isActive: " . JobStatus::getName($jobInfo->isActive) . "<br/>";
+      echo "status: " . JobStatus::getName($jobInfo->status) . "<br/>";
    }
    else
    {

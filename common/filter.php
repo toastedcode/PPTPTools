@@ -102,7 +102,7 @@ class UserFilterComponent extends FilterComponent
       $html =
 <<<HEREDOC
       <div class="flex-horizontal filter-component hide-on-tablet">
-         <div>$this->label:</div>
+         <div>$this->label:&nbsp</div>
          <div><select id="employeeNumberInput" name="employeeNumber">$options</select></div>
       </div>
 HEREDOC;
@@ -116,6 +116,59 @@ HEREDOC;
       {
          $this->selectedEmployeeNumber = $_POST['employeeNumber'];
       }
+   }
+}
+
+// *****************************************************************************
+//                            JobNumberFilterComponent
+
+class JobNumberFilterComponent extends FilterComponent
+{
+   public $jobNumbers;
+   
+   public $selectedJobNumber;
+   
+   function __construct($label, $jobNumbers, $selectedJobNumber)
+   {
+      $this->label = $label;
+      $this->jobNumbers = $jobNumbers;
+      $this->selectedJobNumber = $selectedJobNumber;
+   }
+   
+   public function getHtml()
+   {
+      $selected = "";
+      
+      $options = "<option $selected value=\"All\">All</option>";
+      
+      foreach ($this->jobNumbers as $jobNumber)
+      {
+         $selected = ($jobNumber == $this->selectedJobNumber) ? "selected" : "";
+         $options .= "<option $selected value=\"" . $jobNumber . "\">" . $jobNumber . "</option>";
+      }
+      
+      $html =
+<<<HEREDOC
+      <div class="flex-horizontal filter-component hide-on-tablet">
+         <div>$this->label:&nbsp</div>
+         <div><select id="filter-job-number-input" name="filterJobNumber">$options</select></div>
+      </div>
+HEREDOC;
+      
+      return ($html);
+   }
+   
+   public function update()
+   {
+      if (isset($_POST['filterJobNumber']))
+      {
+         $this->selectedJobNumber = $_POST['filterJobNumber'];
+      }
+   }
+   
+   public function updateJobNumbers($jobNumbers)
+   {
+      $this->jobNumbers = $jobNumbers;
    }
 }
 
@@ -212,6 +265,31 @@ HEREDOC;
    }
 }
 
+// *****************************************************************************
+//                                  PrintButton
+
+class PrintButton extends FilterComponent
+{
+    function __construct()
+    {
+    }
+    
+    public function getHtml()
+    {
+        $html =
+<<<HEREDOC
+        <div>
+           <button class="mdl-button mdl-js-button mdl-button--raised filter-component" onclick="window.print()">
+              <i class="material-icons action-button-icon">print</i>
+           </button>
+         </div>
+HEREDOC;
+        
+        return ($html);
+    }
+    
+    private $report;
+}
 
 // *****************************************************************************
 //                                  Filter
@@ -255,7 +333,7 @@ class Filter
 <<<HEREDOC
       <script src="$ROOT/common/filter.js"></script>
       
-      <form action="#" method="POST">
+      <form id="filter-form" method="POST">
       <div class="flex-horizontal">
 HEREDOC;
 

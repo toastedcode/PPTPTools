@@ -160,4 +160,129 @@ function DecimalValidator(inputId, maxLength, minValue, maxValue, maxDecimalPlac
       return (valid);
    }
 }
+
+function HexValidator(inputId, maxLength, minValue, maxValue, allowNull)
+{
+   this.inputId = inputId;
+   this.maxLength = maxLength;
+   this.minValue = minValue;
+   this.maxValue = maxValue;
+   this.allowNull = allowNull;
+   
+   HexValidator.prototype.init = function()
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.maxLength = this.maxLength;
+         
+         element.validator = this;
+      }
+   }
+   
+   HexValidator.prototype.isValid = function()
+   {
+      var valid = false;
+   
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         var hexValue = element.value;
+         
+         // Validate null value.
+         if ((hexValue == null) || (hexValue == "")) 
+         {
+            valid = this.allowNull;
+         }
+         // Validate valid hex within limits.
+         else
+         {
+            var regexp = /^[0-9a-fA-F]+$/;
+            var isHex = regexp.test(hexValue);
+               
+            var intVal = parseInt(hexValue, 16);  // radix = 16 for hexadecimal
+            
+            valid = (isHex && !isNaN(intVal) && (intVal >= minValue) && (intVal <= maxValue));
+         }
+      }
+      
+      return (valid);
+   }
+   
+   HexValidator.prototype.color = function(color)
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.style.color = color;
+      }
+   }
+   
+   HexValidator.prototype.validate = function()
+   {
+      var valid = this.isValid();
+      
+      if (valid)
+      {
+         this.color("#000000");
+      }
+      else
+      {
+         this.color("#FF0000");
+      }
+
+      return (valid);
+   }
+}
+
+function SelectValidator(inputId)
+{
+   this.inputId = inputId;
+   
+   SelectValidator.prototype.init = function()
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.validator = this;
+      }
+   }
+   
+   SelectValidator.prototype.isValid = function()
+   {   
+      var element = document.getElementById(this.inputId);
+      
+      return (element.value != "");
+   }
+   
+   SelectValidator.prototype.color = function(color)
+   {
+      var element = document.getElementById(this.inputId);
+      
+      if (element)
+      {
+         element.style.color = color;
+      }
+   }
+   
+   SelectValidator.prototype.validate = function()
+   {
+      var valid = this.isValid();
+      
+      if (valid)
+      {
+         this.color("#000000");
+      }
+      else
+      {
+         this.color("#FF0000");
+      }
+
+      return (valid);
+   }
+}
    

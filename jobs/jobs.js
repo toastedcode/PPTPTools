@@ -95,6 +95,34 @@ function onEditJob(jobId)
    form.submit();
 }
 
+function onCopyJob(jobId)
+{
+   form = document.createElement('form');
+   form.setAttribute('method', 'POST');
+   form.setAttribute('action', 'jobs.php');
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'view');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'new_job');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'action');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', 'copy_job');
+   form.appendChild(input);
+   
+   input = document.createElement('input');
+   input.setAttribute('name', 'jobId');
+   input.setAttribute('type', 'hidden');
+   input.setAttribute('value', jobId);
+   form.appendChild(input);
+   
+   document.body.appendChild(form);
+   form.submit();
+}
+
 function validateJob()
 {
    valid = false;
@@ -103,6 +131,10 @@ function validateJob()
          (document.getElementById("job-number-suffix-input").validator.validate())))
    {
       alert("Please enter a valid job number.  (Format: Mxxxx-xxx)");      
+   }
+   else if (!(document.getElementById("sample-weight-input").validator.validate()))
+   {
+      alert("Please enter a sample weight.");
    }
    else if (!(document.getElementById("cycle-time-input").validator.validate()))
    {

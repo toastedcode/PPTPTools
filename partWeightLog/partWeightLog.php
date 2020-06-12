@@ -2,281 +2,279 @@
 
 require_once '../common/authentication.php';
 require_once '../common/database.php';
+require_once '../common/filter.php';
 require_once '../common/header.php';
+require_once '../common/navigation.php';
+require_once '../common/newIndicator.php';
+require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
+require_once '../common/timeCardInfo.php';
 
-require 'viewPartWeightLog.php';
-require 'selectEntryMethod.php';
-require 'selectWorkCenter.php';
-require 'selectJob.php';
-require 'selectOperator.php';
-require 'enterPanCount.php';
-require 'selectTimeCard.php';
-require 'enterWeight.php';
-
-function getAction()
+function getNavBar()
 {
-   $action = '';
+   $navBar = new Navigation();
    
-   if (isset($_POST['action']))
-   {
-      $action = $_POST['action'];
-   }
-   else if (isset($_GET['action']))
-   {
-      $action = $_GET['action'];
-   }
+   $navBar->start();
+   $navBar->mainMenuButton();
+   $navBar->highlightNavButton("New Log Entry", "location.href = 'partWeightLogEntry.php';", true);
+   $navBar->end();
    
-   return ($action);
+   return ($navBar->getHtml());
 }
 
-function getView()
+function getFilter()
 {
-   $view = '';
+   $filter = null;
    
-   if (isset($_POST['view']))
+   if (isset($_SESSION["partWeightFilter"]))
    {
-      $view = $_POST['view'];
+      $filter = $_SESSION["partWeightFilter"];
    }
-   else if (isset($_GET['view']))
+   else
    {
-      $view = $_GET['view'];
-   }
-   
-   return ($view);
-}
-
-function processAction($action)
-{
-   switch ($action)
-   {
-      case 'new_part_weight_entry':
-      {
-         $_SESSION["partWeightEntry"] = new PartWeightEntry();
-         $_SESSION["partWeightEntry"]->dateTime = Time::now("Y-m-d h:i:s A");
-         
-         if ($user = Authentication::getAuthenticatedUser())
-         {
-            $_SESSION["partWeightEntry"]->employeeNumber = $user->employeeNumber;
-         }
-         
-         updatePartWeightEntry();
-         break;
-      }
-         
-      case 'update_part_weight_entry':
-      {
-         updatePartWeightEntry();
-         break;   
-      }
+      $user = Authentication::getAuthenticatedUser();
       
-      case 'cancel_part_weight_entry':
+      $operators = null;
+      $selectedOperator = null;
+      $allowAll = false;
+      if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS))
       {
-         unset($_SESSION["partWeightEntry"]);
-         unset($_SESSION["wcNumber"]);
-         break;
-      }
-      
-      case 'save_part_weight_entry':
-      {
-         updatePartWeightEntry();
-         
-         updatePartWeightLog($_SESSION['partWeightEntry']);
-         
-         $_SESSION["partWeightEntry"] = new PartWeightEntry();
-         break;
-      }
-      
-      case 'delete_part_weight_entry':
-      {
-         deletePartWeightEntry($_POST['partWeightEntryId']);
-         break;
-      }
-      
-      default:
-      {
-         // Unhandled action.
-      }
-   }
-}
-
-function processView($view)
-{
-   switch ($view)
-   {
-      case 'select_entry_method':
-      {
-         unset($_SESSION["wcNumber"]);
-         
-         $page = new SelectEntryMethod();
-         $page->render($view);
-         break;
-      }
-         
-      case 'select_time_card':
-      {
-         $page = new SelectTimeCard_PartWeight();
-         $page->render($view);
-         break;
-      }
-      
-      case 'select_job':
-      {
-         $page = new SelectJob_PartWeight();
-         $page->render();
-         break;
-      }
-         
-      case 'select_operator':
-      {
-         $page = new SelectOperator_PartWeight();
-         $page->render();
-         break;
-      }
-      
-      case 'enter_pan_count':
-      {
-         $page = new EnterPanCount();
-         $page->render();
-         break;
-      }
-         
-      case 'select_work_center':
-      {
-         $page = new SelectWorkCenter_PartWeight();
-         $page->render();
-         break;
-      }
-      
-      case 'enter_weight':
-      {
-         $page = new EnterWeight();
-         $page->render();
-         break;
-      }
-         
-      case 'view_part_weight_log':
-      default:
-      {
-         $page = new ViewPartWeightLog();
-         $page->render();
-         break;
-      }
-   }
-}
-
-function updatePartWeightEntry()
-{
-   if (isset($_POST['dateTime']))
-   {
-      $dateTime = new DateTime($_POST['dateTime']);
-      $_SESSION["partWeightEntry"]->dateTime = $dateTime->format("Y-m-d h:i:s");
-   }
-   
-   if (isset($_POST['employeeNumber']))
-   {
-      $_SESSION["partWeightEntry"]->employeeNumber = $_POST['employeeNumber'];
-   }
-
-   if (isset($_GET['timeCardId']))  // When called from viewTimeCard.php
-   {
-      $_SESSION["partWeightEntry"]->timeCardId = $_GET['timeCardId'];
-   }
-   else if (isset($_POST['timeCardId']))
-   {
-      $_SESSION["partWeightEntry"]->timeCardId = $_POST['timeCardId'];
-   }
-   
-   if (isset($_POST['weight']))
-   {
-      $_SESSION["partWeightEntry"]->weight = $_POST['weight'];
-   }
-   
-   // Temporary input variable, part of selecting job.
-   if (isset($_POST['wcNumber']))
-   {
-      $_SESSION["wcNumber"] = $_POST['wcNumber'];
-   }
-   
-   if (isset($_POST['jobId']))
-   {
-      $_SESSION["partWeightEntry"]->jobId = $_POST['jobId'];
-   }
-   
-   if (isset($_POST['operator']))
-   {
-      $_SESSION["partWeightEntry"]->operator = $_POST['operator'];
-   }
-   
-   if (isset($_POST['panCount']))
-   {
-      $_SESSION["partWeightEntry"]->panCount= $_POST['panCount'];
-   }
-}
-
-function deletePartWeightEntry($partWeightEntryId)
-{
-   $result = false;
-   
-   $database = new PPTPDatabase();
-   
-   $database->connect();
-   
-   if ($database->isConnected())
-   {
-      $result = $database->deletePartWeightEntry($partWeightEntryId);
-   }
-   
-   return ($result);
-}
-
-function updatePartWeightLog($partWeightEntry)
-{
-   $success = false;
-   
-   $database = new PPTPDatabase();
-   
-   $database->connect();
-   
-   if ($database->isConnected())
-   {
-      if ($partWeightEntry->partWeightEntryId != 0)
-      {
-         $database->updatePartWeightEntry($partWeightEntry->partWeightEntryId, $partWeightEntry);
+         // Allow selection from all operators.
+         $operators = UserInfo::getUsersByRoles(array(Role::LABORER, Role::PART_WASHER));
+         $selectedOperator = "All";
+         $allowAll = true;
       }
       else
       {
-         // Delete any existing part weight.
-         // TODO: Any reason to preserve old entries?
-         if ($partWeightEntry->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
-         {
-            $database->deleteAllPartWeightEntries($partWeightEntry->timeCardId);
-         }
-         
-         $database->newPartWeightEntry($partWeightEntry);
+         // Limit to own logs.
+         $operators = array($user);
+         $selectedOperator = $user->employeeNumber;
+         $allowAll = false;
       }
       
-      $success = true;
+      $filter = new Filter();
+      
+      $filter->addByName("laborer", new UserFilterComponent("Laborer", $operators, $selectedOperator, $allowAll));
+      $filter->addByName('date', new DateFilterComponent());
+      $filter->add(new FilterButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new TodayButton());
+      $filter->add(new YesterdayButton());
+      $filter->add(new ThisWeekButton());
+      $filter->add(new FilterDivider());
+      $filter->add(new PrintButton());
+      
+      $_SESSION["partWeightFilter"] = $filter;
    }
    
-   return ($success);
+   $filter->update();
+   
+   return ($filter);
 }
-?>
 
-<!-- ********************************** BEGIN ********************************************* -->
+function getTable($filter)
+{
+   $html = "";
+   
+   global $ROOT;
 
-<?php 
+   // Start date.
+   $startDate = new DateTime($filter->get('date')->startDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+   $startDateString = $startDate->format("Y-m-d");
+   
+   // End date.
+   // Increment the end date by a day to make it inclusive.
+   $endDate = new DateTime($filter->get('date')->endDate, new DateTimeZone('America/New_York'));
+   $endDate->modify('+1 day');
+   $endDateString = $endDate->format("Y-m-d");
+   
+   $result = PPTPDatabase::getInstance()->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, $filter->get('laborer')->selectedEmployeeNumber, $startDateString, $endDateString, false);
+   
+   if ($result && (MySqlDatabase::countResults($result) > 0))
+   {
+      $html =
+<<<HEREDOC
+      <div class="table-container">
+         <table class="part-weight-log-table">
+            <tr>
+               <th>Job #</th>
+               <th class="hide-on-tablet">WC #</th>
+               <th class="hide-on-tablet">Operator Name</th>
+               <th class="hide-on-tablet">Mfg. Date</th>
+               <th>Laborer Name</th>
+               <th>Weigh Date</th>
+               <th class="hide-on-tablet">Weigh Time</th>
+               <th class="hide-on-mobile">Basket Count</th>
+               <th>Weight</th>
+               <th class="hide-on-mobile">Estimated<br>Part Count</th>
+               <th class="hide-on-print"/>
+               <th class="hide-on-print"/>
+            </tr>
+HEREDOC;
+         
+      while ($row = $result->fetch_assoc())
+      {
+         $partWeightEntry = PartWeightEntry::load($row["partWeightEntryId"]);
+         
+         if ($partWeightEntry)
+         {
+            $jobId = JobInfo::UNKNOWN_JOB_ID;
+            $operatorEmployeeNumber =  UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+            $mismatch = "";
+            
+            // If we have a timeCardId, use that to fill in the job id, operator, and manufacture.
+            $mfgDate = null;
+            $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
+            if ($timeCardInfo)
+            {
+               $jobId = $timeCardInfo->jobId;
+               
+               $mfgDate = $timeCardInfo->dateTime;
+               
+               $operatorEmployeeNumber = $timeCardInfo->employeeNumber;
+            }
+            else
+            {
+               $jobId = $partWeightEntry->getJobId();
+               $operatorEmployeeNumber =  $partWeightEntry->getOperator();
+               
+               if ($partWeightEntry->manufactureDate)
+               {
+                  $mfgDate = $partWeightEntry->manufactureDate;
+               }
+            }
+            
+            //
+            // Check for a mismatch between the Time Card pan count and the Part Washer Log pan count.
+            //
+            
+            if ($timeCardInfo != null)
+            {
+               $timeCardPanCount = $timeCardInfo->panCount;               
+               $partWeightLogPanCount = $partWeightEntry->panCount;
+               
+               // Check for a mismatch.
+               if ($timeCardPanCount != $partWeightLogPanCount)
+               {
+                  $mismatch = "<span class=\"mismatch-indicator\" tooltip=\"weight log = $partWeightLogPanCount; time card = $timeCardPanCount; \" tooltip-position=\"top\">mismatch</span>";
+               }
+            }
+                        
+            // Use the job id to fill in the job number and work center number.
+            $jobNumber = "unknown";
+            $wcNumber = "unknown";
+            $jobInfo = JobInfo::load($jobId);
+            if ($jobInfo)
+            {
+               $jobNumber = $jobInfo->jobNumber;
+               $wcNumber = $jobInfo->wcNumber;
+            }
+            
+            $operatorName = "unknown";
+            $operator = UserInfo::load($operatorEmployeeNumber);
+            if ($operator)
+            {
+               $operatorName= $operator->getFullName();
+            }
+            
+            $laborerName = "unknown";
+            $laborer = UserInfo::load($partWeightEntry->employeeNumber);
+            if ($laborer)
+            {
+               $laborerName= $laborer->getFullName();
+            }
+            
+            if ($mfgDate)
+            {
+               $dateTime = new DateTime($mfgDate, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+               $mfgDate = $dateTime->format("m-d-Y");
+            }
+            else
+            {
+               $mfgDate = "---";
+            }
+            
+            $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+            $weighDate = $dateTime->format("m-d-Y");
+            
+            $dateTime = new DateTime($partWeightEntry->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
+            $weighTime = $dateTime->format("h:i a");
+            
+            $newIndicator = new NewIndicator($dateTime, 60);
+            $new = $newIndicator->getHtml();
+            
+            $viewEditIcon = "";
+            $deleteIcon = "";
+            if (Authentication::checkPermissions(Permission::EDIT_PART_WASHER_LOG))
+            {
+               $viewEditIcon =
+               "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";
+               $deleteIcon =
+               "<i class=\"material-icons table-function-button\" onclick=\"onDeletePartWeightEntry($partWeightEntry->partWeightEntryId)\">delete</i>";
+            }
+            else
+            {
+               $viewEditIcon =
+               "<a href=\"$ROOT/partWeightLog/partWeightLogEntry.php?entryId=$partWeightEntry->partWeightEntryId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+            }
+            
+            $html .=
+<<<HEREDOC
+            <tr>
+               <td>$jobNumber</td>
+               <td class="hide-on-tablet">$wcNumber</td>
+               <td class="hide-on-tablet">$operatorName</td>
+               <td class="hide-on-tablet">$mfgDate</td>
+               <td>$laborerName</td>
+               <td>$weighDate $new</td>
+               <td class="hide-on-tablet">$weighTime</td>
+               <td class="hide-on-mobile">$partWeightEntry->panCount $mismatch</td>                           
+               <td>$partWeightEntry->weight</td>
+               <td>{$partWeightEntry->calculatePartCount()}</td>
+               <td class="hide-on-print">$viewEditIcon</td>
+               <td class="hide-on-print">$deleteIcon</td>
+            </tr>
+HEREDOC;
+         }  // end if ($partWeightEntry)
+      }  // end while ($row = $result->fetch_assoc())
+         
+      $html .=
+<<<HEREDOC
+         </table>
+      </div>
+HEREDOC;
+   }
+   else
+   {
+      $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a new operator or date range.</div>";
+   }  // end if ($result && (Database::countResults($result) > 0))
+   
+   return ($html);
+}
+
+// ********************************** BEGIN ************************************
+
 Time::init();
 
 session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 
-processAction(getAction());
+$filter = getFilter();
+
+// Post/Redirect/Get idiom.
+// getFilter() stores all $_POST data in the $_SESSION variable.
+// header() redirects to this page, but with a GET request.
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+   // Redirect to this page.
+   header("Location: " . $_SERVER['REQUEST_URI']);
+   exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -294,9 +292,10 @@ processAction(getAction());
    <link rel="stylesheet" type="text/css" href="partWeightLog.css"/>
    
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src="partWeightLog.js"></script>
+   <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
-   
+   <script src="partWeightLog.js"></script>
+
 </head>
 
 <body>
@@ -304,12 +303,32 @@ processAction(getAction());
    <?php Header::render("PPTP Tools"); ?>
    
    <div class="flex-horizontal main">
-      
-      <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+     
+     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
    
-      <?php processView(getView())?>
+     <div class="flex-vertical content">
+
+        <div class="heading">Part Weight Log</div>
+
+        <div class="description">The Part Weight Log provides an up-to-the-minute view into the part weighing process.  Here you can track the weight of your manufactured parts prior to the washing process.</div>
+
+        <div class="flex-vertical inner-content">
+        
+           <?php echo $filter->getHtml(); ?>
+           
+           <?php echo getTable($filter); ?>
+      
+        </div>
          
+        <?php echo getNavBar(); ?>
+         
+     </div>
+     
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

@@ -4,11 +4,12 @@ require_once 'time.php';
 
 class PartWasherEntry
 {
+   const UNKNOWN_ENTRY_ID = 0;
    const UNKNOWN_TIME_CARD_ID = 0;
    const UNKNOWN_JOB_ID = 0;
    const UNKNOWN_OPERATOR = 0;
    
-   public $partWasherEntryId;
+   public $partWasherEntryId = PartWasherEntry::UNKNOWN_ENTRY_ID;
    public $dateTime;
    public $employeeNumber;
    public $timeCardId = PartWasherEntry::UNKNOWN_TIME_CARD_ID;
@@ -18,6 +19,7 @@ class PartWasherEntry
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWasherEntry::UNKNOWN_JOB_ID;
    public $operator = PartWasherEntry::UNKNOWN_OPERATOR;
+   public $manufactureDate = null;
    
    public function getJobId()
    {
@@ -74,11 +76,9 @@ class PartWasherEntry
    {
       $partWasherEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntry($partWasherEntryId);
          
@@ -96,6 +96,10 @@ class PartWasherEntry
             // These attributes were added for manual entry when no time card is available.
             $partWasherEntry->jobId = intval($row['jobId']);
             $partWasherEntry->operator = intval($row['operator']);
+            if ($row['manufactureDate'])
+            {
+               $partWasherEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+            }
          }
       }
       
@@ -106,11 +110,9 @@ class PartWasherEntry
    {
       $partWasherEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWasherEntriesByTimeCard($timeCardId);
          
@@ -123,26 +125,28 @@ class PartWasherEntry
       return ($partWasherEntry);
    }
    
-   public static function getPartWasherEntryForJob($jobId)
+   public static function getPanCountForJob($jobId, $startDate, $endDate)
    {
-      $partWasherEntry = null;
+      $panCount = 0;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWasherEntriesByJob($jobId);
+         $result = $database->getPartWasherEntries(
+            $jobId,
+            UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
+            $startDate,
+            $endDate,
+            true);  // $useMfgDate
          
-         if ($result && ($row = $result->fetch_assoc()))
+         while ($result && ($row = $result->fetch_assoc()))
          {
-            // Note: Assumes one entry per job.
-            $partWasherEntry = PartWasherEntry::load(intval($row['partWasherEntryId']));
+            $panCount += intval($row["panCount"]);
          }
       }
       
-      return ($partWasherEntry);
+      return ($panCount);
    }
 }
 
@@ -162,6 +166,7 @@ class PartWasherEntry
        echo "partCount: " .         $partWasherEntry->partCount .         "<br/>";
        echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
        echo "operator: " .          $partWasherEntry->operator .          "<br/>";
+       echo "manufactureDate: " .   $partWasherEntry->manufactureDate .   "<br/>";
     }
     else
     {

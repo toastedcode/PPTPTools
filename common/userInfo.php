@@ -16,6 +16,7 @@ class UserInfo
    public $roles = Role::UNKNOWN;
    public $permissions = Permission::NO_PERMISSIONS;
    public $email;
+   public $authToken;
    
    public static function load($employeeNumber)
    {
@@ -67,14 +68,38 @@ class UserInfo
    {
       $users = array();
       
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
+      $database = PPTPDatabase::getInstance();
+           
+      if ($database && $database->isConnected())
       {
          $result = $database->getUsersByRole($role);
 
+         if ($result)
+         {
+            while ($row = $result->fetch_assoc())
+            {
+               $userInfo = new UserInfo();
+               
+               $userInfo->initialize($row);
+               
+               $users[] = $userInfo;
+            }
+         }
+      }
+      
+      return ($users);
+   }
+   
+   static public function getUsersByRoles($roles)
+   {
+      $users = array();
+      
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->getUsersByRoles($roles);
+         
          if ($result)
          {
             while ($row = $result->fetch_assoc())
@@ -106,6 +131,7 @@ class UserInfo
       $this->firstName = $row['firstName'];
       $this->lastName = $row['lastName'];
       $this->email = $row['email'];
+      $this->authToken = $row['authToken'];
    }
 }
 
@@ -133,6 +159,7 @@ if ($userInfo)
    echo "firstName: " .      $userInfo->firstName .      "<br/>";
    echo "lastName: " .       $userInfo->lastName .       "<br/>";
    echo "email: " .          $userInfo->email .          "<br/>";
+   echo "authToken: " .      $userInfo->authToken .      "<br/>";
    
    echo "fullName: " . $userInfo->getFullName() . "<br/>";
 }

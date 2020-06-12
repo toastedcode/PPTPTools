@@ -213,11 +213,9 @@ function redirectToLogin()
    header('Location: ../home.php');
    exit;
 }
-?>
 
-<!-- ********************************** BEGIN ********************************************* -->
+// ********************************** BEGIN ************************************
 
-<?php 
 Time::init();
 
 session_start();
@@ -244,9 +242,9 @@ processAction(getAction());
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="signage.css"/>
    
-   <script src="signage.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
+   <script src="signage.js"></script>
    
 </head>
 
@@ -261,6 +259,10 @@ processAction(getAction());
       <?php processView(getView())?>
    
    </div>
+   
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

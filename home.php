@@ -14,12 +14,14 @@ class Activity
    const PART_WEIGHT = 3;
    const PART_WASH = 4;
    const PART_INSPECTION = 5;
-   const LINE_INSPECTION = 6;
-   const MACHINE_STATUS = 7;
-   const PRODUCTION_SUMMARY = 8;
-   const USER = 9;
-   const SIGNAGE = 10;
-   const LAST = Activity::SIGNAGE;
+   const INSPECTION_TEMPLATE = 6;
+   const LINE_INSPECTION = 7;
+   const MACHINE_STATUS = 8;
+   const PRODUCTION_SUMMARY = 9;
+   const USER = 10;
+   const SIGNAGE = 11;
+   const PRINT_MANAGER = 12;
+   const LAST = Activity::PRINT_MANAGER;
       
    private static $permissionMasks = null;
    
@@ -28,16 +30,19 @@ class Activity
       if (Activity::$permissionMasks == null)
       {
          Activity::$permissionMasks = array(
-            Permission::getPermission(Permission::VIEW_JOB)->bits,                 // JOBS
-            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           // TIME_CARD
-            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     // PART_WEIGHT
-            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     // PART_WASH
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // PART_INSPECTION
-            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,     // LINE_INSPECTION (TODO)
-            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,      // MACHINE_STATUS
-            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,  // PRODUCTION_SUMMARY
-            Permission::getPermission(Permission::VIEW_USER)->bits,                // USER
-            Permission::getPermission(Permission::VIEW_SIGN)->bits);               // SIGNAGE
+            Permission::getPermission(Permission::VIEW_JOB)->bits,                  // JOBS
+            Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,            // TIME_CARD
+            Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,      // PART_WEIGHT
+            Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,      // PART_WASH
+            Permission::getPermission(Permission::VIEW_PART_INSPECTION)->bits,      // PART_INSPECTION
+            Permission::getPermission(Permission::VIEW_INSPECTION_TEMPLATE)->bits,  // INSPECTION_TEMPLATE
+            Permission::getPermission(Permission::VIEW_INSPECTION)->bits,           // LINE_INSPECTION
+            Permission::getPermission(Permission::VIEW_MACHINE_STATUS)->bits,       // MACHINE_STATUS
+            Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,   // PRODUCTION_SUMMARY
+            Permission::getPermission(Permission::VIEW_USER)->bits,                 // USER
+            Permission::getPermission(Permission::VIEW_SIGN)->bits,                 // SIGNAGE
+            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits         // PRINT_MANAGER
+         );
       }
       
       return (Activity::$permissionMasks);
@@ -151,7 +156,7 @@ HEREDOC;
    {
       $timeCardButton =
 <<<HEREDOC
-      <div class="action-button" onclick="location.href='timecard/timeCard.php?view=view_time_cards';">
+      <div class="action-button" onclick="location.href='timecard/viewTimeCards.php';">
          <div><i class="material-icons action-button-icon">schedule</i></div>
          <div>Time Cards</div>
       </div>
@@ -164,7 +169,7 @@ HEREDOC;
    {
       $partWeightButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php?view=view_part_weight_log';">
+     <div class="action-button" onclick="location.href='partWeightLog/partWeightLog.php';">
         <i class="material-icons action-button-icon">fingerprint</i>
         <div>Part Weight</div>
         <div>Log</div>
@@ -178,10 +183,24 @@ HEREDOC;
    {
       $partWashButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php?view=view_part_washer_log';">
+     <div class="action-button" onclick="location.href='partWasherLog/partWasherLog.php';">
         <i class="material-icons action-button-icon">opacity</i>
         <div>Part Washer</div>
         <div>Log</div>
+     </div>
+HEREDOC;
+   }
+   
+   // Part Inspection
+   $inspectionTemplateButton = "";
+   if (Activity::isAllowed(Activity::INSPECTION_TEMPLATE, $permissions))
+   {
+      $inspectionTemplateButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='inspectionTemplate/inspectionTemplates.php';">
+        <i class="material-icons action-button-icon">format_list_bulleted</i>
+        <div>Inspection</div>
+        <div>Templates</div>
      </div>
 HEREDOC;
    }
@@ -194,25 +213,24 @@ HEREDOC;
 <<<HEREDOC
      <div class="action-button" onclick="location.href='partInspection/partInspection.php?view=view_part_inspections';">
         <i class="material-icons action-button-icon">search</i>
-        <div>Part</div>
+        <div>Oasis</div>
         <div>Inspections</div>
      </div>
 HEREDOC;
    }
-      
-   // Line Inspection
-   $lineInspectionButton = "";
-   if (Activity::isAllowed(Activity::LINE_INSPECTION, $permissions))
-   {
-      $lineInspectionButton =
+   
+    // Inspection
+    $inspectionButton = "";
+    if (Activity::isAllowed(Activity::LINE_INSPECTION, $permissions))
+    {
+       $inspectionButton =
 <<<HEREDOC
-     <div class="action-button" onclick="location.href='lineInspection/lineInspection.php?view=view_line_inspections';">
-        <i class="material-icons action-button-icon">thumbs_up_down</i>
-        <div>Line</div>
-        <div>Inspections</div>
-     </div>
+       <div class="action-button" onclick="location.href='inspection/inspections.php';">
+          <i class="material-icons action-button-icon">thumbs_up_down</i>
+          <div>Inspections</div>
+       </div>
 HEREDOC;
-   }
+    }
       
    // Machine Status
    $machineStatusButton = "";
@@ -260,6 +278,34 @@ HEREDOC;
 HEREDOC;
    }
    
+   // Print Manager
+   $printManagerButton = "";
+   if (Activity::isAllowed(Activity::PRINT_MANAGER, $permissions))
+   {
+      $printManagerButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='printer/printer.php';">
+        <i class="material-icons action-button-icon">print</i>
+        <div>Print</div>
+        <div>Manager</div>
+     </div>
+HEREDOC;
+   }
+      
+   // Scanner
+   $scannerButton = "";
+   if (Activity::isAllowed(Activity::PRINT_MANAGER, $permissions))
+   {
+      $scannerButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='panTicket/scanPanTicket.php';">
+        <i class="material-icons action-button-icon">photo_camera</i>
+        <div>Pan Ticket</div>
+        <div>Scanner</div>
+     </div>
+HEREDOC;
+   }
+   
    echo
 <<<HEREDOC
    <div class="flex-horizontal" style="align-items:stretch; justify-content: flex-start; height:100%">
@@ -283,16 +329,22 @@ HEREDOC;
             $partWeightButton
             
             $partWashButton
+
+            $inspectionTemplateButton
             
             $partInspectionButton
             
-            $lineInspectionButton
+            $inspectionButton
             
             $machineStatusButton
             
             $productionSummaryButton
             
             $digitalSignageButton
+
+            $printManagerButton
+            
+            $scannerButton
    
          </div>
          
@@ -304,7 +356,7 @@ HEREDOC;
 
 function login($username, $password)
 {
-   $result = Authentication::authenticate($username, $password);
+   Authentication::authenticateUser($username, $password);
 }
 
 function logout()
@@ -378,6 +430,7 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
    <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
 
    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <script src="common/common.js"></script>
    
 </head>
 
@@ -402,6 +455,10 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
       loginPage();
    }
    ?>
+
+   <script>
+      preserveSession();
+   </script>
 
 </body>
 

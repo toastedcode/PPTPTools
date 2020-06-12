@@ -4,20 +4,29 @@ require_once 'time.php';
 
 class PartWeightEntry
 {
+   const UNKNOWN_ENTRY_ID = 0;
    const UNKNOWN_TIME_CARD_ID = 0;
    const UNKNOWN_JOB_ID = 0;
    const UNKNOWN_OPERATOR = 0;
+   const UNKNOWN_PAN_WEIGHT = 0;
+   const UNKNOWN_PALLET_WEIGHT = 0;
+   
+   const STANDARD_PAN_WEIGHT = 7.1;  // lbs
+   const STANDARD_PALLET_WEIGHT = 20.0;  // lbs   
    
    public $partWeightEntryId;
    public $dateTime;
    public $employeeNumber;
    public $timeCardId = PartWeightEntry::UNKNOWN_TIME_CARD_ID;
+   public $panCount = 0;
    public $weight;
+   public $panWeight = PartWeightEntry::STANDARD_PAN_WEIGHT;
+   public $palletWeight = PartWeightEntry::STANDARD_PALLET_WEIGHT;   
    
    // These attributes were added for manual entry when no time card is available.
    public $jobId = PartWeightEntry::UNKNOWN_JOB_ID;
    public $operator = PartWeightEntry::UNKNOWN_OPERATOR;
-   public $panCount = 0;
+   public $manufactureDate = null;
    
    public function getJobId()
    {
@@ -53,32 +62,32 @@ class PartWeightEntry
       return ($operator);
    }
    
-   public function getPanCount()
+   public function calculatePartCount()
    {
-      $panCount = $this->panCount;
+      $partCount = 0;
       
-      if ($this->timeCardId != PartWeightEntry::UNKNOWN_TIME_CARD_ID)
+      $jobId = $this->getJobId();
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo && ($jobInfo->sampleWeight > JobInfo::UNKNOWN_SAMPLE_WEIGHT))
       {
-         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         $partCount = 
+            ($this->weight - ($this->palletWeight + ($this->panCount * $this->panWeight))) / ($jobInfo->sampleWeight);
          
-         if ($timeCardInfo)
-         {
-            $panCount = $timeCardInfo->panCount;
-         }
+         $partCount = round($partCount, 0);
       }
       
-      return ($panCount);
+      return ($partCount);
    }
 
    public static function load($partWeightEntryId)
    {
       $partWeightEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWeightEntry($partWeightEntryId);
          
@@ -90,12 +99,16 @@ class PartWeightEntry
             $partWeightEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $partWeightEntry->employeeNumber = intval($row['employeeNumber']);
             $partWeightEntry->timeCardId = intval($row['timeCardId']);
+            $partWeightEntry->panCount = intval($row['panCount']);
             $partWeightEntry->weight = doubleval($row['weight']);
             
             // These attributes were added for manual entry when no time card is available.
             $partWeightEntry->jobId = intval($row['jobId']);
             $partWeightEntry->operator = intval($row['operator']);
-            $partWeightEntry->panCount = intval($row['panCount']);
+            if ($row['manufactureDate'])
+            {
+               $partWeightEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+            }
          }
       }
       
@@ -106,11 +119,9 @@ class PartWeightEntry
    {
       $partWeightEntry = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
          $result = $database->getPartWeightEntriesByTimeCard($timeCardId);
          
@@ -123,26 +134,28 @@ class PartWeightEntry
       return ($partWeightEntry);
    }
    
-   public static function getPartWeightEntryForJob($jobId)
+   public static function getPanCountForJob($jobId, $mfgStartDate, $mfgEndDate)
    {
-      $partWeightEntry = null;
+      $panCount = 0;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWeightEntriesByJob($jobId);
+         $result = $database->getPartWeightEntries(
+                      $jobId, 
+                      UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
+                      $mfgStartDate,
+                      $mfgEndDate,
+                      true);  // $useMfgDate
          
-         if ($result && ($row = $result->fetch_assoc()))
+         while ($result && ($row = $result->fetch_assoc()))
          {
-            // Note: Assumes one entry per job.
-            $partWeightEntry = PartWeightEntry::load(intval($row['partWeightEntryId']));
+            $panCount += intval($row["panCount"]);
          }
       }
       
-      return ($partWeightEntry);
+      return ($panCount);
    }
 }
 
@@ -155,10 +168,14 @@ if (isset($_GET["id"]))
    if ($partWeightEntry)
    {
       echo "partWeightEntryId: " . $partWeightEntry->partWeightEntryId . "<br/>";
-      echo "dateTime: " .           $partWeightEntry->dateTime .          "<br/>";
-      echo "employeeNumber: " .     $partWeightEntry->employeeNumber .    "<br/>";
-      echo "timeCardId: " .         $partWeightEntry->timeCardId .        "<br/>";
-      echo "weight: " .             $partWeightEntry->weight .            "<br/>";
+      echo "dateTime: " .          $partWeightEntry->dateTime .          "<br/>";
+      echo "employeeNumber: " .    $partWeightEntry->employeeNumber .    "<br/>";
+      echo "timeCardId: " .        $partWeightEntry->timeCardId .        "<br/>";
+      echo "panCount: " .          $partWasherEntry->panCount .          "<br/>";
+      echo "weight: " .            $partWeightEntry->weight .            "<br/>";
+      echo "jobId: " .             $partWasherEntry->jobId .             "<br/>";
+      echo "operator: " .          $partWasherEntry->operator .          "<br/>";
+      echo "manufactureDate: " .   $partWasherEntry->manufactureDate .   "<br/>";
    }
    else
    {
