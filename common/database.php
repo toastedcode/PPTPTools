@@ -574,7 +574,7 @@ class PPTPDatabase extends MySqlDatabase
       {
          // Manufacture time may be in the part washer entry itself, or in the associated time card.
          $dateTimeClause = "((partwasher.manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "') OR" .
-                           " (timecard.manufactureDate BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
+                           " (timecard.dateTime BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
       }
       else
       {
@@ -701,7 +701,7 @@ class PPTPDatabase extends MySqlDatabase
       {
          // Manufacture time may be in the part weight entry itself, or in the associated time card.
          $dateTimeClause = "((partweight.manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "') OR" .
-                           " (timecard.manufactureDate BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
+                           " (timecard.dateTime BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
       }
       else
       {
