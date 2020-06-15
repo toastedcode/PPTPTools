@@ -63,7 +63,7 @@ function getInspection()
       
       if ($inspectionId != Inspection::UNKNOWN_INSPECTION_ID)
       {
-         $inspection = Inspection::load($inspectionId);
+         $inspection = Inspection::load($inspectionId, true);  // Load actual results.
       }
       else
       {

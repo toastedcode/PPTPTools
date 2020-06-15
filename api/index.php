@@ -786,7 +786,7 @@ $router->add("saveInspection", function($params) {
        (intval($params["inspectionId"]) != Inspection::UNKNOWN_INSPECTION_ID))
    {
       //  Updated entry
-      $inspection = Inspection::load($params["inspectionId"]);
+      $inspection = Inspection::load($params["inspectionId"], true);  // Load actual results.
       
       if (!$inspection)
       {
@@ -895,6 +895,8 @@ $router->add("saveInspection", function($params) {
                  
             if ($result->success)
             {
+               $inspection->updateSummary();
+               
                if ($inspection->inspectionId == Inspection::UNKNOWN_INSPECTION_ID)
                {
                   $dbaseResult = $database->newInspection($inspection);
@@ -939,7 +941,7 @@ $router->add("deleteInspection", function($params) {
    {
       $inspectionId = intval($params["inspectionId"]);
       
-      $inspection = Inspection::load($inspectionId);
+      $inspection = Inspection::load($inspectionId, false);  // Don't load actual results, for efficiency.
       
       if ($inspection)
       {

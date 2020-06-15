@@ -574,7 +574,7 @@ class PPTPDatabase extends MySqlDatabase
       {
          // Manufacture time may be in the part washer entry itself, or in the associated time card.
          $dateTimeClause = "((partwasher.manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "') OR" .
-                           " (timecard.manufactureDate BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
+                           " (timecard.dateTime BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
       }
       else
       {
@@ -584,7 +584,7 @@ class PPTPDatabase extends MySqlDatabase
       $query = "SELECT partwasher.* FROM partwasher " .
                "LEFT JOIN timecard ON partwasher.timeCardId = timecard.timeCardId " .
                "WHERE $jobClause $employeeClause $dateTimeClause ORDER BY partwasher.dateTime DESC;";
-      
+
       $result = $this->query($query);
       
       return ($result);
@@ -701,14 +701,12 @@ class PPTPDatabase extends MySqlDatabase
       {
          // Manufacture time may be in the part weight entry itself, or in the associated time card.
          $dateTimeClause = "((partweight.manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "') OR" .
-                           " (timecard.manufactureDate BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
+                           " (timecard.dateTime BETWEEN '" .   Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'))";
       }
       else
       {
          $dateTimeClause = "partweight.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
-      
-      
       
       $query = "SELECT partweight.* FROM partweight " .
                "LEFT JOIN timecard ON partweight.timeCardId = timecard.timeCardId " .
@@ -1293,13 +1291,13 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO inspection " .
-      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator) " .
+      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator, samples, naCount, passCount, failCount) " .
       "VALUES " .
-      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator');";
-
+      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator', '$inspection->samples', '$inspection->naCount', '$inspection->passCount', '$inspection->failCount');";
+echo $query;
       $result = $this->query($query);
       
-      if ($result)
+      if ($result && $inspection->inspectionResults)
       {
          // Get the last auto-increment id, which should be the inspection id.
          $inspectionId = mysqli_insert_id($this->getConnection());
@@ -1333,7 +1331,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE inspection " .
-      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator'  " .
+      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator', samples = '$inspection->samples', naCount = '$inspection->naCount', passCount = '$inspection->passCount', failCount = '$inspection->failCount'  " .
       "WHERE inspectionId = '$inspection->inspectionId';";
 
       $result = $this->query($query);

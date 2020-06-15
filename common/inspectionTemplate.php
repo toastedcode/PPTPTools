@@ -50,6 +50,8 @@ class InspectionTemplate
 {
    const UNKNOWN_TEMPLATE_ID = 0;
    
+   const OASIS_TEMPLATE_ID = 1;
+   
    const DEFAULT_SAMPLE_SIZE = 1;
    
    public $templateId;

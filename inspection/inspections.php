@@ -183,12 +183,18 @@ HEREDOC;
       
       while ($row = $result->fetch_assoc())
       {
-         $inspection = Inspection::load($row["inspectionId"]);
+         $inspection = Inspection::load($row["inspectionId"], false);  // Don't load actual results, for efficiency.
          
          $inspectionTemplate = InspectionTemplate::load($row["templateId"]);
          
          if ($inspection && $inspectionTemplate)
          {
+            // If no summary has been saved, we'll have to load the actual results.
+            if ($inspection->hasSummary() == false)
+            {
+               $inspection->loadInspectionResults();
+            }
+            
             $inspectionTypeLabel = InspectionType::getLabel($inspectionTemplate->inspectionType);
             
             $dateTime = new DateTime($inspection->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
@@ -240,8 +246,8 @@ HEREDOC;
                   "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=view_inspection\"><i class=\"material-icons table-function-button\">visibility</i></a>";
             }
             
-            $passCount = $inspection->getCountByStatus(InspectionStatus::PASS);
-            $count = ($inspection->getCount() - $inspection->getCountByStatus(InspectionStatus::NON_APPLICABLE));
+            $measurementCount = $inspection->getMeasurementCount();            
+            $passCount = $inspection->getPassCount();
             
             $html .=
 <<<HEREDOC
@@ -254,7 +260,7 @@ HEREDOC;
                <td class="hide-on-tablet">$operatorName</td>
                <td>$jobNumber</td>
                <td>$wcNumber</td>
-               <td>$passCount/$count</td>
+               <td>$passCount/$measurementCount</td>
                <td>$passFail</td>
                <td class="hide-on-print">$viewEditIcon</td>
                <td class="hide-on-print">$deleteIcon</td>
