@@ -87,6 +87,11 @@ class MySqlDatabase implements Database
       return (mysqli_insert_id($this->connection));
    }
    
+   public function lastQuery()
+   {
+      return ($this->connection->last_query());
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
@@ -1291,10 +1296,10 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO inspection " .
-      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator, samples, naCount, passCount, failCount) " .
+      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator, samples, naCount, passCount, failCount, dataFile) " .
       "VALUES " .
-      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator', '$inspection->samples', '$inspection->naCount', '$inspection->passCount', '$inspection->failCount');";
-echo $query;
+      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator', '$inspection->samples', '$inspection->naCount', '$inspection->passCount', '$inspection->failCount', '$inspection->dataFile');";
+
       $result = $this->query($query);
       
       if ($result && $inspection->inspectionResults)
@@ -1331,7 +1336,7 @@ echo $query;
       
       $query =
       "UPDATE inspection " .
-      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator', samples = '$inspection->samples', naCount = '$inspection->naCount', passCount = '$inspection->passCount', failCount = '$inspection->failCount'  " .
+      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator', samples = '$inspection->samples', naCount = '$inspection->naCount', passCount = '$inspection->passCount', failCount = '$inspection->failCount', dataFile = '$inspection->dataFile'  " .
       "WHERE inspectionId = '$inspection->inspectionId';";
 
       $result = $this->query($query);

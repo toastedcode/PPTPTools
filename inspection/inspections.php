@@ -231,9 +231,15 @@ HEREDOC;
 
             $viewEditIcon = "";
             $deleteIcon = "";
-            if ((Authentication::checkPermissions(Permission::EDIT_INSPECTION)) &&
-                ((Authentication::checkPermissions(Permission::VIEW_OTHER_USERS)) ||  // Can view others, or
-                 ($inspection->inspector == $user->employeeNumber)))                  // created this inspection
+            if ($inspectionTemplate->inspectionType == InspectionType::OASIS)
+            {
+               $viewEditIcon =
+                  "<a href=\"$ROOT/inspection/viewOasisInspection.php?inspectionId=$inspection->inspectionId\"><i class=\"material-icons table-function-button\">visibility</i></a>";
+               
+            }
+            else if ((Authentication::checkPermissions(Permission::EDIT_INSPECTION)) &&
+                    ((Authentication::checkPermissions(Permission::VIEW_OTHER_USERS)) ||  // Can view others, or
+                     ($inspection->inspector == $user->employeeNumber)))                  // created this inspection
             {
                $viewEditIcon =
                   "<a href=\"$ROOT/inspection/viewInspection.php?inspectionId=$inspection->inspectionId&view=edit_inspection\"><i class=\"material-icons table-function-button\">mode_edit</i></a>";

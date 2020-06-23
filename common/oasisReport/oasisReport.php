@@ -1,13 +1,38 @@
 <?php
+require_once(__DIR__ . "/../userInfo.php");
+require_once(__DIR__ . "/../utils.php");
 require_once 'partInspection.php';
 require_once 'userFieldType.php';
 require_once 'userField.php';
 
 class OasisReport
 {
+   public static function load($inspectionId)
+   {
+      global $UPLOADS;
+      
+      $oasisReport = null;
+      
+      $inspection = Inspection::load($inspectionId, false);  // Don't load inspection results.
+      
+      if ($inspection)
+      {
+         $dataFile = $inspection->dataFile;
+         
+         if ($dataFile && ($dataFile != ""))
+         {
+            $oasisReport = OasisReport::parseFile($UPLOADS . "oasisReports/" . $dataFile);
+         }
+      }
+      
+      return ($oasisReport);
+   }
+   
    public static function parseFile($path)
    {
       $oasisReport = new OasisReport();
+      
+      $oasisReport->dataFile = basename($path);
       
       $file = file_get_contents($path);
       
@@ -29,6 +54,11 @@ class OasisReport
       return ($oasisReport);
    }
    
+   public function getDataFile()
+   {
+      return ($this->dataFile);
+   }
+   
    public function getUserField($fieldType)
    {
       $userField = null;
@@ -41,9 +71,14 @@ class OasisReport
       return ($userField);
    }
    
-   public function setUserField($fieldType, $value)
+   public function setUserField($fieldType, $label, $value)
    {
-      $this->userFields[$fieldType] = $value;
+      $userField = new UserField();
+      
+      $userField->setLabel($label);
+      $userField->setValue($value);
+      
+      $this->userFields[$fieldType] = $userField;
    }
    
    public function getEmployeeNumber()
@@ -97,7 +132,7 @@ class OasisReport
          
          if (is_numeric($str))
          {
-            $wcNumber = inval($str);
+            $wcNumber = intval($str);
          }
       }
       
@@ -199,25 +234,45 @@ class OasisReport
    {
       $html = "";
       
+      $row = 0;
+      
+      $html .= "<div class=\"flex-horizontal user-fields\">";
       foreach (UserFieldType::$VALUES as $fieldType)
       {
+         if (($row % 3) == 0)
+         {
+            if ($row != 0)
+            {
+               $html .= "</div>";
+            }
+            
+            $html .= "<div class=\"flex-vertical\">";
+         }
+         
+         $label = "";
          $value = "";
          $userField = $this->getUserField($fieldType);
          if ($userField)
          {
+            $label = $userField->getLabel();
             $value = $userField->getValue();   
          }
          
-         $html .= "<div>" . UserFieldType::getLabel($fieldType) . ": " . $value . "</div>";
+         $html .= "<div class=\"user-field\"><label>" . $label . "</label>";
+         $html .= "<input type=\"text\" value=\"" . $value . "\" disabed></div>";
+         
+         $row++;
       }
+      $html .= "</div></div>";
       
       for ($i = 0; $i < count($this->inspections); $i++)
       {
-         $html .= "<h3>Sample " . $i . "</h3><br>";
+         $html .= "<div style=\"align-self: flex-start\"><b>Sample " . ($i + 1) . "</b></div>";
+         $html .= "<div style=\"align-self: flex-start\">" . $this->inspections[$i]->getDate() . "</div>";
          $html .= $this->inspections[$i]->toHtml();
       }
          
-      return ($html);
+      return (tidyHtml($html));
    }
    
    private function parse($line)
@@ -322,6 +377,8 @@ class OasisReport
       return ($success);
    }
    
+   private $dataFile = null;
+   
    private $userFields = array();
    
    private $inspections = array();
@@ -333,7 +390,8 @@ class OasisReport
 /*
 $partInspection = new PartInspection();
 $partInspection->setDataFile("report.rpt");
-$partInspection->setDate(new DateTime());
+$dateTime = new DateTime();
+$partInspection->setDate($dateTime->format("Y-m-d H:i:s"));
 
 $partInspection->addMeasurement(PartMeasurement::parse("DATA|OAL|0.8070|0.8075|0.8139|0.8165|0.8170|PASS"));
 $partInspection->addMeasurement(PartMeasurement::parse("DATA|hex lgh|0.4900|0.4910|0.5065|0.5090|0.5100|PASS"));
@@ -342,13 +400,13 @@ $partInspection->addMeasurement(PartMeasurement::parse("DATA|front|1.0300|1.0308
 $partInspection->addMeasurement(PartMeasurement::parse("DATA|back|1.0300|1.0308|1.0384|1.0442|1.0450|PASS"));
 
 $oasisReport = new OasisReport();
-$oasisReport->setUserField(UserFieldType::EMPLOYEE_NUMBER, 1975);
-$oasisReport->setUserField(UserFieldType::PART_COUNT, 5000);
-$oasisReport->setUserField(UserFieldType::SAMPLE_SIZE, 12);
-$oasisReport->setUserField(UserFieldType::MACHINE_NUMBER, 101);
-$oasisReport->setUserField(UserFieldType::PART_NUMBER, "M8206 Rev 10");
-$oasisReport->setUserField(UserFieldType::EFFICIENCY, "77%");
-$oasisReport->setUserField(UserFieldType::COMMENTS, "I messed up big time.");
+$oasisReport->setUserField(UserFieldType::EMPLOYEE_NUMBER, "Inspector", "1975");
+$oasisReport->setUserField(UserFieldType::PART_COUNT, "Parts Made", "5000");
+$oasisReport->setUserField(UserFieldType::SAMPLE_SIZE, "Sample Size", "12");
+$oasisReport->setUserField(UserFieldType::MACHINE_NUMBER, "Machine Number", "101");
+$oasisReport->setUserField(UserFieldType::PART_NUMBER, "Part Number", "M8206 Rev 10");
+$oasisReport->setUserField(UserFieldType::EFFICIENCY, "Efficiency:", "77%");
+$oasisReport->setUserField(UserFieldType::COMMENTS, "Comments:", "I messed up big time.");
 $oasisReport->addPartInspection($partInspection);
 
 echo "Employee number: " . $oasisReport->getEmployeeNumber() . "<br>";

@@ -72,7 +72,7 @@ class PartInspection
                      
                   case ReportLineType::PART_INSPECTION_END:
                   {
-                     $dateString = $tokens[1] . " " . $tokens[2];
+                     $this->date = $tokens[1] . " " . $tokens[2];
                      
                      // TODO
                      /*
@@ -120,7 +120,7 @@ class PartInspection
    
   public function setDate($date)
   {
-     $this->date = $date;
+     $this->$date = $date;
   }
   
   public function getMeasurements()
@@ -176,7 +176,7 @@ class PartInspection
    
    private $dataFile = "";
    
-   private $date;
+   private $date = "";
    
    private $measurements = array();
 }

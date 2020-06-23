@@ -61,16 +61,20 @@ class PartMeasurement
    
    public function addValue($measurementType, $value)
    {
-      $this->data[$measurementType] = $value;
+      $index = ($measurementType - MeasurementType::FIRST);
+      
+      $this->data[$index] = $value;
    }
    
    public function getValue($measurementType)
    {
       $value = 0.0;
       
-      if (isset($this->data[$measurementType]))
+      $index = ($measurementType - MeasurementType::FIRST);
+      
+      if (isset($this->data[$index]))
       {
-         $value = $this->data[$measurementType];
+         $value = $this->data[$index];
       }
       
       return ($value);
@@ -89,23 +93,65 @@ class PartMeasurement
    public function toHtml()
    {
       // Name
-      $html = "<tr><td>{$this->name}</td><td>";
+      $html = "<tr><td>{$this->name}</td>";
       
       // Measurements
       foreach (MeasurementType::$VALUES as $measurementType)
       {
+         $index = ($measurementType - MeasurementType::FIRST);
+         
          $html .= "<td>";
          
-         if (isset($this->data[$measurementType]))
+         if (isset($this->data[$index]))
          {
-            $html .= $this->data[$measurementType];
+            $html .= $this->data[$index];
          }
             
          $html .= "</td>";
       }
       
       // Result
-      $html .= "<td>" . MeasurementResult::getLabel($this->result) . "</td></tr>";
+      //$html .= "<td>" . MeasurementResult::getLabel($this->result) . "</td></tr>";
+      
+      $html .= "<td><div class=\"graph " . MeasurementResult::getCss($this->result) . "\">";
+      
+      $lowWarn = $this->getValue(MeasurementType::LOW_WARN);
+      $highWarn = $this->getValue(MeasurementType::HIGH_WARN);
+      $measurement = $this->getValue(MeasurementType::MEASURED);
+      $warningRange = ($highWarn - $lowWarn);
+      
+      if ($warningRange > 0)
+      {
+         // Left gutter.
+         $html .= ($measurement < $lowWarn) ? "&#10070;" : "&nbsp;";
+   
+         $measurementPosition = round((($measurement- $lowWarn) / $warningRange) * PartMeasurement::GRAPH_WIDTH);
+         
+         for ($i = 0; $i < PartMeasurement::GRAPH_WIDTH; $i++)
+         {
+            if (($i == $measurementPosition) &&
+                ($measurement > $lowWarn) &&
+                ($measurement < $highWarn))
+            {
+               $html .= "&#10070;";
+            }
+            else if (($i == 0) || ($i == (PartMeasurement::GRAPH_WIDTH - 1)))
+            {
+               $html .= "|";
+            }
+            else
+            {
+               $html .= "&nbsp;";
+            }
+         }
+         
+         // Right gutter.
+         $html .= ($measurement > $highWarn) ? "&#10070;" : "&nbsp;";
+      }
+      
+      $html .= "</td></div></tr>";
+      
+      //$html .= "<td>" . MeasurementResult::getLabel($this->result) . "</td></tr>";
          
       return ($html);
    }
@@ -117,6 +163,8 @@ class PartMeasurement
    const FIRST_MEASUREMENT_INDEX = 2;
    
    const RESULT_INDEX = 7;
+   
+   const GRAPH_WIDTH = 20;
    
    private $name;
    

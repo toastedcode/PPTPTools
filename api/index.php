@@ -5,10 +5,12 @@ require_once '../common/authentication.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
+require_once '../common/oasisReport/oasisReport.php';
 require_once '../common/panTicket.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/printerInfo.php';
+require_once '../common/root.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
 require_once '../printer/printJob.php';
@@ -1399,6 +1401,60 @@ $router->add("printPanTicket", function($params) {
    {
       $result->success = false;
       $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("uploadOasisReport", function($params) {
+   $result = new stdClass();
+   $result->success = false;
+   
+   global $UPLOADS;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($_FILES["reportFile"]))
+   {
+      $target_dir = $UPLOADS . "oasisReports/";
+      $target_file = $target_dir . basename($_FILES["reportFile"]["name"]);
+      
+      if (move_uploaded_file($_FILES["reportFile"]["tmp_name"], $target_file))
+      {
+         $oasisReport = OasisReport::parseFile($target_file);
+         
+         if (!$oasisReport)
+         {
+            $result->success = false;
+            $result->error = "Failed to parse the Oasis report file.";
+         }
+         else
+         {
+            // Create a new inspection from the Oasis report.
+            $inspection = new Inspection();
+            $inspection->initializeFromOasisReport($oasisReport);
+            
+            if ($database->newInspection($inspection))
+            {
+               $result->success = true;
+            }
+            else
+            {
+               $result->error = "Database error.";
+               $result->sqlQuery = $database->lastQuery();
+            }
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Failed to save the report file.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "No report file specified.";
    }
    
    echo json_encode($result);

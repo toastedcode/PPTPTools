@@ -98,6 +98,9 @@ class Inspection
    public $warningCount;
    public $failCount;
    
+   // Source data file for Oasis reports.
+   public $dataFile;
+   
    // The actual inspection results.
    public $inspectionResults;
    
@@ -116,6 +119,7 @@ class Inspection
       $this->passCount = 0;
       $this->warningCount = 0;
       $this->failCount = 0;
+      $this->dataFile = null;
       $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
    }
    
@@ -151,6 +155,7 @@ class Inspection
       $this->warningCount = 0;  // TODO
       $this->failCount = $oasisReport->getFailureCount();
       $this->passCount = ($this->samples - $this->failCount);
+      $this->dataFile = $oasisReport->getDataFile();
       $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
    }
    
@@ -184,6 +189,9 @@ class Inspection
             $inspection->passCount = intval($row['passCount']);
             $inspection->warningCount = intval($row['warningCount']);
             $inspection->failCount = intval($row['failCount']);
+            
+            // Source data file for Oasis reports.
+            $inspection->dataFile = $row['dataFile'];
             
             // Optionally load actual inspection results.
             if ($loadInspectionResults)

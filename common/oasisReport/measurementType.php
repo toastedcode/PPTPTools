@@ -13,7 +13,6 @@ class MeasurementType
    
    private static $LABELS = array(
       "UNKNOWN",
-      "FIRST",
       "LOW_LIMIT",
       "LOW_WARN",
       "MEASURED",
@@ -24,7 +23,6 @@ class MeasurementType
       MeasurementType::LOW_LIMIT,
       MeasurementType::LOW_WARN,
       MeasurementType::MEASURED,
-      MeasurementType::LOW_WARN,
       MeasurementType::HIGH_WARN,
       MeasurementType::HIGH_LIMIT);
    

@@ -13,7 +13,7 @@ class MeasurementResult
    const LAST = MeasurementResult::FAIL_NULL;
    
    private static $LABELS = array(
-      "PASS",
+      "UNKNOWN",
       "PASS",
       "WARN LOW",
       "WARN HIGH",
@@ -28,6 +28,15 @@ class MeasurementResult
       MeasurementResult::FAIL_LOW,
       MeasurementResult::FAIL_HIGH,
       MeasurementResult::FAIL_NULL);
+   
+   private static $CSS = array(
+      "",
+      "measurement-result-pass",
+      "measurement-result-warn-low",
+      "measurement-result-warn-high",
+      "measurement-result-fail-low",
+      "measurement-result-fail-high",
+      "measurement-result-fail-null");
    
    public static function valueOf($token)
    {
@@ -55,6 +64,18 @@ class MeasurementResult
       }
       
       return ($label);
+   }
+   
+   public static function getCss($measurementResult)
+   {
+      $cssClass = MeasurementResult::$CSS[MeasurementResult::UNKNOWN];
+      
+      if ($measurementResult <= MeasurementResult::LAST)
+      {
+         $cssClass = MeasurementResult::$CSS[$measurementResult];
+      }
+      
+      return ($cssClass);
    }
    
    public static function isPassed($measurementResult)
