@@ -58,11 +58,9 @@ HEREDOC;
       
       $selectedEmployeeNumber = $this->getEmployeeNumber();
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getUsersByRole(Role::OPERATOR);
      

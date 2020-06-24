@@ -815,9 +815,6 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getJobs($jobNumber, $jobStatuses)
    {
-      $active = JobStatus::ACTIVE;
-      $deleted = JobStatus::DELETED;
-      
       $jobNumberClause = "";
       if ($jobNumber != "All")
       {
@@ -1492,7 +1489,8 @@ class PPTPDatabase extends MySqlDatabase
       $queued = PrintJobStatus::QUEUED;
       $pending = PrintJobStatus::PENDING;
       $printing = PrintJobStatus::PRINTING;
-      $statusClause = "WHERE status IN ($queued, $pending, $printing)";
+      $error = PrintJobStatus::ERROR;
+      $statusClause = "WHERE status IN ($queued, $pending, $printing, $error)";
       
       $query = "SELECT printJobId FROM printjob $statusClause ORDER BY dateTime ASC;";
 
@@ -1530,6 +1528,89 @@ class PPTPDatabase extends MySqlDatabase
    public function deletePrintJob($printJobId)
    {
       $query = "DELETE FROM printjob WHERE printJobId = $printJobId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                              Maintenance Log
+   // **************************************************************************
+   
+   public function getMaintenanceEntry(
+      $maintenanceEntryId)
+   {
+      $query = "SELECT * FROM maintenance WHERE maintenanceEntryId = $maintenanceEntryId";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getMaintenanceEntries(
+      $employeeNumber,
+      $startDate,
+      $endDate)
+   {
+      $result = NULL;
+      if ($employeeNumber == 0)
+      {
+         $query = "SELECT * FROM maintenance WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, maintenanceEntryId DESC;";
+         
+         $result = $this->query($query);
+      }
+      else
+      {
+         $query = "SELECT * FROM maintenance WHERE employeeNumber=" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, maintenanceEntryId DESC;";
+         
+         $result = $this->query($query);
+      }
+      
+      return ($result);
+   }
+   
+   public function newMaintenanceEntry(
+      $maintenanceEntry)
+   {
+      $dateTime = Time::toMySqlDate($maintenanceEntry->dateTime);
+      $approvedDateTime = Time::toMySqlDate($maintenanceEntry->approvedDateTime);
+      
+      $comments = mysqli_real_escape_string($this->getConnection(), $maintenanceEntry->comments);
+      
+      $query =
+      "INSERT INTO maintenance " .
+      "(dateTime, employeeNumber, category, wcNumber, operator, maintenanceTime, comments, approvedBy, approvedDateTime) " .
+      "VALUES " .
+      "('$dateTime', '$maintenanceEntry->employeeNumber', '$maintenanceEntry->category', '$maintenanceEntry->wcNumber', '$maintenanceEntry->operator', '$maintenanceEntry->maintenanceTime', '$comments', '$maintenanceEntry->approvedBy', '$approvedDateTime');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateMaintenanceEntry(
+      $maintenanceEntry)
+   {
+      $dateTime = Time::toMySqlDate($maintenanceEntry->dateTime);
+      $approvedDateTime = Time::toMySqlDate($maintenanceEntry->approvedDateTime);
+      
+      $comments = mysqli_real_escape_string($this->getConnection(), $maintenanceEntry->comments);
+      
+      $query =
+      "UPDATE maintenance " .
+      "SET dateTime = \"$dateTime\", employeeNumber = $maintenanceEntry->employeeNumber, category = $maintenanceEntry->category, wcNumber = $maintenanceEntry->wcNumber, operator = $maintenanceEntry->operator, maintenanceTime = $maintenanceEntry->maintenanceTime, comments = \"$comments\", approvedBy = $maintenanceEntry->approvedBy, approvedDateTime = \"$approvedDateTime\" " .
+      "WHERE maintenanceEntryId = $maintenanceEntry->maintenanceEntryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteMaintenanceEntry(
+      $maintenanceEntryId)
+   {
+      $query = "DELETE FROM maintenance WHERE maintenanceEntryId = $maintenanceEntryId;";
       
       $result = $this->query($query);
       

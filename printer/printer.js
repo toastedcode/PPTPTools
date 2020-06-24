@@ -5,10 +5,11 @@ var PrintJobStatus = {
    PENDING:  2,
    PRINTING: 3,
    COMPLETE: 4,
+   ERROR:    5,
    DELETED:  6
 };
 
-var PrintJobStatusLabels = ["", "Queued", "Pending", "Printing", "Complete", "Deleted"];
+var PrintJobStatusLabels = ["", "Queued", "Pending", "Printing", "Complete", "Error", "Deleted"];
 
 function PrintManager(printerContainerId, printQueueContainerId, previewId)
 {
@@ -238,16 +239,12 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
          {
             if (printJob.status == PrintJobStatus.QUEUED)
             {
-               if (this.print(printJob) == true)
-               {
-                  printJob.status = PrintJobStatus.COMPLETE;
-                  
-                  this.updatePrintJobStatus(printJob.printJobId, printJob.status);   
-               }
-               else
-               {
-                  // Leave in QUEUED state.                                 
-               }
+               // Print.
+               // Note: Sets value of printJob.status.
+               this.print(printJob);
+               
+               // Update the print job status at the server.
+               this.updatePrintJobStatus(printJob.printJobId, printJob.status);   
             }
          }
       }
@@ -301,6 +298,11 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
       };
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
+   }.bind(this);
+   
+   PrintManager.prototype.retryPrintJob = function(printJobId)
+   {
+      this.updatePrintJobStatus(printJobId, PrintJobStatus.QUEUED);  
    }.bind(this);
    
    PrintManager.prototype.renderPrinters = function()
@@ -375,7 +377,7 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
    
    PrintManager.prototype.renderPrintQueue = function()
    {
-      const HEADINGS = new Array("Date", "Owner", "Description", "Copies", "Status", "");
+      const HEADINGS = new Array("Date", "Owner", "Description", "Copies", "Status", "", "");
       
       if (printQueueContainer != null)
       {
@@ -441,6 +443,15 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
                cell = row.insertCell();
                cell.innerHTML = 
                   "<i class=\"material-icons table-function-button\" onclick=\"printManager.cancelPrintJob(" + printJob.printJobId + ")\">delete</i>";
+               
+               // Retry icon
+               cell = row.insertCell();
+               if (printJob.status == PrintJobStatus.ERROR)
+               {
+                  cell = row.insertCell();
+                  cell.innerHTML = 
+                     "<i class=\"material-icons table-function-button\" onclick=\"printManager.retryPrintJob(" + printJob.printJobId + ")\">autorenew</i>";
+               }
             }
          }
          
@@ -489,11 +500,14 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
             
             console.log("Printed!");
             
+            printJob.status = PrintJobStatus.COMPLETE;
             success = true;
          }
          catch (exception)
          {
             console.log("Print error! " + exception.message);
+            
+            printJob.status = PrintJobStatus.ERROR;
          }
       }
       

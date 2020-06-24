@@ -5,6 +5,7 @@ require_once '../common/authentication.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
+require_once '../common/maintenanceEntry.php';
 require_once '../common/panTicket.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
@@ -1397,6 +1398,152 @@ $router->add("printPanTicket", function($params) {
    {
       $result->success = false;
       $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("saveMaintenanceEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $maintenanceEntry = null;
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != MaintenanceEntry::UNKNOWN_ENTRY_ID))
+   {
+      //  Updated entry
+      $maintenanceEntry = MaintenanceEntry::load($params["entryId"]);
+      
+      if (!$maintenanceEntry)
+      {
+         $result->success = false;
+         $result->error = "No existing maintenance entry found.";
+      }
+   }
+   else
+   {
+      // New entry.
+      $maintenanceEntry = new MaintenanceEntry();
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["dateTime"]) &&
+          isset($params["employeeNumber"]) &&
+          isset($params["category"]) &&
+          isset($params["maintenanceTime"]) &&
+          isset($params["comments"]))
+      {
+         // Use current date/time as time card time.
+         // TODO: Use entered date/time.
+         $maintenanceEntry->dateTime = Time::now("Y-m-d h:i:s A");
+         
+         // Required parameters.
+         $maintenanceEntry->employeeNumber = intval($params["employeeNumber"]);
+         $maintenanceEntry->category = intval($params["category"]);
+         $maintenanceEntry->maintenanceTime = intval($params["maintenanceTime"]);
+         $maintenanceEntry->comments = $params["comments"];
+         
+         //
+         // Optional parameters.
+         //
+         
+         if ($maintenanceEntry->category == MaintenanceCategory::CATEGORY_1)
+         {
+            if (isset($params["wcNumber"]) &&
+                isset($params["operator"]))
+            {
+               $maintenanceEntry->wcNumber = intval($params["wcNumber"]);
+               $maintenanceEntry->operator = intval($params["operator"]);
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "Missing parameters.";
+            }
+         }
+         
+         if (isset($params["approvedBy"]))
+         {
+            $maintenanceEntry->approvedBy = intval($params["approvedBy"]);
+            
+            if (isset($params["approvedByDateTime"]))
+            {
+               $maintenanceEntry->approvedDateTime = Time::now("Y-m-d h:i:s A");  // TODO
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "Missing parameters.";
+            }
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+      
+      if ($result->success)
+      {
+         if ($maintenanceEntry->maintenanceEntryId == MaintenanceEntry::UNKNOWN_ENTRY_ID)
+         {
+            $dbaseResult = $database->newMaintenanceEntry($maintenanceEntry);
+         }
+         else
+         {
+            $dbaseResult = $database->updateMaintenanceEntry($maintenanceEntry);
+         }
+            
+         if (!$dbaseResult)
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+   }
+   
+   echo json_encode($result);
+});
+      
+$router->add("deleteMaintenanceEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != MaintenanceEntry::UNKNOWN_ENTRY_ID))
+   {
+      $entryId = intval($params["entryId"]);
+      
+      $maintenanceEntry = MaintenanceEntry::load($entryId);
+      
+      if ($maintenanceEntry)
+      {
+         $dbaseResult = $database->deleteMaintenanceEntry($entryId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing maintenance entry found.";
+      }
    }
    
    echo json_encode($result);

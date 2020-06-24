@@ -21,7 +21,8 @@ class Activity
    const USER = 10;
    const SIGNAGE = 11;
    const PRINT_MANAGER = 12;
-   const LAST = Activity::PRINT_MANAGER;
+   const MAINTENANCE_LOG = 13;
+   const LAST = Activity::MAINTENANCE_LOG;
       
    private static $permissionMasks = null;
    
@@ -41,7 +42,8 @@ class Activity
             Permission::getPermission(Permission::VIEW_PRODUCTION_SUMMARY)->bits,   // PRODUCTION_SUMMARY
             Permission::getPermission(Permission::VIEW_USER)->bits,                 // USER
             Permission::getPermission(Permission::VIEW_SIGN)->bits,                 // SIGNAGE
-            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits         // PRINT_MANAGER
+            Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits,        // PRINT_MANAGER
+            Permission::getPermission(Permission::VIEW_MAINTENANCE_LOG)->bits       // MAINTENANCE_LOG
          );
       }
       
@@ -191,6 +193,20 @@ HEREDOC;
 HEREDOC;
    }
    
+   // Part Wash
+   $maintenanceLogButton = "";
+   if (Activity::isAllowed(Activity::MAINTENANCE_LOG, $permissions))
+   {
+      $maintenanceLogButton =
+<<<HEREDOC
+     <div class="action-button" onclick="location.href='maintenanceLog/maintenanceLog.php';">
+        <i class="material-icons action-button-icon">build</i>
+        <div>Maintenance</div>
+        <div>Log</div>
+     </div>
+HEREDOC;
+   }
+   
    // Part Inspection
    $inspectionTemplateButton = "";
    if (Activity::isAllowed(Activity::INSPECTION_TEMPLATE, $permissions))
@@ -329,6 +345,8 @@ HEREDOC;
             $partWeightButton
             
             $partWashButton
+
+            $maintenanceLogButton
 
             $inspectionTemplateButton
             
