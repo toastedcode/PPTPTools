@@ -112,8 +112,7 @@ function getNavBar()
       // Creating a new entry.
       // Editing an existing entry.
       
-      $navBar->cancelButton("window.history.back();");
-      //$navBar->highlightNavButton("Save", "submitForm('input-form', 'partWeightLog.php', 'view_part_weight_log', 'save_part_weight_entry');", false);
+      $navBar->cancelButton("onCancel();");
       $navBar->highlightNavButton("Save", "onSubmit();", false);
    }
    else if ($view == View::VIEW_PART_WEIGHT_ENTRY)
@@ -700,20 +699,20 @@ if (!Authentication::isAuthenticated())
                <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
                   <div class="form-label">Pan Ticket #</div>
-                  <input id="pan-ticket-code-input" class="form-input-medium" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo !isEditable(PartWeightLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
+                  <input id="pan-ticket-code-input" class="form-input-medium" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="onTouched(); this.validator.validate(); onPanTicketCodeChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo !isEditable(PartWeightLogInputField::TIME_CARD_ID) ? "disabled" : ""; ?>>
                </div>               
             
                <div class="form-section-header">Manual Entry</div>
                <div class="form-item">
                   <div class="form-label">Job Number</div>
-                  <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(PartWeightLogInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
+                  <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="onTouched(); this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(PartWeightLogInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
                      <?php echo getJobNumberOptions(); ?>
                   </select>
                </div>
                
                <div class="form-item">
                   <div class="form-label">Work Center</div>
-                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate(); onWcNumberChange();" <?php echo !isEditable(PartWeightLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                  <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="onTouched(); this.validator.validate(); onWcNumberChange();" <?php echo !isEditable(PartWeightLogInputField::WC_NUMBER) ? "disabled" : ""; ?>>
                      <?php echo getWcNumberOptions(); ?>
                   </select>
                </div>
@@ -722,7 +721,7 @@ if (!Authentication::isAuthenticated())
                   <div class="form-item">
                      <div class="form-label">Manufacture Date</div>
                      <div class="flex-horizontal">
-                        <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>
+                        <input id="manufacture-date-input" class="form-input-medium" type="date" name="manufactureDate" form="input-form" oninput="onTouched(); " value="<?php echo getManufactureDate(); ?>" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>
                         &nbsp<button id="today-button" form="" onclick="onTodayButton()" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>Today</button>
                         &nbsp<button id="yesterday-button" form="" onclick="onYesterdayButton()" <?php echo !isEditable(PartWeightLogInputField::MANUFACTURE_DATE) ? "disabled" : ""; ?>>Yesterday</button>
                      </div>
@@ -731,7 +730,7 @@ if (!Authentication::isAuthenticated())
                
                <div class="form-item">
                   <div class="form-label">Operator</div>
-                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWeightLogInputField::OPERATOR) ? "disabled" : ""; ?>>
+                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="onTouched(); this.validator.validate();" <?php echo !isEditable(PartWeightLogInputField::OPERATOR) ? "disabled" : ""; ?>>
                      <?php echo getOperatorOptions(); ?>
                   </select>
                </div>
@@ -746,29 +745,29 @@ if (!Authentication::isAuthenticated())
                
                <div class="form-item">
                   <div class="form-label">Laborer</div>
-                  <select id="laborer-input" class="form-input-medium" name="laborer" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(PartWeightLogInputField::LABORER) ? "disabled" : ""; ?>>
+                  <select id="laborer-input" class="form-input-medium" name="laborer" form="input-form" oninput="onTouched(); this.validator.validate();" <?php echo !isEditable(PartWeightLogInputField::LABORER) ? "disabled" : ""; ?>>
                      <?php echo getLaborerOptions(); ?>
                   </select>
                </div>               
                               
                <div class="form-item">
                   <div class="form-label">Basket Count</div>
-                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
+                  <input id="pan-count-input" class="form-input-medium" type="number" name="panCount" form="input-form" oninput="onTouched(); this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPanCount(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_COUNT) ? "disabled" : ""; ?>>
                </div>
                            
                <div class="form-item">
                   <div class="form-label">Part Weight</div>
-                  <input id="part-weight-input" class="form-input-medium" type="number" name="partWeight" form="input-form" oninput="this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPartWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+                  <input id="part-weight-input" class="form-input-medium" type="number" name="partWeight" form="input-form" oninput="onTouched(); this.validator.validate(); updateCalculatedPartCount();" value="<?php echo getPartWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PART_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
                </div>
                
                <div class="form-item">
                   <div class="form-label">Pan Weight</div>
-                  <input id="pan-weight-input" class="form-input-medium" type="number" style="width:50px;" name="panWeight" form="input-form" value="<?php echo getPanWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+                  <input id="pan-weight-input" class="form-input-medium" type="number" style="width:50px;" name="panWeight" form="input-form" oninput="onTouched();" value="<?php echo getPanWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PAN_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
                </div>
                
                <div class="form-item">
                   <div class="form-label">Pallet Weight</div>
-                  <input id="pallet-weight-input" class="form-input-medium" type="number" style="width:50px;" name="palletWeight" form="input-form" value="<?php echo getPalletWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PALLET_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
+                  <input id="pallet-weight-input" class="form-input-medium" type="number" style="width:50px;" name="palletWeight" form="input-form" oninput="onTouched();"value="<?php echo getPalletWeight(); ?>" <?php echo !isEditable(PartWeightLogInputField::PALLET_WEIGHT) ? "disabled" : ""; ?>>&nbsp;lbs
                </div>
                
                <div class="form-item">

@@ -240,6 +240,13 @@ function updateEfficiency()
    }
 }
 
+var touched = false;
+
+function onTouched()
+{
+   touched = true;
+}
+
 function onSubmit()
 {
    if (validateTimeCard())
@@ -284,6 +291,14 @@ function onSubmit()
    
       // The data sent is what the user provided in the form
       xhttp.send(formData);
+   }
+}
+
+function onCancel()
+{
+   if (!touched || confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
    }
 }
 

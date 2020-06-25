@@ -177,6 +177,11 @@ class TimeCardInfo
       return (!$this->requiresApproval() || ($this->approvedBy > 0));
    }
    
+   public function incompleteMaterialNumber()
+   {
+      return ($this->materialNumber == 0);
+   }
+   
    public function incompleteTime()
    {
       return (($this->setupTime == 0) && ($this->runTime == 0));
@@ -194,9 +199,10 @@ class TimeCardInfo
    
    public function isComplete()
    {
-      return (!($this->incompleteTime() || 
-               $this->incompletePanCount() || 
-               $this->incompletePartCount()));
+      return (!($this->incompleteMaterialNumber() ||
+                $this->incompleteTime() || 
+                $this->incompletePanCount() || 
+                $this->incompletePartCount()));
    }
 }
 
