@@ -57,3 +57,6 @@ uploads/
 
 #QR Code cache
 phpqrcode/cache
+
+#thirdParty
+thirdParty/
