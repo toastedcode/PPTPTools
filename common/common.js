@@ -70,6 +70,39 @@ function validate(elementId)
    return (document.getElementById(elementId).validator.validate());
 }
 
+function setSession(key, value)
+{
+   requestUrl = "../api/setSession/?key=" + key + "&value=" + value;
+   
+   var xhttp = new XMLHttpRequest();
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {
+         try
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               console.log("$_SESSION[" + json.key + "] = " + json.value);
+            }
+            else
+            {
+               console.log("API call to update $_SESSION failed. " + json.error);
+            }
+         }
+         catch (exception)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      }
+   };
+   xhttp.open("GET", requestUrl, true);
+   xhttp.send();
+}
+
 function preserveSession()
 {
    setInterval(function(){ 

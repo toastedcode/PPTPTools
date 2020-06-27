@@ -11,6 +11,7 @@ class Header
       echo 
 <<<HEREDOC
       <div class="header-div">
+         <!-- class="material-icons action-button-icon">menu</i-->
          <span class="page-title" onclick="location.href = '$ROOT/home.php'">$pageTitle</span>
 HEREDOC;
          

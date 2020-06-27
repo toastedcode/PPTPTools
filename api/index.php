@@ -20,12 +20,128 @@ require_once '../printer/printQueue.php';
 session_start();
 
 $router = new Router();
-$router->setLogging(false);
+$router->setLogging(true);
 
 $router->add("ping", function($params) {
    $result = new stdClass();
    $result->success = true;
    
+   echo json_encode($result);
+});
+
+$router->add("setSession", function($params) {
+   $result = new stdClass();
+   $result->success = false;
+   
+   if (isset($params["key"]) &&
+       isset($params["value"]))
+   {
+      $_SESSION[$params["key"]] = $params["value"];
+      
+      $result->key = $params["key"];
+      $result->value = $params["value"];
+      $result->success = true;
+   }
+   else
+   {
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("getSession", function($params) {
+   $result = new stdClass();
+   $result->success = false;
+   
+   if (isset($params["key"]))
+   {
+      if (isset($_SESSION[$params["key"]]))
+      {
+         $result->key = $params["key"];
+         $result->value = $_SESSION[$params["key"]];
+         $result->success = true;
+      }
+      else
+      {
+         $result->key = $params["key"];
+         $result->error = "Undefined session key.";
+      }
+   }
+   else
+   {
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("timeCardData", function($params) {
+   $result = array();
+   
+   $startDate = Time::startOfDay(Time::now("Y-m-d"));
+   $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["filters"]))
+   {
+      foreach ($params["filters"] as $filter)
+      {
+         if ($filter->field == "date")
+         {
+            if ($filter->type == ">=")
+            {
+               $startDate = Time::startOfDay($filter->value);
+            }
+            else if ($filter->type == "<=")
+            {
+               $endDate = Time::endOfDay($filter->value);
+            }
+         }
+      }
+   }
+   
+   if (isset($params["startDate"]))
+   {
+      $startDate = Time::startOfDay($params["startDate"]);
+   }
+   
+   if (isset($params["endDate"]))
+   {
+      $endDate = Time::endOfDay($params["endDate"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $timeCards = $database->getTimeCards(0, $startDate, $endDate);
+      
+      // Populate data table.
+      foreach ($timeCards as $timeCard)
+      {
+         $timeCardInfo = TimeCardInfo::load($timeCard["timeCardId"]);
+         if ($timeCardInfo)
+         {
+            $timeCard["efficiency"] = $timeCardInfo->getEfficiency();
+         }
+         
+         $userInfo = UserInfo::load($timeCard["employeeNumber"]);
+         if ($userInfo)
+         {
+            $timeCard["operator"] = $userInfo->getFullName();
+         }
+         
+         $jobInfo = JobInfo::load($timeCard["jobId"]);
+         if ($jobInfo)
+         {
+            $timeCard["jobNumber"] = $jobInfo->jobNumber;
+            $timeCard["wcNumber"] = $jobInfo->wcNumber;
+         }
+         
+         $result[] = $timeCard;
+      }
+   }
+
    echo json_encode($result);
 });
 
