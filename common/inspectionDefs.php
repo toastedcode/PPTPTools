@@ -42,6 +42,13 @@ abstract class InspectionType
    const LAST = 6;
    const COUNT = InspectionType::LAST - InspectionType::FIRST;
    
+   public static $VALUES = array(
+      InspectionType::OASIS,
+      InspectionType::LINE,
+      InspectionType::QCP,
+      InspectionType::IN_PROCESS,
+      InspectionType::GENERIC);
+   
    public static function getLabel($inspectionType)
    {
       $labels = array("---", "Oasis Inspection", "Line Inspection", "QCP Inspection", "In Process", "Generic");

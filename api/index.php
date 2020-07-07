@@ -10,6 +10,7 @@ require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/printerInfo.php';
 require_once '../common/timeCardInfo.php';
+require_once '../common/upload.php';
 require_once '../common/userInfo.php';
 require_once '../printer/printJob.php';
 require_once '../printer/printQueue.php';
@@ -41,6 +42,10 @@ $router->add("setSession", function($params) {
       $result->key = $params["key"];
       $result->value = $params["value"];
       $result->success = true;
+      
+      
+      file_put_contents("getSession.log", $params["key"] . "->" . $params["value"], FILE_APPEND | LOCK_EX);
+      
    }
    else
    {
@@ -255,6 +260,197 @@ $router->add("jobs", function($params) {
    echo json_encode($result);
 });
 
+$router->add("jobData", function($params) {
+   $result = array();
+   
+   $jobStatuses = array();
+
+   for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
+   {
+      $name = strtolower(JobStatus::getName($jobStatus));
+      
+      if (isset($params[$name]) && filter_var($params[$name], FILTER_VALIDATE_BOOLEAN))  // Note: boolval(string) always return true
+      {
+         $jobStatuses[] = $jobStatus;
+      }
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $jobs = $database->getJobs(JobInfo::UNKNOWN_JOB_NUMBER, $jobStatuses);
+      
+      if ($jobs)
+      {
+         // Populate data table.
+         foreach ($jobs as $job)
+         {         
+            $job["statusLabel"] = JobStatus::getName(intval($job["status"]));
+            
+            $result[] = $job;
+         }
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("saveJob", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $jobInfo = null;
+   
+   if (isset($params["jobId"]) &&
+       is_numeric($params["jobId"]) &&
+       (intval($params["jobId"]) != JobInfo::UNKNOWN_JOB_ID))
+   {
+      $jobId = intval($params["jobId"]);
+      
+      //  Updated entry
+      $jobInfo = JobInfo::load($jobId);
+      
+      if (!$jobInfo)
+      {
+         $result->success = false;
+         $result->error = "No existing job entry found.";
+      }
+   }
+   else
+   {
+      // New time card.
+      $jobInfo = new JobInfo();
+      
+      // Use current date/time as time card time.
+      $jobInfo->dateTime = Time::now("Y-m-d h:i:s A");
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["jobNumber"]) &&
+          isset($params["creator"]) &&
+          isset($params["partNumber"]) &&
+          isset($params["sampleWeight"]) &&
+          isset($params["wcNumber"]) &&
+          isset($params["cycleTime"]) &&
+          isset($params["netPercentage"]) &&
+          isset($params["status"]) &&
+          isset($params["qcpTemplateId"]) &&
+          isset($params["lineTemplateId"]) &&
+          isset($params["inProcessTemplateId"]))
+      {
+         $jobInfo->jobNumber = $params["jobNumber"];
+         $jobInfo->creator = intval($params["creator"]);
+         $jobInfo->partNumber = $params["partNumber"];
+         $jobInfo->sampleWeight = doubleval($params["sampleWeight"]);
+         $jobInfo->wcNumber = intval($params["wcNumber"]);
+         $jobInfo->cycleTime = intval($params["cycleTime"]);
+         $jobInfo->netPercentage = intval($params["netPercentage"]);
+         $jobInfo->status = intval($params["status"]);
+         $jobInfo->qcpTemplateId = intval($params["qcpTemplateId"]);
+         $jobInfo->lineTemplateId = intval($params["lineTemplateId"]);
+         $jobInfo->inProcessTemplateId = intval($params["inProcessTemplateId"]);
+            
+         if ($jobInfo->jobId == JobInfo::UNKNOWN_JOB_ID)
+         {
+            $dbaseResult = $database->newJob($jobInfo);
+            
+            if ($dbaseResult)
+            {
+               $result->jobId = $database->lastInsertId();
+            }
+         }
+         else
+         {
+            $dbaseResult = $database->updateJob($jobInfo);
+            $result->jobId = $jobInfo->jobId;
+            
+            if (!$dbaseResult)
+            {
+               $result->success = false;
+               $result->error = "Database query failed.";
+            }
+         }
+         
+         //
+         // Process uploaded customer print.
+         //
+         
+         if ($result->success && isset($_FILES["customerPrint"]) && ($_FILES["customerPrint"]["name"] != ""))
+         {
+            $uploadStatus = Upload::uploadCustomerPrint($_FILES["customerPrint"]);
+            
+            if ($uploadStatus == UploadStatus::UPLOADED)
+            {
+               $filename = basename($_FILES["customerPrint"]["name"]);
+               
+               $database->setCustomerPrint($result->jobId, $filename);
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "File upload failed! " . UploadStatus::toString($uploadStatus);
+            }
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("deleteJob", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["jobId"]) &&
+       is_numeric($params["jobId"]) &&
+       (intval($params["jobId"]) != JobInfo::UNKNOWN_JOB_ID))
+   {
+      $jobId = intval($params["jobId"]);
+      
+      $jobInfo = JobInfo::load($jobId);
+      
+      if ($jobInfo)
+      {
+         // Don't actually delete.  Just change status to DELETED.
+         $dbaseResult = $database->updateJobStatus($jobId, JobStatus::DELETED);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing job found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("wcNumbers", function($params) {
    $result = new stdClass();
    
@@ -326,6 +522,154 @@ $router->add("users", function($params) {
    {
       $result->status = false;
       $result->error = "No users found.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("userData", function($params) {
+   $result = array();
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $users = $database->getUsers();
+      
+      // Populate data table.
+      foreach ($users as $user)
+      {
+         $userInfo = UserInfo::load($user["employeeNumber"]);
+         if ($userInfo)
+         {
+            $user["name"] = $userInfo->getFullName();
+         }
+         
+         $user["roleLabel"] = Role::getRole(intval($user["roles"]))->roleName;
+         
+         $result[] = $user;
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("saveUser", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+      
+   if (isset($params["employeeNumber"]) &&
+       isset($params["firstName"]) &&
+       isset($params["lastName"]) &&
+       isset($params["email"]) &&
+       isset($params["roles"]) &&
+       isset($params["username"]) &&
+       isset($params["password"]))
+   {
+      $employeeNumber = intval($params["employeeNumber"]);
+         
+      $newUser = false;
+      $userInfo = UserInfo::load($employeeNumber);
+      
+      if (!$userInfo)
+      {
+         $newUser = true;
+         $userInfo = new UserInfo();
+      }
+      
+      $userInfo->employeeNumber = $employeeNumber;
+      $userInfo->firstName = $params["firstName"];
+      $userInfo->lastName = $params["lastName"];
+      $userInfo->email = $params["email"];
+      $userInfo->roles = intval($params["roles"]);
+      $userInfo->username = $params["username"];
+      $userInfo->password = $params["password"];
+      
+      foreach (Permission::getPermissions() as $permission)
+      {
+         $name = "permission-" . $permission->permissionId;
+         
+         if (isset($params[$name]))
+         {
+            // Set bit.
+            $userInfo->permissions |= $permission->bits;
+         }
+         else if ($permission->isSetIn($userInfo->permissions))
+         {
+            // Clear bit.
+            $userInfo->permissions &= ~($permission->bits);
+         }
+      }
+      
+      if ($newUser)
+      {
+         $dbaseResult = $database->newUser($userInfo);
+      }
+      else
+      {
+         $dbaseResult = $database->updateUser($userInfo);
+      }
+      
+      if ($dbaseResult)
+      {
+         $result->userInfo = $userInfo;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("deleteUser", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["employeeNumber"]) &&
+       is_numeric($params["employeeNumber"]) &&
+      (intval($params["employeeNumber"]) != UserInfo::UNKNOWN_EMPLOYEE_NUMBER))
+   {
+      $employeeNumber = intval($params["employeeNumber"]);
+      
+      $userInfo = UserInfo::load($employeeNumber);
+      
+      if ($userInfo)
+      {
+         $dbaseResult = $database->deleteUser($employeeNumber);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing user found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
    }
    
    echo json_encode($result);
@@ -883,6 +1227,60 @@ $router->add("inspectionTemplates", function($params) {
    {
       $result->success = false;
       $result->error = "No inspection type specified.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("inspectionData", function($params) {
+   $result = array();
+   
+   $startDate = Time::startOfDay(Time::now("Y-m-d"));
+   $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   $inspectionType = InspectionType::UNKNOWN;
+   
+   if (isset($params["startDate"]))
+   {
+      $startDate = Time::startOfDay($params["startDate"]);
+   }
+   
+   if (isset($params["endDate"]))
+   {
+      $endDate = Time::endOfDay($params["endDate"]);
+   }
+   
+   if (isset($params["inspectionType"]))
+   {
+      $inspectionType = intval($params["inspectionType"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $inspections = $database->getInspections($inspectionType, $startDate, $endDate);
+      
+      // Populate data table.
+      foreach ($inspections as $inspection)
+      {
+         $inspection["dateTime"] = Time::fromMySqlDate($inspection["dateTime"], "Y-m-d H:i:s");
+         
+         $inspection["inspectionTypeLabel"] = InspectionType::getLabel(intval($inspection["inspectionType"]));
+         
+         $userInfo = UserInfo::load($inspection["inspector"]);
+         if ($userInfo)
+         {
+            $inspection["inspectorName"] = $userInfo->getFullName();
+         }
+         
+         $userInfo = UserInfo::load($inspection["operator"]);
+         if ($userInfo)
+         {
+            $inspection["operatorName"] = $userInfo->getFullName();
+         }
+         
+         $result[] = $inspection;
+      }
    }
    
    echo json_encode($result);

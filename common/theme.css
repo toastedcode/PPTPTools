@@ -1,0 +1,25 @@
+@CHARSET "ISO-8859-1";
+
+:root {
+  --background-color: white;
+  --main-color: #484fb0;
+  
+  --text-color-light: white;
+  --text-color-dark: #5F6368;
+  
+  --accent-color-light: #484fb0;
+  --accent-color-medium: #484fb0;
+  --accent-color-dark: #484fb0;
+  
+  --neutral-color-light: #484fb0;
+  --neutral-color-medium: #484fb0;
+  --neutral-color-dark: #484fb0;
+  
+  --gray-light: #e4e4e4;
+  --gray-medium: #bfbfbf;
+  --gray-dark: #868686;
+  
+  --button-color: var(--gray-light);
+  
+  --main-font: "lucida grande",tahoma,verdana,arial,sans-serif;
+}

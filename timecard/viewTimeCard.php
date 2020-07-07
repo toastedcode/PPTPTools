@@ -1,19 +1,23 @@
 <?php
 
+require_once '../common/activity.php';
 require_once '../common/commentCodes.php';
-require_once '../common/header.php';
-require_once '../common/userInfo.php';
+require_once '../common/header2.php';
 require_once '../common/jobInfo.php';
-require_once '../common/navigation.php';
+require_once '../common/menu.php';
 require_once '../common/params.php';
 require_once '../common/timeCardInfo.php';
+require_once '../common/userInfo.php';
+
+const ACTIVITY = Activity::TIME_CARD;
+$activity = Activity::getActivity(ACTIVITY);
 
 const ONLY_ACTIVE = true;
 
 abstract class TimeCardInputField
 {
    const FIRST = 0;
-   const MANUFACTURE_DATE = PartWasherLogInputField::FIRST;
+   const MANUFACTURE_DATE = TimeCardInputField::FIRST;
    const MANUFACTURE_TIME = 1;
    const OPERATOR = 2;
    const JOB_NUMBER = 3;
@@ -26,7 +30,7 @@ abstract class TimeCardInputField
    const SCRAP_COUNT = 10;
    const COMMENTS = 11;
    const LAST = 12;
-   const COUNT = PartWasherLogInputField::LAST - PartWasherLogInputField::FIRST;
+   const COUNT = TimeCardInputField::LAST - TimeCardInputField::FIRST;
 }
 
 abstract class View
@@ -266,6 +270,7 @@ function getCommentCodesDiv()
 <<< HEREDOC
       <div class="form-item">
          <input id="$id" type="checkbox" class="comment-checkbox" form="input-form" name="$name" $checked $disabled/>
+         &nbsp;
          <label for="$id" class="form-input-medium">$description</label>
       </div>
 HEREDOC;
@@ -288,7 +293,7 @@ HEREDOC;
    <div class="form-col">
       <div class="form-section-header">Codes</div>
       <div class="form-row">
-         <div class="form-col">
+         <div class="form-col" style="margin-right: 10px;">
             $leftColumn
          </div>
          <div class="form-col">
@@ -314,7 +319,7 @@ function getApprovalButton()
       
    $html =
 <<<HEREDOC
-   <button id="approve-button" class="approval" onclick="approve($approvingUser->employeeNumber)" style="width: 100px;">Approve</button>
+   <button id="approve-button" class="small-button accent-button" onclick="approve($approvingUser->employeeNumber)">Approve</button>
 HEREDOC;
       
    return ($html);
@@ -328,7 +333,7 @@ function getUnapprovalButton()
       
    $html =
 <<<HEREDOC
-   <button id="unapprove-button" class="approval" onclick="unapprove($approvingUser->employeeNumber)" style="width: 100px;">Unapprove</button>
+   <button id="unapprove-button" class="small-button accent-button" onclick="unapprove($approvingUser->employeeNumber)">Unapprove</button>
 HEREDOC;
    
    return ($html);
@@ -574,51 +579,52 @@ if (!Authentication::isAuthenticated())
 <html>
 
 <head>
-
+   
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
-   <link rel="stylesheet" type="text/css" href="timeCard.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="timeCard.js"></script>
 
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
+        
+   <form id="input-form" action="" method="POST">
+      <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
+      <input type="hidden" name="operator" value="<?php echo getOperator(); ?>">
+      <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
+      <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
+      <input id="run-time-input" type="hidden" name="runTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
+      <input id="setup-time-input" type="hidden" name="setupTime" value="<?php echo getTimeCardInfo()->setupTime; ?>">
+      <input id="gross-parts-per-hour-input" type="hidden" value="<?php echo getGrossPartsPerHour(); ?>">
+   </form>
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   <div class="main flex-horizontal flex-top flex-left">
    
-      <form id="input-form" action="" method="POST">
-         <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
-         <input type="hidden" name="operator" value="<?php echo getOperator(); ?>">
-         <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
-         <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
-         <input id="run-time-input" type="hidden" name="runTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
-         <input id="setup-time-input" type="hidden" name="setupTime" value="<?php echo getTimeCardInfo()->setupTime; ?>">
-         <input id="gross-parts-per-hour-input" type="hidden" value="<?php echo getGrossPartsPerHour(); ?>">
-      </form>
+      <?php Menu::render(ACTIVITY); ?>
       
-      <div class="flex-vertical content">
+      <div class="content flex-vertical flex-top flex-left">
       
-         <div class="heading"><?php echo getHeading(); ?></div>
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-         <div class="description"><?php echo getDescription(); ?></div>
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
          
-          <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;">
+         <br>
+         
+         <div class="flex-horizontal flex-left flex-wrap">
 
-            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+            <div class="flex-vertical flex-left" style="margin-right: 50px;">
             
                <div class="form-item">
                   <div class="form-label">Mfg. Date</div>
@@ -659,7 +665,7 @@ if (!Authentication::isAuthenticated())
       
             </div>
             
-            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+            <div class="flex-vertical flex-top" style="margin-right: 50px;">
             
                <div class="form-col">
                
@@ -675,10 +681,11 @@ if (!Authentication::isAuthenticated())
                   <div class="form-item">
                      <div class="form-label">Setup time</div>
                      <div class="form-col">
-                        <div class="form-row" style="justify-content:flex-start">
+                        <div class="form-row flex-left">
                            <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
                            <div style="padding: 5px;">:</div>
                            <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           &nbsp;&nbsp;
                            <?php echo getApprovalButton(); ?>
                            <?php echo getUnapprovalButton(); ?>
                         </div>
@@ -718,7 +725,7 @@ if (!Authentication::isAuthenticated())
                
             </div>
             
-            <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
+            <div class="flex-vertical flex-top" style="margin-right: 50px;">
             
                <?php echo getCommentCodesDiv(); ?>
                
@@ -733,47 +740,58 @@ if (!Authentication::isAuthenticated())
 
          </div>
          
-         <?php echo getNavBar(); ?>
-         
-      </div>
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="save-button" class="accent-button">Save</button>            
+         </div>
       
-      <script>
-         preserveSession();
-         
-         function userCanApprove()
-         {
-            return (<?php echo canApprove() ? "true" : "false"; ?>);
-         }
-         
-         var operatorValidator = new SelectValidator("operator-input");
-         var jobNumberValidator = new SelectValidator("job-number-input");
-         var wcNumberValidator = new SelectValidator("wc-number-input");
-         var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
-         var runTimeHourValidator = new IntValidator("run-time-hour-input", 2, 0, 16, true);
-         var runTimeMinuteValidator = new IntValidator("run-time-minute-input", 2, 0, 59, true);
-         var setupTimeHourValidator = new IntValidator("setup-time-hour-input", 2, 0, 16, true);
-         var setupTimeMinuteValidator = new IntValidator("setup-time-minute-input", 2, 0, 59, true);
-         var panCountValidator = new IntValidator("pan-count-input", 2, 0, 40, true);
-         var partsCountValidator = new IntValidator("part-count-input", 6, 0, 100000, true);
-         var scrapCountValidator = new IntValidator("scrap-count-input", 6, 0, 100000, true);
-
-         operatorValidator.init();
-         jobNumberValidator.init();
-         wcNumberValidator.init();
-         materialNumberValidator.init();
-         runTimeHourValidator.init();
-         runTimeMinuteValidator.init();
-         setupTimeHourValidator.init();
-         setupTimeMinuteValidator.init();
-         panCountValidator.init();
-         partsCountValidator.init();
-         scrapCountValidator.init();
-   
-         updateEfficiency();
-         updateApproval();
-      </script>
+      </div> <!-- content -->
      
-   </div>
+   </div> <!-- main -->   
+         
+   <script>
+   
+      preserveSession();
+      
+      function userCanApprove()
+      {
+         return (<?php echo canApprove() ? "true" : "false"; ?>);
+      }
+      
+      var operatorValidator = new SelectValidator("operator-input");
+      var jobNumberValidator = new SelectValidator("job-number-input");
+      var wcNumberValidator = new SelectValidator("wc-number-input");
+      var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
+      var runTimeHourValidator = new IntValidator("run-time-hour-input", 2, 0, 16, true);
+      var runTimeMinuteValidator = new IntValidator("run-time-minute-input", 2, 0, 59, true);
+      var setupTimeHourValidator = new IntValidator("setup-time-hour-input", 2, 0, 16, true);
+      var setupTimeMinuteValidator = new IntValidator("setup-time-minute-input", 2, 0, 59, true);
+      var panCountValidator = new IntValidator("pan-count-input", 2, 0, 40, true);
+      var partsCountValidator = new IntValidator("part-count-input", 6, 0, 100000, true);
+      var scrapCountValidator = new IntValidator("scrap-count-input", 6, 0, 100000, true);
+
+      operatorValidator.init();
+      jobNumberValidator.init();
+      wcNumberValidator.init();
+      materialNumberValidator.init();
+      runTimeHourValidator.init();
+      runTimeMinuteValidator.init();
+      setupTimeHourValidator.init();
+      setupTimeMinuteValidator.init();
+      panCountValidator.init();
+      partsCountValidator.init();
+      scrapCountValidator.init();
+
+      updateEfficiency();
+      updateApproval();
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){window.history.back();};
+      document.getElementById("save-button").onclick = function(){onSubmit();};      
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+            
+   </script>
 
 </body>
 

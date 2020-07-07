@@ -1,25 +1,23 @@
 <?php
 
-require_once '../common/authentication.php';
+require_once '../common/activity.php';
 require_once '../common/database.php';
 require_once '../common/header2.php';
-require_once '../common/jobInfo.php';
+require_once '../common/inspection.php';
+require_once '../common/inspectionTemplate.php';
 require_once '../common/menu.php';
 require_once '../common/newIndicator.php';
 require_once '../common/permissions.php';
-require_once '../common/roles.php';
-require_once '../common/timeCardInfo.php';
-require_once '../common/userInfo.php';
 
 function getFilterStartDate()
 {
    $startDate = Time::now("Y-m-d");
    
-   if (isset($_SESSION["timeCard.filter.startDate"]))
+   if (isset($_SESSION["inspection.filter.startDate"]))
    {
-      $startDate = $_SESSION["timeCard.filter.startDate"];
+      $startDate = $_SESSION["inspection.filter.startDate"];
    }
-
+   
    // Convert to Javascript date format.
    $dateTime = new DateTime($startDate, new DateTimeZone('America/New_York'));  // TODO: Replace
    $startDate = $dateTime->format(Time::$javascriptDateFormat);
@@ -31,9 +29,9 @@ function getFilterEndDate()
 {
    $startDate = Time::now("Y-m-d");
    
-   if (isset($_SESSION["timeCard.filter.endDate"]))
+   if (isset($_SESSION["inspection.filter.endDate"]))
    {
-      $startDate = $_SESSION["timeCard.filter.endDate"];
+      $startDate = $_SESSION["inspection.filter.endDate"];
    }
    
    // Convert to Javascript date format.
@@ -41,6 +39,37 @@ function getFilterEndDate()
    $startDate = $dateTime->format(Time::$javascriptDateFormat);
    
    return ($startDate);
+}
+
+function getFilterInspectionType()
+{
+   $inspectionStatus = InspectionType::UNKNOWN;
+   
+   if (isset($_SESSION["inspection.filter.inspectionType"]))
+   {
+      $inspectionStatus = intval($_SESSION["inspection.filter.inspectionType"]);
+   }
+   
+   return ($inspectionStatus);
+}
+
+function getInspectionTypeOptions()
+{
+   $selectedInspectionType = getFilterInspectionType();
+   
+   $selected = ($selectedInspectionType == InspectionType::UNKNOWN) ? "selected" : "";
+   $unknown = InspectionType::UNKNOWN;
+   
+   $options = "<option value=\"$unknown\" $selected>All</option>";
+   
+   foreach (InspectionType::$VALUES as $inspectionType)
+   {
+      $selected = ($inspectionType == $selectedInspectionType) ? "selected" : "";
+      
+      $options .= "<option value=\"$inspectionType\" $selected>" . InspectionType::getLabel($inspectionType) . "</option>";
+   }
+   
+   return ($options);
 }
 
 function getReportFilename()
@@ -54,7 +83,7 @@ function getReportFilename()
       $dateString .= "_to_" . $endDate;
    }
    
-   $filename = "TimeCards_" . $dateString . ".csv";
+   $filename = "Inspections_" . $dateString . ".csv";
    
    return ($filename);
 }
@@ -71,15 +100,6 @@ if (!Authentication::isAuthenticated())
    exit;
 }
 
-// Post/Redirect/Get idiom.
-// getFilter() stores all $_POST data in the $_SESSION variable.
-// header() redirects to this page, but with a GET request.
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-   // Redirect to this page.
-   header("Location: " . $_SERVER['REQUEST_URI']);
-   exit();
-}
 ?>
 
 <html>
@@ -98,8 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    <script src="../thirdParty/moment/moment.min.js"></script>
    
    <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
-   <script src="timeCard.js"></script>
+   <script src="inspection.js"></script>
       
 </head>
 
@@ -109,20 +128,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    
    <div class="main flex-horizontal flex-top flex-left">
    
-      <?php Menu::render(Activity::TIME_CARD); ?>
+      <?php Menu::render(Activity::INSPECTION); ?>
       
       <div class="content flex-vertical flex-top flex-left">
       
          <div class="flex-horizontal flex-v-center flex-h-center">
-            <div class="heading">Time Cards</div>&nbsp;&nbsp;
+            <div class="heading">Inspections</div>&nbsp;&nbsp;
             <i id="help-icon" class="material-icons icon-button">help</i>
          </div>
          
-         <div id="description" class="description">Time cards record the time a machine operator spends working on a job, as well as a part count for that run.</div>
-         
+         <div id="description" class="description">Part inspections allow Pittsburgh Precision quality assurance experts the chance to catch productions problems before they result in signficant waste or delay.</div>
+
          <br>
          
          <div class="flex-horizontal flex-v-center flex-left">
+            <div style="white-space: nowrap">Inspection type</div>
+            &nbsp;
+            <select id="inspection-type-filter"><?php echo getInspectionTypeOptions(); ?></select>
+            &nbsp;&nbsp;
             <div style="white-space: nowrap">Start date</div>
             &nbsp;
             <input id="start-date-filter" type="date" value="<?php echo getFilterStartDate()?>">
@@ -138,11 +161,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          
          <br>
         
-         <button id="new-time-card-button" class="accent-button">New Time Card</button>
+         <button id="new-inspection-button" class="accent-button">New Inspection</button>
 
          <br>
         
-         <div id="time-card-table"></div>
+         <div id="inspection-table"></div>
 
          <br> 
         
@@ -158,13 +181,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
       function getTableQuery()
       {
-         return ("<?php echo $ROOT ?>/api/timeCardData/");
+         return ("<?php echo $ROOT ?>/api/inspectionData/");
       }
 
       function getTableQueryParams()
       {
-         
          var params = new Object();
+
+         params.inspectionType = document.getElementById("inspection-type-filter").value;
          params.startDate =  document.getElementById("start-date-filter").value;
          params.endDate =  document.getElementById("end-date-filter").value;
 
@@ -175,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       var params = getTableQueryParams();
       
       // Create Tabulator on DOM element time-card-table.
-      var table = new Tabulator("#time-card-table", {
+      var table = new Tabulator("#inspection-table", {
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
          responsiveLayout:"hide", // enable responsive layouts
@@ -183,54 +207,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          ajaxParams:params,
          //Define Table Columns
          columns:[
-            {title:"Id",           field:"timeCardId",     hozAlign:"left", visible:false},
-            {title:"Date",         field:"dateTime",       hozAlign:"left", responsive:0,
+            {title:"Id",              field:"inspectionId",        hozAlign:"left", visible:false},
+            {title:"Inspection Type", field:"inspectionTypeLabel", hozAlign:"left", responsive:1},
+            {title:"Name",            field:"name",                hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Date",            field:"dateTime",            hozAlign:"left", responsive:0,
                formatter:"datetime",  // Requires moment.js 
                formatterParams:{
                   outputFormat:"MM/DD/YYYY",
                   invalidPlaceholder:"---"
                }
             },
-            {title:"Operator",     field:"operator",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Job #",        field:"jobNumber",      hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Machine #",    field:"wcNumber",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Heat #",       field:"materialNumber", hozAlign:"left", responsive:6},
-            {title:"Run Time",     field:"runTime",        hozAlign:"left", responsive:1},
-            {title:"Setup Time",   field:"setupTime",      hozAlign:"left", responsive:2},
-            {title:"Basket Count", field:"panCount",       hozAlign:"left", responsive:3},
-            {title:"Part Count",   field:"partCount",      hozAlign:"left", responsive:4},
-            {title:"Scrap Count",  field:"scrapCount",     hozAlign:"left", responsive:5},
-            {title:"Efficiency",   field:"efficiency",     hozAlign:"left", responsive:7, 
-               formatter:function(cell, formatterParams, onRendered){
-                  return (parseFloat(cell.getValue()).toFixed(2) + "%");
-                }
-            },
-            {title:"", field:"panTicket", responsive:0,             
-               formatter:function(cell, formatterParams, onRendered){
-                  return ("<i class=\"material-icons icon-button\">receipt</i>");
+            {title:"Time",            field:"dateTime",            hozAlign:"left", responsive:0,
+               formatter:"datetime",  // Requires moment.js 
+               formatterParams:{
+                  outputFormat:"hh:mm A",
+                  invalidPlaceholder:"---"
                }
             },
-            {title:"", field:"delete", responsive:0,
+            {title:"Inspector",       field:"inspectorName",       hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Operator",        field:"operatorName",        hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Job",             field:"jobNumber",           hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Work Center",     field:"wcNumber",            hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Success Rate",    field:"successRate",         hozAlign:"left", responsive:0},
+            {title:"Pass/Fail",       field:"inspectionStatus",    hozAlign:"left", responsive:0, headerFilter:true,
+               {title:"",                field:"delete",                               responsive:0,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">delete</i>");
+               }
+            },
+            {title:"",                field:"delete",                               responsive:0,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">delete</i>");
                }
             }
          ],
          cellClick:function(e, cell){
-            var timeCardId = parseInt(cell.getRow().getData().timeCardId);
+            var inspectionId = parseInt(cell.getRow().getData().inspectionId);
             
             if (cell.getColumn().getField() == "delete")
             {
-               onDeleteTimeCard(timeCardId);
-            }
-            else if (cell.getColumn().getField() == "panTicket")
-            {
-               document.location = "<?php echo $ROOT?>/panTicket/viewPanTicket.php?panTicketId=" + timeCardId;
+               onDeleteInspection(inspectionId);
             }
             else // Any other column
             {
-               // Open time card for viewing/editing.
-               document.location = "<?php echo $ROOT?>/timecard/viewTimeCard.php?timeCardId=" + timeCardId;               
+               // Open user for viewing/editing.
+               document.location = "<?php echo $ROOT?>/inspection/viewInspection.php?inspectionId=" + inspectionId;               
             }
          },
          rowClick:function(e, row){
@@ -244,7 +265,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          {
             var filterId = event.srcElement.id;
    
-            if ((filterId == "start-date-filter") ||
+            if ((filterId == "inspection-type-filter") ||
+                (filterId == "start-date-filter") ||
                 (filterId == "end-date-filter"))
             {
                var url = getTableQuery();
@@ -258,13 +280,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   // Handle error loading data
                });
 
-               if (filterId == "start-date-filter")
+               if (filterId == "inspection-type-filter")
                {
-                  setSession("timeCard.filter.startDate", document.getElementById("start-date-filter").value);
+                  setSession("inspection.filter.inspectionStatus", document.getElementById("inspection-type-filter").value);
+               }
+               else if (filterId == "start-date-filter")
+               {
+                  setSession("inspection.filter.startDate", document.getElementById("start-date-filter").value);
                }
                else if (filterId == "end-date-filter")
                {
-                  setSession("timeCard.filter.endDate", document.getElementById("end-date-filter").value);
+                  setSession("inspection.filter.endDate", document.getElementById("end-date-filter").value);
                }
             }
          }
@@ -281,7 +307,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
          return (formattedDate);
       }
-            
 
       function filterToday()
       {
@@ -319,13 +344,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       }
 
       // Setup event handling on all DOM elements.
+      document.getElementById("inspection-type-filter").addEventListener("change", updateFilter);
       document.getElementById("start-date-filter").addEventListener("change", updateFilter);      
       document.getElementById("end-date-filter").addEventListener("change", updateFilter);
       document.getElementById("today-button").onclick = filterToday;
       document.getElementById("yesterday-button").onclick = filterYesterday;
-      document.getElementById("new-time-card-button").onclick = function(){location.href = 'viewTimeCard.php';};
+      document.getElementById("new-inspection-button").onclick = function(){location.href = 'viewInspection.php';};
       document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:"."})};
-
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
    </script>

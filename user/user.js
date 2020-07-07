@@ -1,98 +1,86 @@
-function onNewUser()
+function onSubmit()
 {
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'user.php');
+   if (validateUser())
+   {
+      var form = document.querySelector('#input-form');
+      
+      var xhttp = new XMLHttpRequest();
    
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'new_user');
-   form.appendChild(input);
+      // Bind the form data.
+      var formData = new FormData(form);
    
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'new_user');
-   form.appendChild(input);
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         try
+         {
+            var json = JSON.parse(event.target.responseText);
    
-   document.body.appendChild(form);
-   form.submit();    
+            if (json.success == true)
+            {
+               location.href = "viewUsers.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
+         }
+         catch (expection)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/saveUser/"
+      xhttp.open("POST", requestUrl);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);
+   }
 }
 
 function onDeleteUser(employeeNumber)
 {
    if (confirm("Are you sure you want to delete this user?"))
    {
-      form = document.createElement('form');
-      form.setAttribute('method', 'POST');
-      form.setAttribute('action', 'user.php');
+      // AJAX call to delete part weight entry.
+      requestUrl = "../api/deleteUser/?employeeNumber=" + employeeNumber;
       
-      input = document.createElement('input');
-      input.setAttribute('name', 'action');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', 'delete_user');
-      form.appendChild(input);
-      
-      input = document.createElement('input');
-      input.setAttribute('name', 'employeeNumber');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('value', employeeNumber);
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      form.submit();
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {         
+            try
+            {
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  location.href = "viewUsers.php";
+               }
+               else
+               {
+                  console.log("API call to delete user failed.");
+                  alert(json.error);
+               }
+            }
+            catch (expection)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send(); 
    }
-}
-
-function onViewUser(employeeNumber)
-{
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'user.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'view_user');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'employeeNumber');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', employeeNumber);
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();
-}
-
-function onEditUser(employeeNumber)
-{
-   form = document.createElement('form');
-   form.setAttribute('method', 'POST');
-   form.setAttribute('action', 'user.php');
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'view');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'edit_user');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'action');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', 'edit_user');
-   form.appendChild(input);
-   
-   input = document.createElement('input');
-   input.setAttribute('name', 'employeeNumber');
-   input.setAttribute('type', 'hidden');
-   input.setAttribute('value', employeeNumber);
-   form.appendChild(input);
-   
-   document.body.appendChild(form);
-   form.submit();
 }
 
 function validateUser()

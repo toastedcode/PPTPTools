@@ -158,7 +158,7 @@ class PPTPDatabase extends MySqlDatabase
 
    public function getWorkCenters()
    {
-      $result = $this->query("SELECT * FROM workcenter ORDER BY WCNumber ASC");
+      $result = $this->query("SELECT * FROM workcenter ORDER BY wcNumber ASC");
 
       return ($result);
    }
@@ -815,37 +815,49 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getJobs($jobNumber, $jobStatuses)
    {
-      $active = JobStatus::ACTIVE;
-      $deleted = JobStatus::DELETED;
-      
-      $jobNumberClause = "";
-      if ($jobNumber != "All")
+      $result = null;
+
+      // Validate input.
+      // If an array of job statuses is specified, it must not be empty.
+      if (is_null($jobStatuses) || (count($jobStatuses) > 0))
       {
-         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
-      }
-      
-      $jobStatusClause = "(";
-      $or = false;
-      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
-      {
-         if ($jobStatuses[$jobStatus])
+         $jobNumberClause = "";
+         if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
          {
-            if ($or)
+            $jobNumberClause = "jobNumber = '$jobNumber' AND ";
+         }
+         
+         $jobStatusClause = "";
+         if ($jobStatuses && count($jobStatuses) > 0)
+         {
+            $jobStatusClause = "(";
+            
+            $or = false;
+            foreach ($jobStatuses as $jobStatus)
             {
-               $jobStatusClause .= " OR ";
+               if ($or)
+               {
+                  $jobStatusClause .= " OR ";
+               }
+                  
+               $jobStatusClause .= "status = $jobStatus";
+                  
+               $or = true;
             }
             
-            $jobStatusClause .= "status = $jobStatus";
-               
-            $or = true;
+            $jobStatusClause .= ")";
          }
+         
+         $whereClause = "";
+         if (($jobNumberClause != "") || ($jobStatusClause != ""))
+         {
+            $whereClause = "WHERE " . $jobNumberClause . $jobStatusClause;
+         }
+         
+         $query = "SELECT * FROM job $whereClause ORDER BY jobNumber ASC;";
+   
+         $result = $this->query($query);
       }
-      $jobStatusClause .= ")";
-      
-      
-      $query = "SELECT * FROM job WHERE $jobNumberClause $jobStatusClause ORDER BY jobNumber ASC;";
-
-      $result = $this->query($query);
       
       return ($result);
    }
@@ -914,6 +926,15 @@ class PPTPDatabase extends MySqlDatabase
          "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId', lineTemplateId = '$jobInfo->lineTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
          "WHERE jobId = '$jobInfo->jobId';";
 
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function setCustomerPrint($jobId, $filename)
+   {
+      $query = "UPDATE job SET customerPrint = '$filename' WHERE jobId = '$jobId';";
+      
       $result = $this->query($query);
       
       return ($result);
@@ -1221,37 +1242,8 @@ class PPTPDatabase extends MySqlDatabase
    //                                Inspections
    // **************************************************************************
    
-   public function getInspections($inspectionType, $jobNumber, $inspector, $operator, $startDate, $endDate)
+   public function getInspections($inspectionType, $startDate, $endDate)
    {
-      $userClause = "";
-      if (($inspector != 0) || ($operator != 0))
-      {
-         $userClause = "(";
-         
-         if ($inspector != 0)
-         {
-            $userClause .= "inspector = $inspector";
-         }
-         
-         if (($inspector != 0) && ($operator != 0))
-         {
-            $userClause .= " OR ";
-         }
-            
-         if ($operator != 0)
-         {
-            $userClause .= "operator = $operator";
-         }
-         
-         $userClause .= ") AND";
-      }         
-      
-      $jobNumberClause = "";
-      if ($jobNumber != "All")
-      {
-         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
-      }
-      
       $typeClause = "";
       if ($inspectionType != InspectionType::UNKNOWN)
       {
@@ -1260,7 +1252,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query = "SELECT * FROM inspection " .
                "INNER JOIN inspectiontemplate ON inspection.templateId = inspectiontemplate.templateId " .
-               "WHERE $userClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
+               "WHERE $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
 
       $result = $this->query($query);
       

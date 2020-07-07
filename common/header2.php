@@ -11,7 +11,7 @@ class Header
       echo 
 <<<HEREDOC
       <div class="header">
-         <div id="menu-button" class="menu-button"><i class="menu-icon material-icons">menu</i></div>
+         <div id="menu-button" class="menu-button"><i class="menu-icon material-icons action-button-icon">menu</i></div>
          <div class="flex-horizontal" style="justify-content: space-between; width: 100%; padding-right:20px;">
             <a class="page-title" href="$ROOT/home.php">$pageTitle</a>
 HEREDOC;

@@ -1,6 +1,6 @@
 <?php
 
-require_once '../common/root.php';
+require_once 'root.php';
 
 abstract class UploadStatus
 {
