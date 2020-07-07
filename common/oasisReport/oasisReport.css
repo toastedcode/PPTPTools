@@ -1,0 +1,76 @@
+@charset "ISO-8859-1";
+
+.user-fields {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.part-inspection-table {
+   margin-top: 10px;
+   margin-bottom: 20px;
+}
+
+.user-fields {
+   align-items: flex-start; /* align left */
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
+.user-fields div {
+	margin-right: 10px;
+	align-items: flex-start; /* align left */
+}
+
+.user-field label {
+   margin-right: 3px;
+   display: inline-block;
+   width: 130px;
+}
+
+.user-field {
+	margin-bottom: 10px;
+}
+
+.user-field input {
+	background: #c2fcc6;
+}
+
+.graph {
+   font-family: "Courier New";
+   color: black;
+   border: 1px solid #000000;
+}
+
+.graph.measurement-result-pass {
+	background: #00FF00;
+}
+
+.graph.measurement-result-warn-low, .graph.measurement-result-warn-high
+{
+   background: #FFFF00;
+}
+
+.graph.measurement-result-fail-low, .graph.measurement-result-fail-high
+{
+   background: #FF0000;
+}
+
+.graph.measurement-result-fail-null {
+   background: #FF64FF;
+}
+
+table {
+   background: #ffffff;
+   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+   border-collapse:collapse;
+}
+
+tr {
+   border: 1px solid #dddddd;
+}
+
+th, td {
+   text-align: left;
+   padding: 0px 20px 0px 20px;
+   font-size: 10pt;
+}
