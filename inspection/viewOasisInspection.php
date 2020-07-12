@@ -1,15 +1,19 @@
 <?php
 
+require_once '../common/activity.php';
 require_once '../common/authentication.php';
-require_once '../common/header.php';
+require_once '../common/header2.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
-require_once '../common/navigation.php';
+require_once '../common/menu.php';
 require_once '../common/oasisReport/oasisReport.php';
 require_once '../common/params.php';
 require_once '../common/root.php';
 require_once '../common/userInfo.php';
+
+const ACTIVITY = Activity::INSPECTION;
+$activity = Activity::getActivity(ACTIVITY);
 
 function getParams()
 {
@@ -59,17 +63,6 @@ function getDescription()
    $description = "";
    
    return ($description);
-}
-
-function getNavBar()
-{
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   $navBar->highlightNavButton("Ok", "location.href = 'inspections.php';", false);
-   $navBar->end();
-   
-   return ($navBar->getHtml());
 }
 
 function getUserField($userField)
@@ -157,34 +150,36 @@ if (!Authentication::isAuthenticated())
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
-   <link rel="stylesheet" type="text/css" href="inspection.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/oasisReport/oasisReport.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/oasisReport/oasisReport.css"/>
+   <link rel="stylesheet" type="text/css" href="inspection.css"/>
+   
    <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
-   <script src="inspection.js"></script>
 
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-      <div class="flex-vertical content">
+   <div class="main flex-horizontal flex-top flex-left">
+   
+      <?php Menu::render(ACTIVITY); ?>
       
-         <div class="heading"><?php echo getHeading(); ?></div>
+      <div class="content flex-vertical flex-top flex-left">
+      
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-         <div class="description"><?php echo getDescription(); ?></div>
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
+         
+         <br>
          
          <!-- div>
             <div>
@@ -235,15 +230,26 @@ if (!Authentication::isAuthenticated())
          
          <?php echo getSamples() ?>
          
-         <?php echo getNavBar(); ?>
+         <br>
          
-      </div>
-               
-      <script>
-         preserveSession();
-      </script>
+         <div class="flex-horizontal flex-h-center">
+            <button id="ok-button">Ok</button>
+         </div>
+      
+      </div> <!-- content -->
      
-   </div>
+   </div> <!-- main -->   
+         
+   <script>
+   
+      preserveSession();
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("ok-button").onclick = function(){window.history.back();};
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+      
+   </script>
 
 </body>
 

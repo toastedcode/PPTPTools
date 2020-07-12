@@ -113,6 +113,7 @@ if (!Authentication::isAuthenticated())
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.min.js"></script>
@@ -224,15 +225,23 @@ if (!Authentication::isAuthenticated())
                   invalidPlaceholder:"---"
                }
             },
-            {title:"Inspector",       field:"inspectorName",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Operator",        field:"operatorName",        hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Job",             field:"jobNumber",           hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Work Center",     field:"wcNumber",            hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Success Rate",    field:"successRate",         hozAlign:"left", responsive:0},
-            {title:"Pass/Fail",       field:"inspectionStatus",    hozAlign:"left", responsive:0, headerFilter:true,
-               {title:"",                field:"delete",                               responsive:0,
+            {title:"Inspector",       field:"inspectorName",       hozAlign:"left",   responsive:0, headerFilter:true},
+            {title:"Operator",        field:"operatorName",        hozAlign:"left",   responsive:0, headerFilter:true},
+            {title:"Job",             field:"jobNumber",           hozAlign:"left",   responsive:0, headerFilter:true},
+            {title:"Work Center",     field:"wcNumber",            hozAlign:"left",   responsive:0, headerFilter:true},
+            {title:"Success Rate",    field:"successRate",         hozAlign:"left",   responsive:0,
                formatter:function(cell, formatterParams, onRendered){
-                  return ("<i class=\"material-icons icon-button\">delete</i>");
+                  var count = cell.getRow().getData().count;
+                  var naCount = cell.getRow().getData().naCount;
+                  var passCount = cell.getRow().getData().passCount;
+                  return (passCount + "/" + (count - naCount));
+               }
+            },
+            {title:"Pass/Fail",       field:"inspectionStatus",    hozAlign:"center", responsive:0, headerFilter:true,
+               formatter:function(cell, formatterParams, onRendered){
+                  var label = cell.getRow().getData().inspectionStatusLabel;
+                  var cssClass = cell.getRow().getData().inspectionStatusClass;
+                  return ("<div class=\"inspection-status " + cssClass + "\">" + label + "</div>");
                }
             },
             {title:"",                field:"delete",                               responsive:0,
@@ -250,8 +259,17 @@ if (!Authentication::isAuthenticated())
             }
             else // Any other column
             {
+               var inspectionType = cell.getRow().getData().inspectionType;
+
                // Open user for viewing/editing.
-               document.location = "<?php echo $ROOT?>/inspection/viewInspection.php?inspectionId=" + inspectionId;               
+               if (inspectionType == <?php echo InspectionType::OASIS; ?>)
+               {
+                  document.location = "<?php echo $ROOT?>/inspection/viewOasisInspection.php?inspectionId=" + inspectionId;
+               }
+               else
+               {
+                  document.location = "<?php echo $ROOT?>/inspection/viewInspection.php?inspectionId=" + inspectionId;
+               }
             }
          },
          rowClick:function(e, row){
@@ -349,7 +367,7 @@ if (!Authentication::isAuthenticated())
       document.getElementById("end-date-filter").addEventListener("change", updateFilter);
       document.getElementById("today-button").onclick = filterToday;
       document.getElementById("yesterday-button").onclick = filterYesterday;
-      document.getElementById("new-inspection-button").onclick = function(){location.href = 'viewInspection.php';};
+      document.getElementById("new-inspection-button").onclick = function(){location.href = 'selectInspection.php';};
       document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:"."})};
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};

@@ -35,6 +35,15 @@
 	background: #c2fcc6;
 }
 
+.sample-heading {
+   font-weight: bold;
+   margin-bottom: 5px;
+}
+
+.sample-date {
+   font-size: 10pt;
+}
+
 .graph {
    font-family: "Courier New";
    color: black;

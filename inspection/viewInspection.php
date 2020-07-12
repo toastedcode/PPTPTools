@@ -1,16 +1,13 @@
-<?php
+<?php 
 
-require_once '../common/authentication.php';
-require_once '../common/header.php';
+require_once '../common/activity.php';
+require_once '../common/header2.php';
 require_once '../common/inspection.php';
-require_once '../common/inspectionTemplate.php';
-require_once '../common/jobInfo.php';
-require_once '../common/navigation.php';
+require_once '../common/menu.php';
 require_once '../common/params.php';
-require_once '../common/root.php';
-require_once '../common/userInfo.php';
 
-const ONLY_ACTIVE = true;
+const ACTIVITY = Activity::INSPECTION;
+$activity = Activity::getActivity(ACTIVITY);
 
 abstract class InspectionInputField
 {
@@ -27,6 +24,13 @@ abstract class InspectionInputField
    const COUNT = InspectionInputField::LAST - InspectionInputField::FIRST;
 }
 
+abstract class View
+{
+   const NEW_INSPECTION = 0;
+   const VIEW_INSPECTION = 1;
+   const EDIT_INSPECTION = 2;
+}
+
 function getParams()
 {
    static $params = null;
@@ -41,9 +45,76 @@ function getParams()
 
 function getView()
 {
-   $params = getParams();
+   $view = View::VIEW_INSPECTION;
    
-   return ($params->keyExists("view") ? $params->get("view") : "view_inspection");
+   $inspection = getInspection();
+   
+   if (getInspectionId() == Inspection::UNKNOWN_INSPECTION_ID)
+   {
+      $view = View::NEW_INSPECTION;
+   }
+   else if (Authentication::checkPermissions(Permission::EDIT_INSPECTION) &&
+            // Only allow editing of your own inspections, or if the VIEW_OTHERS permission is enabled.
+            (($inspection->inspector == Authentication::getAuthenticatedUser()->employeeNumber) ||
+             Authentication::checkPermissions(Permission::VIEW_OTHER_USERS)))
+   {
+      $view = View::EDIT_INSPECTION;
+   }
+   
+   return ($view);
+}
+
+function isEditable($field)
+{
+   $view = getView();
+   
+   // Start with the edit mode, as dictated by the view.
+   $isEditable = (($view == View::NEW_INSPECTION) ||
+                  ($view == View::EDIT_INSPECTION));
+   
+   switch ($field)
+   {
+      case InspectionInputField::INSPECTION_TYPE:
+      case InspectionInputField::INSPECTION_TEMPLATE:
+      {
+         $isEditable = false;
+         break;
+      }
+      
+      case InspectionInputField::JOB_NUMBER:
+      {
+         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
+                         showOptionalProperty(OptionalInspectionProperties::JOB_NUMBER));
+         break;
+      }
+      
+      case InspectionInputField::WC_NUMBER:
+      {
+         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
+                         showOptionalProperty(OptionalInspectionProperties::WC_NUMBER));
+         break;
+      }
+      
+      case InspectionInputField::OPERATOR:
+      {
+         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
+                         showOptionalProperty(OptionalInspectionProperties::OPERATOR));
+         break;
+      }
+      
+      default:
+      {
+         // Edit status based solely on view.
+         break;
+      }
+   }
+   
+   return ($isEditable);
+}
+
+function getDisabled($field)
+{
+   return (isEditable($field) ? "" : "disabled");
 }
 
 function getInspectionId()
@@ -377,13 +448,79 @@ function getComments()
    return ($comments);
 }
 
+function getHeading()
+{
+   $heading = "";
+   
+   switch (getView())
+   {
+      case View::NEW_INSPECTION:
+         {
+            $heading = "Add a New Inspection";
+            break;
+         }
+         
+      case View::EDIT_INSPECTION:
+         {
+            $heading = "Update an Inspection";
+            break;
+         }
+         
+      case View::VIEW_INSPECTION:
+         {
+            "View an Inspection";
+            break;
+         }
+         
+      default:
+         {
+            break;
+         }
+   }
+   
+   return ($heading);
+}
+
+function getDescription()
+{
+   $description = "";
+   
+   switch (getView())
+   {
+      case View::NEW_INSPECTION:
+         {
+            $description = "Next, select the operator responsible for the targeted part inspection.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
+            break;
+         }
+         
+      case View::EDIT_INSPECTION:
+         {
+            $description = "You may revise any of the fields for this inspection and then select save when you're satisfied with the changes.";
+            break;
+         }
+         
+      case View::VIEW_INSPECTION:
+         {
+            $description = "View a previously saved inspection in detail.";
+            break;
+         }
+         
+      default:
+         {
+            break;
+         }
+   }
+   
+   return ($description);
+}
+
 function getInspectionTypeOptions()
 {
    $options = "<option style=\"display:none\">";
    
    $selectedInspectionType = getInspectionType();
    
-   for ($inspectionType = InspectionType::FIRST; $inspectionType != InspectionType::LAST; $inspectionType++)
+   foreach (InspectionType::$VALUES as $inspectionType)
    {
       $selected = ($inspectionType == $selectedInspectionType) ? "selected" : "";
       
@@ -530,129 +667,6 @@ function getOperatorOptions()
    return ($options);
 }
 
-function getHeading()
-{
-   $heading = "";
-   
-   $view = getView();
-   
-   if ($view == "new_inspection")
-   {
-      $heading = "Add a New Inspection";
-   }
-   else if ($view == "edit_inspection")
-   {
-      $heading = "Update an Inspection";
-   }
-   else if ($view == "view_inspection")
-   {
-      $heading = "View an Inspection";
-   }
-      
-   return ($heading);
-}
-
-function getDescription()
-{
-   $description = "";
-   
-   $view = getView();
-   
-   if ($view == "new_inspection")
-   {
-      $description = "Next, select the operator responsible for the targeted part inspection.  If any of the categories are not relevant to the part you're inspecting, just leave it set to \"N/A\"";
-   }
-   else if ($view == "edit_inspection")
-   {
-      $description = "You may revise any of the fields for this inspection and then select save when you're satisfied with the changes.";
-   }
-   else if ($view == "view_inspection")
-   {
-      $description = "View a previously saved inspection in detail.";
-   }
-   
-   return ($description);
-}
-
-function getNavBar()
-{
-   $view = getView();
-   
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   
-   if (($view == "new_inspection") ||
-       ($view == "edit_inspection"))
-   {
-      // Case 1
-      // Creating a new inspection.
-      // Editing an existing inspection.
-      
-      $navBar->cancelButton("location.href = 'inspections.php';");
-      $navBar->highlightNavButton("Save", "onSubmit();", false);
-   }
-   else if ($view == "view_inspection")
-   {
-      // Case 2
-      // Viewing an existing job.
-      
-      $navBar->highlightNavButton("Ok", "location.href = 'inspections.php';", false);
-   }
-   
-   $navBar->end();
-   
-   return ($navBar->getHtml());
-}
-
-function isEditable($field)
-{
-   $view = getView();
-   
-   // Start with the edit mode, as dictated by the view.
-   $isEditable = (($view == "new_inspection") ||
-                  ($view == "edit_inspection"));
-   
-   switch ($field)
-   {
-      case InspectionInputField::INSPECTION_TYPE:
-      case InspectionInputField::INSPECTION_TEMPLATE:
-      {
-         $isEditable = false;
-         break;
-      }
-      
-      case InspectionInputField::JOB_NUMBER:
-      {
-         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
-                         showOptionalProperty(OptionalInspectionProperties::JOB_NUMBER));
-         break;
-      }
-      
-      case InspectionInputField::WC_NUMBER:
-      {
-         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
-                         showOptionalProperty(OptionalInspectionProperties::WC_NUMBER));
-         break;
-      }
-      
-      case InspectionInputField::OPERATOR:
-      {
-         $isEditable &= ((getInspectionType() != InspectionType::GENERIC) ||
-                         showOptionalProperty(OptionalInspectionProperties::OPERATOR));
-         break;
-      }
-      
-      default:
-      {
-         // Edit status based solely on view.
-         break;
-      }
-   }
-   
-   return ($isEditable);
-}
-
 function getInspections()
 {
    $html = "";
@@ -666,7 +680,7 @@ function getInspections()
       $quickInspection = getQuickInspectionButton();
       
       $html .=
-<<<HEREDOC
+      <<<HEREDOC
       <tr>
          <td>$quickInspection</td>
          <td></td>
@@ -688,7 +702,7 @@ HEREDOC;
             }
             
             $html .=
-<<<HEREDOC
+            <<<HEREDOC
             <th>
                <div class="flex-column">
                   <div>Check $sampleId</div>
@@ -700,12 +714,12 @@ HEREDOC;
          else
          {
             $html .=
-<<<HEREDOC
+            <<<HEREDOC
             <th>Sample $sampleId</th>
 HEREDOC;
          }
       }
-         
+      
       $html .= "<th>Comment</tr>";
       
       $html .= "</tr>";
@@ -719,8 +733,8 @@ HEREDOC;
          
          $html .= "<tr>";
          
-         $html .= 
-<<<HEREDOC
+         $html .=
+         <<<HEREDOC
          <td><div class="expand-button" style="display:$expandButtonDisplayStyle;" onclick="showData(this)">+</div><div class="condense-button" style="display:$condenseButtonDisplayStyle;" onclick="hideData(this)">-</div></td>
          <td>
             <div class="flex-vertical">
@@ -729,7 +743,7 @@ HEREDOC;
             </div>
          </td>
 HEREDOC;
-        
+         
          for ($sampleIndex = 0; $sampleIndex < $inspectionTemplate->sampleSize; $sampleIndex++)
          {
             $inspectionResult = null;
@@ -744,13 +758,13 @@ HEREDOC;
          $comment = "";
          if (isset($inspection->inspectionResults[$inspectionProperty->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX]))
          {
-            $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX];         
+            $inspectionResult = $inspection->inspectionResults[$inspectionProperty->propertyId][InspectionResult::COMMENT_SAMPLE_INDEX];
             
             $comment = $inspectionResult->data;
          }
          
          $html .= getInspectionCommentInput($inspectionProperty, $comment);
-            
+         
          $html .= "</tr>";
          
          $html .= "<tr style=\"display:$dataRowDisplayStyle;\"><td/><td/>";
@@ -783,7 +797,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       
       $pass = "";
       $warning = "";
-      $fail = "";      
+      $fail = "";
       $nonApplicable = "selected";
       $updateTime = "";
       $class = "";
@@ -811,7 +825,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       $disabled = !isEditable(InspectionInputField::INSPECTION) ? "disabled" : "";
       
       $html .=
-<<<HEREDOC
+      <<<HEREDOC
       <div class="flex-vertical">
          <select name="$name" class="inspection-status-input $class" form="input-form" oninput="onInspectionStatusUpdate(this)" $disabled>
             <option value="$nonApplicableValue" $nonApplicable>N/A</option>
@@ -823,7 +837,7 @@ function getInspectionInput($inspectionProperty, $sampleIndex, $inspectionResult
       </div>
 HEREDOC;
    }
-      
+   
    $html .= "</td>";
    
    return ($html);
@@ -862,19 +876,19 @@ function getInspectionDataInput($inspectionProperty, $sampleIndex, $inspectionRe
       {
          $dataValue = $inspectionResult->data;
       }
-            
+      
       $disabled = !isEditable(InspectionInputField::COMMENTS) ? "disabled" : "";
       
       $dataUnits = InspectionDataUnits::getAbbreviatedLabel($inspectionProperty->dataUnits);
       
       if (($inspectionProperty->dataType == InspectionDataType::INTEGER) ||
-          ($inspectionProperty->dataType == InspectionDataType::DECIMAL))
+         ($inspectionProperty->dataType == InspectionDataType::DECIMAL))
       {
          $inputType = "number";
       }
       
       $html .=
-<<<HEREDOC
+      <<<HEREDOC
       <input name="$dataName" type="$inputType" form="input-form" style="width:80px;" value="$dataValue" $disabled>&nbsp$dataUnits
 HEREDOC;
    }
@@ -891,11 +905,11 @@ function getQuickInspectionButton()
    if (Authentication::checkPermissions(Permission::QUICK_INSPECTION))
    {
       $html =
-<<<HEREDOC
+      <<<HEREDOC
       <i class="material-icons" onclick="approveAll()">thumb_up</i>
 HEREDOC;
    }
-
+   
    return ($html);
 }
 
@@ -919,48 +933,51 @@ if (!Authentication::isAuthenticated())
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="inspection.js"></script>
 
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
+        
+   <form id="input-form" action="" method="POST">
+      <input id="inspection-id-input" type="hidden" name="inspectionId" value="<?php echo getInspectionId(); ?>">
+      <!-- Hidden inputs make sure disabled fields below get posted. -->
+      <input type="hidden" name="templateId" value="<?php echo getTemplateId(); ?>">
+      <input type="hidden" name="jobNumber" value="<?php echo getJobNumber(); ?>">
+      <input type="hidden" name="wcNumber" value="<?php echo getWcNumber(); ?>">
+   </form>
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <!-- div class="flex-horizontal sidebar hide-on-tablet"></div--> 
+   <div class="main flex-horizontal flex-top flex-left">
    
-      <form id="input-form" action="" method="POST">
-         <input id="inspection-id-input" type="hidden" name="inspectionId" value="<?php echo getInspectionId(); ?>">
-         <!-- Hidden inputs make sure disabled fields below get posted. -->
-         <input type="hidden" name="templateId" value="<?php echo getTemplateId(); ?>">
-         <input type="hidden" name="jobNumber" value="<?php echo getJobNumber(); ?>">
-         <input type="hidden" name="wcNumber" value="<?php echo getWcNumber(); ?>">
-      </form>
+      <?php Menu::render(ACTIVITY); ?>
       
-      <div class="flex-vertical content">
+      <div class="content flex-vertical flex-top flex-left">
       
-         <div class="heading"><?php echo getHeading(); ?></div>
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-         <div class="description"><?php echo getDescription(); ?></div>
-      
-         <div class="pptp-form">
-            <div class="form-row">
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
+         
+         <br>
+         
+         <div class="flex-column">
+         
+            <div class="flex-row" style="justify-content: space-evenly;">
 
-               <div class="form-col">
+               <div class="flex-column">
                
                   <div class="form-item">
                      <div class="form-label">Inspection Type</div>
@@ -1024,58 +1041,72 @@ if (!Authentication::isAuthenticated())
                </div>
 
             </div>
+            
+         </div>
+         
+         <br>
+         
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="save-button" class="accent-button">Save</button>            
          </div>
       
-         <?php echo getNavBar(); ?>
-         
-      </div>
-               
-      <script>
-         preserveSession();
-
-         // Resize notes text area to fit text.
-         var notes = document.getElementById('notes-input');
-         notes.style.height = notes.scrollHeight + "px";
-      
-         const PASS = <?php echo InspectionStatus::PASS; ?>;
-      
-         var jobNumberValidator = new SelectValidator("job-number-input");
-         var wcNumberValidator = new SelectValidator("wc-number-input");
-         var operatorValidator = new SelectValidator("operator-input");
-
-         jobNumberValidator.init();
-         wcNumberValidator.init();
-         operatorValidator.init();
-
-         function onInspectionStatusUpdate(element)
-         {
-            var inspectionStatusClasses = [
-            <?php
-            for ($inspectionStatus = InspectionStatus::FIRST; $inspectionStatus < InspectionStatus::LAST; $inspectionStatus++)
-            {
-               $class = InspectionStatus::getClass($inspectionStatus);
-               echo "\"$class\"";
-               echo ($inspectionStatus < (InspectionStatus::LAST - 1)) ? ", " : "";
-            }
-            ?>
-            ];
-
-            // Clear classes
-            for (const inspectionStatusClass of inspectionStatusClasses)
-            {
-               if (inspectionStatusClass != "")
-               {
-                  element.classList.remove(inspectionStatusClass);
-               }
-            }
-
-            // Add new class.
-            var inspectionStatus = parseInt(element.value);
-            element.classList.add(inspectionStatusClasses[inspectionStatus]);
-         }
-      </script>
+      </div> <!-- content -->
      
-   </div>
+   </div> <!-- main -->   
+         
+   <script>
+   
+      preserveSession();
+      
+      // Resize notes text area to fit text.
+      var notes = document.getElementById('notes-input');
+      notes.style.height = notes.scrollHeight + "px";
+   
+      const PASS = <?php echo InspectionStatus::PASS; ?>;
+   
+      var jobNumberValidator = new SelectValidator("job-number-input");
+      var wcNumberValidator = new SelectValidator("wc-number-input");
+      var operatorValidator = new SelectValidator("operator-input");
+
+      jobNumberValidator.init();
+      wcNumberValidator.init();
+      operatorValidator.init();
+
+      function onInspectionStatusUpdate(element)
+      {
+         var inspectionStatusClasses = [
+         <?php
+         for ($inspectionStatus = InspectionStatus::FIRST; $inspectionStatus < InspectionStatus::LAST; $inspectionStatus++)
+         {
+            $class = InspectionStatus::getClass($inspectionStatus);
+            echo "\"$class\"";
+            echo ($inspectionStatus < (InspectionStatus::LAST - 1)) ? ", " : "";
+         }
+         ?>
+         ];
+
+         // Clear classes
+         for (const inspectionStatusClass of inspectionStatusClasses)
+         {
+            if (inspectionStatusClass != "")
+            {
+               element.classList.remove(inspectionStatusClass);
+            }
+         }
+
+         // Add new class.
+         var inspectionStatus = parseInt(element.value);
+         element.classList.add(inspectionStatusClasses[inspectionStatus]);
+      }
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){location.href = "viewInspections.php";};
+      document.getElementById("save-button").onclick = function(){onSaveInspection();};      
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+            
+   </script>
 
 </body>
 

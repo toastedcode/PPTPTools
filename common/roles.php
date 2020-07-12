@@ -55,7 +55,7 @@ class Role
    {
       $permission = Permission::getPermission($permissionId);
       
-      return ($permission->isSetIn($this->$defaultPermissions));
+      return ($permission->isSetIn($this->defaultPermissions));
    }
    
    private static $roles = null;

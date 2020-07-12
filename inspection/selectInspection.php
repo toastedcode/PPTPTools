@@ -1,14 +1,19 @@
 <?php
 
+require_once '../common/activity.php';
 require_once '../common/authentication.php';
-require_once '../common/header.php';
+require_once '../common/header2.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
+require_once '../common/menu.php';
 require_once '../common/navigation.php';
 require_once '../common/params.php';
 require_once '../common/root.php';
 require_once '../common/userInfo.php';
+
+const ACTIVITY = Activity::INSPECTION;
+$activity = Activity::getActivity(ACTIVITY);
 
 const ONLY_ACTIVE = true;
 
@@ -82,7 +87,7 @@ function getTemplateOptions()
 
 function getHeading()
 {
-   $heading = "Add a New Inspection";
+   $heading = "Select an Inspection Template";
       
    return ($heading);
 }
@@ -92,20 +97,6 @@ function getDescription()
    $description = "Start by selecting choosing your inspection type and a currently active job.";
    
    return ($description);
-}
-   
-function getNavBar()
-{
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   
-   $navBar->cancelButton("location.href = 'inspections.php';");
-   $navBar->nextButton("if (validateInspectionSelection()) {submitForm('input-form', 'viewInspection.php', 'new_inspection', '');}");
-   
-   $navBar->end();
-   
-   return ($navBar->getHtml());
 }
 
 function isEditable($field)
@@ -133,43 +124,46 @@ if (!Authentication::isAuthenticated())
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="inspection.js"></script>
 
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
+        
+   <form id="input-form" action="viewInspection.php" method="POST">
+   </form>
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   <div class="main flex-horizontal flex-top flex-left">
    
-      <form id="input-form" action="" method="POST">
-      </form>
+      <?php Menu::render(ACTIVITY); ?>
       
-      <div class="flex-vertical content">
+      <div class="content flex-vertical flex-top flex-left">
       
-         <div class="heading"><?php echo getHeading(); ?></div>
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-         <div class="description"><?php echo getDescription(); ?></div>
-      
-         <div class="pptp-form">
-            <div class="form-row">
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
+         
+         <br>
+         
+         <div class="flex-column">
+         
+            <div class="flex-row" style="justify-content: space-evenly;">
 
-               <div class="form-col">
+               <div class="flex-column">
                
                   <div class="form-item">
                      <div class="form-label">Inspection Type</div>
@@ -202,32 +196,47 @@ if (!Authentication::isAuthenticated())
                   </div>
          
                </div>
+               
             </div>
+            
+         </div>
+         
+         <br>
+         
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="next-button" class="accent-button">Next</button>            
          </div>
       
-         <?php echo getNavBar(); ?>
-         
-      </div>
-               
-      <script>
-         preserveSession();
-      
-         const OASIS = <?php echo InspectionType::OASIS; ?>;
-         const LINE = <?php echo InspectionType::LINE; ?>;
-         const QCP = <?php echo InspectionType::QCP; ?>;
-         const IN_PROCESS = <?php echo InspectionType::IN_PROCESS; ?>;
-         const GENERIC = <?php echo InspectionType::GENERIC; ?>;
-      
-         var inspectionTypeValidator = new SelectValidator("inspection-type-input");
-         var jobNumberValidator = new SelectValidator("job-number-input");
-         var wcNumberValidator = new SelectValidator("wc-number-input");
-
-         inspectionTypeValidator.init();
-         jobNumberValidator.init();
-         wcNumberValidator.init();
-      </script>
+      </div> <!-- content -->
      
-   </div>
+   </div> <!-- main -->   
+         
+   <script>
+   
+      preserveSession();
+      
+      const OASIS = <?php echo InspectionType::OASIS; ?>;
+      const LINE = <?php echo InspectionType::LINE; ?>;
+      const QCP = <?php echo InspectionType::QCP; ?>;
+      const IN_PROCESS = <?php echo InspectionType::IN_PROCESS; ?>;
+      const GENERIC = <?php echo InspectionType::GENERIC; ?>;
+   
+      var inspectionTypeValidator = new SelectValidator("inspection-type-input");
+      var jobNumberValidator = new SelectValidator("job-number-input");
+      var wcNumberValidator = new SelectValidator("wc-number-input");
+   
+      inspectionTypeValidator.init();
+      jobNumberValidator.init();
+      wcNumberValidator.init();
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){window.history.back();};
+      document.getElementById("next-button").onclick = function(){onSelectInspectionTemplate();};      
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+      
+   </script>
 
 </body>
 

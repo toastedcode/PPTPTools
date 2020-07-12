@@ -38,7 +38,7 @@ function onSaveJob()
    
       // Set up our request
       requestUrl = "../api/saveJob/"
-      xhttp.open("POST", requestUrl);
+      xhttp.open("POST", requestUrl, true);
    
       // The data sent is what the user provided in the form
       xhttp.send(formData);

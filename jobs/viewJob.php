@@ -52,7 +52,7 @@ function getParams()
 
 function getView()
 {
-   $view = View::NEW_JOB;
+   $view = View::VIEW_JOB;
    
    if (getJobId() == JobInfo::UNKNOWN_JOB_ID)
    {

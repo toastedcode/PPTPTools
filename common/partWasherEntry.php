@@ -71,6 +71,24 @@ class PartWasherEntry
       
       return ($panCount);
    }
+   
+   public function initializeFromDatabaseRow($row)
+   {
+      $this->partWasherEntryId = intval($row['partWasherEntryId']);
+      $this->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+      $this->employeeNumber = intval($row['employeeNumber']);
+      $this->timeCardId = intval($row['timeCardId']);
+      $this->panCount = intval($row['panCount']);
+      $this->partCount = intval($row['partCount']);
+      
+      // These attributes were added for manual entry when no time card is available.
+      $this->jobId = intval($row['jobId']);
+      $this->operator = intval($row['operator']);
+      if ($row['manufactureDate'])
+      {
+         $this->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+      }
+   }
 
    public static function load($partWasherEntryId)
    {
@@ -86,20 +104,7 @@ class PartWasherEntry
          {
             $partWasherEntry = new PartWasherEntry();
             
-            $partWasherEntry->partWasherEntryId = intval($row['partWasherEntryId']);
-            $partWasherEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $partWasherEntry->employeeNumber = intval($row['employeeNumber']);
-            $partWasherEntry->timeCardId = intval($row['timeCardId']);
-            $partWasherEntry->panCount = intval($row['panCount']);
-            $partWasherEntry->partCount = intval($row['partCount']);
-            
-            // These attributes were added for manual entry when no time card is available.
-            $partWasherEntry->jobId = intval($row['jobId']);
-            $partWasherEntry->operator = intval($row['operator']);
-            if ($row['manufactureDate'])
-            {
-               $partWasherEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
-            }
+            $partWasherEntry->initializeFromDatabaseRow($row);
          }
       }
       

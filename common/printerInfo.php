@@ -44,6 +44,11 @@ class PrinterInfo
 
       return ($diffSeconds <= PrinterInfo::ONLINE_THRESHOLD);
    }
+   
+   public function getDisplayName()
+   {
+      return (getPrinterDisplayName($this->printerName));
+   }
 }
 
 /*

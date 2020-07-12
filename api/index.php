@@ -11,6 +11,7 @@ require_once '../common/partWasherEntry.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/printerInfo.php';
 require_once '../common/root.php';
+require_once '../common/signInfo.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/upload.php';
 require_once '../common/userInfo.php';
@@ -873,6 +874,77 @@ $router->add("deleteTimeCard", function($params) {
    echo json_encode($result);
 });
 
+$router->add("partWasherLogData", function($params) {
+   $result = array();
+   
+   $startDate = Time::startOfDay(Time::now("Y-m-d"));
+   $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["startDate"]))
+   {
+      $startDate = Time::startOfDay($params["startDate"]);
+   }
+   
+   if (isset($params["endDate"]))
+   {
+      $endDate = Time::endOfDay($params["endDate"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $databaseResult = $database->getPartWasherEntries(JobInfo::UNKNOWN_JOB_ID, UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $startDate, $endDate, false);  // Don't use mfg. time.
+      
+      // Populate data table.
+      foreach ($databaseResult as $row)
+      {
+         $partWasherEntry = new PartWasherEntry();
+         $partWasherEntry->initializeFromDatabaseRow($row);
+         
+         $userInfo = UserInfo::load($partWasherEntry->employeeNumber);
+         if ($userInfo)
+         {
+            $partWasherEntry->washerName = $userInfo->getFullName();
+         }
+
+         $jobId = $partWasherEntry->jobId;
+         
+         $operator = $partWasherEntry->operator;
+         
+         if ($partWasherEntry->timeCardId)
+         {
+            $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
+            
+            if ($timeCardInfo)
+            {
+               $jobId = $timeCardInfo->jobId;
+               
+               $operator = $timeCardInfo->employeeNumber;
+               
+               $partWasherEntry->manufactureDate = $timeCardInfo->dateTime;
+            }
+         }
+         
+         $jobInfo = JobInfo::load($jobId);
+         if ($jobInfo)
+         {
+            $partWasherEntry->jobNumber = $jobInfo->jobNumber;
+         }
+         
+         $userInfo = UserInfo::load($operator);
+         if ($userInfo)
+         {
+            $partWasherEntry->operatorName = $userInfo->getFullName();
+         }
+         
+         $result[] = $partWasherEntry;
+      }
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("savePartWasherEntry", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -1029,6 +1101,80 @@ $router->add("deletePartWasherEntry", function($params) {
    {
       $result->success = false;
       $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("partWeightLogData", function($params) {
+   $result = array();
+   
+   $startDate = Time::startOfDay(Time::now("Y-m-d"));
+   $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["startDate"]))
+   {
+      $startDate = Time::startOfDay($params["startDate"]);
+   }
+   
+   if (isset($params["endDate"]))
+   {
+      $endDate = Time::endOfDay($params["endDate"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $databaseResult = $database->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $startDate, $endDate, false);  // Don't use mfg. time.
+      
+      // Populate data table.
+      foreach ($databaseResult as $row)
+      {
+         $partWeightEntry = new PartWeightEntry();
+         $partWeightEntry->initializeFromDatabaseRow($row);
+         
+         $userInfo = UserInfo::load($partWeightEntry->employeeNumber);
+         if ($userInfo)
+         {
+            $partWeightEntry->laborerName = $userInfo->getFullName();
+         }
+         
+         $jobId = $partWeightEntry->jobId;
+         
+         $operator = $partWeightEntry->operator;
+         
+         if ($partWeightEntry->timeCardId)
+         {
+            $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
+            
+            if ($timeCardInfo)
+            {
+               $jobId = $timeCardInfo->jobId;
+               
+               $operator = $timeCardInfo->employeeNumber;
+               
+               $partWeightEntry->manufactureDate = $timeCardInfo->dateTime;
+            }
+         }
+         
+         $jobInfo = JobInfo::load($jobId);
+         if ($jobInfo)
+         {
+            $partWeightEntry->jobNumber = $jobInfo->jobNumber;
+            $partWeightEntry->wcNumber = $jobInfo->wcNumber;
+         }
+         
+         $userInfo = UserInfo::load($operator);
+         if ($userInfo)
+         {
+            $partWeightEntry->operatorName = $userInfo->getFullName();
+         }
+         
+         $partWeightEntry->partCount = $partWeightEntry->calculatePartCount();
+         
+         $result[] = $partWeightEntry;
+      }
    }
    
    echo json_encode($result);
@@ -1260,28 +1406,46 @@ $router->add("inspectionData", function($params) {
    
    if ($database && $database->isConnected())
    {
-      $inspections = $database->getInspections($inspectionType, $startDate, $endDate);
+      $databaseResult = $database->getInspections($inspectionType, $startDate, $endDate);
       
       // Populate data table.
-      foreach ($inspections as $inspection)
+      foreach ($databaseResult as $row)
       {
-         $inspection["dateTime"] = Time::fromMySqlDate($inspection["dateTime"], "Y-m-d H:i:s");
-         
-         $inspection["inspectionTypeLabel"] = InspectionType::getLabel(intval($inspection["inspectionType"]));
-         
-         $userInfo = UserInfo::load($inspection["inspector"]);
-         if ($userInfo)
+         $inspection = new Inspection();
+         $inspection->initializeFromDatabaseRow($row);
+         if (!$inspection->hasSummary())
          {
-            $inspection["inspectorName"] = $userInfo->getFullName();
+            $inspection->loadInspectionResults();
          }
          
-         $userInfo = UserInfo::load($inspection["operator"]);
+         $row["dateTime"] = $inspection->dateTime;
+         
+         $row["inspectionTypeLabel"] = InspectionType::getLabel(intval($row["inspectionType"]));
+         
+         $inspectionStatus = $inspection->getInspectionStatus();
+         $row["inspectionStatus"] = $inspection->getInspectionStatus();
+         $row["inspectionStatusLabel"] = InspectionStatus::getLabel($inspectionStatus);
+         $row["inspectionStatusClass"] = InspectionStatus::getClass($inspectionStatus);
+         
+         $userInfo = UserInfo::load($inspection->inspector);
          if ($userInfo)
          {
-            $inspection["operatorName"] = $userInfo->getFullName();
+            $row["inspectorName"] = $userInfo->getFullName();
          }
          
-         $result[] = $inspection;
+         $userInfo = UserInfo::load($inspection->operator);
+         if ($userInfo)
+         {
+            $row["operatorName"] = $userInfo->getFullName();
+         }
+         
+         $row["count"] = $inspection->getCount(true);
+         $row["naCount"] = $inspection->getCountByStatus(InspectionStatus::NON_APPLICABLE);
+         $row["passCount"] = $inspection->getCountByStatus(InspectionStatus::PASS);
+         $row["warningCount"] = $inspection->getCountByStatus(InspectionStatus::WARNING);
+         $row["failCount"] = $inspection->getCountByStatus(InspectionStatus::FAIL);
+         
+         $result[] = $row;
       }
    }
    
@@ -1655,6 +1819,33 @@ $router->add("deleteInspectionTemplate", function($params) {
    echo json_encode($result);
 });
 
+$router->add("printerData", function($params) {
+   $result = array();
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $databaseResult = $database->getPrinters();
+      
+      foreach ($databaseResult as $row)
+      {
+         $printerInfo = PrinterInfo::load($row["printerName"]);
+         
+         if ($printerInfo && $printerInfo->isCurrent())
+         {
+            $row["displayName"] = $printerInfo->getDisplayName();
+            
+            $row["status"] = ($printerInfo->isConnected) ? "Online" : "Offline";
+            
+            $result[] = $row;
+         }
+      }
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("registerPrinter", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -1765,6 +1956,29 @@ $router->add("printQueue", function($params) {
    
    $result->success = true;
    $result->queue = $printQueue->queue;
+   
+   echo json_encode($result);
+});
+
+$router->add("printQueueData", function($params) {
+   $result = array();
+   
+   $printQueue = PrintQueue::load();
+   
+   foreach ($printQueue->queue as $printJob)
+   {
+      $userInfo = UserInfo::load($printJob->owner);
+      if ($userInfo)
+      {
+         $printJob->ownerName = $userInfo->getFullName();
+      }
+      
+      $printJob->printerDisplayName = getPrinterDisplayName($printJob->printerName);
+      
+      $printJob->statusLabel = PrintJobStatus::getLabel($printJob->status);
+      
+      $result[] = $printJob;
+   }
    
    echo json_encode($result);
 });
@@ -1969,6 +2183,135 @@ $router->add("uploadOasisReport", function($params) {
    {
       $result->success = false;
       $result->error = "No report file specified.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("signData", function($params) {
+   $result = array();
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $dbaseResult = $database->getSigns();
+      
+      // Populate data table.
+      foreach ($dbaseResult as $row)
+      {
+         $result[] = $row;
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("saveSign", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   if (isset($params["signId"]) &&
+       is_numeric($params["signId"]) &&
+      (intval($params["signId"]) != SignInfo::UNKNOWN_SIGN_ID))
+   {
+      $signId = intval($params["signId"]);
+      
+      //  Updated entry
+      $signInfo = SignInfo::load($signId);
+      
+      if (!$signInfo)
+      {
+         $result->success = false;
+         $result->error = "No existing sign found.";
+      }
+   }
+   else
+   {
+      // New sign.
+      $signInfo = new SignInfo();
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["name"]) &&
+          isset($params["description"]) &&
+          isset($params["url"]))
+      {
+         $signInfo->name = $params["name"];
+         $signInfo->description = $params["description"];
+         $signInfo->url = $params["url"];
+
+         if ($signInfo->signId == SignInfo::UNKNOWN_SIGN_ID)
+         {
+            $dbaseResult = $database->newSign($signInfo);
+         }
+         else
+         {
+            $dbaseResult = $database->updateSign($signInfo);
+         }
+      
+         if ($dbaseResult)
+         {
+            $result->signInfo = $signInfo;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("deleteSign", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["signId"]) &&
+       is_numeric($params["signId"]) &&
+       (intval($params["signId"]) != SignInfo::UNKNOWN_SIGN_ID))
+   {
+      $signId = intval($params["signId"]);
+      
+      $signInfo = SignInfo::load($signId);
+      
+      if ($signInfo)
+      {
+         $dbaseResult = $database->deleteSign($signId);
+         
+         if ($dbaseResult)
+         {
+            $result->success = true;
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing sign found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
    }
    
    echo json_encode($result);

@@ -60,9 +60,9 @@ class Activity
             Activity::PART_WEIGHT =>         new Activity(Activity::PART_WEIGHT,         "Part Weight Log",      "fingerprint",          Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     "$ROOT/partWeightLog/partWeightLog.php"),
             Activity::PART_WASH =>           new Activity(Activity::PART_WASH,           "Parts Washer Log",     "opacity",              Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     "$ROOT/partWasherLog/partWasherLog.php"),
             Activity::INSPECTION_TEMPLATE => new Activity(Activity::INSPECTION_TEMPLATE, "Inspection Templates", "format_list_bulleted", Permission::getPermission(Permission::VIEW_INSPECTION_TEMPLATE)->bits, "$ROOT/inspectionTemplate/inspectionTemplates.php"),
-            Activity::INSPECTION =>          new Activity(Activity::INSPECTION,          "Inspections",          "search",               Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          "$ROOT/inspection/inspections.php"),
-            Activity::PRINT_MANAGER =>       new Activity(Activity::PRINT_MANAGER,       "Print Manager",        "print",                Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits,       "$ROOT/printer/printer.php"),
-            Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/signage.php")
+            Activity::INSPECTION =>          new Activity(Activity::INSPECTION,          "Inspections",          "search",               Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          "$ROOT/inspection/viewInspections.php"),
+            Activity::PRINT_MANAGER =>       new Activity(Activity::PRINT_MANAGER,       "Print Manager",        "print",                Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits,       "$ROOT/printer/viewPrinters.php"),
+            Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/viewSigns.php")
          );
       }
       

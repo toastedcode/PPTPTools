@@ -2,7 +2,7 @@
 
 require_once './common/authentication.php';
 require_once './common/database.php';
-require_once './common/header.php';
+require_once './common/header2.php';
 require_once './common/permissions.php';
 
 class Activity
@@ -422,14 +422,11 @@ $background = Authentication::isAuthenticated() ? "#eee" : "url('./images/PPTPFl
 
    <!--  Material Design Lite -->
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css" />
 
    <!-- PPTP -->
-   <link rel="stylesheet" type="text/css" href="common/flex.css"/>
-   <link rel="stylesheet" type="text/css" href="common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="pptpTools.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
 
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="common/common.js"></script>
    
 </head>

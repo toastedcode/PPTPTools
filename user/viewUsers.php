@@ -92,7 +92,7 @@ if (!Authentication::isAuthenticated())
 
       var url = getTableQuery();
       
-      // Create Tabulator on DOM element time-card-table.
+      // Create Tabulator on DOM element user-table.
       var table = new Tabulator("#user-table", {
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",

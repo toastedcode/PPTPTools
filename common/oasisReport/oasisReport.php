@@ -267,8 +267,8 @@ class OasisReport
       
       for ($i = 0; $i < count($this->inspections); $i++)
       {
-         $html .= "<div style=\"align-self: flex-start\"><b>Sample " . ($i + 1) . "</b></div>";
-         $html .= "<div style=\"align-self: flex-start\">" . $this->inspections[$i]->getDate() . "</div>";
+         $html .= "<div class=\"sample-heading\" style=\"align-self: flex-start\">Sample " . ($i + 1) . "</div>";
+         $html .= "<div class=\"sample-date\" style=\"align-self: flex-start\">" . $this->inspections[$i]->getDate() . "</div>";
          $html .= $this->inspections[$i]->toHtml();
       }
          

@@ -248,7 +248,7 @@ if (!Authentication::isAuthenticated())
       
          // Set up our request
          requestUrl = "../api/printPanTicket/"
-         xhttp.open("POST", requestUrl);
+         xhttp.open("POST", requestUrl, true);
       
          // The data sent is what the user provided in the form
          xhttp.send(formData);         

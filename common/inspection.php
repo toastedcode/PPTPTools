@@ -159,6 +159,29 @@ class Inspection
       $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
    }
    
+   public function initializeFromDatabaseRow($row)
+   {
+      $this->inspectionId = intval($row['inspectionId']);
+      $this->templateId = intval($row['templateId']);
+      $this->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+      $this->inspector = intval($row['inspector']);
+      $this->comments = $row['comments'];
+      $this->jobId = $row['jobId'];
+      $this->operator = intval($row['operator']);
+      $this->jobNumber = $row['jobNumber'];
+      $this->wcNumber = intval($row['wcNumber']);
+      
+      // Inspection summary.
+      $this->samples = intval($row['samples']);
+      $this->naCount = intval($row['naCount']);
+      $this->passCount = intval($row['passCount']);
+      $this->warningCount = intval($row['warningCount']);
+      $this->failCount = intval($row['failCount']);
+      
+      // Source data file for Oasis reports.
+      $this->dataFile = $row['dataFile'];
+   }
+   
    public static function load($inspectionId, $loadInspectionResults)
    {
       $inspection = null;
@@ -173,25 +196,7 @@ class Inspection
          {
             $inspection = new Inspection();
             
-            $inspection->inspectionId = intval($row['inspectionId']);
-            $inspection->templateId = intval($row['templateId']);
-            $inspection->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $inspection->inspector = intval($row['inspector']);
-            $inspection->comments = $row['comments'];
-            $inspection->jobId = $row['jobId'];
-            $inspection->operator = intval($row['operator']);
-            $inspection->jobNumber = $row['jobNumber'];
-            $inspection->wcNumber = intval($row['wcNumber']);
-            
-            // Inspection summary.
-            $inspection->samples = intval($row['samples']);
-            $inspection->naCount = intval($row['naCount']);
-            $inspection->passCount = intval($row['passCount']);
-            $inspection->warningCount = intval($row['warningCount']);
-            $inspection->failCount = intval($row['failCount']);
-            
-            // Source data file for Oasis reports.
-            $inspection->dataFile = $row['dataFile'];
+            $inspection->initializeFromDatabaseRow($row);
             
             // Optionally load actual inspection results.
             if ($loadInspectionResults)

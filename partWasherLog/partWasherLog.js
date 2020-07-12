@@ -241,7 +241,7 @@ function onSubmit()
    
       // Set up our request
       requestUrl = "../api/savePartWasherEntry/"
-      xhttp.open("POST", requestUrl);
+      xhttp.open("POST", requestUrl, true);
    
       // The data sent is what the user provided in the form
       xhttp.send(formData);

@@ -20,4 +20,17 @@ abstract class PrintJobStatus
    }
 }
 
+function getPrinterDisplayName($printerName)
+{
+   $displayName = $printerName;
+   
+   // Remove network location from printer name.
+   if (strrpos($printerName, "\\") !== false)
+   {
+      $displayName = substr($printerName, strrpos($printerName, "\\") + 1);
+   }
+   
+   return ($displayName);
+}
+
 ?>

@@ -1,144 +1,135 @@
 <?php
 
+require_once '../common/activity.php';
 require_once '../common/database.php';
-require_once '../common/navigation.php';
+require_once '../common/header2.php';
+require_once '../common/menu.php';
 require_once '../common/permissions.php';
-require_once '../common/roles.php';
-require_once '../common/userInfo.php';
 
-class ViewSigns
+// ********************************** BEGIN ************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
 {
-   public function __construct()
-   {
-   }
+   header('Location: ../home.php');
+   exit;
+}
+
+?>
+
+<html>
+
+<head>
+
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
-   public function getHtml()
-   {
-      $signsDiv = ViewSigns::signsDiv();
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   
+   <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
+   
+   <script src="../common/common.js"></script>
+   <script src="signage.js"></script>
       
-      $navBar = ViewSigns::navBar();
+</head>
+
+<body class="flex-vertical flex-top flex-left">
+
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="main flex-horizontal flex-top flex-left">
+   
+      <?php Menu::render(Activity::SIGNAGE); ?>
       
-      $html = 
-<<<HEREDOC
-      <script src="signage.js"></script>
-   
-      <div class="flex-vertical content">
-
-         <div class="heading">Digital Signage</div>
-
-         <div class="description">You can use PPTP Tools to set up and configure your Screenly digital signs.</div>
-
-         <div class="flex-vertical inner-content"> 
-   
-            $signsDiv
-         
+      <div class="content flex-vertical flex-top flex-left">
+      
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading">Digital Signage</div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
          </div>
+         
+         <div id="description" class="description">You can use PPTP Tools to set up and configure your Screenly digital signs.</div>
 
-         $navBar;
+         <br>
+        
+         <button id="new-sign-button" class="accent-button">New Sign</button>
 
-      </div>
-HEREDOC;
+         <br>
+        
+         <div id="sign-table"></div>
+         
+      </div> <!-- content -->
       
-      return ($html);
-   }
+   </div> <!-- main -->
    
-   public function render()
-   {
-      echo (ViewSigns::getHtml());
-   }
+   <script>
    
-   private function navBar()
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      $navBar->mainMenuButton();
-      $navBar->highlightNavButton("New Sign", "onNewSign()", true);
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
-   
-   private function signsDiv()
-   {
-      $html = "";
-      
-      $database = new PPTPDatabase();
-      
-      $database->connect();
-      
-      if ($database->isConnected())
+      preserveSession();
+
+      function getTableQuery()
       {
-         $result = $database->getSigns();
-         
-         if ($result && ($database->countResults($result) > 0))
-         {
-         
-            $html = 
-<<<HEREDOC
-            <div class="table-container">
-               <table class="signs-table">
-                  <tr>
-                     <th/>
-                     <th>Name</th>
-                     <th>Description</th>
-                     <th>URL</th>
-                     <th/>
-                     <th/>
-                  </tr>
-HEREDOC;
+         return ("<?php echo $ROOT ?>/api/signData/");
+      }
 
-            while ($row = $result->fetch_assoc())
-            {
-               $signInfo = SignInfo::load($row["signId"]);
-               
-               $signButton = "<button class=\"launch-button\" onclick=\"openURL('$signInfo->url')\">Go</button>";
-               
-               $viewEditIcon = "";
-               $deleteIcon = "";
-               if (Authentication::checkPermissions(Permission::EDIT_SIGN))
-               {
-                  $viewEditIcon =
-                  "<i class=\"material-icons table-function-button\" onclick=\"onEditSign('$signInfo->signId')\">mode_edit</i>";
-                  
-                  $deleteIcon =
-                  "<i class=\"material-icons table-function-button\" onclick=\"onDeleteSign('$signInfo->signId')\">delete</i>";
+      var url = getTableQuery();
+      
+      // Create Tabulator on DOM element sign-table.
+      var table = new Tabulator("#sign-table", {
+         //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+         layout:"fitData",
+         responsiveLayout:"hide", // enable responsive layouts
+         ajaxURL:url,
+         //Define Table Columns
+         columns:[
+            {title:"", field:"launch",
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<button class=\"small-button accent-button\" style=\"width:50px;\">Go</button>");
                }
-               else
-               {
-                  $viewEditIcon =
-                  "<i class=\"material-icons table-function-button\" onclick=\"onViewSign('$signInfo->signId')\">visibility</i>";
-               }
-               
-               if ($signInfo)
-               {
-                  $html .=
-<<<HEREDOC
-                  <tr>
-                     <td>$signButton</td>
-                     <td>$signInfo->name</td>
-                     <td>$signInfo->description</td>
-                     <td>$signInfo->url</td>
-                     <td>$viewEditIcon</td>
-                     <td>$deleteIcon</td>
-                  </tr>
-HEREDOC;
+            },
+            {title:"Name",        field:"name",        hozAlign:"left"},
+            {title:"Description", field:"description", hozAlign:"left"},
+            {title:"URL",         field:"url",         hozAlign:"left"},
+            {title:"",           field:"delete",
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">delete</i>");
                }
             }
-            
-            $html .=
-<<<HEREDOC
-               </table>
-            </div>
-HEREDOC;
-         }
-         else
-         {
-            $html = "<div class=\"no-data\">No signs are currently set up in the system.</div>";
-         }
-      }
-      
-      return ($html);
-   }
-}
-?>
+         ],
+         cellClick:function(e, cell){
+            var signId = parseInt(cell.getRow().getData().signId);
+            var url = cell.getRow().getData().url;
+
+            if (cell.getColumn().getField() == "launch")
+            {
+               window.open(url);
+            }
+            else if (cell.getColumn().getField() == "delete")
+            {
+               onDeleteSign(signId);
+            }
+            else // Any other column
+            {
+               // Open user for viewing/editing.
+               document.location = "<?php echo $ROOT?>/signage/viewSign.php?signId=" + signId;               
+            }
+         },
+         rowClick:function(e, row){
+            // No row click function needed.
+         },
+      });
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("new-sign-button").onclick = function(){location.href = 'viewSign.php';};
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+   </script>
+   
+</body>
+
+</html>
