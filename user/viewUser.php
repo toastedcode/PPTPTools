@@ -2,7 +2,7 @@
 
 require_once '../common/activity.php';
 require_once '../common/commentCodes.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/userInfo.php';
 require_once '../common/menu.php';
 require_once '../common/params.php';
@@ -231,7 +231,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -247,7 +247,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
@@ -286,22 +286,22 @@ if (!Authentication::isAuthenticated())
       
                <div class="form-item">
                   <div class="form-label">Employee #</div>
-                  <input id="employee-number-input" type="text" name="employeeNumber" form="input-form" style="width:150px;" value="<?php echo getUserInfo()->employeeNumber; ?>" oninput="this.validator.validate()" <?php echo !isEditable(UserInputField::EMPLOYEE_NUMBER) ? "disabled" : ""; ?>/>
+                  <input id="employee-number-input" type="text" name="employeeNumber" form="input-form" maxlength="5" style="width:150px;" value="<?php echo getUserInfo()->employeeNumber; ?>" oninput="this.validator.validate()" <?php echo !isEditable(UserInputField::EMPLOYEE_NUMBER) ? "disabled" : ""; ?>/>
                </div>
       
                <div class="form-item">
                   <div class="form-label">First Name</div>
-                  <input id="first-name-input" type="text" name="firstName" form="input-form" style="width:150px;" value="<?php echo getUserInfo()->firstName; ?>" <?php echo !isEditable(UserInputField::FIRST_NAME) ? "disabled" : ""; ?> />
+                  <input id="first-name-input" type="text" name="firstName" form="input-form" maxlength="16" style="width:150px;" value="<?php echo getUserInfo()->firstName; ?>" <?php echo !isEditable(UserInputField::FIRST_NAME) ? "disabled" : ""; ?> />
                </div>
       
                <div class="form-item">
                   <div class="form-label">Last Name</div>
-                  <input id="last-name-input" type="text" name="lastName" form="input-form" style="width:150px;" value="<?php echo getUserInfo()->lastName; ?>" <?php echo !isEditable(UserInputField::LAST_NAME) ? "disabled" : ""; ?> />
+                  <input id="last-name-input" type="text" name="lastName" form="input-form" maxlength="16" style="width:150px;" value="<?php echo getUserInfo()->lastName; ?>" <?php echo !isEditable(UserInputField::LAST_NAME) ? "disabled" : ""; ?> />
                </div>
       
                <div class="form-item">
                   <div class="form-label">Email</div>
-                  <input id="email-input" type="text" name="email" form="input-form" style="width:300px;" value="<?php echo getUserInfo()->email; ?>" <?php echo !isEditable(UserInputField::EMAIL) ? "disabled" : ""; ?> />
+                  <input id="email-input" type="text" name="email" form="input-form" maxlength="32" style="width:300px;" value="<?php echo getUserInfo()->email; ?>" <?php echo !isEditable(UserInputField::EMAIL) ? "disabled" : ""; ?> />
                </div>
       
                <div class="form-item">
@@ -313,12 +313,12 @@ if (!Authentication::isAuthenticated())
       
                <div class="form-item">
                   <div class="form-label">Username</div>
-                  <input id="user-name-input" type="text" name="username" form="input-form" style="width:150px;" value="<?php echo getUserInfo()->username; ?>" <?php echo !isEditable(UserInputField::USERNAME) ? "disabled" : ""; ?> />
+                  <input id="user-name-input" type="text" name="username" form="input-form" maxlength="32" style="width:150px;" value="<?php echo getUserInfo()->username; ?>" <?php echo !isEditable(UserInputField::USERNAME) ? "disabled" : ""; ?> />
                </div>
       
                <div class="form-item">
                   <div class="form-label">Password</div>
-                  <input id="user-password-input" type="password" name="password" form="input-form" style="width:150px;" value="<?php echo getUserInfo()->password; ?>" <?php echo !isEditable(UserInputField::PASSWORD) ? "disabled" : ""; ?> />
+                  <input id="user-password-input" type="password" name="password" form="input-form" maxlength="32" style="width:150px;" value="<?php echo getUserInfo()->password; ?>" <?php echo !isEditable(UserInputField::PASSWORD) ? "disabled" : ""; ?> />
                </div>
       
                <div class="form-item">
@@ -358,11 +358,26 @@ if (!Authentication::isAuthenticated())
       employeeNumberValidator.init();
 
       // Setup event handling on all DOM elements.
-      document.getElementById("cancel-button").onclick = function(){window.history.back();};
-      document.getElementById("save-button").onclick = function(){onSubmit();};      
+      document.getElementById("cancel-button").onclick = function(){onCancel();};
+      document.getElementById("save-button").onclick = function(){onSaveUser();};      
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
-            
+      document.getElementById("role-input").onchange = onRoleChange;
+      
+      // Store the initial state of the form, for change detection.
+      setInitialFormState("input-form");
+
+      // Permission bits.
+      var defaultPermissions =
+      [
+         <?php
+         foreach (Role::getRoles() as $role)
+         {
+            echo $role->defaultPermissions . ", ";
+         }
+         ?>   
+      ];
+      
    </script>
 
 </body>

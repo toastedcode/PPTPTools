@@ -1,7 +1,7 @@
 <?php
 
 require_once '../common/activity.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/jobInfo.php';
 require_once '../common/menu.php';
 require_once '../common/params.php';
@@ -265,7 +265,7 @@ function getCreationDate()
 
 function getWcNumberOptions()
 {
-   $options = "";
+   $options = "<option style=\"display:none\">";
    
    $database = PPTPDatabase::getInstance();
    
@@ -369,7 +369,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -385,7 +385,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
@@ -415,8 +415,6 @@ if (!Authentication::isAuthenticated())
             <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
             <i id="help-icon" class="material-icons icon-button">help</i>
          </div>
-         
-         <br>
          
          <div id="description" class="description"><?php echo getDescription(); ?></div>
          
@@ -544,11 +542,14 @@ if (!Authentication::isAuthenticated())
       autoFillPartStats();
 
       // Setup event handling on all DOM elements.
-      document.getElementById("cancel-button").onclick = function(){window.history.back();};
+      document.getElementById("cancel-button").onclick = function(){onCancel();};
       document.getElementById("save-button").onclick = function(){onSaveJob();};      
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
-            
+
+      // Store the initial state of the form, for change detection.
+      setInitialFormState("input-form");
+      
    </script>
 
 </body>

@@ -2,7 +2,7 @@
 
 require_once '../common/activity.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/menu.php';
 require_once '../common/permissions.php';
 
@@ -14,7 +14,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -30,7 +30,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    

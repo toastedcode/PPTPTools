@@ -1,4 +1,4 @@
-function onSubmit()
+function onSaveInspectionTemplate()
 {
    if (validateInspectionTemplate())
    {
@@ -17,7 +17,7 @@ function onSubmit()
    
             if (json.success == true)
             {
-               location.href = "inspectionTemplates.php";
+               location.href = "viewInspectionTemplates.php";
             }
             else
             {
@@ -45,6 +45,15 @@ function onSubmit()
    }
 }
 
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
+   }
+}
+
 function onDeleteInspectionTemplate(templateId)
 {
    if (confirm("Are you sure you want to delete this template?"))
@@ -63,7 +72,7 @@ function onDeleteInspectionTemplate(templateId)
                
                if (json.success == true)
                {
-                  location.href = "inspectionTemplates.php";            
+                  location.href = "viewInspectionTemplates.php";            
                }
                else
                {
@@ -80,6 +89,11 @@ function onDeleteInspectionTemplate(templateId)
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
    }
+}
+
+function onCopyInspectionTemplate(templateId)
+{
+   location.href = "viewInspectionTemplate.php?copyFrom=" + templateId;
 }
 
 function onInspectionTypeChange()

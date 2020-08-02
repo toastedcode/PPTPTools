@@ -1,7 +1,30 @@
 @CHARSET "ISO-8859-1";
 
-form {
-	margin: 0px 0px 0px 0px;
+table {
+   background: #ffffff;
+   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+   border-collapse:collapse;
+}
+
+tr {
+   border: 1px solid #dddddd;
+}
+
+th, td {
+   text-align: left;
+   padding: 18px;
+   font-size: 10pt;
+}
+
+tr:hover {
+   background: #eeeeee;
+   cursor: pointer;
+}
+
+tr button {
+	font-size: 10pt;
+   min-width: 0px;
+   padding: 3px 3px 3px 3px;
 }
 
 .label-div {

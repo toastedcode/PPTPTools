@@ -3,6 +3,7 @@
 require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/header.php';
+require_once '../common/menu.php';
 require_once '../common/navigation.php';
 require_once '../common/panTicket.php';
 require_once '../common/params.php';
@@ -49,30 +50,6 @@ function getPanTicket()
    return ($panTicket);
 }
 
-function getNavBar()
-{
-   // Time card ids are synonomous with pan ticket ids.
-   $timeCardId = getPanTicketId();
-   
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   
-   if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
-   {
-      $navBar->cancelButton("window.history.back();", false);
-      $navBar->highlightNavButton("Print", "printPanTicket()", false);
-   }
-   else
-   {
-      $navBar->highlightNavButton("Ok", "location.href = '../home.php'", false);
-   }
-   
-   $navBar->end();
-   
-   return ($navBar->getHtml());
-}
-
 function getPrinterOptions()
 {
    $options = "";
@@ -86,14 +63,14 @@ function getPrinterOptions()
       while ($result && ($row = $result->fetch_assoc()))
       {
          $printerInfo = PrinterInfo::load($row["printerName"]);
-
+         
          if ($printerInfo && $printerInfo->isCurrent())
          {
             $displayName = $printerInfo->printerName;
             if (strrpos($printerInfo->printerName, "\\") !== false)
             {
                $displayName = substr($printerInfo->printerName, strrpos($printerInfo->printerName, "\\") + 1);
-            }            
+            }
             
             $disabled = "";
             $selected = "";
@@ -103,18 +80,28 @@ function getPrinterOptions()
                $disabled = "disabled";
                
                if (isset($_SESSION["preferredPrinter"]) &&
-                   ($printerInfo->printerName == $_SESSION["preferredPrinter"]))
+                  ($printerInfo->printerName == $_SESSION["preferredPrinter"]))
                {
-                 $selected = "selected"; 
+                  $selected = "selected";
                }
             }
             
             $options .= "<option value=\"$printerInfo->printerName\" $selected $disabled>$displayName</option>";
          }
-      }      
+      }
    }
    
    return ($options);
+}
+
+function renderPanTicket()
+{
+   $panTicket = getPanTicket();
+   
+   if ($panTicket)
+   {
+      $panTicket->render();
+   }
 }
 
 // *********************************** BEGIN ***********************************
@@ -130,85 +117,86 @@ if (!Authentication::isAuthenticated())
 }
 ?>
 
-<!DOCTYPE html>
 <html>
 
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/panTicket.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src = "../thirdParty/dymo/DYMO.Label.Framework.3.0.js" type="text/javascript" charset="UTF-8"></script>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/panTicket.css"/>
+   
    <script src="../common/common.js"></script>
    <script src="../common/panTicket.js"></script>
-
+      
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
+
+   <form id="input-form" action="" method="POST">
+      <input type="hidden" name="panTicketId" value="<?php echo getPanTicketId(); ?>">
+   </form>
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
-     
-     <form id="input-form" action="" method="POST">
-        <input type="hidden" name="panTicketId" value="<?php echo getPanTicketId(); ?>">
-      </form>
+   <div class="main flex-horizontal flex-top flex-left">
    
-     <div class="flex-vertical content">
-
-        <div class="heading">Print Pan Tickets</div>
-
-        <div class="description">ISO standards require that all manufactured parts be tracked with a pan ticket.</div>
-
-        <div class="flex-horizontal inner-content" style="align-items:center; width:100%;">
- 
-           <!-- img id="pan-ticket-image" src="" width="25%" style="display:none; margin-right:50px;" alt="pan ticket"/-->
+      <?php Menu::render(Activity::TIME_CARD); ?>
+      
+      <div class="content flex-vertical flex-top flex-left">
+      
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading">Print Pan Tickets</div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
+         
+         <div id="description" class="description">ISO standards require that all manufactured parts be tracked with a pan ticket.</div>
+         
+         <br>
+         
+         <div class="flex-horizontal flex-v-center">
+         
            <div style="margin-right: 50px;">
-              <?php $panTicket = new PanTicket(getPanTicketId()); $panTicket->render(); ?>
+              <?php renderPanTicket(); ?>
            </div>
            
-            <div class="pptp-form">
-
+            <div class="flex-vertical">
+   
                   <div class="form-item">
                      <div class="form-label">Printer</div>
-                     <select id="printer-input" class="form-input-medium" type="text" name="printerName" form="input-form">
+                     <select id="printer-input" type="text" name="printerName" form="input-form">
                         <?php echo getPrinterOptions(); ?>
                      </select>
                   </div>
-
+   
                   <div class="form-item">
                      <div class="form-label">Copies</div>
-                     <input id="copies-input" class="form-input-medium" type="number" name="copies" form="input-form" style="width:50px;" value="1">
+                     <input id="copies-input" type="number" name="copies" form="input-form" style="width:50px;" value="1">
                   </div>
-
+   
             </div>
-
-        </div>
-        
-        <?php echo getNavBar(); ?>
+            
+         </div>
          
-     </div>
-     
-   </div>
+         <br>
+         <br>
+         
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="print-button" class="accent-button">Print</button>            
+         </div>
+         
+      </div> <!-- content -->
+      
+   </div> <!-- main -->
    
    <script>
-      preserveSession();
    
-      /*
-      dymo.label.framework.init(function() {
-         var label = new PanTicket(<!--php echo getPanTicketId(); ?-->, "pan-ticket-image", );
-      });
-      */
+      preserveSession();
+
 
       function printPanTicket()
       {
@@ -252,9 +240,15 @@ if (!Authentication::isAuthenticated())
       
          // The data sent is what the user provided in the form
          xhttp.send(formData);         
-      }
+      }      
+      
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){window.history.back();};
+      document.getElementById("print-button").onclick = printPanTicket;
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
    </script>
-
+   
 </body>
 
 </html>

@@ -2,7 +2,7 @@
 
 require_once '../common/activity.php';
 require_once '../common/authentication.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
@@ -138,7 +138,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -154,7 +154,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/oasisReport/oasisReport.css"/>
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    

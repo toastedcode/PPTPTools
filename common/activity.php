@@ -16,7 +16,8 @@ class Activity
    const INSPECTION = 7;
    const PRINT_MANAGER = 8;
    const SIGNAGE = 9;
-   const LAST = 10;
+   const PAN_TICKET = 10;
+   const LAST = 11;
    
    public $id;
    public $label;
@@ -42,7 +43,8 @@ class Activity
       Activity::INSPECTION_TEMPLATE,
       Activity::INSPECTION,
       Activity::PRINT_MANAGER,
-      Activity::SIGNAGE
+      Activity::SIGNAGE,
+      Activity::PAN_TICKET
    );
    
    private static $ACTIVITIES = null;
@@ -59,10 +61,11 @@ class Activity
             Activity::TIME_CARD =>           new Activity(Activity::TIME_CARD,           "Time Cards",           "schedule",             Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           "$ROOT/timecard/viewTimeCards.php"),
             Activity::PART_WEIGHT =>         new Activity(Activity::PART_WEIGHT,         "Part Weight Log",      "fingerprint",          Permission::getPermission(Permission::VIEW_PART_WEIGHT_LOG)->bits,     "$ROOT/partWeightLog/partWeightLog.php"),
             Activity::PART_WASH =>           new Activity(Activity::PART_WASH,           "Parts Washer Log",     "opacity",              Permission::getPermission(Permission::VIEW_PART_WASHER_LOG)->bits,     "$ROOT/partWasherLog/partWasherLog.php"),
-            Activity::INSPECTION_TEMPLATE => new Activity(Activity::INSPECTION_TEMPLATE, "Inspection Templates", "format_list_bulleted", Permission::getPermission(Permission::VIEW_INSPECTION_TEMPLATE)->bits, "$ROOT/inspectionTemplate/inspectionTemplates.php"),
+            Activity::INSPECTION_TEMPLATE => new Activity(Activity::INSPECTION_TEMPLATE, "Inspection Templates", "format_list_bulleted", Permission::getPermission(Permission::VIEW_INSPECTION_TEMPLATE)->bits, "$ROOT/inspectionTemplate/viewInspectionTemplates.php"),
             Activity::INSPECTION =>          new Activity(Activity::INSPECTION,          "Inspections",          "search",               Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          "$ROOT/inspection/viewInspections.php"),
             Activity::PRINT_MANAGER =>       new Activity(Activity::PRINT_MANAGER,       "Print Manager",        "print",                Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits,       "$ROOT/printer/viewPrinters.php"),
-            Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/viewSigns.php")
+            Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/viewSigns.php"),
+            Activity::PAN_TICKET =>          new Activity(Activity::PAN_TICKET,          "Pan Ticket Scanner",   "camera_alt",           Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           "$ROOT/panTicket/scanPanTicket.php")
          );
       }
       

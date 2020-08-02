@@ -1,3 +1,59 @@
+function onSavePartWasherEntry()
+{
+   if (validatePartWasherEntry())
+   {
+      var form = document.querySelector('#input-form');
+      
+      var xhttp = new XMLHttpRequest();
+   
+      // Bind the form data.
+      var formData = new FormData(form);
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         try
+         {
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "partWasherLog.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
+         }
+         catch (expection)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/savePartWasherEntry/"
+      xhttp.open("POST", requestUrl, true);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);
+   }
+}
+
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
+   }
+}
+
 function onDeletePartWasherEntry(partWasherEntryId)
 {
    if (confirm("Are you sure you want to delete this log entry?"))
@@ -199,53 +255,6 @@ function onYesterdayButton()
    yesterday.setDate(yesterday.getDate() - 1);
    
    document.querySelector('#manufacture-date-input').value = formattedDate(yesterday); 
-}
-
-function onSubmit()
-{
-   if (validatePartWasherEntry())
-   {
-      var form = document.querySelector('#input-form');
-      
-      var xhttp = new XMLHttpRequest();
-   
-      // Bind the form data.
-      var formData = new FormData(form);
-   
-      // Define what happens on successful data submission.
-      xhttp.addEventListener("load", function(event) {
-         try
-         {
-            var json = JSON.parse(event.target.responseText);
-   
-            if (json.success == true)
-            {
-               location.href = "partWasherLog.php?view=view_part_washer_log";
-            }
-            else
-            {
-               alert(json.error);
-            }
-         }
-         catch (expection)
-         {
-            console.log("JSON syntax error");
-            console.log(this.responseText);
-         }
-      });
-   
-      // Define what happens on successful data submission.
-      xhttp.addEventListener("error", function(event) {
-        alert('Oops! Something went wrong.');
-      });
-   
-      // Set up our request
-      requestUrl = "../api/savePartWasherEntry/"
-      xhttp.open("POST", requestUrl, true);
-   
-      // The data sent is what the user provided in the form
-      xhttp.send(formData);
-   }
 }
 
 function set(elementId, value)

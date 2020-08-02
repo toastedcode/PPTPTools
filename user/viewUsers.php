@@ -2,7 +2,7 @@
 
 require_once '../common/activity.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/menu.php';
 require_once '../common/permissions.php';
 require_once '../common/roles.php';
@@ -22,7 +22,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -38,7 +38,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.min.js"></script>
@@ -103,7 +103,7 @@ if (!Authentication::isAuthenticated())
             {title:"Employee #", field:"employeeNumber", hozAlign:"left", responsive:0},
             {title:"Name",       field:"name",           hozAlign:"left", responsive:1, headerFilter:true},
             {title:"Username",   field:"username",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Email",      field:"email",          hozAlign:"left", responsive:2},
+            {title:"Email",      field:"email",          hozAlign:"left", responsive:2, width:150},
             {title:"Role",       field:"roleLabel",      hozAlign:"left", responsive:0, headerFilter:true},
             {title:"",           field:"delete",                          responsive:0,
                formatter:function(cell, formatterParams, onRendered){

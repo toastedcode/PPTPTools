@@ -1,6 +1,6 @@
 <?php
 require_once 'params.php';
-require_once '../phpqrcode/phpqrcode.php';
+require_once '../thirdParty/phpqrcode/phpqrcode.php';
 
 $params = Params::parse();
 

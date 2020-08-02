@@ -2,7 +2,7 @@
 
 require_once '../common/activity.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/menu.php';
 require_once '../common/permissions.php';
 require_once '../common/roles.php';
@@ -15,7 +15,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -31,7 +31,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.js"></script>
@@ -58,7 +58,8 @@ if (!Authentication::isAuthenticated())
             <i id="help-icon" class="material-icons icon-button">help</i>
          </div>
          
-         <div id="description" class="description">Something something cloud.  Something something print.</div>
+         <!-- div id="description" class="description">PPTP Tools supports cloud printing of pan tickets using Dymo label printers.<br><br><b>Local Printers</b> are the printers being served by this device.<br><br><b>Cloud printers</b> are printers available all users in the system.<br><br><b>Print queue</b> shows what pan tickts are currently being printed</div-->
+         <div id="description" class="description"><p>PPTP Tools supports cloud printing of pan tickets using Dymo label printers.</p><p><b>Local Printers</b> are the printers being served by this device, including local and network printers.</p><p><b>Cloud Printers</b> are printers available all users in the system.</p><p>The <b>Print Queue</b> allows you to see what pan tickets are currently being printed.</p></div>
          
          <br>
 
@@ -109,7 +110,7 @@ if (!Authentication::isAuthenticated())
       var localPrinterTable = new Tabulator("#local-printer-table", {
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
-         ajaxLoader:false,
+         responsiveLayout:"hide", // enable responsive layouts
          //Define Table Columns
          columns:[
             {title:"Name",     field:"name", hozAlign:"left"},
@@ -131,7 +132,7 @@ if (!Authentication::isAuthenticated())
       var cloudPrinterTable = new Tabulator("#cloud-printer-table", {
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
-         //ajaxLoader:false,
+         responsiveLayout:"hide", // enable responsive layouts
          //Define Table Columns
          columns:[
             {title:"Name",     field:"displayName", hozAlign:"left"},
@@ -145,7 +146,7 @@ if (!Authentication::isAuthenticated())
       var printQueueTable = new Tabulator("#print-queue-table", {
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
-         //ajaxLoader:false,
+         responsiveLayout:"hide", // enable responsive layouts
          //Define Table Columns
          columns:[
             {title:"Date",            field:"dateTime",       hozAlign:"left", responsive:0,

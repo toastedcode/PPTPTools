@@ -1,7 +1,7 @@
 <?php
 
 require_once '../common/activity.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/menu.php';
 require_once '../common/params.php';
 require_once '../common/signInfo.php';
@@ -170,7 +170,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -186,7 +186,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
@@ -221,17 +221,17 @@ if (!Authentication::isAuthenticated())
 
             <div class="form-item">
                <div class="form-label">Name</div>
-               <input id="sign-name-input" type="text" name="name" form="input-form" style="width:300px;" value="<?php echo getSignInfo()->name; ?>" <?php echo getDisabled(UserInputField::NAME); ?>/>
+               <input id="sign-name-input" type="text" name="name" form="input-form" maxlength="64" style="width:300px;" value="<?php echo getSignInfo()->name; ?>" <?php echo getDisabled(UserInputField::NAME); ?>/>
             </div>
 
             <div class="form-item">
                <div class="form-label">Description</div>
-               <input id="sign-description-input" type="text" name="description" form="input-form" style="width:300px;" value="<?php echo getSignInfo()->description; ?>" <?php echo getDisabled(UserInputField::DESCRIPTION); ?>/>
+               <input id="sign-description-input" type="text" name="description" form="input-form" maxlength="64" style="width:300px;" value="<?php echo getSignInfo()->description; ?>" <?php echo getDisabled(UserInputField::DESCRIPTION); ?>/>
             </div>
 
             <div class="form-item">
                <div class="form-label">URL</div>
-               <input id="sign-url-input" type="text" name="url" form="input-form" style="width:300px;" value="<?php echo getSignInfo()->url; ?>" <?php echo getDisabled(UserInputField::URL); ?>/>
+               <input id="sign-url-input" type="text" name="url" form="input-form" maxlength="64" style="width:300px;" value="<?php echo getSignInfo()->url; ?>" <?php echo getDisabled(UserInputField::URL); ?>/>
             </div>
 
          </div>         

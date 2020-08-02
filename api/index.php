@@ -24,7 +24,7 @@ require_once '../printer/printQueue.php';
 session_start();
 
 $router = new Router();
-$router->setLogging(true);
+$router->setLogging(false);
 
 $router->add("ping", function($params) {
    $result = new stdClass();
@@ -145,6 +145,8 @@ $router->add("timeCardData", function($params) {
             $timeCard["jobNumber"] = $jobInfo->jobNumber;
             $timeCard["wcNumber"] = $jobInfo->wcNumber;
          }
+         
+         $timeCard["isNew"] = Time::isNew($timeCardInfo->dateTime, Time::NEW_THRESHOLD);
          
          $result[] = $timeCard;
       }
@@ -590,6 +592,7 @@ $router->add("saveUser", function($params) {
       $userInfo->roles = intval($params["roles"]);
       $userInfo->username = $params["username"];
       $userInfo->password = $params["password"];
+      $userInfo->authToken = $params["authToken"];
       
       foreach (Permission::getPermissions() as $permission)
       {
@@ -938,6 +941,16 @@ $router->add("partWasherLogData", function($params) {
             $partWasherEntry->operatorName = $userInfo->getFullName();
          }
          
+         $partWasherEntry->isNew = Time::isNew($partWasherEntry->dateTime, Time::NEW_THRESHOLD);
+         
+         // Mismatch checking.
+         $partWasherEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($partWasherEntry->manufactureDate), Time::endOfDay($partWasherEntry->manufactureDate));
+         $partWasherEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($partWasherEntry->manufactureDate), Time::endOfDay($partWasherEntry->manufactureDate));
+         $partWasherEntry->panCountMismatch =
+         (($partWasherEntry->totalPartWasherLogPanCount > 0) &&
+          ($partWasherEntry->totalPartWeightLogPanCount != $partWasherEntry->totalPartWasherLogPanCount));
+         
+         
          $result[] = $partWasherEntry;
       }
    }
@@ -1173,6 +1186,15 @@ $router->add("partWeightLogData", function($params) {
          
          $partWeightEntry->partCount = $partWeightEntry->calculatePartCount();
          
+         $partWeightEntry->isNew = Time::isNew($partWeightEntry->dateTime, Time::NEW_THRESHOLD);
+         
+         // Mismatch checking.
+         $partWeightEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($partWeightEntry->manufactureDate), Time::endOfDay($partWeightEntry->manufactureDate));         
+         $partWeightEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($partWeightEntry->manufactureDate), Time::endOfDay($partWeightEntry->manufactureDate));
+         $partWeightEntry->panCountMismatch = 
+            (($partWeightEntry->totalPartWasherLogPanCount > 0) &&
+             ($partWeightEntry->totalPartWeightLogPanCount != $partWeightEntry->totalPartWasherLogPanCount));
+         
          $result[] = $partWeightEntry;
       }
    }
@@ -1361,7 +1383,7 @@ $router->add("inspectionTemplates", function($params) {
       
       foreach ($templateIds as $templateId)
       {
-         $inspectionTemplate = InspectionTemplate::load($templateId);
+         $inspectionTemplate = InspectionTemplate::load($templateId); 
          
          if ($inspectionTemplate)
          {
@@ -1498,7 +1520,7 @@ $router->add("saveInspection", function($params) {
          $inspection->inspector = intval($params["inspector"]);
          $inspection->comments = $params["comments"];
          
-         $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
+         $inspectionTemplate = InspectionTemplate::load($inspection->templateId, true);  // Load properties. 
          
          if ($inspectionTemplate)
          {
@@ -1647,6 +1669,37 @@ $router->add("deleteInspection", function($params) {
    echo json_encode($result);
 });
 
+$router->add("inspectionTemplateData", function($params) {
+   $result = array();
+   
+   $inspectionType = InspectionType::UNKNOWN;
+
+   if (isset($params["inspectionType"]))
+   {
+      $inspectionType = intval($params["inspectionType"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $databaseResult = $database->getInspectionTemplates($inspectionType);
+      
+      // Populate data table.
+      foreach ($databaseResult as $row)
+      {
+         $inspectionTemplate = new InspectionTemplate();
+         $inspectionTemplate->initializeFromDatabaseRow($row);
+         
+         $inspectionTemplate->inspectionTypeLabel = InspectionType::getLabel($inspectionTemplate->inspectionType);
+         
+         $result[] = $inspectionTemplate;
+      }
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("saveInspectionTemplate", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -1661,7 +1714,7 @@ $router->add("saveInspectionTemplate", function($params) {
        (intval($params["templateId"]) != InspectionTemplate::UNKNOWN_TEMPLATE_ID))
    {
       //  Updated entry
-      $inspectionTemplate = InspectionTemplate::load($params["templateId"]);
+      $inspectionTemplate = InspectionTemplate::load($params["templateId"], true);  // Load properties.
       
       if (!$inspectionTemplate)
       {

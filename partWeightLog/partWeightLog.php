@@ -2,7 +2,7 @@
 
 require_once '../common/authentication.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/jobInfo.php';
 require_once '../common/menu.php';
 require_once '../common/newIndicator.php';
@@ -65,7 +65,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -81,8 +81,8 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
-   
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+      
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.min.js"></script>
    
@@ -185,11 +185,23 @@ if (!Authentication::isAuthenticated())
             },
             {title:"Laborer",           field:"laborerName",       hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Weight Date",       field:"dateTime",          hozAlign:"left", responsive:0,
-               formatter:"datetime",  // Requires moment.js 
-               formatterParams:{
-                  outputFormat:"MM/DD/YYYY",
-                  invalidPlaceholder:"---"
-               }
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = "---";
+                  
+                  var date = new Date(cell.getValue());
+   
+                  if (date.getTime() === date.getTime())  // check for valid date
+                  {
+                     var cellValue = formatDate(date);
+                     
+                     if (cell.getRow().getData().isNew)
+                     {
+                        cellValue += "&nbsp<span class=\"new-indicator\">new</div>";
+                     }
+                  }
+   
+                  return (cellValue);
+               }            
             },
             {title:"Weight Time",       field:"dateTime",          hozAlign:"left", responsive:0,
                formatter:"datetime",  // Requires moment.js 
@@ -198,7 +210,35 @@ if (!Authentication::isAuthenticated())
                   invalidPlaceholder:"---"
                }
             },            
-            {title:"Basket Count",      field:"panCount",          hozAlign:"left", responsive:2},
+            {title:"Basket Count",      field:"panCount",          hozAlign:"left", responsive:2,
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  
+                  if (cell.getRow().getData().panCountMismatch)
+                  {
+                     var totalPartWeightLogPanCount = cell.getRow().getData().totalPartWeightLogPanCount;
+                     var totalPartWasherLogPanCount = cell.getRow().getData().totalPartWasherLogPanCount;
+                     
+                     var mismatch = "&nbsp<span class=\"mismatch-indicator\">mismatch</span>";
+                     cellValue += mismatch;
+                  }
+
+                  return (cellValue);
+               },
+               tooltip:function(cell){
+                  var toolTip = "";
+                  
+                  if (cell.getRow().getData().panCountMismatch)
+                  {
+                     var totalPartWeightLogPanCount = cell.getRow().getData().totalPartWeightLogPanCount;
+                     var totalPartWasherLogPanCount = cell.getRow().getData().totalPartWasherLogPanCount;
+                     
+                     toolTip = "weight log = " + totalPartWeightLogPanCount + "; wash log = " + totalPartWasherLogPanCount;
+                  }
+
+                  return (toolTip);                  
+               }
+            },
             {title:"Weight",            field:"weight",           hozAlign:"left", responsive:1},
             {title:"Part Count (Est.)", field:"partCount",         hozAlign:"left", responsive:1},
             {title:"",                  field:"delete",                             responsive:0,
@@ -212,7 +252,7 @@ if (!Authentication::isAuthenticated())
             
             if (cell.getColumn().getField() == "delete")
             {
-               onDeleteEntry(timeCardId);
+               onDeletePartWeightEntry(entryId);
             }
             else // Any other column
             {
@@ -267,8 +307,7 @@ if (!Authentication::isAuthenticated())
          var formattedDate = date.getFullYear() + "-" + (month) + "-" + (day);
 
          return (formattedDate);
-      }
-            
+      }            
 
       function filterToday()
       {

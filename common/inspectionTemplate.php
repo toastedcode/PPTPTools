@@ -75,7 +75,18 @@ class InspectionTemplate
       $this->inspectionProperties = array();
    }
    
-   public static function load($templateId)
+   public function initializeFromDatabaseRow($row)
+   {
+      $this->templateId = intval($row['templateId']);
+      $this->inspectionType = intval($row['inspectionType']);
+      $this->name = $row['name'];
+      $this->description = $row['description'];
+      $this->sampleSize = intval($row['sampleSize']);
+      $this->optionalProperties = intval($row['optionalProperties']);
+      $this->notes = $row['notes'];
+   }
+   
+   public static function load($templateId, $loadInspectionProperties = false)
    {
       $inspectionTemplate = null;
       
@@ -89,19 +100,17 @@ class InspectionTemplate
          {
             $inspectionTemplate = new InspectionTemplate();
             
-            $inspectionTemplate->templateId = intval($row['templateId']);
-            $inspectionTemplate->inspectionType = intval($row['inspectionType']);
-            $inspectionTemplate->name = $row['name'];
-            $inspectionTemplate->description = $row['description'];
-            $inspectionTemplate->sampleSize = intval($row['sampleSize']);
-            $inspectionTemplate->optionalProperties = intval($row['optionalProperties']);
-            $inspectionTemplate->notes = $row['notes'];
+            $inspectionTemplate->initializeFromDatabaseRow($row);
             
-            $result = $database->getInspectionProperties($templateId);
-            
-            while ($result && ($row = $result->fetch_assoc()))
+            // Optionally load actual inspection properties.
+            if ($loadInspectionProperties)
             {
-               $inspectionTemplate->inspectionProperties[] = InspectionProperty::load($row);
+               $result = $database->getInspectionProperties($templateId);
+               
+               while ($result && ($row = $result->fetch_assoc()))
+               {
+                  $inspectionTemplate->inspectionProperties[] = InspectionProperty::load($row);
+               }
             }
          }
       }
@@ -202,7 +211,7 @@ class InspectionTemplate
 if (isset($_GET["templateId"]))
 {
    $templateId = $_GET["templateId"];
-   $inspectionTemplate = InspectionTemplate::load($templateId);
+   $inspectionTemplate = InspectionTemplate::load($templateId, true);  // Load properties.
    if ($inspectionTemplate)
    {
       echo "templateId: " .         $inspectionTemplate->templateId .                               "<br/>";

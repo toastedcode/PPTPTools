@@ -240,7 +240,7 @@ function updateEfficiency()
    }
 }
 
-function onSubmit()
+function onSaveTimeCard()
 {
    if (validateTimeCard())
    {
@@ -287,9 +287,18 @@ function onSubmit()
    }
 }
 
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
+   }
+}
+
 function onDeleteTimeCard(timeCardId)
 {
-   if (confirm("Are you sure you want to delete this log entry?"))
+   if (confirm("Are you sure you want to delete this time card?"))
    {
       // AJAX call to delete part weight entry.
       requestUrl = "../api/deleteTimeCard/?timeCardId=" + timeCardId;

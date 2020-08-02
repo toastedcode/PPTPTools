@@ -1,4 +1,4 @@
-function onSubmit()
+function onSaveUser()
 {
    if (validateUser())
    {
@@ -45,6 +45,15 @@ function onSubmit()
    }
 }
 
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
+   }
+}
+
 function onDeleteUser(employeeNumber)
 {
    if (confirm("Are you sure you want to delete this user?"))
@@ -80,6 +89,25 @@ function onDeleteUser(employeeNumber)
       };
       xhttp.open("GET", requestUrl, true);
       xhttp.send(); 
+   }
+}
+
+function onRoleChange()
+{
+   var roleId = parseInt(document.getElementById("role-input").value);
+   var permissions = defaultPermissions[roleId - 1];
+   
+   var elements = document.getElementsByClassName("permission-checkbox");
+   
+   for (element of elements)
+   {
+      var name = element.name;
+      var permissionId = parseInt(name.substring(name.indexOf("-") + 1));
+      
+      var mask = (1 << (permissionId - 1));
+      var isSet = ((permissions & mask) != 0);
+      
+      element.checked = isSet;
    }
 }
 

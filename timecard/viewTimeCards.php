@@ -2,7 +2,7 @@
 
 require_once '../common/authentication.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/jobInfo.php';
 require_once '../common/menu.php';
 require_once '../common/newIndicator.php';
@@ -67,7 +67,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.min.js"></script>
@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          <br>
         
          <div id="time-card-table"></div>
-
+         
          <br> 
         
          <div id="download-link" class="download-link">Download CSV file</div>
@@ -185,11 +185,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          columns:[
             {title:"Id",           field:"timeCardId",     hozAlign:"left", visible:false},
             {title:"Date",         field:"dateTime",       hozAlign:"left", responsive:0,
-               formatter:"datetime",  // Requires moment.js 
-               formatterParams:{
-                  outputFormat:"MM/DD/YYYY",
-                  invalidPlaceholder:"---"
-               }
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = "---";
+                  
+                  var date = new Date(cell.getValue());
+
+                  if (date.getTime() === date.getTime())  // check for valid date
+                  {
+                     var cellValue = formatDate(date);
+                     
+                     if (cell.getRow().getData().isNew)
+                     {
+                        cellValue += "&nbsp<span class=\"new-indicator\">new</div>";
+                     }
+                  }
+
+                  return (cellValue);
+              }
             },
             {title:"Operator",     field:"operator",       hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Job #",        field:"jobNumber",      hozAlign:"left", responsive:0, headerFilter:true},
@@ -319,6 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       }
 
       // Setup event handling on all DOM elements.
+      window.addEventListener('resize', function() { table.redraw(); });
       document.getElementById("start-date-filter").addEventListener("change", updateFilter);      
       document.getElementById("end-date-filter").addEventListener("change", updateFilter);
       document.getElementById("today-button").onclick = filterToday;

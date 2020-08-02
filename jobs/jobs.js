@@ -45,6 +45,15 @@ function onSaveJob()
    }
 }
 
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
+   }
+}
+
 function onDeleteJob(jobId)
 {
    if (confirm("Are you sure you want to delete this job?"))

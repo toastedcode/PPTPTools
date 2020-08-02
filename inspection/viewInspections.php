@@ -2,7 +2,7 @@
 
 require_once '../common/activity.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/menu.php';
@@ -96,7 +96,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -112,7 +112,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
@@ -142,22 +142,28 @@ if (!Authentication::isAuthenticated())
 
          <br>
          
-         <div class="flex-horizontal flex-v-center flex-left">
+         <div class="flex-horizontal flex-left flex-wrap">
             <div style="white-space: nowrap">Inspection type</div>
             &nbsp;
-            <select id="inspection-type-filter"><?php echo getInspectionTypeOptions(); ?></select>
+            <div class="flex-horizontal">
+               <div style="white-space: nowrap">Inspection type</div>
+               &nbsp;
+               <select id="inspection-type-filter"><?php echo getInspectionTypeOptions(); ?></select>
+            </div>
             &nbsp;&nbsp;
-            <div style="white-space: nowrap">Start date</div>
-            &nbsp;
-            <input id="start-date-filter" type="date" value="<?php echo getFilterStartDate()?>">
-            &nbsp;&nbsp;
-            <div style="white-space: nowrap">End date</div>
-            &nbsp;
-            <input id="end-date-filter" type="date" value="<?php echo getFilterEndDate()?>">
-            &nbsp;&nbsp;
-            <button id="today-button" class="small-button">Today</button>
-            &nbsp;&nbsp;
-            <button id="yesterday-button" class="small-button">Yesterday</button>
+            <div class="flex-horizontal">
+               <div style="white-space: nowrap">Start date</div>
+               &nbsp;
+               <input id="start-date-filter" type="date" value="<?php echo getFilterStartDate()?>">
+               &nbsp;&nbsp;
+               <div style="white-space: nowrap">End date</div>
+               &nbsp;
+               <input id="end-date-filter" type="date" value="<?php echo getFilterEndDate()?>">
+               &nbsp;&nbsp;
+               <button id="today-button" class="small-button">Today</button>
+               &nbsp;&nbsp;
+               <button id="yesterday-button" class="small-button">Yesterday</button>
+            </div>
          </div>
          
          <br>
@@ -210,7 +216,7 @@ if (!Authentication::isAuthenticated())
          columns:[
             {title:"Id",              field:"inspectionId",        hozAlign:"left", visible:false},
             {title:"Inspection Type", field:"inspectionTypeLabel", hozAlign:"left", responsive:1},
-            {title:"Name",            field:"name",                hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Name",            field:"name",                hozAlign:"left", responsive:2, headerFilter:true},
             {title:"Date",            field:"dateTime",            hozAlign:"left", responsive:0,
                formatter:"datetime",  // Requires moment.js 
                formatterParams:{
@@ -229,7 +235,7 @@ if (!Authentication::isAuthenticated())
             {title:"Operator",        field:"operatorName",        hozAlign:"left",   responsive:0, headerFilter:true},
             {title:"Job",             field:"jobNumber",           hozAlign:"left",   responsive:0, headerFilter:true},
             {title:"Work Center",     field:"wcNumber",            hozAlign:"left",   responsive:0, headerFilter:true},
-            {title:"Success Rate",    field:"successRate",         hozAlign:"left",   responsive:0,
+            {title:"Success Rate",    field:"successRate",         hozAlign:"left",   responsive:3,
                formatter:function(cell, formatterParams, onRendered){
                   var count = cell.getRow().getData().count;
                   var naCount = cell.getRow().getData().naCount;

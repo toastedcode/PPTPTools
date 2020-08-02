@@ -1,0 +1,75 @@
+<html>
+
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+
+   
+   <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
+   <script src="../thirdParty/moment/moment.min.js"></script>
+   
+   <script src="../common/common.js"></script>
+   <script src="../common/validate.js"></script>
+   <script src="timeCard.js"></script>
+</head>
+
+
+<div class="flex-vertical flex-top flex-left">
+<div class="flex-horizontal flex-top flex-left" style="width: 100%">
+ <div class="flex-vertical flex-top flex-left" style="width: 100%">
+ 
+         <div  style="width: 100%" id="time-card-table" ></div>
+   
+   <script>
+      
+      // Create Tabulator on DOM element time-card-table.
+      var table = new Tabulator("#time-card-table", {
+         responsiveLayout:"hide", // enable responsive layouts
+         //Define Table Columns
+         columns:[
+            {title:"Id",           field:"timeCardId",     hozAlign:"left", visible:false},
+            {title:"Date",         field:"dateTime",       hozAlign:"left", responsive:0,
+               formatter:"datetime",  // Requires moment.js 
+               formatterParams:{
+                  outputFormat:"MM/DD/YYYY",
+                  invalidPlaceholder:"---"
+               }
+            },
+            {title:"Operator",     field:"operator",       hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Job #",        field:"jobNumber",      hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Machine #",    field:"wcNumber",       hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Heat #",       field:"materialNumber", hozAlign:"left", responsive:6},
+            {title:"Run Time",     field:"runTime",        hozAlign:"left", responsive:1},
+            {title:"Setup Time",   field:"setupTime",      hozAlign:"left", responsive:2},
+            {title:"Basket Count", field:"panCount",       hozAlign:"left", responsive:3},
+            {title:"Part Count",   field:"partCount",      hozAlign:"left", responsive:4},
+            {title:"Scrap Count",  field:"scrapCount",     hozAlign:"left", responsive:5},
+            {title:"Efficiency",   field:"efficiency",     hozAlign:"left", responsive:7, 
+               formatter:function(cell, formatterParams, onRendered){
+                  return (parseFloat(cell.getValue()).toFixed(2) + "%");
+                }
+            },
+            {title:"", field:"panTicket", responsive:0,             
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">receipt</i>");
+               }
+            },
+            {title:"", field:"delete", responsive:0,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">delete</i>");
+               }
+            }
+         ]
+      });
+      
+   </script>
+
+</div>   
+</div>
+</div>
+</html>

@@ -1,7 +1,7 @@
 <?php 
 
 require_once '../common/activity.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/inspection.php';
 require_once '../common/menu.php';
 require_once '../common/params.php';
@@ -170,7 +170,7 @@ function getNewInspection()
    
    if ($inspection->templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
    {
-      $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
+      $inspectionTemplate = InspectionTemplate::load($inspection->templateId, true);  // Load properties.
       
       if ($inspectionTemplate)
       {
@@ -229,7 +229,7 @@ function getInspectionTemplate()
       
       if ($templateId != Inspection::UNKNOWN_INSPECTION_ID)
       {
-         $inspectionTemplate = InspectionTemplate::load($templateId);
+         $inspectionTemplate = InspectionTemplate::load($templateId, true);  // Load properties.
       }
    }
    
@@ -680,7 +680,7 @@ function getInspections()
       $quickInspection = getQuickInspectionButton();
       
       $html .=
-      <<<HEREDOC
+<<<HEREDOC
       <tr>
          <td>$quickInspection</td>
          <td></td>
@@ -702,7 +702,7 @@ HEREDOC;
             }
             
             $html .=
-            <<<HEREDOC
+<<<HEREDOC
             <th>
                <div class="flex-column">
                   <div>Check $sampleId</div>
@@ -714,7 +714,7 @@ HEREDOC;
          else
          {
             $html .=
-            <<<HEREDOC
+<<<HEREDOC
             <th>Sample $sampleId</th>
 HEREDOC;
          }
@@ -734,7 +734,7 @@ HEREDOC;
          $html .= "<tr>";
          
          $html .=
-         <<<HEREDOC
+<<<HEREDOC
          <td><div class="expand-button" style="display:$expandButtonDisplayStyle;" onclick="showData(this)">+</div><div class="condense-button" style="display:$condenseButtonDisplayStyle;" onclick="hideData(this)">-</div></td>
          <td>
             <div class="flex-vertical">
@@ -921,7 +921,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -937,7 +937,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="inspection.css"/>
    
    <script src="../common/common.js"></script>

@@ -2,7 +2,7 @@
 
 require_once '../common/authentication.php';
 require_once '../common/database.php';
-require_once '../common/header2.php';
+require_once '../common/header.php';
 require_once '../common/jobInfo.php';
 require_once '../common/menu.php';
 require_once '../common/newIndicator.php';
@@ -65,7 +65,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -81,7 +81,7 @@ if (!Authentication::isAuthenticated())
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common2.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.min.js"></script>
@@ -184,11 +184,23 @@ if (!Authentication::isAuthenticated())
             },
             {title:"Washer",       field:"washerName",        hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Wash Date",    field:"dateTime",          hozAlign:"left", responsive:0,
-               formatter:"datetime",  // Requires moment.js 
-               formatterParams:{
-                  outputFormat:"MM/DD/YYYY",
-                  invalidPlaceholder:"---"
-               }
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = "---";
+                  
+                  var date = new Date(cell.getValue());
+
+                  if (date.getTime() === date.getTime())  // check for valid date
+                  {
+                     var cellValue = formatDate(date);
+                     
+                     if (cell.getRow().getData().isNew)
+                     {
+                        cellValue += "&nbsp<span class=\"new-indicator\">new</div>";
+                     }
+                  }
+
+                  return (cellValue);
+              }
             },
             {title:"Wash Time",    field:"dateTime",          hozAlign:"left", responsive:0,
                formatter:"datetime",  // Requires moment.js 
@@ -197,7 +209,35 @@ if (!Authentication::isAuthenticated())
                   invalidPlaceholder:"---"
                }
             },            
-            {title:"Basket Count", field:"panCount",          hozAlign:"left", responsive:2},
+            {title:"Basket Count", field:"panCount",          hozAlign:"left", responsive:2,
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  
+                  if (cell.getRow().getData().panCountMismatch)
+                  {
+                     var totalPartWeightLogPanCount = cell.getRow().getData().totalPartWeightLogPanCount;
+                     var totalPartWasherLogPanCount = cell.getRow().getData().totalPartWasherLogPanCount;
+                     
+                     var mismatch = "&nbsp<span class=\"mismatch-indicator\">mismatch</span>";
+                     cellValue += mismatch;
+                  }
+
+                  return (cellValue);
+               },
+               tooltip:function(cell){
+                  var toolTip = "";
+                  
+                  if (cell.getRow().getData().panCountMismatch)
+                  {
+                     var totalPartWeightLogPanCount = cell.getRow().getData().totalPartWeightLogPanCount;
+                     var totalPartWasherLogPanCount = cell.getRow().getData().totalPartWasherLogPanCount;
+                     
+                     toolTip = "wash log = " + totalPartWasherLogPanCount + "; weight log = " + totalPartWeightLogPanCount;
+                  }
+
+                  return (toolTip);                  
+               }
+            },
             {title:"Part Count",   field:"partCount",         hozAlign:"left", responsive:1},
             {title:"", field:"delete", responsive:0,
                formatter:function(cell, formatterParams, onRendered){
@@ -210,12 +250,12 @@ if (!Authentication::isAuthenticated())
             
             if (cell.getColumn().getField() == "delete")
             {
-               onDeleteEntry(timeCardId);
+               onDeletePartWasherEntry(entryId);
             }
             else // Any other column
             {
                // Open time card for viewing/editing.
-               document.location = "<?php echo $ROOT?>/partWasherLog/partWasherLog.php?entryId=" + entryId;               
+               document.location = "<?php echo $ROOT?>/partWasherLog/partWasherLogEntry.php?entryId=" + entryId;               
             }
          },
          rowClick:function(e, row){

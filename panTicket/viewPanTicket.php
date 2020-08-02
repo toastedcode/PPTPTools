@@ -3,7 +3,7 @@
 require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/header.php';
-require_once '../common/navigation.php';
+require_once '../common/menu.php';
 require_once '../common/panTicket.php';
 require_once '../common/params.php';
 require_once '../common/timeCardInfo.php';
@@ -48,33 +48,14 @@ function getPanTicket()
    return ($panTicket);
 }
 
-function getNavBar()
+function renderPanTicket()
 {
-   // Time card ids are synonomous with pan ticket ids.
-   $timeCardId = getPanTicketId();
+   $panTicket = getPanTicket();
    
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   
-   if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+   if ($panTicket)
    {
-      $navBar->highlightNavButton("Edit Time Card", "location.href = '../timecard/viewTimeCard.php?timeCardId=$timeCardId'", false);
-   
-      $navBar->highlightNavButton("Weigh Parts", "location.href = '../partWeightLog/partWeightLogEntry.php?timeCardId=$timeCardId'", false);
-   
-      $navBar->highlightNavButton("Wash Parts", "location.href = '../partWasherLog/partWasherLogEntry.php?timeCardId=$timeCardId'", false);
-      
-      $navBar->highlightNavButton("Print Copies", "location.href = 'printPanTicket.php?panTicketId=$timeCardId'", false);
+      $panTicket->render();
    }
-   else
-   {
-      $navBar->highlightNavButton("Ok", "location.href = '../home.php'", false);      
-   }
-   
-   $navBar->end();
-   
-   return ($navBar->getHtml());
 }
 
 // *********************************** BEGIN ***********************************
@@ -90,64 +71,76 @@ if (!Authentication::isAuthenticated())
 }
 ?>
 
-<!DOCTYPE html>
 <html>
 
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    <link rel="stylesheet" type="text/css" href="../common/panTicket.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-   <script src = "../thirdParty/dymo/DYMO.Label.Framework.3.0.js" type="text/javascript" charset="UTF-8"></script>
    <script src="../common/common.js"></script>
-   <script src="../common/panTicket.js"></script>
-
+      
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   <div class="main flex-horizontal flex-top flex-left">
    
-     <div class="flex-vertical content">
-
-        <div class="heading">Pan Ticket</div>
-
-        <div class="description">Select the action you want to take with this pan ticket.  All the relevant data will be automatically entered for you.</div>
-
-        <div class="flex-vertical inner-content" style="align-items:center; width:100%;">
- 
-           <!-- img id="pan-ticket-image" src="" width="20%" style="display:none;" alt="pan ticket"/-->
-           <?php $panTicket = new PanTicket(getPanTicketId()); $panTicket->render(); ?>
-       
-        </div>
-        
-        <?php echo getNavBar(); ?>
+      <?php Menu::render(Activity::TIME_CARD); ?>
+      
+      <div class="content flex-vertical flex-top flex-left">
+      
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading">Pan Ticket</div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-     </div>
-     
-   </div>
+         <div id="description" class="description">Select the action you want to take with this pan ticket.  All the relevant data will be automatically entered for you.</div>
+         
+         <br>
+         
+         <div class="flex-horizontal flex-v-center">
+         
+            <div style="margin-right: 50px;">
+               <?php renderPanTicket(); ?>
+            </div>
+        
+            <div class="flex-vertical">
+               <button id="edit-time-card-button" class="accent-button">Edit Time Card</button>
+               <br>
+               <button id="weigh-parts-button" class="accent-button">Weigh Parts</button>
+               <br>
+               <button id="wash-parts-button" class="accent-button">Wash Parts</button>
+               <br>
+               <button id="print-copies-button" class="accent-button">Print Copies</button>
+            </div>
+            
+         </div>
+         
+      </div> <!-- content -->
+      
+   </div> <!-- main -->
    
    <script>
+   
       preserveSession();
       
-      /*
-      dymo.label.framework.init(function() {
-         var label = new PanTicket(<!-- ?php echo getPanTicketId(); ?-->, "pan-ticket-image", );
-      });
-      */
+      // Setup event handling on all DOM elements.
+      document.getElementById("edit-time-card-button").onclick = function(){location.href = "../timecard/viewTimeCard.php?timeCardId=<?php echo getPanTicketId(); ?>";};
+      document.getElementById("weigh-parts-button").onclick = function(){location.href = "../partWeightLog/partWeightLogEntry.php?timeCardId=<?php echo getPanTicketId(); ?>";};
+      document.getElementById("wash-parts-button").onclick = function(){location.href = "../partWeightLog/partWeightLogEntry.php?timeCardId=<?php echo getPanTicketId(); ?>";};
+      document.getElementById("print-copies-button").onclick = function(){location.href = "printPanTicket.php?panTicketId=<?php echo getPanTicketId(); ?>";};
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
    </script>
-
+   
 </body>
 
 </html>

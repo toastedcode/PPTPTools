@@ -74,6 +74,29 @@ class Time
       
       return ($seconds);
    }
+   
+   // A constant specifying how old a data entry can be to consider it "new".
+   const NEW_THRESHOLD = 15;  // minutes
+   
+   static public function isNew($dateTime, $newThresholdMinutes)
+   {
+      $now = new DateTime("now", new DateTimeZone('America/New_York'));
+      $then = new DateTime($dateTime, new DateTimeZone('America/New_York'));
+      
+      // Determine the interval between the supplied date and the current time.
+      $interval = $then->diff($now);
+      
+      // Convert to minutes.
+      $minutes = (($interval->h * 60) + ($interval->i));
+      if ($interval->days)
+      {
+         $minutes = (($interval->days * 24 * 60) + $minutes);
+      }
+
+      $isNew = ($minutes <= $newThresholdMinutes);
+      
+      return ($isNew);
+   }
 }
 
 /*

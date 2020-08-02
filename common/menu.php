@@ -23,7 +23,7 @@ HEREDOC;
       
       foreach (Activity::$VALUES as $activityId)
       {
-         //if (Activity::isAllowed($activityId, Authentication::getPermissions()))
+         if (Activity::isAllowed($activityId, Authentication::getPermissions()))
          {
             $html .= Menu::menuItem($activityId, ($activityId == $selectedActivityId));
          }
