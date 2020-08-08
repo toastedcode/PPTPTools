@@ -45,10 +45,6 @@ $router->add("setSession", function($params) {
       $result->key = $params["key"];
       $result->value = $params["value"];
       $result->success = true;
-      
-      
-      file_put_contents("getSession.log", $params["key"] . "->" . $params["value"], FILE_APPEND | LOCK_EX);
-      
    }
    else
    {
@@ -754,6 +750,7 @@ $router->add("saveTimeCard", function($params) {
    if ($result->success)
    {
       if (isset($params["operator"]) &&
+          isset($params["manufactureDate"]) &&
           isset($params["jobNumber"]) &&
           isset($params["wcNumber"]) &&
           isset($params["materialNumber"]) &&
@@ -770,6 +767,7 @@ $router->add("saveTimeCard", function($params) {
          if ($jobId != JobInfo::UNKNOWN_JOB_ID)
          {
             $timeCardInfo->employeeNumber = intval($params["operator"]);
+            $timeCardInfo->manufactureDate = Time::startOfDay($params->get("manufactureDate"));
             $timeCardInfo->jobId = $jobId;
             $timeCardInfo->materialNumber = intval($params["materialNumber"]);
             $timeCardInfo->setupTime = intval($params["setupTime"]);
@@ -925,7 +923,7 @@ $router->add("partWasherLogData", function($params) {
                
                $operator = $timeCardInfo->employeeNumber;
                
-               $partWasherEntry->manufactureDate = $timeCardInfo->dateTime;
+               $partWasherEntry->manufactureDate = $timeCardInfo->manufactureDate;
             }
          }
          
@@ -1167,7 +1165,7 @@ $router->add("partWeightLogData", function($params) {
                
                $operator = $timeCardInfo->employeeNumber;
                
-               $partWeightEntry->manufactureDate = $timeCardInfo->dateTime;
+               $partWeightEntry->manufactureDate = $timeCardInfo->manufactureDate;
             }
          }
          

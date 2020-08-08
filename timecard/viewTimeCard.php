@@ -17,8 +17,8 @@ const ONLY_ACTIVE = true;
 abstract class TimeCardInputField
 {
    const FIRST = 0;
-   const MANUFACTURE_DATE = TimeCardInputField::FIRST;
-   const MANUFACTURE_TIME = 1;
+   const ENTRY_DATE = TimeCardInputField::FIRST;   
+   const MANUFACTURE_DATE = 1;
    const OPERATOR = 2;
    const JOB_NUMBER = 3;
    const WC_NUMBER = 4;
@@ -77,8 +77,15 @@ function isEditable($field)
                   ($view == View::EDIT_TIME_CARD));
    
    switch ($field)
-   {         
+   {
+      case TimeCardInputField::ENTRY_DATE:
+      {
+         $isEditable = false;
+         break;
+      }
+      
       case TimeCardInputField::OPERATOR:
+      case TimeCardInputField::MANUFACTURE_DATE:
       {
          $isEditable = ((Authentication::getAuthenticatedUser()->roles == Role::ADMIN) ||
                         (Authentication::getAuthenticatedUser()->roles == Role::SUPER_USER));
@@ -100,6 +107,11 @@ function isEditable($field)
    }
    
    return ($isEditable);
+}
+
+function getDisabled($field)
+{
+   return (isEditable($field) ? "" : "disabled");
 }
 
 function getTimeCardId()
@@ -252,7 +264,7 @@ function getCommentCodesDiv()
 {
    $timeCardInfo = getTimeCardInfo();
    
-   $disabled = !isEditable(TimeCardInputField::COMMENTS) ? "disabled" : "";
+   $disabled = !isEditable(TimeCardInputField::COMMENTS);
    
    $commentCodes = CommentCode::getCommentCodes();
    
@@ -494,6 +506,25 @@ function getDescription()
    return ($description);
 }
 
+function getEntryDateTime()
+{
+   $dateTime = new DateTime();  // now
+   
+   if (getView() != View::NEW_TIME_CARD)
+   {
+      $timeCardInfo = getTimeCardInfo();
+      
+      if ($timeCardInfo)
+      {
+         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      }
+   }
+
+   $entryDate = $dateTime->format(Time::$javascriptDateFormat) . "T" . $dateTime->format(Time::$javascriptTimeFormat);   
+   
+   return ($entryDate);
+}
+
 function getManufactureDate()
 {
    $mfgDate = Time::now(Time::$javascriptDateFormat);
@@ -504,30 +535,12 @@ function getManufactureDate()
       
       if ($timeCardInfo)
       {
-         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+         $dateTime = new DateTime($timeCardInfo->manufactureDate, new DateTimeZone('America/New_York'));
          $mfgDate = $dateTime->format(Time::$javascriptDateFormat);
       }
    }
    
    return ($mfgDate);
-}
-
-function getManufactureTime()
-{
-   $mfgTime = Time::now(Time::$javascriptTimeFormat);
-   
-   if (getView() != View::NEW_TIME_CARD)
-   {
-      $timeCardInfo = getTimeCardInfo();
-      
-      if ($timeCardInfo)
-      {
-         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
-         $mfgTime = $dateTime->format(Time::$javascriptTimeFormat);
-      }
-   }
-   
-   return ($mfgTime);
 }
 
 function getNavBar()
@@ -597,6 +610,7 @@ if (!Authentication::isAuthenticated())
         
    <form id="input-form" action="" method="POST">
       <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
+      <input type="hidden" name="manufactureDate" value="<?php echo getManufactureDate(); ?>">
       <input type="hidden" name="operator" value="<?php echo getOperator(); ?>">
       <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
       <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
@@ -625,20 +639,20 @@ if (!Authentication::isAuthenticated())
          <div class="flex-horizontal flex-left flex-wrap">
 
             <div class="flex-vertical flex-left" style="margin-right: 50px;">
-            
+
                <div class="form-item">
-                  <div class="form-label">Mfg. Date</div>
-                  <input type="date" class="form-input-medium" name="date" value="<?php echo getManufactureDate(); ?>" disabled>
+                  <div class="form-label">Entry Date</div>
+                  <input type="datetime-local" class="form-input-medium" value="<?php echo getEntryDateTime(); ?>" <?php echo getDisabled(TimeCardInputField::ENTRY_DATE); ?>>
                </div>
                
                <div class="form-item">
-                  <div class="form-label">Mfg. Time</div>
-                  <input type="time" class="form-input-medium" name="time" value="<?php echo getManufactureTime(); ?>" disabled>
+                  <div class="form-label">Mfg. Date</div>
+                  <input type="date" class="form-input-medium" name="manufactureDate" form="input-form" value="<?php echo getManufactureDate(); ?>" <?php echo getDisabled(TimeCardInputField::MANUFACTURE_DATE); ?>>
                </div>
                
                <div class="form-item">
                   <div class="form-label">Operator</div>
-                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo !isEditable(TimeCardInputField::OPERATOR) ? "disabled" : ""; ?>>
+                  <select id="operator-input" class="form-input-medium" name="operator" form="input-form" oninput="this.validator.validate();" <?php echo getDisabled(TimeCardInputField::OPERATOR); ?>>
                      <?php echo getOperatorOptions(); ?>
                   </select>
                </div>
@@ -647,19 +661,19 @@ if (!Authentication::isAuthenticated())
                   <div class="form-section-header">Job</div>         
                   <div class="form-item">
                      <div class="form-label">Job Number</div>
-                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo !isEditable(TimeCardInputField::JOB_NUMBER) ? "disabled" : ""; ?>>
+                     <select id="job-number-input" class="form-input-medium" name="jobNumber" form="input-form" oninput="this.validator.validate(); onJobNumberChange();" <?php echo getDisabled(TimeCardInputField::JOB_NUMBER); ?>>
                         <?php echo getJobNumberOptions(); ?>
                      </select>
                   </div>       
                   <div class="form-item">
                      <div class="form-label">Work Center</div>
-                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate(); onWcNumberChange();" <?php echo !isEditable(TimeCardInputField::WC_NUMBER) ? "disabled" : ""; ?>>
+                     <select id="wc-number-input" class="form-input-medium" name="wcNumber" form="input-form" oninput="this.validator.validate(); onWcNumberChange();" <?php echo getDisabled(TimeCardInputField::WC_NUMBER); ?>>
                         <?php echo getWcNumberOptions(); ?>
                      </select>
                   </div>       
                   <div class="form-item">
                      <div class="form-label">Heat #</div>
-                     <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:100px;" oninput="this.validator.validate()" value="<?php echo getMaterialNumber(); ?>" <?php echo !isEditable(TimeCardInputField::MATERIAL_NUMBER) ? "disabled" : ""; ?>>
+                     <input id="material-number-input" type="number" class="form-input-medium" form="input-form" name="materialNumber" style="width:100px;" oninput="this.validator.validate()" value="<?php echo getMaterialNumber(); ?>" <?php echo getDisabled(TimeCardInputField::MATERIAL_NUMBER); ?>>
                   </div>         
                </div>
       
@@ -673,18 +687,18 @@ if (!Authentication::isAuthenticated())
                   
                   <div class="form-item">
                      <div class="form-label">Run time</div>
-                     <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
+                     <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo getDisabled(TimeCardInputField::RUN_TIME); ?> />
                      <div style="padding: 5px;">:</div>
-                     <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::RUN_TIME) ? "disabled" : ""; ?> />
+                     <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" step="15" <?php echo getDisabled(TimeCardInputField::RUN_TIME); ?> />
                   </div>
          
                   <div class="form-item">
                      <div class="form-label">Setup time</div>
                      <div class="form-col">
                         <div class="form-row flex-left">
-                           <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           <input id="setup-time-hour-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeHours" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeHours(); ?>" <?php echo getDisabled(TimeCardInputField::SETUP_TIME); ?> />
                            <div style="padding: 5px;">:</div>
-                           <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo !isEditable(TimeCardInputField::SETUP_TIME) ? "disabled" : ""; ?> />
+                           <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo getDisabled(TimeCardInputField::SETUP_TIME); ?> />
                            &nbsp;&nbsp;
                            <?php echo getApprovalButton(); ?>
                            <?php echo getUnapprovalButton(); ?>
@@ -702,17 +716,17 @@ if (!Authentication::isAuthenticated())
                   
                   <div class="form-item">
                      <div class="form-label">Basket count</div>
-                     <input id="pan-count-input" type="number" class="form-input-medium" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="<?php echo getTimeCardInfo()->panCount; ?>" <?php echo !isEditable(TimeCardInputField::PAN_COUNT) ? "disabled" : ""; ?> />
+                     <input id="pan-count-input" type="number" class="form-input-medium" form="input-form" name="panCount" style="width:100px;" oninput="panCountValidator.validate()" value="<?php echo getTimeCardInfo()->panCount; ?>" <?php echo getDisabled(TimeCardInputField::PAN_COUNT); ?> />
                   </div>
             
                   <div class="form-item">
                      <div class="form-label">Good count</div>
-                     <input id="part-count-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); onPartCountChange();" value="<?php echo getTimeCardInfo()->partCount; ?>" <?php echo !isEditable(TimeCardInputField::PART_COUNT) ? "disabled" : ""; ?> />
+                     <input id="part-count-input" type="number" class="form-input-medium" form="input-form" name="partCount" style="width:100px;" oninput="partsCountValidator.validate(); onPartCountChange();" value="<?php echo getTimeCardInfo()->partCount; ?>" <?php echo getDisabled(TimeCardInputField::PART_COUNT); ?> />
                   </div>
             
                   <div class="form-item">
                      <div class="form-label">Scrap count</div>
-                     <input id="scrap-count-input" type="number" class="form-input-medium" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="<?php echo getTimeCardInfo()->scrapCount; ?>" <?php echo !isEditable(TimeCardInputField::SCRAP_COUNT) ? "disabled" : ""; ?> />
+                     <input id="scrap-count-input" type="number" class="form-input-medium" form="input-form" name="scrapCount" style="width:100px;" oninput="scrapCountValidator.validate()" value="<?php echo getTimeCardInfo()->scrapCount; ?>" <?php echo getDisabled(TimeCardInputField::SCRAP_COUNT); ?> />
                   </div>
             
                   <div class="form-item">
@@ -732,7 +746,7 @@ if (!Authentication::isAuthenticated())
                <div class="form-col">
                   <div class="form-section-header">Comments</div>
                   <div class="form-item">
-                     <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" <?php echo !isEditable(TimeCardInputField::COMMENTS) ? "disabled" : ""; ?>><?php echo getTimeCardInfo()->comments; ?></textarea>
+                     <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" <?php echo getDisabled(TimeCardInputField::COMMENTS); ?>><?php echo getTimeCardInfo()->comments; ?></textarea>
                   </div>
                </div>
                

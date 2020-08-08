@@ -183,8 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          ajaxParams:params,
          //Define Table Columns
          columns:[
-            {title:"Id",           field:"timeCardId",     hozAlign:"left", visible:false},
-            {title:"Date",         field:"dateTime",       hozAlign:"left", responsive:0,
+            {title:"Id",           field:"timeCardId",      hozAlign:"left", visible:false},
+            {title:"Date",         field:"dateTime",        hozAlign:"left", responsive:0,
                formatter:function(cell, formatterParams, onRendered){
                   var cellValue = "---";
                   
@@ -203,16 +203,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (cellValue);
               }
             },
-            {title:"Operator",     field:"operator",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Job #",        field:"jobNumber",      hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Machine #",    field:"wcNumber",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Heat #",       field:"materialNumber", hozAlign:"left", responsive:6},
-            {title:"Run Time",     field:"runTime",        hozAlign:"left", responsive:1},
-            {title:"Setup Time",   field:"setupTime",      hozAlign:"left", responsive:2},
-            {title:"Basket Count", field:"panCount",       hozAlign:"left", responsive:3},
-            {title:"Part Count",   field:"partCount",      hozAlign:"left", responsive:4},
-            {title:"Scrap Count",  field:"scrapCount",     hozAlign:"left", responsive:5},
-            {title:"Efficiency",   field:"efficiency",     hozAlign:"left", responsive:7, 
+            {title:"Mfg. Date",    field:"manufactureDate", hozAlign:"left", responsive:0, headerFilter:true,
+               formatter:"datetime",  // Requires moment.js 
+               formatterParams:{
+                  outputFormat:"M/D/YYYY",
+                  invalidPlaceholder:"---"
+               }
+            },
+            {title:"Operator",     field:"operator",        hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Job #",        field:"jobNumber",       hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Machine #",    field:"wcNumber",        hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Heat #",       field:"materialNumber",  hozAlign:"left", responsive:6},
+            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1},
+            {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2},
+            {title:"Basket Count", field:"panCount",        hozAlign:"left", responsive:3},
+            {title:"Part Count",   field:"partCount",       hozAlign:"left", responsive:4},
+            {title:"Scrap Count",  field:"scrapCount",      hozAlign:"left", responsive:5},
+            {title:"Efficiency",   field:"efficiency",      hozAlign:"left", responsive:7, 
                formatter:function(cell, formatterParams, onRendered){
                   return (parseFloat(cell.getValue()).toFixed(2) + "%");
                 }

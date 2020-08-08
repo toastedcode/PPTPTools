@@ -269,7 +269,7 @@ function getManufactureDate()
    
    if ($timeCardInfo)
    {
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $dateTime = new DateTime($timeCardInfo->manufactureDate, new DateTimeZone('America/New_York'));
       $manufactureDate = $dateTime->format(Time::$javascriptDateFormat);
    }
    else

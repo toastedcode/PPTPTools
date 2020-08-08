@@ -74,7 +74,7 @@ class PanTicket
       {
          $panTicketCode = PanTicket::getPanTicketCode($this->panTicketId);
          $operator = $timeCardInfo->employeeNumber;
-         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+         $dateTime = new DateTime($timeCardInfo->manufactureDate, new DateTimeZone('America/New_York'));
          $mfgDate = $dateTime->format("m-d-Y");
          $materialNumber = $timeCardInfo->materialNumber;
          $panCount = $timeCardInfo->panCount;
@@ -162,7 +162,7 @@ HEREDOC;
          $wcNumber = $jobInfo->wcNumber;
       }
       
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $dateTime = new DateTime($timeCardInfo->manufactureDate, new DateTimeZone('America/New_York'));
       $mfgDate = $dateTime->format("m-d-Y");
       
       $file = fopen(PanTicket::LABEL_TEMPLATE_FILENAME, "r");
