@@ -340,6 +340,26 @@ button {
    color: black;
 }
 
+.incomplete-indicator {
+   vertical-align: super;
+   font-size: 10px;
+   color: orange;
+}
+
+.approved-indicator {
+   vertical-align: super;
+   font-size: 10px;
+   color: green;
+   white-space: nowrap;
+}
+
+.unapproved-indicator {
+   vertical-align: super;
+   font-size: 10px;
+   color: red;
+   white-space: nowrap;
+}
+
 .mismatch-indicator {
    vertical-align: super;
    font-size: 10px;

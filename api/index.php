@@ -143,7 +143,17 @@ $router->add("timeCardData", function($params) {
          }
          
          $timeCard["isNew"] = Time::isNew($timeCardInfo->dateTime, Time::NEW_THRESHOLD);
+         $timeCard["incompleteTime"] = $timeCardInfo->incompleteTime();
+         $timeCard["incompletePanCount"] = $timeCardInfo->incompletePanCount();
+         $timeCard["incompletePartCount"] = $timeCardInfo->incompletePartCount();
          
+         $timeCard["requiresApproval"] = $timeCardInfo->requiresApproval();
+         $userInfo = UserInfo::load($timeCardInfo->approvedBy);
+         if ($userInfo)
+         {
+            $timeCard["approvedByName"] = $userInfo->getFullName();
+         }
+                  
          $result[] = $timeCard;
       }
    }

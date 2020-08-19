@@ -66,11 +66,9 @@ class JobInfo
    {
       $jobInfo = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getJob($jobId);
          
@@ -150,11 +148,9 @@ class JobInfo
    {
       $jobNumbers = array();
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getJobNumbers($onlyActive);
          

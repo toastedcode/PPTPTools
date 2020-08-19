@@ -214,10 +214,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {title:"Job #",        field:"jobNumber",       hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Machine #",    field:"wcNumber",        hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Heat #",       field:"materialNumber",  hozAlign:"left", responsive:6},
-            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1},
-            {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2},
-            {title:"Basket Count", field:"panCount",        hozAlign:"left", responsive:3},
-            {title:"Part Count",   field:"partCount",       hozAlign:"left", responsive:4},
+            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1,
+               formatter:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  if (cell.getRow().getData().incompleteTime)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+                }
+            },
+            {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2,
+               formatter:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+
+                  if (cell.getRow().getData().requiresApproval)
+                  {
+                     if (cell.getRow().getData().approvedByName)
+                     {
+                        cellValue += "&nbsp<span class=\"approved-indicator\">approved</div>";
+                     }
+                     else
+                     {
+                        cellValue += "&nbsp<span class=\"unapproved-indicator\">unapproved</div>";
+                     }
+                  }                  
+                  
+                  return (cellValue);
+                },
+                tooltip:function(cell){
+                   var toolTip = "";
+
+                   if (cell.getRow().getData().approvedByName)
+                   {
+                      toolTip = "Approved by " + cell.getRow().getData().approvedByName;
+                   }
+
+                   return (toolTip);                  
+                }
+            },
+            {title:"Basket Count", field:"panCount",        hozAlign:"left", responsive:3, 
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  
+                  if (cell.getRow().getData().incompletePanCount)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+                }
+            },
+            {title:"Part Count",   field:"partCount",       hozAlign:"left", responsive:4,
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  
+                  if (cell.getRow().getData().incompletePartCount)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+                }
+            },
             {title:"Scrap Count",  field:"scrapCount",      hozAlign:"left", responsive:5},
             {title:"Efficiency",   field:"efficiency",      hozAlign:"left", responsive:7, 
                formatter:function(cell, formatterParams, onRendered){
