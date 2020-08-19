@@ -87,6 +87,11 @@ class MySqlDatabase implements Database
       return (mysqli_insert_id($this->connection));
    }
    
+   public function lastQuery()
+   {
+      return ($this->connection->last_query());
+   }
+   
    protected function getConnection()
    {
       return ($this->connection);
@@ -158,7 +163,7 @@ class PPTPDatabase extends MySqlDatabase
 
    public function getWorkCenters()
    {
-      $result = $this->query("SELECT * FROM workcenter ORDER BY WCNumber ASC");
+      $result = $this->query("SELECT * FROM workcenter ORDER BY wcNumber ASC");
 
       return ($result);
    }
@@ -223,14 +228,15 @@ class PPTPDatabase extends MySqlDatabase
       $timeCardInfo)
    {
       $date = Time::toMySqlDate($timeCardInfo->dateTime);
+      $manufactureDate = Time::toMySqlDate($timeCardInfo->manufactureDate);
       
       $comments = mysqli_real_escape_string($this->getConnection(), $timeCardInfo->comments);
       
       $query =
          "INSERT INTO timecard " .
-         "(employeeNumber, dateTime, jobId, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
+         "(employeeNumber, dateTime, manufactureDate, jobId, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
          "VALUES " .
-         "('$timeCardInfo->employeeNumber', '$date', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
+         "('$timeCardInfo->employeeNumber', '$date', '$manufactureDate', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
 
       $result = $this->query($query);
       
@@ -241,12 +247,13 @@ class PPTPDatabase extends MySqlDatabase
       $timeCardInfo)
    {
       $dateTime = Time::toMySqlDate($timeCardInfo->dateTime);
+      $manufactureDate = Time::toMySqlDate($timeCardInfo->manufactureDate);      
       
       $comments = mysqli_real_escape_string($this->getConnection(), $timeCardInfo->comments);
       
       $query =
       "UPDATE timecard " .
-      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
+      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", manufactureDate = \"$manufactureDate\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
       "WHERE timeCardId = $timeCardInfo->timeCardId;";
 
       $result = $this->query($query);
@@ -584,7 +591,7 @@ class PPTPDatabase extends MySqlDatabase
       $query = "SELECT partwasher.* FROM partwasher " .
                "LEFT JOIN timecard ON partwasher.timeCardId = timecard.timeCardId " .
                "WHERE $jobClause $employeeClause $dateTimeClause ORDER BY partwasher.dateTime DESC;";
-      
+
       $result = $this->query($query);
       
       return ($result);
@@ -708,8 +715,6 @@ class PPTPDatabase extends MySqlDatabase
          $dateTimeClause = "partweight.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
       }
       
-      
-      
       $query = "SELECT partweight.* FROM partweight " .
                "LEFT JOIN timecard ON partweight.timeCardId = timecard.timeCardId " .
                "WHERE $jobClause $employeeClause $dateTimeClause ORDER BY partweight.dateTime DESC;";
@@ -815,37 +820,49 @@ class PPTPDatabase extends MySqlDatabase
    
    public function getJobs($jobNumber, $jobStatuses)
    {
-      $active = JobStatus::ACTIVE;
-      $deleted = JobStatus::DELETED;
-      
-      $jobNumberClause = "";
-      if ($jobNumber != "All")
+      $result = null;
+
+      // Validate input.
+      // If an array of job statuses is specified, it must not be empty.
+      if (is_null($jobStatuses) || (count($jobStatuses) > 0))
       {
-         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
-      }
-      
-      $jobStatusClause = "(";
-      $or = false;
-      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
-      {
-         if ($jobStatuses[$jobStatus])
+         $jobNumberClause = "";
+         if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
          {
-            if ($or)
+            $jobNumberClause = "jobNumber = '$jobNumber' AND ";
+         }
+         
+         $jobStatusClause = "";
+         if ($jobStatuses && count($jobStatuses) > 0)
+         {
+            $jobStatusClause = "(";
+            
+            $or = false;
+            foreach ($jobStatuses as $jobStatus)
             {
-               $jobStatusClause .= " OR ";
+               if ($or)
+               {
+                  $jobStatusClause .= " OR ";
+               }
+                  
+               $jobStatusClause .= "status = $jobStatus";
+                  
+               $or = true;
             }
             
-            $jobStatusClause .= "status = $jobStatus";
-               
-            $or = true;
+            $jobStatusClause .= ")";
          }
+         
+         $whereClause = "";
+         if (($jobNumberClause != "") || ($jobStatusClause != ""))
+         {
+            $whereClause = "WHERE " . $jobNumberClause . $jobStatusClause;
+         }
+         
+         $query = "SELECT * FROM job $whereClause ORDER BY jobNumber ASC;";
+   
+         $result = $this->query($query);
       }
-      $jobStatusClause .= ")";
-      
-      
-      $query = "SELECT * FROM job WHERE $jobNumberClause $jobStatusClause ORDER BY jobNumber ASC;";
-
-      $result = $this->query($query);
       
       return ($result);
    }
@@ -914,6 +931,15 @@ class PPTPDatabase extends MySqlDatabase
          "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId', lineTemplateId = '$jobInfo->lineTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
          "WHERE jobId = '$jobInfo->jobId';";
 
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function setCustomerPrint($jobId, $filename)
+   {
+      $query = "UPDATE job SET customerPrint = '$filename' WHERE jobId = '$jobId';";
+      
       $result = $this->query($query);
       
       return ($result);
@@ -1221,37 +1247,8 @@ class PPTPDatabase extends MySqlDatabase
    //                                Inspections
    // **************************************************************************
    
-   public function getInspections($inspectionType, $jobNumber, $inspector, $operator, $startDate, $endDate)
+   public function getInspections($inspectionType, $startDate, $endDate)
    {
-      $userClause = "";
-      if (($inspector != 0) || ($operator != 0))
-      {
-         $userClause = "(";
-         
-         if ($inspector != 0)
-         {
-            $userClause .= "inspector = $inspector";
-         }
-         
-         if (($inspector != 0) && ($operator != 0))
-         {
-            $userClause .= " OR ";
-         }
-            
-         if ($operator != 0)
-         {
-            $userClause .= "operator = $operator";
-         }
-         
-         $userClause .= ") AND";
-      }         
-      
-      $jobNumberClause = "";
-      if ($jobNumber != "All")
-      {
-         $jobNumberClause = "jobNumber = '$jobNumber' AND ";
-      }
-      
       $typeClause = "";
       if ($inspectionType != InspectionType::UNKNOWN)
       {
@@ -1260,7 +1257,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query = "SELECT * FROM inspection " .
                "INNER JOIN inspectiontemplate ON inspection.templateId = inspectiontemplate.templateId " .
-               "WHERE $userClause $jobNumberClause $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
+               "WHERE $typeClause inspection.dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY inspection.dateTime DESC, inspectionId DESC;";
 
       $result = $this->query($query);
       
@@ -1293,13 +1290,13 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO inspection " .
-      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator) " .
+      "(templateId, dateTime, inspector, comments, jobId, jobNumber, wcNumber, operator, samples, naCount, passCount, failCount, dataFile) " .
       "VALUES " .
-      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator');";
+      "('$inspection->templateId', '$dateTime', '$inspection->inspector', '$inspection->comments', '$inspection->jobId', '$inspection->jobNumber', '$inspection->wcNumber', '$inspection->operator', '$inspection->samples', '$inspection->naCount', '$inspection->passCount', '$inspection->failCount', '$inspection->dataFile');";
 
       $result = $this->query($query);
       
-      if ($result)
+      if ($result && $inspection->inspectionResults)
       {
          // Get the last auto-increment id, which should be the inspection id.
          $inspectionId = mysqli_insert_id($this->getConnection());
@@ -1333,7 +1330,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE inspection " .
-      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator'  " .
+      "SET dateTime = '$dateTime', inspector = '$inspection->inspector', comments = '$inspection->comments', jobId = '$inspection->jobId', jobNumber = '$inspection->jobNumber', wcNumber = '$inspection->wcNumber', operator = '$inspection->operator', samples = '$inspection->samples', naCount = '$inspection->naCount', passCount = '$inspection->passCount', failCount = '$inspection->failCount', dataFile = '$inspection->dataFile'  " .
       "WHERE inspectionId = '$inspection->inspectionId';";
 
       $result = $this->query($query);

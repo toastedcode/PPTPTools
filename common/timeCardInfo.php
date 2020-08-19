@@ -13,6 +13,7 @@ class TimeCardInfo
    
    public $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    public $dateTime;
+   public $manufactureDate;
    public $employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    public $jobId;
    public $materialNumber;
@@ -114,11 +115,9 @@ class TimeCardInfo
    {
       $timeCardInfo = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getTimeCard($timeCardId);
          
@@ -127,7 +126,8 @@ class TimeCardInfo
             $timeCardInfo = new TimeCardInfo();
             
             $timeCardInfo->timeCardId = intval($row['timeCardId']);
-            $timeCardInfo->dateTime= Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $timeCardInfo->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $timeCardInfo->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
             $timeCardInfo->employeeNumber = intval($row['employeeNumber']);
             $timeCardInfo->jobId = $row['jobId'];
             $timeCardInfo->materialNumber = intval($row['materialNumber']);
@@ -216,6 +216,7 @@ if (isset($_GET["timeCardId"]))
       
       echo "timeCardId: " .       $timeCardInfo->timeCardId .           "<br/>";
       echo "dateTime: " .         $timeCardInfo->dateTime .             "<br/>";
+      echo "manufactureDate: " .  $timeCardInfo->manufactureDate .      "<br/>";      
       echo "employeeNumber: " .   $timeCardInfo->employeeNumber .       "<br/>";
       echo "jobId: " .            $timeCardInfo->jobId .                "<br/>";
       echo "materialNumber: " .   $timeCardInfo->materialNumber .       "<br/>";

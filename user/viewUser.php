@@ -1,332 +1,385 @@
 <?php
 
+require_once '../common/activity.php';
+require_once '../common/commentCodes.php';
+require_once '../common/header.php';
 require_once '../common/userInfo.php';
-require_once '../common/navigation.php';
-require_once '../common/userInfo.php';
+require_once '../common/menu.php';
+require_once '../common/params.php';
 
-class ViewUser
+const ACTIVITY = Activity::USER;
+$activity = Activity::getActivity(ACTIVITY);
+
+abstract class UserInputField
 {
-   public function getHtml($view)
+   const FIRST = 0;
+   const EMPLOYEE_NUMBER = UserInputField::FIRST;
+   const FIRST_NAME = 1;
+   const LAST_NAME = 2;
+   const EMAIL = 3;
+   const ROLE = 4;
+   const USERNAME = 5;
+   const PASSWORD = 6;
+   const AUTHENTICATION_TOKEN = 7;
+   const PERMISSIONS = 8;
+   const LAST = 9;
+   const COUNT = UserInputField::LAST - UserInputField::FIRST;
+}
+
+abstract class View
+{
+   const NEW_USER = 0;
+   const VIEW_USER = 1;
+   const EDIT_USER = 2;
+}
+
+function getParams()
+{
+   static $params = null;
+   
+   if (!$params)
    {
-      $html = "";
-      
-      $userInfo = ViewUser::getUserInfo();
-      
-      $newUser = ($userInfo->employeeNumber == UserInfo::UNKNOWN_EMPLOYEE_NUMBER);
-      
-      $editable = (($view == "new_user") || ($view == "edit_user"));
-      
-      $headingDiv = ViewUser::headingDiv($view);
-      $descriptionDiv = ViewUser::descriptionDiv($view);
-      $userDiv = ViewUser::userDiv($userInfo, $view);
-      $permissionsDiv = ViewUser::permissionsDiv($userInfo, $view);
-      $navBar = ViewUser::navBar($userInfo, $view);
-      
-      $title = "";
-      if ($view == "new_user")
-      {
-         $title = "New User";
-      }
-      else if ($view == "edit_user")
-      {
-         $title = "Edit User";
-      }
-      else if ($view == "view_user")
-      {
-         $title = "View User";
-      }
-      
-      $html =
-<<<HEREDOC
-      <form id="input-form" method="POST"></form>
-
-      <div class="flex-vertical content">
-
-         $headingDiv
-
-         $descriptionDiv
-
-         <div class="flex-horizontal inner-content" style="justify-content: flex-start; flex-wrap: wrap;">
-
-            $userDiv
-            
-            $permissionsDiv
-            
-         </div>
-         
-         $navBar
-               
-      </div>
-               
-      <script>
-         var employeeNumberValidator = new IntValidator("employee-number-input", 4, 1, 9999, false);
-
-         employeeNumberValidator.init();
-      </script>
-HEREDOC;
-      
-      return ($html);
+      $params = Params::parse();
    }
    
-   public function render($view)
+   return ($params);
+}
+
+function getView()
+{
+   $view = View::VIEW_USER;
+   
+   if (getEmployeeNumber() == UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
    {
-      echo (ViewUser::getHtml($view));
+      $view = View::NEW_USER;
+   }
+   else if (Authentication::checkPermissions(Permission::EDIT_USER))
+   {
+      $view = View::EDIT_USER;
    }
    
-   protected static function headingDiv($view)
+   return ($view);
+}
+
+function isEditable($field)
+{
+   $view = getView();
+   
+   // Start with the edit mode, as dictated by the view.
+   $isEditable = (($view == View::NEW_USER) ||
+                  ($view == View::EDIT_USER));
+   
+   switch ($field)
    {
-      $heading = "";
-      if ($view == "new_user")
+      case UserInputField::EMPLOYEE_NUMBER:
+      {
+         $isEditable = ($view == View::NEW_USER);
+         break;
+      }
+
+      default:
+      {
+         // Edit status based solely on view.
+         break;
+      }
+   }
+   
+   return ($isEditable);
+}
+
+function getEmployeeNumber()
+{
+   $employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+   
+   $params = getParams();
+   
+   if ($params->keyExists("employeeNumber"))
+   {
+      $employeeNumber = $params->getInt("employeeNumber");
+   }
+   
+   return ($employeeNumber);
+}
+
+function getUserInfo()
+{
+   static $userInfo = null;
+   
+   if ($userInfo == null)
+   {
+      $employeeNumber = getEmployeeNumber();
+      
+      if ($employeeNumber != UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
+      {
+         $userInfo = UserInfo::load($employeeNumber);
+      }
+      else
+      {
+         $userInfo = new UserInfo();
+      }
+   }
+   
+   return ($userInfo);
+}
+
+
+function getHeading()
+{
+   $heading = "";
+   
+   switch (getView())
+   {
+      case View::NEW_USER:
       {
          $heading = "Add a New User";
+         break;
       }
-      if ($view == "edit_user")
+      
+      case View::EDIT_USER:
       {
          $heading = "Edit an Existing User";
+         break;
       }
-      else if ($view == "view_user")
+      
+      case View::VIEW_USER:
+      default:
       {
          $heading = "View User Details";
+         break;
       }
-      
-      $html =
-<<<HEREDOC
-      <div class="heading">$heading</div>
-HEREDOC;
-      
-      return ($html);
    }
+
+   return ($heading);
+}
+
+function getDescription()
+{
+   $description = "";
    
-   protected static function descriptionDiv($view)
+   switch (getView())
    {
-      $description = "";
-      if ($view == "new_user")
+      case View::NEW_USER:
       {
          $description = "Users of the PPTP Tools system can be given a variety of roles and permissions.  Here you can set up a new user and give them as much access as their job requires.";
+         break;
       }
-      else if ($view == "edit_user")
+         
+      case View::EDIT_USER:
       {
          $description = "You may revise any of the settings associated with this user and then select save when you're satisfied with the changes.";
+         break;
       }
-      else if ($view == "view_user")
+         
+      case View::VIEW_USER:
+      default:
       {
          $description = "View the settings and access permissions of this user.";
+         break;
       }
-      
-      $html =
-<<<HEREDOC
-      <div class="description">$description</div>
-HEREDOC;
-      
-      return ($html);
    }
    
-   protected static function userDiv($userInfo, $view)
+   return ($description);
+}
+
+function getRoleOptions()
+{
+   $options = "<option style=\"display:none\">";
+   
+   $selectedRole = getUserInfo()->roles;
+   
+   foreach (Role::getRoles() as $role)
    {
-      $editable = (($view == "new_user") || ($view == "edit_user"));
-      
-      $disabled = ($editable) ? "" : "disabled";
-      $employeeNumberDisabled = ($editable && ($view == "new_user")) ? "" : "disabled";
-      
-      $roleOptions = "";
-      foreach (Role::getRoles() as $role)
-      {
-         $selected = ($userInfo->roles == $role->roleId) ? "selected" : "";
-         $roleOptions.= "<option $selected value=\"" . $role->roleId . "\">" . $role->roleName . "</option>";
-      }
-      
-      $html =
-<<<HEREDOC
-      <div class="flex-vertical" style="align-items: flex-start; margin-right: 50px;">
-
-         <div class="form-section-header">Identity</div>
-
-         <div class="form-item">
-            <div class="form-label">Employee #</div>
-            <input id="employee-number-input" type="text" class="form-input-medium" name="employeeNumber" form="input-form" style="width:150px;" value="$userInfo->employeeNumber" oninput="this.validator.validate()" $employeeNumberDisabled/>
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">First Name</div>
-            <input id="first-name-input" type="text" class="form-input-medium" name="firstName" form="input-form" style="width:150px;" value="$userInfo->firstName" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Last Name</div>
-            <input id="last-name-input" type="text" class="form-input-medium" name="lastName" form="input-form" style="width:150px;" value="$userInfo->lastName" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Email</div>
-            <input id="email-input" type="text" class="form-input-medium" name="email" form="input-form" style="width:300px;" value="$userInfo->email" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Role</div>
-            <div><select id="role-input" class="form-input-medium" name="roles" form="input-form" $disabled>$roleOptions</select></div>
-         </div>
-
-         <div class="form-section-header">Login</div>
-
-         <div class="form-item">
-            <div class="form-label">Username</div>
-            <input id="user-name-input" type="text" class="form-input-medium" name="username" form="input-form" style="width:150px;" value="$userInfo->username" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Password</div>
-            <input id="user-password-input" type="password" class="form-input-medium" name="password" form="input-form" style="width:150px;" value="$userInfo->password" $disabled />
-         </div>
-
-         <div class="form-item">
-            <div class="form-label">Authentication token</div>
-            <div class="flex-horizontal">
-               <input id="auth-token-input" type="text" class="form-input-medium" name="authToken" form="input-form" style="width:150px;" value="$userInfo->authToken" readonly $disabled/>
-               &nbsp
-               <button onclick="refreshAuthToken()">Refresh</button>
-               &nbsp
-               <button onclick="copyToClipboard('auth-token-input')">Copy</button>
-            </div>
-         </div>
-
-      </div>
-HEREDOC;
-      
-      return ($html);
+      $selected = ($role->roleId == $selectedRole) ? "selected" : "";
+      $options.= "<option $selected value=\"" . $role->roleId . "\">" . $role->roleName . "</option>";
    }
    
-   /*
-   protected static function roleDiv($userInfo, $view)
-   {
-      $editable = (($view == "new_user") || ($view == "edit_user"));
-      
-      $disabled = ($editable) ? "" : "disabled";
-      
-      $roleOptions = "";
-      foreach (Role::getRoles() as $role)
-      {
-         $selected = ($userInfo->roles == $role->roleId) ? "selected" : "";
-         $roleOptions.= "<option $selected value=\"" . $role->roleId . "\">" . $role->roleName . "</option>";
-      }
-      
-      $html =
-<<<HEREDOC
-      <div class="flex-vertical time-card-table-col">
-         <div class="section-header-div"><h2>Role</h2></div>
-         <div class="flex-horizontal time-card-table-row">
-            <div class="label-div"><h3>Role</h3></div>
-            <div><select id="role-input" class="medium-text-input" name="roles" form="input-form" $disabled>$roleOptions</select></div>
-         </div>
-      </div>
-HEREDOC;
+   return ($options);
+}
 
-      return ($html);
-   }
-   */
-      
+function getPermissionInputs()
+{
+   $html = "";
    
-   protected static function permissionsDiv($userInfo, $view)
-   {
-      $editable = (($view == "new_user") || ($view == "edit_user"));
-      
-      $disabled = ($editable) ? "" : "disabled";
-      
-      $roleOptions = "";
-      foreach (Role::getRoles() as $role)
-      {
-         $selected = ($userInfo->roles == $role->roleId) ? "selected" : "";
-         $roleOptions.= "<option $selected value=\"" . $role->roleId . "\">" . $role->roleName . "</option>";
-      }
-      
-      $html =
-<<<HEREDOC
-      <div class="flex-vertical" style="align-items: flex-start;">
-         <div class="form-section-header">Permissions</div>
-HEREDOC;
-
-      foreach (Permission::getPermissions() as $permission)
-      {
-         $html .= ViewUser::permissionDiv($userInfo, $permission, $view);
-      }
-
-      $html .=
-<<<HEREDOC
-      </div>
-HEREDOC;
-      
-      return ($html);
-   }
+   $userInfo = getUserInfo();
    
-   protected static function permissionDiv($userInfo, $permission, $view)
+   $disabled = isEditable(UserInputField::PERMISSIONS) ? "" : "disabled";
+
+   foreach (Permission::getPermissions() as $permission)
    {
-      $editable = (($view == "new_user") || ($view == "edit_user"));
-      
-      $disabled = ($editable) ? "" : "disabled";
-      
       $id = "permission-" . $permission->permissionId . "-input";
       $name = "permission-" . $permission->permissionId;
       $description = $permission->permissionName;
       $checked = $permission->isSetIn($userInfo->permissions) ? "checked" : "";
       
-      
-      $html =
+      $html .=
 <<<HEREDOC
-      <div class="flex-horizontal">
+      <div class="flex-horizontal flex-v-center">
          <input id="$id" type="checkbox" class="permission-checkbox" form="input-form" name="$name" $checked $disabled/>
          <label for="$id" class="form-input-medium">$description</label>
       </div>
 HEREDOC;
-
-      return ($html);
    }
    
-   protected static function navBar($userInfo, $view)
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      
-      if (($view == "new_user") ||
-          ($view == "edit_user"))
-      {
-         // Case 1
-         // Creating a new user.
-         // Editing an existing user.
-         
-         $navBar->cancelButton("submitForm('input-form', 'user.php', 'view_users', 'cancel_user')");
-         $navBar->highlightNavButton("Save", "if (validateUser()){submitForm('input-form', 'user.php', 'view_users', 'save_user');};", false);
-      }
-      else if ($view == "view_user")
-      {
-         // Case 2
-         // Viewing an existing user.
-         
-         $navBar->highlightNavButton("Ok", "submitForm('input-form', 'user.php', 'view_users', 'no_action')", false);
-      }
-      
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
-   
-   protected static function getUserInfo()
-   {
-      $userInfo = new UserInfo();
-      
-      if (isset($_GET['employeeNumber']))
-      {
-         $userInfo = UserInfo::load($_GET['employeeNumber']);
-      }
-      else if (isset($_POST['employeeNumber']))
-      {
-         $userInfo = UserInfo::load($_POST['employeeNumber']);
-      }
-      else if (isset($_SESSION['userInfo']))
-      {
-         $userInfo = $_SESSION['userInfo'];
-      }
-      
-      return ($userInfo);
-   }
+   return ($html);
 }
+
+// ********************************** BEGIN ************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../login.php');
+   exit;
+}
+
 ?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   
+   <script src="../common/common.js"></script>
+   <script src="../common/validate.js"></script>
+   <script src="user.js"></script>
+
+</head>
+
+<body class="flex-vertical flex-top flex-left">
+        
+   <form id="input-form" action="" method="POST">
+         <input type="hidden" name="employeeNumber" value="<?php echo getUserInfo()->employeeNumber; ?>">   
+   </form>
+
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="main flex-horizontal flex-top flex-left">
+   
+      <?php Menu::render(ACTIVITY); ?>
+      
+      <div class="content flex-vertical flex-top flex-left">
+      
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
+         
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
+         
+         <br>
+         
+         <div class="flex-horizontal flex-left flex-wrap">
+
+            <div class="flex-vertical flex-top" style="margin-right: 50px;">
+      
+               <div class="form-section-header">Identity</div>
+      
+               <div class="form-item">
+                  <div class="form-label">Employee #</div>
+                  <input id="employee-number-input" type="text" name="employeeNumber" form="input-form" maxlength="5" style="width:150px;" value="<?php echo getUserInfo()->employeeNumber; ?>" oninput="this.validator.validate()" <?php echo !isEditable(UserInputField::EMPLOYEE_NUMBER) ? "disabled" : ""; ?>/>
+               </div>
+      
+               <div class="form-item">
+                  <div class="form-label">First Name</div>
+                  <input id="first-name-input" type="text" name="firstName" form="input-form" maxlength="16" style="width:150px;" value="<?php echo getUserInfo()->firstName; ?>" <?php echo !isEditable(UserInputField::FIRST_NAME) ? "disabled" : ""; ?> />
+               </div>
+      
+               <div class="form-item">
+                  <div class="form-label">Last Name</div>
+                  <input id="last-name-input" type="text" name="lastName" form="input-form" maxlength="16" style="width:150px;" value="<?php echo getUserInfo()->lastName; ?>" <?php echo !isEditable(UserInputField::LAST_NAME) ? "disabled" : ""; ?> />
+               </div>
+      
+               <div class="form-item">
+                  <div class="form-label">Email</div>
+                  <input id="email-input" type="text" name="email" form="input-form" maxlength="32" style="width:300px;" value="<?php echo getUserInfo()->email; ?>" <?php echo !isEditable(UserInputField::EMAIL) ? "disabled" : ""; ?> />
+               </div>
+      
+               <div class="form-item">
+                  <div class="form-label">Role</div>
+                  <div><select id="role-input" name="roles" form="input-form" <?php echo !isEditable(UserInputField::PERMISSIONS) ? "disabled" : ""; ?>><?php echo getRoleOptions(); ?></select></div>
+               </div>
+      
+               <div class="form-section-header">Login</div>
+      
+               <div class="form-item">
+                  <div class="form-label">Username</div>
+                  <input id="user-name-input" type="text" name="username" form="input-form" maxlength="32" style="width:150px;" value="<?php echo getUserInfo()->username; ?>" <?php echo !isEditable(UserInputField::USERNAME) ? "disabled" : ""; ?> />
+               </div>
+      
+               <div class="form-item">
+                  <div class="form-label">Password</div>
+                  <input id="user-password-input" type="password" name="password" form="input-form" maxlength="32" style="width:150px;" value="<?php echo getUserInfo()->password; ?>" <?php echo !isEditable(UserInputField::PASSWORD) ? "disabled" : ""; ?> />
+               </div>
+      
+               <div class="form-item">
+                  <div class="form-label">Authentication token</div>
+                  <div class="flex-horizontal">
+                     <input id="auth-token-input" type="text" name="authToken" form="input-form" style="width:150px;" value="<?php echo getUserInfo()->authToken; ?>" readonly <?php echo !isEditable(UserInputField::AUTHENTICATION_TOKEN) ? "disabled" : ""; ?>/>
+                     &nbsp
+                     <button class="small-button <?php echo !isEditable(UserInputField::AUTHENTICATION_TOKEN) ? "disabled" : ""; ?>" onclick="refreshAuthToken()">Refresh</button>
+                     &nbsp
+                     <button class="small-button" onclick="copyToClipboard('auth-token-input')">Copy</button>
+                  </div>
+               </div>
+      
+            </div>
+            
+            <div class="flex-vertical flex-top">
+               <div class="form-section-header">Permissions</div>
+               <?php echo getPermissionInputs(); ?>
+            </div>
+            
+         </div>
+         
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="save-button" class="accent-button">Save</button>            
+         </div>
+      
+      </div> <!-- content -->
+     
+   </div> <!-- main -->   
+         
+   <script>
+   
+      preserveSession();
+      
+      var employeeNumberValidator = new IntValidator("employee-number-input", 4, 1, 9999, false);
+      employeeNumberValidator.init();
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){onCancel();};
+      document.getElementById("save-button").onclick = function(){onSaveUser();};      
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+      document.getElementById("role-input").onchange = onRoleChange;
+      
+      // Store the initial state of the form, for change detection.
+      setInitialFormState("input-form");
+
+      // Permission bits.
+      var defaultPermissions =
+      [
+         <?php
+         foreach (Role::getRoles() as $role)
+         {
+            echo $role->defaultPermissions . ", ";
+         }
+         ?>   
+      ];
+      
+   </script>
+
+</body>
+
+</html>

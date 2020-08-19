@@ -1,4 +1,4 @@
 <?php
-$ROOT = "http://localhost/pptp";
+$ROOT = "/pptp";
 $UPLOADS = $_SERVER['DOCUMENT_ROOT'] . "/pptp/uploads/";
 ?>

@@ -42,11 +42,9 @@ class LineInspectionInfo
    {
       $lineInspectionInfo = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getLineInspection($entryId);
          

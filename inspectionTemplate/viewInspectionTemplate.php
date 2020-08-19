@@ -5,10 +5,13 @@ require_once '../common/header.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
-require_once '../common/navigation.php';
+require_once '../common/menu.php';
 require_once '../common/params.php';
 require_once '../common/root.php';
 require_once '../common/userInfo.php';
+
+const ACTIVITY = Activity::INSPECTION_TEMPLATE;
+$activity = Activity::getActivity(ACTIVITY);
 
 const ONLY_ACTIVE = true;
 
@@ -85,14 +88,14 @@ function getInspectionTemplate()
       $templateId = getTemplateId();
       
       $copyFromTemplateId = getCopyFromTemplateId();
-
+      
       if ($templateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
       {
-         $inspectionTemplate = InspectionTemplate::load($templateId);
+         $inspectionTemplate = InspectionTemplate::load($templateId, true);  // Load properties.
       }
       else if ($copyFromTemplateId != InspectionTemplate::UNKNOWN_TEMPLATE_ID)
       {
-         $inspectionTemplate = InspectionTemplate::load($copyFromTemplateId);
+         $inspectionTemplate = InspectionTemplate::load($copyFromTemplateId, true);  // Load properties.
          
          // Clear/modify select fields.
          $inspectionTemplate->templateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
@@ -129,7 +132,7 @@ function getInspectionName()
    $inspectionName = "";
    
    $inspectionTemplate = getInspectionTemplate();
-
+   
    if ($inspectionTemplate)
    {
       $inspectionName = $inspectionTemplate->name;
@@ -174,11 +177,14 @@ function getInspectionTypeOptions()
    
    for ($inspectionType = InspectionType::FIRST; $inspectionType != InspectionType::LAST; $inspectionType++)
    {
-      $selected = ($inspectionType == $selectedInspectionType) ? "selected" : "";
-      
-      $label = InspectionType::getLabel($inspectionType);
-      
-      $options .= "<option value=\"$inspectionType\" $selected>$label</option>";
+      if ($inspectionType != InspectionType::OASIS)  // Does not support templates.
+      {
+         $selected = ($inspectionType == $selectedInspectionType) ? "selected" : "";
+         
+         $label = InspectionType::getLabel($inspectionType);
+         
+         $options .= "<option value=\"$inspectionType\" $selected>$label</option>";
+      }
    }
    
    return ($options);
@@ -223,23 +229,23 @@ function getHeading()
    switch (getView())
    {
       case View::NEW_INSPECTION_TEMPLATE:
-         {
-            $heading = "Create a New Inspection Template";
-            break;
-         }
+      {
+         $heading = "Create a New Inspection Template";
+         break;
+      }
          
       case View::EDIT_INSPECTION_TEMPLATE:
-         {
-            $heading = "Update an Inspection Template";
-            break;
-         }
+      {
+         $heading = "Update an Inspection Template";
+         break;
+      }
          
       case View::VIEW_INSPECTION_TEMPLATE:
       default:
-         {
-            $heading = "View an Inspection Template";
-            break;
-         }
+      {
+         $heading = "View an Inspection Template";
+         break;
+      }
    }
    
    return ($heading);
@@ -253,56 +259,25 @@ function getDescription()
    {
       case View::NEW_INSPECTION_TEMPLATE:
       {
-         $description = "Blah blah blah.";
+         $description = "Create a new template for inspections.  Start by selecting an inspection type and then add as many inspection properties as you need.";
          break;
       }
          
       case View::EDIT_INSPECTION_TEMPLATE:
       {
-         $description = "Blah blah blah.";
+         $description = "Edit an existing template.  Note that adding or removing properties from this inspection will affect any current inspections that rely on this template.";
          break;
       }
          
       case View::VIEW_INSPECTION_TEMPLATE:
       default:
       {
-         $description = "Blah blah blah.";
+         $description = "View the details on an existing template.";
          break;
       }
    }
    
    return ($description);
-}
-
-function getNavBar()
-{
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   
-   $view = getView();
-   
-   if (($view == View::NEW_INSPECTION_TEMPLATE) ||
-       ($view == View::EDIT_INSPECTION_TEMPLATE))
-   {
-      // Case 1
-      // Creating a new template.
-      // Editing an existing template.
-      
-      $navBar->cancelButton("location.href = 'inspectionTemplates.php'");
-      $navBar->highlightNavButton("Save", "onSubmit();", false);
-   }
-   else if ($view == View::VIEW_INSPECTION_TEMPLATE)
-   {
-      // Case 2
-      // Viewing an existing template.
-      
-      $navBar->highlightNavButton("Ok", "location.href = 'inspectionTemplates.php'", false);
-   }
-   
-   $navBar->end();
-   
-   return ($navBar->getHtml());
 }
 
 function isEditable($field)
@@ -325,6 +300,11 @@ function isEditable($field)
    return ($isEditable);
 }
 
+function getDisabled($field)
+{
+   return (isEditable($field) ? "" : "disabled");
+}
+
 function getOptionalProperties()
 {
    $html = "";
@@ -333,14 +313,14 @@ function getOptionalProperties()
    
    if ($inspectionTemplate)
    {
-      for ($optionalProperty = OptionalInspectionProperties::FIRST; 
-           $optionalProperty < OptionalInspectionProperties::LAST; 
-           $optionalProperty++)
+      for ($optionalProperty = OptionalInspectionProperties::FIRST;
+      $optionalProperty < OptionalInspectionProperties::LAST;
+      $optionalProperty++)
       {
          $name = "optional-property-$optionalProperty-input";
          $label = OptionalInspectionProperties::getLabel($optionalProperty);
          $checked = $inspectionTemplate->isOptionalPropertySet($optionalProperty) ? "checked" : "";
-         $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : "";
+         $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES);
          
          $html .=
 <<<HEREDOC
@@ -394,7 +374,7 @@ function getInspectionProperties()
       
       $propertyIndex = 0;
       foreach ($inspectionTemplate->inspectionProperties as $inspectionProperty)
-      {        
+      {
          $html .= getInspectionRow($propertyIndex, $inspectionProperty);
          
          $propertyIndex++;
@@ -419,7 +399,7 @@ function getInspectionRow($propertyIndex, $inspectionProperty)
    $dataTypeOptions = getDataTypeOptions($dataType);
    $dataUnitsOptions = getDataUnitsOptions($dataUnits);
    
-   $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : "";
+   $disabled = !isEditable(InspectionTemplateInputField::PROPERTIES);
    
    $html =
 <<<HEREDOC
@@ -451,7 +431,7 @@ function reorderProperties(&$inspectionTemplate)
          $allZeros = false;
          break;
       }
-   } 
+   }
    
    if ($allZeros)
    {
@@ -472,7 +452,7 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../home.php');
+   header('Location: ../login.php');
    exit;
 }
 
@@ -484,135 +464,144 @@ if (!Authentication::isAuthenticated())
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/form.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/tooltip.css"/>
    <link rel="stylesheet" type="text/css" href="inspectionTemplate.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="../common/common.js"></script>
    <script src="../common/validate.js"></script>
    <script src="inspectionTemplate.js"></script>
 
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
+        
+   <form id="input-form" action="" method="POST">
+      <input id="inspection-id-input" type="hidden" name="templateId" value="<?php echo getTemplateId(); ?>">
+      <!-- Hidden inputs make sure disabled fields below get posted. -->
+   </form>
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   <div class="main flex-horizontal flex-top flex-left">
    
-      <form id="input-form" action="" method="POST">
-         <input id="inspection-id-input" type="hidden" name="templateId" value="<?php echo getTemplateId(); ?>">
-         <!-- Hidden inputs make sure disabled fields below get posted. -->
-      </form>
+      <?php Menu::render(ACTIVITY); ?>
       
-      <div class="flex-vertical content">
+      <div class="content flex-vertical flex-top flex-left">
       
-         <div class="heading"><?php echo getHeading(); ?></div>
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-         <div class="description"><?php echo getDescription(); ?></div>
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
          
-         <div class="flex-vertical inner-content">
-            <div class="pptp-form">
-               <div class="form-row">
-   
-                  <div class="form-col">
-                  
-                     <div class="form-item">
-                        <div class="form-label">Inspection Type</div>
-                        <select id="inspection-type-input" name="inspectionType" class="form-input-medium" form="input-form" oninput="onInspectionTypeChange();" <?php echo !isEditable(InspectionTemplateInputField::INSPECTION_TYPE) ? "disabled" : ""; ?>>
-                            <?php echo getInspectionTypeOptions(); ?>
-                        </select>
-                     </div>
-                  
-                     <div class="form-item">
-                        <div class="form-label">Inspection Name</div>
-                        <input name="templateName" type="text" class="form-input-medium" style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>" <?php echo !isEditable(InspectionTemplateInputField::NAME) ? "disabled" : ""; ?>>
-                     </div>
-                     
-                     <div class="form-item">
-                        <div class="form-label">Description</div>
-                        <input name="templateDescription" type="text" class="form-input-medium" style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>" <?php echo !isEditable(InspectionTemplateInputField::DESCRIPTION) ? "disabled" : ""; ?>>
-                     </div>
-                     
-                     <div class="form-item">
-                        <div class="form-label">Sample Size</div>
-                        <input name="sampleSize" type="number" class="form-input-medium" style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>" <?php echo !isEditable(InspectionTemplateInputField::SAMPLE_SIZE) ? "disabled" : ""; ?>>
-                     </div>
-                     
-                     <div id="optional-properties-input-container" class="form-item">
-                        <div class="form-label">Optional Properties</div>
-                        <?php echo getOptionalProperties() ?>                     
-                     </div>
-                     
-                     <div class="form-item">
-                        <div class="form-label">Notes</div>
-                        <textarea name="notes" rows="4" cols="50" form="input-form" <?php echo !isEditable(InspectionTemplateInputField::NOTES) ? "disabled" : ""; ?>><?php echo getNotes() ?></textarea>
-                     </div>
-                     
-                     <div class="form-item">
-                        <table id="property-table">
-                           <tr>
-                              <th></th>
-                              <th>Property</th>
-                              <th>Specification</th>
-                              <th>Data Type</th>
-                              <th>Units</th>
-                              <th></th>
-                           <tr>
-                           <?php echo getInspectionProperties() ?>
-                        </table>
-                     </div>
-                     
-                     <div class="form-item" style="justify-content: flex-end;">
-                        <button style="width: 50px; height: 30px;" onclick="onAddProperty()" <?php echo !isEditable(InspectionTemplateInputField::PROPERTIES) ? "disabled" : ""; ?>>+</button>
-                     </div>
-            
-                  </div>
-   
-               </div>
-            </div>
+         <br>
+               
+         <div class="form-item">
+            <div class="form-label">Inspection Type</div>
+            <select id="inspection-type-input" name="inspectionType"  form="input-form" oninput="onInspectionTypeChange();" <?php echo getDisabled(InspectionTemplateInputField::INSPECTION_TYPE); ?>>
+                <?php echo getInspectionTypeOptions(); ?>
+            </select>
          </div>
       
-         <?php echo getNavBar(); ?>
+         <div class="form-item">
+            <div class="form-label">Inspection Name</div>
+            <input name="templateName" type="text"  style="width: 250px;" form="input-form" value="<?php echo getInspectionName() ?>" <?php echo getDisabled(InspectionTemplateInputField::NAME); ?>>
+         </div>
          
-      </div>
-               
-      <script>
-         preserveSession();
+         <div class="form-item">
+            <div class="form-label">Description</div>
+            <input name="templateDescription" type="text"  style="width: 450px;" form="input-form" value="<?php echo getInspectionDescription() ?>" <?php echo getDisabled(InspectionTemplateInputField::DESCRIPTION); ?>>
+         </div>
+         
+         <div class="form-item">
+            <div class="form-label">Sample Size</div>
+            <input name="sampleSize" type="number"  style="width: 50px;" form="input-form" value="<?php echo getSampleSize() ?>" <?php echo getDisabled(InspectionTemplateInputField::SAMPLE_SIZE); ?>>
+         </div>
+         
+         <div id="optional-properties-input-container" class="form-item">
+            <div class="form-label">Optional Properties</div>
+            <?php echo getOptionalProperties() ?>                     
+         </div>
+         
+         <div class="form-item">
+            <div class="form-label">Notes</div>
+            <textarea name="notes" rows="4" cols="50" form="input-form" <?php echo getDisabled(InspectionTemplateInputField::NOTES); ?>><?php echo getNotes() ?></textarea>
+         </div>
+         
+         <div class="flex-vertical flex-right">
+         
+            <div class="form-item">
+               <table id="property-table">
+                  <tr>
+                     <th></th>
+                     <th>Property</th>
+                     <th>Specification</th>
+                     <th>Data Type</th>
+                     <th>Units</th>
+                     <th></th>
+                  <tr>
+                  <?php echo getInspectionProperties() ?>
+               </table>
+            </div>
+            
+            <div class="form-item" style="justify-content: flex-end;">
+               <button onclick="onAddProperty()" <?php echo getDisabled(InspectionTemplateInputField::PROPERTIES); ?>>+</button>
+            </div>
+            
+         </div>
+         
+         <br>
+         
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="save-button" class="accent-button">Save</button>            
+         </div>
       
-         const OASIS = <?php echo InspectionType::OASIS; ?>;
-         const LINE = <?php echo InspectionType::LINE; ?>;
-         const QCP = <?php echo InspectionType::QCP; ?>;
-         const IN_PROCESS = <?php echo InspectionType::IN_PROCESS; ?>;
-         const GENERIC = <?php echo InspectionType::GENERIC; ?>;
-      
-         var propertyCount = <?php echo getInspectionPropertyCount(); ?>;
-      
-         function getNewInspectionRow()
-         {
-            var innerHtml = "<?php echo preg_replace( "/\r|\n/", "", addslashes(getInspectionRow("@", null)));?>";
-
-            innerHtml = innerHtml.replace(/@/g, propertyCount);
-            console.log(innerHtml);
-
-            propertyCount++;
-
-            return (innerHtml);
-         }
-
-         // Initialize visibility of optional properties.
-         onInspectionTypeChange();
-      </script>
+      </div> <!-- content -->
      
-   </div>
+   </div> <!-- main -->   
+         
+   <script>
+   
+      preserveSession();
+      
+      const OASIS = <?php echo InspectionType::OASIS; ?>;
+      const LINE = <?php echo InspectionType::LINE; ?>;
+      const QCP = <?php echo InspectionType::QCP; ?>;
+      const IN_PROCESS = <?php echo InspectionType::IN_PROCESS; ?>;
+      const GENERIC = <?php echo InspectionType::GENERIC; ?>;
+   
+      var propertyCount = <?php echo getInspectionPropertyCount(); ?>;
+   
+      function getNewInspectionRow()
+      {
+         var innerHtml = "<?php echo preg_replace( "/\r|\n/", "", addslashes(getInspectionRow("@", null)));?>";
+
+         innerHtml = innerHtml.replace(/@/g, propertyCount);
+
+         propertyCount++;
+
+         return (innerHtml);
+      }
+
+      // Initialize visibility of optional properties.
+      onInspectionTypeChange();
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){onCancel();};
+      document.getElementById("save-button").onclick = function(){onSaveInspectionTemplate();};      
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+
+      // Store the initial state of the form, for change detection.
+      setInitialFormState("input-form");
+            
+   </script>
 
 </body>
 

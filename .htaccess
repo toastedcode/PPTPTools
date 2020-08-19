@@ -1,0 +1,3 @@
+DirectoryIndex login.php
+Redirect /pptp/index.html /pptp/login.php
+Redirect /pptp/home.php /pptp/login.php

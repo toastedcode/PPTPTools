@@ -10,35 +10,32 @@ var PrintJobStatus = {
 
 var PrintJobStatusLabels = ["", "Queued", "Pending", "Printing", "Complete", "Deleted"];
 
-function PrintManager(printerContainerId, printQueueContainerId, previewId)
+function PrintManager(listener)
 {
-   // The div element containing the printer table
-   var printerContainer = document.getElementById(printerContainerId);
-   
-   // The div element containing the print queue table.
-   var printQueueContainer = document.getElementById(printQueueContainerId);
-   
-   // The img element to be used as the print preview.
-   var previewImg = document.getElementById(previewId);
-   
    // Indicator that the DYMO framework has been initialized.
-   var frameworkInitialized = false;
+   this.frameworkInitialized = false;
    
    // Timer for refreshing the print queue from the server.
-   var interval = null;
+   this.interval = null;
    
    // Array of print jobs representing the current print queue.
-   var printQueue = null;
+   this.printQueue = null;
    
    // Array of dymo.label.framework.PrinterInfo objects representing the printers detected on the client PC.
-   var printers = null;
+   this.localPrinters = null;
+   
+   // Array of PrinterInfo objects representing the currently available cloud printers.
+   this.cloudPrinters = null;
+   
+   // Callback routine when any data is updated.
+   this.listener = listener;
 
    // Callback from DYMO framework.
    PrintManager.prototype.onFrameworkInitialized = function()
    {
       console.log("DYMO framework initialized");
       
-      frameworkInitialized = true;
+      this.frameworkInitialized = true;
       
       if (dymo.label.framework.checkEnvironment())
       {
@@ -54,7 +51,7 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
    // Registers all detected printers with the server.
    PrintManager.prototype.registerPrinters = function()
    {
-      for (printer of printers)
+      for (printer of this.localPrinters)
       {
          this.registerPrinter(printer);
       }
@@ -62,19 +59,18 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
    }.bind(this)
    
    // Queries DYMO framework for printers detected on the client PC
-   PrintManager.prototype.refreshPrinters = function()
+   PrintManager.prototype.refreshLocalPrinters = function()
    {
-      printers = dymo.label.framework.getPrinters();
-     
-      this.renderPrinters();
+      this.localPrinters = dymo.label.framework.getPrinters();
       
    }.bind(this)
    
+   // Returns true if the specified local printer is online.
    PrintManager.prototype.isPrinterOnline = function(printerName)
    {
       var isOnline = false;
       
-      for (printer of printers)
+      for (printer of this.localPrinters)
       {
          if (printer.name == printerName)
          {
@@ -86,6 +82,7 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
       return (isOnline);
    }
    
+   // Starts the print manager's periodic polling of printers and the print queue.
    PrintManager.prototype.start = function()
    {
       // Initialize framework.
@@ -95,24 +92,38 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
       this.update();
       
       // Update periodically.
-      interval = setInterval(function(){this.update();}.bind(this), 5000);
+      this.interval = setInterval(function(){this.update();}.bind(this), 5000);
    }.bind(this)
    
+   // Stops the print manager's periodic polling of printers and the print queue.
    PrintManager.prototype.stop = function()
    {
-      clearInterval(interval);
+      clearInterval(this.interval);
    }
-      
+
+   // Polls local printers, cloud printers, and the print queue.
+   // Attempts printing if a print job is specified for a local printer.
    PrintManager.prototype.update = function()
    {
-      this.refreshPrinters();
+      this.refreshLocalPrinters();
       
       this.registerPrinters();
       
-      this.fetchPrintQueue();
+      this.refreshCloudPrinters();
+      
+      this.refreshPrintQueue();
+      
+      this.onPrintQueueUpdate();
+      
+      // Update any listener (i.e. GUI).
+      if (this.listener != null)
+      {
+         this.listener.onUpdate(this.localPrinters, this.cloudPrinters, this.printQueue);
+      }
  
    }.bind(this)
    
+   // Registers all local printers with the server.
    PrintManager.prototype.registerPrinter = function(printerInfo)
    {
       var xhttp = new XMLHttpRequest();
@@ -143,21 +154,22 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
    
       // Define what happens on successful data submission.
       xhttp.addEventListener("error", function(event) {
-        alert('Oops! Something went wrong.');
+        console.log("registerPrinter: Failed to contact server.");
       });
    
-      // Set up our request
+      // Set up our request.
       requestUrl = "../api/registerPrinter/"
-      xhttp.open("POST", requestUrl);
+      xhttp.open("POST", requestUrl, true);
    
       // The data sent is what the user provided in the form
       xhttp.send(formData);         
    }
    
-   PrintManager.prototype.fetchPrintQueue = function()
+   // Polls the server for a list of available cloud printers.
+   PrintManager.prototype.refreshCloudPrinters = function()
    {
       // AJAX call to fetch print queue.
-      requestUrl = "../api/printQueue/?printerId=" + 101;
+      requestUrl = "../api/printerData/"
       
       var manager = this;
       
@@ -169,15 +181,8 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
             try
             {            
                var json = JSON.parse(this.responseText);
-               
-               if (json.success == true)
-               {
-                  manager.onPrintQueueUpdate(json.queue);               
-               }
-               else
-               {
-                  console.log("API call to retrieve print queue failed.");
-               }
+
+               manager.cloudPrinters = json;               
             }
             catch (exception)
             {
@@ -186,10 +191,55 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
             }
          }
       };
+      
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        console.log("refreshCloudPrinters: Failed to contact server.");
+      });
+      
+      // Set up our request.
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
    };
    
+   // Polls the server for a list of current print jobs.
+   PrintManager.prototype.refreshPrintQueue = function()
+   {
+      // AJAX call to fetch print queue.
+      requestUrl = "../api/printQueueData/"
+      
+      var manager = this;
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            try
+            {            
+               var json = JSON.parse(this.responseText);
+
+               manager.printQueue = json;
+            }
+            catch (exception)
+            {
+               console.log("JSON syntax error: " + exception.message);
+               console.log(this.responseText);
+            }
+         }
+      };
+      
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        console.log("refreshPrintQueue: Failed to contact server.");
+      });
+      
+      // Set up our request.
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();  
+   };
+   
+   // Updates the server with the new status of a print job.
    PrintManager.prototype.updatePrintJobStatus = function(printJobId, status)
    {
       // AJAX call to fetch print queue.
@@ -222,19 +272,25 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
             }
          }
       };
+      
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        console.log("updatePrintJobStatus: Failed to contact server.");
+      });
+      
+      // Set up our request.
       xhttp.open("GET", requestUrl, true);
-      xhttp.send();  
+      xhttp.send(); 
       
    }.bind(this);
    
-   PrintManager.prototype.onPrintQueueUpdate = function(updatedPrintQueue)
+   // Attempts printing of all queued print jobs.
+   PrintManager.prototype.onPrintQueueUpdate = function()
    {
-      printQueue = updatedPrintQueue;
-      
       // Attempt to print any queued print jobs.
-      if (frameworkInitialized)
+      if (this.frameworkInitialized)
       {
-         for (printJob of printQueue)
+         for (printJob of this.printQueue)
          {
             if (printJob.status == PrintJobStatus.QUEUED)
             {
@@ -251,20 +307,10 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
             }
          }
       }
-
-      this.renderPrintQueue();
-      
-      if (printQueue.length > 0)
-      {
-         this.renderPreview(printQueue[0]);
-      }
-      else
-      {
-         this.renderPreview(null);
-      }
       
    }.bind(this);
    
+   // Cancels a print job.
    PrintManager.prototype.cancelPrintJob = function(printJobId)
    {
       var manager = this;
@@ -299,176 +345,18 @@ function PrintManager(printerContainerId, printQueueContainerId, previewId)
             }
          }
       };
+      
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        console.log("cancelPrintJob: Failed to contact server.");
+      });
+      
+      // Set up our request.
       xhttp.open("GET", requestUrl, true);
-      xhttp.send();  
+      xhttp.send();   
    }.bind(this);
    
-   PrintManager.prototype.renderPrinters = function()
-   {
-      const HEADINGS = new Array("Name", "Model", "Location", "Status");
-      
-      if (printerContainer != null)
-      {
-         // Clear table.
-         while (printerContainer.firstChild)
-         {
-            printerContainer.removeChild(printerContainer.firstChild);
-         }
-         
-         //
-         // Build table heading
-         //
-         
-         var table = document.createElement("table");
-         var thead = table.createTHead();
-         var row = thead.insertRow();
-         
-         for (heading of HEADINGS)
-         {
-            var th = document.createElement("th");
-            var text = document.createTextNode(heading);
-            th.appendChild(text);
-            row.appendChild(th);
-         }
-         
-         //
-         // Build table rows
-         //
-         
-         if (printers != null)
-         {
-            for (printer of printers)
-            {
-               var row = table.insertRow();
-               
-               // Name
-               var printFriendlyName = printer.name;
-               if (printer.name.lastIndexOf("\\") != -1)
-               {
-                  printFriendlyName = printer.name.substring(printer.name.lastIndexOf("\\") + 1);
-               }
-               var cell = row.insertCell();
-               var text = document.createTextNode(printFriendlyName);
-               cell.appendChild(text);
-               
-               // Model
-               cell = row.insertCell();
-               text = document.createTextNode(printer.modelName);
-               cell.appendChild(text);
-               
-               // Location
-               cell = row.insertCell();
-               text = document.createTextNode(printer.isLocal ? "Local" : "Network");
-               cell.appendChild(text);
-               
-               // Status
-               cell = row.insertCell();
-               text = document.createTextNode(printer.isConnected ? "Online" : "Offline");
-               cell.appendChild(text);
-            }
-         }
-         
-         printerContainer.appendChild(table);
-      }
-      
-   }.bind(this);
-   
-   PrintManager.prototype.renderPrintQueue = function()
-   {
-      const HEADINGS = new Array("Date", "Owner", "Description", "Copies", "Status", "");
-      
-      if (printQueueContainer != null)
-      {
-         // Clear table.
-         while (printQueueContainer.firstChild)
-         {
-            printQueueContainer.removeChild(printQueueContainer.firstChild);
-         }
-         
-         //
-         // Build table heading
-         //
-         
-         var table = document.createElement("table");
-         var thead = table.createTHead();
-         var row = thead.insertRow();
-         
-         for (heading of HEADINGS)
-         {
-            var th = document.createElement("th");
-            var text = document.createTextNode(heading);
-            th.appendChild(text);
-            row.appendChild(th);
-         }
-         
-         //
-         // Build table rows
-         //
-         
-         if (printQueue != null)
-         {
-            for (printJob of printQueue)
-            {
-               var row = table.insertRow();
-               //row.onmouseover = this.renderPreview(printJob);
-               
-               // Date
-               var cell = row.insertCell();
-               var text = document.createTextNode(printJob.dateTime);
-               cell.appendChild(text);
-               
-               // Owner
-               cell = row.insertCell();
-               text = document.createTextNode(printJob.ownerName);
-               cell.appendChild(text);
-               
-               // Description
-               cell = row.insertCell();
-               text = document.createTextNode(printJob.description);
-               cell.appendChild(text);
-               
-               // Copies
-               cell = row.insertCell();
-               text = document.createTextNode(printJob.copies);
-               cell.appendChild(text);
-               
-               // Status
-               cell = row.insertCell();
-               text = document.createTextNode(PrintJobStatusLabels[printJob.status]);
-               cell.appendChild(text);
-               
-               // Delete icon
-               cell = row.insertCell();
-               cell.innerHTML = 
-                  "<i class=\"material-icons table-function-button\" onclick=\"printManager.cancelPrintJob(" + printJob.printJobId + ")\">delete</i>";
-            }
-         }
-         
-         printQueueContainer.appendChild(table);
-      }
-   }.bind(this);
-   
-   PrintManager.prototype.renderPreview = function(printJob)
-   {
-      if (previewImg != null)
-      {
-         if (printJob != null)
-         {
-            var label = dymo.label.framework.openLabelXml(printJob.xml);
-            
-            var pngData = label.render();
-   
-            previewImg.src = "data:image/png;base64," + pngData;
-            
-            previewImg.style.display  = "block";         
-         }
-         else
-         {
-            previewImg.style.display  = "none";
-         }
-      }
-   }
-   
+   // Attempts printing of a print job.
    PrintManager.prototype.print = function(printJob)
    {
       var success = false;

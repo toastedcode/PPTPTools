@@ -3,10 +3,9 @@
 require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/header.php';
-require_once '../common/navigation.php';
+require_once '../common/menu.php';
 require_once '../common/panTicket.php';
 require_once '../common/params.php';
-require_once '../common/timeCardInfo.php';
 
 abstract class ScanToFunction
 {
@@ -18,15 +17,16 @@ abstract class ScanToFunction
    const COUNT = ScanToFunction::LAST - ScanToFunction::FIRST;
 }
 
-function getNavBar()
+function getParams()
 {
-   $navBar = new Navigation();
+   static $params = null;
    
-   $navBar->start();
-   $navBar->mainMenuButton();
-   $navBar->end();
+   if (!$params)
+   {
+      $params = Params::parse();
+   }
    
-   return ($navBar->getHtml());
+   return ($params);
 }
 
 function getScanToFunction()
@@ -51,55 +51,53 @@ session_start();
 
 if (!Authentication::isAuthenticated())
 {
-   header('Location: ../pptpTools.php');
+   header('Location: ../home.php');
    exit;
 }
 ?>
 
-<!DOCTYPE html>
 <html>
 
 <head>
 
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <link rel="stylesheet" type="text/css" href="../common/flex.css"/>
+
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
-   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
    <script src="../common/common.js"></script>
-
+      
 </head>
 
-<body>
+<body class="flex-vertical flex-top flex-left">
 
    <?php Header::render("PPTP Tools"); ?>
    
-   <div class="flex-horizontal main">
-     
-     <div class="flex-horizontal sidebar hide-on-tablet"></div> 
+   <div class="main flex-horizontal flex-top flex-left">
    
-     <div class="flex-vertical content">
-
-        <div class="heading">Pan Ticket Scanner</div>
-
-        <div class="description">Scan a pan ticket as the first step in weighing, washing, or tracking parts.</div>
-
-        <div class="flex-vertical inner-content" style="align-items:center; width:100%;">
-        
-           <video muted playsinline id="camera" width="500"></video>
-       
-        </div>
-        
-        <?php echo getNavBar(); ?>
+      <?php Menu::render(Activity::PAN_TICKET); ?>
+      
+      <div class="content flex-vertical flex-top flex-left">
+      
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading">Pan Ticket Scanner</div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-     </div>
-     
-   </div>
+         <div id="description" class="description">Scan a pan ticket as the first step in weighing, washing, or tracking parts.</div>
+         
+         <br>
+         
+         <video muted playsinline id="camera" width="500"></video>
+         
+      </div> <!-- content -->
+      
+   </div> <!-- main -->
    
-   <script  type="module">
+   <script type="module">
+   
       preserveSession();
 
       function onScanResult(result)
@@ -162,15 +160,19 @@ if (!Authentication::isAuthenticated())
 
       var scanTo = <?php echo (getScanToFunction()); ?>;
 
-      import QrScanner from "./qr-scanner.min.js";
-      QrScanner.WORKER_PATH = './qr-scanner-worker.min.js';
+      import QrScanner from "../thirdParty/qrscanner/qr-scanner.min.js";
+      QrScanner.WORKER_PATH = "../thirdParty/qrscanner/qr-scanner-worker.min.js";
    
       const video = document.getElementById('camera');
    
       const scanner = new QrScanner(video, onScanResult());
       scanner.start();
+      
+      // Setup event handling on all DOM elements.
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
    </script>
-
+   
 </body>
 
 </html>

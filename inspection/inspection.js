@@ -1,4 +1,12 @@
-function onSubmit()
+function onSelectInspectionTemplate()
+{
+   if (validateInspectionSelection())
+   {
+      document.getElementById("input-form").submit();
+   }
+}
+
+function onSaveInspection()
 {
    if (validateInspection())
    {
@@ -17,7 +25,7 @@ function onSubmit()
    
             if (json.success == true)
             {
-               location.href = "inspections.php";
+               location.href = "viewInspections.php";
             }
             else
             {
@@ -38,7 +46,7 @@ function onSubmit()
    
       // Set up our request
       requestUrl = "../api/saveInspection/"
-      xhttp.open("POST", requestUrl);
+      xhttp.open("POST", requestUrl, true);
    
       // The data sent is what the user provided in the form
       xhttp.send(formData);

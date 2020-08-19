@@ -89,7 +89,19 @@ class Inspection
    // Optional properties for GENERIC inspections.
    public $jobNumber;
    public $wcNumber;
-
+   
+   // Inspection results summary properties.
+   // Note: By storing these directly in the database, we can more quickly build the inspection table.
+   public $samples;
+   public $naCount;
+   public $passCount;
+   public $warningCount;
+   public $failCount;
+   
+   // Source data file for Oasis reports.
+   public $dataFile;
+   
+   // The actual inspection results.
    public $inspectionResults;
    
    public function __construct()
@@ -102,6 +114,12 @@ class Inspection
       $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
       $this->wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
+      $this->samples = 0;
+      $this->naCount = 0;
+      $this->passCount = 0;
+      $this->warningCount = 0;
+      $this->failCount = 0;
+      $this->dataFile = null;
       $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
    }
    
@@ -123,7 +141,48 @@ class Inspection
       }
    }
    
-   public static function load($inspectionId)
+   public function initializeFromOasisReport($oasisReport)
+   {
+      $this->templateId = InspectionTemplate::OASIS_TEMPLATE_ID;
+      $this->inspector = $oasisReport->getEmployeeNumber();
+      $this->comments = $oasisReport->getComments();
+      $this->jobId = JobInfo::UNKNOWN_JOB_ID;
+      $this->operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->jobNumber = $oasisReport->getPartNumber();
+      $this->wcNumber = $oasisReport->getMachineNumber();
+      $this->samples = $oasisReport->getPartInspectionCount();
+      $this->naCount = 0;
+      $this->warningCount = 0;  // TODO
+      $this->failCount = $oasisReport->getFailureCount();
+      $this->passCount = ($this->samples - $this->failCount);
+      $this->dataFile = $oasisReport->getDataFile();
+      $this->inspectionResults = null;  // 2D array, indexed as [propertyId][sampleIndex]
+   }
+   
+   public function initializeFromDatabaseRow($row)
+   {
+      $this->inspectionId = intval($row['inspectionId']);
+      $this->templateId = intval($row['templateId']);
+      $this->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+      $this->inspector = intval($row['inspector']);
+      $this->comments = $row['comments'];
+      $this->jobId = $row['jobId'];
+      $this->operator = intval($row['operator']);
+      $this->jobNumber = $row['jobNumber'];
+      $this->wcNumber = intval($row['wcNumber']);
+      
+      // Inspection summary.
+      $this->samples = intval($row['samples']);
+      $this->naCount = intval($row['naCount']);
+      $this->passCount = intval($row['passCount']);
+      $this->warningCount = intval($row['warningCount']);
+      $this->failCount = intval($row['failCount']);
+      
+      // Source data file for Oasis reports.
+      $this->dataFile = $row['dataFile'];
+   }
+   
+   public static function load($inspectionId, $loadInspectionResults)
    {
       $inspection = null;
       
@@ -137,31 +196,14 @@ class Inspection
          {
             $inspection = new Inspection();
             
-            $inspection->inspectionId = intval($row['inspectionId']);
-            $inspection->templateId = intval($row['templateId']);
-            $inspection->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $inspection->inspector = intval($row['inspector']);
-            $inspection->comments = $row['comments'];
-            $inspection->jobId = $row['jobId'];
-            $inspection->operator = intval($row['operator']);
-            $inspection->jobNumber = $row['jobNumber'];
-            $inspection->wcNumber = intval($row['wcNumber']);
+            $inspection->initializeFromDatabaseRow($row);
             
-            $result = $database->getInspectionResults($inspectionId);
-            
-            while ($result && ($row = $result->fetch_assoc()))
+            // Optionally load actual inspection results.
+            if ($loadInspectionResults)
             {
-               $inspectionResult = InspectionResult::load($row);
+               $inspection->loadInspectionResults();
                
-               if ($inspectionResult)
-               {
-                  if (!isset($inspection->inspectionResults[$inspectionResult->propertyId]))
-                  {
-                     $inspection->inspectionResults[$inspectionResult->propertyId] = array();
-                  }
-                  
-                  $inspection->inspectionResults[$inspectionResult->propertyId][$inspectionResult->sampleIndex] = $inspectionResult;
-               }
+               $inspection->updateSummary();
             }
          }
       }
@@ -169,11 +211,61 @@ class Inspection
       return ($inspection);
    }
    
-   public function getCount()
+   public function loadInspectionResults()
+   {
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->getInspectionResults($this->inspectionId);
+         
+         while ($result && ($row = $result->fetch_assoc()))
+         {
+            $inspectionResult = InspectionResult::load($row);
+            
+            if ($inspectionResult)
+            {
+               if (!isset($this->inspectionResults[$inspectionResult->propertyId]))
+               {
+                  $this->inspectionResults[$inspectionResult->propertyId] = array();
+               }
+               
+               $this->inspectionResults[$inspectionResult->propertyId][$inspectionResult->sampleIndex] = $inspectionResult;
+            }
+         }
+      }
+   }
+   
+   public function hasSummary()
+   {
+      return (!(($this->samples == 0) &&
+                ($this->naCount == 0) &&
+                ($this->passCount == 0) &&
+                ($this->warningCount == 0) &&
+                ($this->failCount == 0)));
+   }
+   
+   public function updateSummary()
+   {
+      if ($this->inspectionResults)
+      {
+         $this->samples = $this->getCount(true);
+         $this->naCount = $this->getCountByStatus(InspectionStatus::NON_APPLICABLE, true);
+         $this->passCount = $this->getCountByStatus(InspectionStatus::PASS, true);
+         $this->passCount = $this->getCountByStatus(InspectionStatus::WARNING, true);
+         $this->failCount = $this->getCountByStatus(InspectionStatus::FAIL, true);
+      }
+   }
+   
+   public function getCount($forceCalculation = false)
    {
       $count = 0;
       
-      if ($this->inspectionResults)
+      if ($this->hasSummary() && !$forceCalculation)
+      {
+         $count = $this->samples;
+      }
+      else if ($this->inspectionResults)
       {
          foreach ($this->inspectionResults as $inspectionRow)
          {
@@ -190,11 +282,45 @@ class Inspection
       return ($count);
    }
    
-   public function getCountByStatus($inspectionStatus)
+   public function getCountByStatus($inspectionStatus, $forceCalculation = false)
    {
       $count = 0;
       
-      if ($this->inspectionResults)
+      if ($this->hasSummary() && !$forceCalculation)
+      {
+         switch ($inspectionStatus)
+         {
+            case InspectionStatus::NON_APPLICABLE:
+            {
+               $count = $this->naCount;
+               break;
+            }
+            
+            case InspectionStatus::PASS:
+            {
+               $count = $this->passCount;
+               break;
+            }
+            
+            case InspectionStatus::WARNING:
+            {
+               $count = $this->warningCount;
+               break;
+            }
+            
+            case InspectionStatus::FAIL:
+            {
+               $count = $this->failCount;
+               break;
+            }
+            
+            default:
+            {
+               break;
+            }
+         }
+      }
+      else if ($this->inspectionResults)
       {
          foreach ($this->inspectionResults as $inspectionRow)
          {
@@ -227,10 +353,24 @@ class Inspection
       return ($this->getCountByStatus(InspectionStatus::FAIL) > 0);
    }
    
+   public function getMeasurementCount()
+   {
+      $count = ($this->getCount() - $this->getCountByStatus(InspectionStatus::NON_APPLICABLE));
+      
+      return ($count);
+   }
+   
+   public function getPassCount()
+   {
+      $count = $this->getCountByStatus(InspectionStatus::PASS);
+      
+      return ($count);
+   }
+   
    public function getInspectionStatus()
    {
       $inspectionStatus = InspectionStatus::UNKNOWN;
-      
+
       if ($this->fail())
       {
          $inspectionStatus = InspectionStatus::FAIL;
@@ -296,7 +436,7 @@ class Inspection
 if (isset($_GET["inspectionId"]))
 {
    $inspectionId = $_GET["inspectionId"];
-   $inspection = Inspection::load($inspectionId);
+   $inspection = Inspection::load($inspectionId, true);
    $inspectionTemplate = InspectionTemplate::load($inspection->templateId);
  
    if ($inspection && $inspectionTemplate)

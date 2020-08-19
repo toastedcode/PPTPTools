@@ -81,6 +81,24 @@ class PartWeightEntry
       return ($partCount);
    }
 
+   public function initializeFromDatabaseRow($row)
+   {
+      $this->partWeightEntryId = intval($row['partWeightEntryId']);
+      $this->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+      $this->employeeNumber = intval($row['employeeNumber']);
+      $this->timeCardId = intval($row['timeCardId']);
+      $this->panCount = intval($row['panCount']);
+      $this->weight = doubleval($row['weight']);
+      
+      // These attributes were added for manual entry when no time card is available.
+      $this->jobId = intval($row['jobId']);
+      $this->operator = intval($row['operator']);
+      if ($row['manufactureDate'])
+      {
+         $this->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
+      }
+   }
+   
    public static function load($partWeightEntryId)
    {
       $partWeightEntry = null;
@@ -95,20 +113,7 @@ class PartWeightEntry
          {
             $partWeightEntry = new PartWeightEntry();
             
-            $partWeightEntry->partWeightEntryId = intval($row['partWeightEntryId']);
-            $partWeightEntry->dateTime = Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $partWeightEntry->employeeNumber = intval($row['employeeNumber']);
-            $partWeightEntry->timeCardId = intval($row['timeCardId']);
-            $partWeightEntry->panCount = intval($row['panCount']);
-            $partWeightEntry->weight = doubleval($row['weight']);
-            
-            // These attributes were added for manual entry when no time card is available.
-            $partWeightEntry->jobId = intval($row['jobId']);
-            $partWeightEntry->operator = intval($row['operator']);
-            if ($row['manufactureDate'])
-            {
-               $partWeightEntry->manufactureDate = Time::fromMySqlDate($row['manufactureDate'], "Y-m-d H:i:s");
-            }
+            $partWeightEntry->initializeFromDatabaseRow($row);
          }
       }
       

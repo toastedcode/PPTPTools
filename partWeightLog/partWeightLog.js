@@ -1,3 +1,59 @@
+function onSavePartWeightEntry()
+{
+   if (validatePartWeightEntry())
+   {
+      var form = document.querySelector('#input-form');
+      
+      var xhttp = new XMLHttpRequest();
+   
+      // Bind the form data.
+      var formData = new FormData(form);
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("load", function(event) {
+         try
+         {
+            var json = JSON.parse(event.target.responseText);
+   
+            if (json.success == true)
+            {
+               location.href = "partWeightLog.php";
+            }
+            else
+            {
+               alert(json.error);
+            }
+         }
+         catch (expection)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      });
+   
+      // Define what happens on successful data submission.
+      xhttp.addEventListener("error", function(event) {
+        alert('Oops! Something went wrong.');
+      });
+   
+      // Set up our request
+      requestUrl = "../api/savePartWeightEntry/"
+      xhttp.open("POST", requestUrl, true);
+   
+      // The data sent is what the user provided in the form
+      xhttp.send(formData);
+   }
+}
+
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
+   }
+}
+
 function onDeletePartWeightEntry(partWeightEntryId)
 {
    if (confirm("Are you sure you want to delete this log entry?"))
@@ -247,53 +303,6 @@ function onYesterdayButton()
    document.querySelector('#manufacture-date-input').value = formattedDate(yesterday); 
 }
 
-function onSubmit()
-{
-   if (validatePartWeightEntry())
-   {
-      var form = document.querySelector('#input-form');
-      
-      var xhttp = new XMLHttpRequest();
-   
-      // Bind the form data.
-      var formData = new FormData(form);
-   
-      // Define what happens on successful data submission.
-      xhttp.addEventListener("load", function(event) {
-         try
-         {
-            var json = JSON.parse(event.target.responseText);
-   
-            if (json.success == true)
-            {
-               location.href = "partWeightLog.php";
-            }
-            else
-            {
-               alert(json.error);
-            }
-         }
-         catch (expection)
-         {
-            console.log("JSON syntax error");
-            console.log(this.responseText);
-         }
-      });
-   
-      // Define what happens on successful data submission.
-      xhttp.addEventListener("error", function(event) {
-        alert('Oops! Something went wrong.');
-      });
-   
-      // Set up our request
-      requestUrl = "../api/savePartWeightEntry/"
-      xhttp.open("POST", requestUrl);
-   
-      // The data sent is what the user provided in the form
-      xhttp.send(formData);
-   }
-}
-
 function set(elementId, value)
 {
    document.getElementById(elementId).value = value;
@@ -398,12 +407,21 @@ function updateTimeCardInfo(timeCardInfo, jobNumber, wcNumber, operatorName)
    updateCalculatedPartCount();
 }
 
+function getBaseWeight()
+{
+   var panCount = parseInt(document.getElementById('pan-count-input').value);
+   var panWeight = parseFloat(document.getElementById('pan-weight-input').value);
+   var palletWeight = parseFloat(document.getElementById('pallet-weight-input').value);
+   
+   var baseWeight = ((panCount * panWeight) + palletWeight);
+
+   return (baseWeight);
+}
+
 function updateCalculatedPartCount()
 {
    var panCount = parseInt(document.getElementById('pan-count-input').value);
    var partWeight = parseFloat(document.getElementById('part-weight-input').value);
-   var panWeight = parseFloat(document.getElementById('pan-weight-input').value);
-   var palletWeight = parseFloat(document.getElementById('pallet-weight-input').value);
   
    var partCount = 0;
    
@@ -411,7 +429,7 @@ function updateCalculatedPartCount()
        (panCount > 0) &&
        (partWeight > 0))       
    {
-      partCount = ((partWeight - ((panCount * panWeight) + palletWeight)) / sampleWeight);
+      partCount = ((partWeight - getBaseWeight()) / sampleWeight);
       
       partCount = Math.round(partCount);
    }
@@ -467,6 +485,10 @@ function validatePartWeightEntry()
    else if (!(document.getElementById("pan-count-input").validator.validate()))
    {
       alert("Please enter a valid basket count.");
+   }
+   else if (parseFloat(document.getElementById("part-weight-input").value) < getBaseWeight())
+   {
+      alert("Please enter a part weight greater than the base pallet/pan weight.");
    }
    else if (!(document.getElementById("part-weight-input").validator.validate()))
    {

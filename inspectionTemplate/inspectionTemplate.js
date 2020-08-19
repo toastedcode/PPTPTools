@@ -1,4 +1,4 @@
-function onSubmit()
+function onSaveInspectionTemplate()
 {
    if (validateInspectionTemplate())
    {
@@ -17,7 +17,7 @@ function onSubmit()
    
             if (json.success == true)
             {
-               location.href = "inspectionTemplates.php";
+               location.href = "viewInspectionTemplates.php";
             }
             else
             {
@@ -38,10 +38,19 @@ function onSubmit()
    
       // Set up our request
       requestUrl = "../api/saveInspectionTemplate/"
-      xhttp.open("POST", requestUrl);
+      xhttp.open("POST", requestUrl, true);
    
       // The data sent is what the user provided in the form
       xhttp.send(formData);
+   }
+}
+
+function onCancel()
+{
+   if (!isFormChanged("input-form") ||
+       confirm("Are you sure?  All data will be lost."))
+   {
+      window.history.back();
    }
 }
 
@@ -63,7 +72,7 @@ function onDeleteInspectionTemplate(templateId)
                
                if (json.success == true)
                {
-                  location.href = "inspectionTemplates.php";            
+                  location.href = "viewInspectionTemplates.php";            
                }
                else
                {
@@ -80,6 +89,11 @@ function onDeleteInspectionTemplate(templateId)
       xhttp.open("GET", requestUrl, true);
       xhttp.send();  
    }
+}
+
+function onCopyInspectionTemplate(templateId)
+{
+   location.href = "viewInspectionTemplate.php?copyFrom=" + templateId;
 }
 
 function onInspectionTypeChange()

@@ -1,288 +1,281 @@
 <?php
 
+require_once '../common/activity.php';
 require_once '../common/database.php';
-require_once '../common/filter.php';
+require_once '../common/header.php';
 require_once '../common/jobInfo.php';
-require_once '../common/navigation.php';
-require_once '../common/newIndicator.php';
+require_once '../common/menu.php';
 require_once '../common/permissions.php';
+require_once '../common/roles.php';
 
-require_once '../common/userInfo.php';
-
-// *****************************************************************************
-//                              JobStatusFilterComponent
-
-class JobStatusFilterComponent extends FilterComponent
+function getReportFilename()
 {
-   public $jobStatusChecked = array();
+   $filename = "Jobs.csv";
    
-   public function __construct()
-   {
-      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
-      {
-         $this->jobStatusChecked[] = false;
-      }
-      
-      $this->jobStatusChecked[JobStatus::PENDING] = true;
-      $this->jobStatusChecked[JobStatus::ACTIVE] = true;
-   }
-   
-   public function getHtml()
-   {
-      $html = "<div class=\"filter-component\">";
-      
-      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
-      {
-         if ($jobStatus != JobStatus::DELETED)
-         {
-            $checked = $this->jobStatusChecked[$jobStatus] ? "checked" : "";
-            
-            $label = JobStatus::getName($jobStatus);
-            
-            $name = strtolower($label);
-            
-            $id = "filter-" . $name . "-input";
-            
-            $html .=
-<<<HEREDOC
-               <input type="hidden" name="$name" value="0"/>
-               <input id="$id" type="checkbox" name="$name" value="true" $checked/>
-               <label for="$id">$label</label>
-HEREDOC;
-         }
-      }
-      
-      $html .= "</div>";
-      
-      return ($html);
-   }
-   
-   public function update()
-   {
-      for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
-      {
-         $name = strtolower(JobStatus::getName($jobStatus));
-         
-         if (isset($_POST[$name]))
-         {
-            $this->jobStatusChecked[$jobStatus] = boolval($_POST[$name]);
-         }
-      }
-   }
+   return ($filename);
 }
 
-// *****************************************************************************
-//                                   ViewJobs
-
-class ViewJobs
+function isFilteredBy($jobStatus)
 {
-   private $filter;
+   $isFiltered = false;
    
-   public function __construct()
+   // Determine if any filter values have been set in the $_SESSION variable.
+   $isInitialized = false;
+   foreach (JobStatus::$VALUES as $evalJobStatus)
    {
-      if (isset($_SESSION["jobFilter"]))
-      {
-         $this->filter = $_SESSION["jobFilter"];
-      }
-      else
-      {
-         $this->filter = new Filter();
+      $name = strtolower(JobStatus::getName($evalJobStatus));
       
-         $this->filter->addByName('jobNumber', new JobNumberFilterComponent("Job Number", JobInfo::getJobNumbers(false), "All"));
-         $this->filter->addByName('jobStatus', new JobStatusFilterComponent());
-         $this->filter->add(new FilterButton());
-         $this->filter->add(new FilterDivider());
-         $this->filter->add(new PrintButton());
-      }
-      
-      $this->filter->update();
-      $this->filter->get("jobNumber")->updateJobNumbers(JobInfo::getJobNumbers(false));
-      
-      $_SESSION["jobFilter"] = $this->filter;
+      $isInitialized |= isset($_SESSION["jobs.filter.$name"]);
    }
-
-   public function getHtml()
+   
+   // Initialize to showing just pending and active jobs.
+   $activeName = strtolower(JobStatus::getName(JobStatus::ACTIVE));
+   $pendingName = strtolower(JobStatus::getName(JobStatus::PENDING));
+   
+   if (!$isInitialized)
    {
-      $filterDiv = ViewJobs::filterDiv();
-      
-      $jobsDiv = ViewJobs::jobsDiv();
-      
-      $navBar = ViewJobs::navBar();
-      
-      $html = 
+      $_SESSION["jobs.filter.$activeName"] = true;
+      $_SESSION["jobs.filter.$pendingName"] = true;
+   }   
+   
+   $name = strtolower(JobStatus::getName($jobStatus));
+   
+   if (isset($_SESSION["jobs.filter.$name"]))
+   {
+      $isFiltered = filter_var($_SESSION["jobs.filter.$name"], FILTER_VALIDATE_BOOLEAN);
+   }
+   
+   return ($isFiltered);
+}
+
+function getJobStatusFilters()
+{
+   $html = "";
+   
+   for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
+   {
+      if ($jobStatus != JobStatus::DELETED)
+      {
+         $checked = isFilteredBy($jobStatus) ? "checked" : "";
+         
+         $label = JobStatus::getName($jobStatus);
+         
+         $name = strtolower($label);
+         
+         $id = $name . "-filter";
+         
+         $html .=
 <<<HEREDOC
-      <script src="jobs.js"></script>
-   
-      <div class="flex-vertical content">
-
-         <div class="heading">Jobs</div>
-
-         <div class="description">
-            Tracking production all starts with the creation of Job.  Your active jobs are the ones available to your operators for creating Time Sheets
+         <div class="flex-horizontal flex-v-center">
+            <input id="$id" class="job-status-filter" type="checkbox" name="$name" value="true" $checked/>
+            &nbsp;
+            <label for="$id">$label</label>
+            &nbsp;&nbsp;
          </div>
-
-         <div class="flex-vertical inner-content"> 
-   
-            $filterDiv
-   
-            $jobsDiv
-         
-         </div>
-
-         $navBar
-
-      </div>
 HEREDOC;
-      
-      return ($html);
-   }
+      }
+   }   
    
-   public function render()
-   {
-      echo (ViewJobs::getHtml());
-   }
-      
-   private function filterDiv()
-   {
-      return ($this->filter->getHtml());
-   }
+   return ($html);
+}
+
+// ********************************** BEGIN ************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../login.php');
+   exit;
+}
+
+?>
+
+<html>
+
+<head>
+
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
-   private function navBar()
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      $navBar->mainMenuButton();
-      $navBar->highlightNavButton("New Job", "onNewJob()", true);
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
    
-   private function jobsDiv()
-   {
-      global $ROOT;
+   <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
+   <script src="../thirdParty/moment/moment.min.js"></script>
+   
+   <script src="../common/common.js"></script>
+   <script src="jobs.js"></script>
       
-      $html = "";
+</head>
+
+<body class="flex-vertical flex-top flex-left">
+
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="main flex-horizontal flex-top flex-left">
+   
+      <?php Menu::render(Activity::JOBS); ?>
       
-      $database = new PPTPDatabase();
+      <div class="content flex-vertical flex-top flex-left">
       
-      $database->connect();
-      
-      if ($database->isConnected())
-      {
-         $result = $database->getJobs($this->filter->get("jobNumber")->selectedJobNumber,
-                                      $this->filter->get("jobStatus")->jobStatusChecked);
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading">Jobs</div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
          
-         if ($result && ($database->countResults($result) > 0))
+         <div id="description" class="description">Tracking production all starts with the creation of Job.  Your active jobs are the ones available to your operators for creating Time Sheets.</div>
+
+         <br>
+         
+         <div class="flex-horizontal">         
+            <?php echo getJobStatusFilters(); ?>
+         </div>
+         
+         <br>
+        
+         <button id="add-job-button" class="accent-button">New Job</button>
+
+         <br>
+        
+         <div id="job-table"></div>
+
+         <br> 
+        
+         <div id="download-link" class="download-link">Download CSV file</div>
+         
+      </div> <!-- content -->
+      
+   </div> <!-- main -->
+   
+   <script>
+   
+      preserveSession();
+
+      function getTableQuery()
+      {
+         return ("<?php echo $ROOT ?>/api/jobData/");
+      }
+
+      function getTableQueryParams()
+      {
+         var params = new Object();
+
+         var filters = document.getElementsByClassName("job-status-filter");
+
+         for (var filter of filters)
          {
-            $html = 
-<<<HEREDOC
-            <div class="table-container">
-               <table class="job-table">
-                  <tr>
-                     <th>Job Number</th>
-                     <th>Author</th>                  
-                     <th>Date</th>
-                     <th class="hide-on-tablet">Part #</th>
-                     <th>Sample Weight</th>
-                     <th>Work Center #</th>
-                     <th class="hide-on-tablet">Cycle Time</th>
-                     <th class="hide-on-tablet">Net Percentage</th>
-                     <th class="hide-on-tablet">Customer Print</th>
-                     <th>Status</th>
-                     <th class="hide-on-print"/>
-                     <th class="hide-on-print"/>
-                     <th class="hide-on-print"/>
-                  </tr>
-HEREDOC;
+            params[filter.name] = filter.checked;
+         }
 
-            while ($row = $result->fetch_assoc())
-            {
-               $jobInfo = JobInfo::load($row["jobId"]);
-               
-               if ($jobInfo)
-               {
-                  $creatorName = "unknown";
-                  $user = UserInfo::load($jobInfo->creator);
-                  if ($user)
-                  {
-                     $creatorName= $user->getFullName();
-                  }
-                  
-                  $dateTime = new DateTime($jobInfo->dateTime, new DateTimeZone('America/New_York'));  // TODO: Function in Time class
-                  $date = $dateTime->format("m-d-Y");
-                  
-                  $newIndicator = new NewIndicator($dateTime, 60);
-                  $new = $newIndicator->getHtml();
-                  
-                  $customerPrint = "";
-                  if ($jobInfo->customerPrint != "")
-                  {
-                     $truncatedFilename = strlen($jobInfo->customerPrint) > 15 ? substr($jobInfo->customerPrint, 0, 15) . "..." : $jobInfo->customerPrint; 
-                     $customerPrint = "<a href=\"$ROOT/uploads/$jobInfo->customerPrint\" target=\"_blank\">$truncatedFilename</a>";
-                  }
-                  
-                  $status = JobStatus::getName($jobInfo->status);
-                  
-                  $viewEditIcon = "";
-                  $copyIcon = "";
-                  $deleteIcon = "";
-                  if (Authentication::checkPermissions(Permission::EDIT_JOB))
-                  {
-                     $viewEditIcon =
-                        "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onEditJob($jobInfo->jobId)\">mode_edit</i>";
-                     
-                     $copyIcon =
-                     "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onCopyJob($jobInfo->jobId)\">file_copy</i>";
-                     
-                     
-                     if ($jobInfo->status != JobStatus::DELETED)
-                     {
-                        $deleteIcon =
-                           "<i class=\"material-icons pan-ticket-function-button\" onclick=\"onDeleteJob($jobInfo->jobId)\">delete</i>";
-                     }
-                  }
-                  else
-                  {
-                     $viewEditIcon =
-                        "<i class=\"material-icons table-function-button\" onclick=\"onViewJob($jobInfo->jobId)\">visibility</i>";
-                  }
-                  
-                  $html .=
-<<<HEREDOC
-                     <tr>
-                        <td>$jobInfo->jobNumber</td>
-                        <td>$creatorName</td>
-                        <td>$date $new</td>
-                        <td class="hide-on-tablet">$jobInfo->partNumber</td>
-                        <td class="hide-on-tablet">$jobInfo->sampleWeight</td>
-                        <td>$jobInfo->wcNumber</td>
-                        <td class="hide-on-tablet">$jobInfo->cycleTime</td>
-                        <td class="hide-on-tablet">$jobInfo->netPercentage</td>
-                        <td class="hide-on-tablet">$customerPrint</td>
-                        <td>$status</td>
-                        <td class="hide-on-print">$viewEditIcon</td>
-                        <td class="hide-on-print">$copyIcon</td>
-                        <td class="hide-on-print">$deleteIcon</td>
-                     </tr>
-HEREDOC;
+         return (params);
+      }
+
+      var url = getTableQuery();
+      var params = getTableQueryParams();
+      
+      // Create Tabulator on DOM element time-card-table.
+      var table = new Tabulator("#job-table", {
+         //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+         layout:"fitData",
+         responsiveLayout:"hide", // enable responsive layouts
+         ajaxURL:url,
+         ajaxParams:params,
+         //Define Table Columns
+         columns:[
+            {title:"Id",             field:"jobId",         hozAlign:"left", visible:false},
+            {title:"Job #",          field:"jobNumber",     hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Date",           field:"dateTime",      hozAlign:"left", responsive:1, headerFilter:true,
+               formatter:"datetime",  // Requires moment.js 
+               formatterParams:{
+                  outputFormat:"MM/DD/YYYY",
+                  invalidPlaceholder:"---"
+               }
+            },
+            {title:"Part #",         field:"partNumber",    hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Work Center",    field:"wcNumber",      hozAlign:"left", responsive:2, headerFilter:true},
+            {title:"Customer Print", field:"customerPrint", hozAlign:"left", responsive:2, 
+               formatter:function(cell, formatterParams, onRendered){
+                  var filename = cell.getValue();
+                  var truncatedFilename = (filename.length > 20) ? filename.substr(0, 20) + "..." : filename; 
+                  return ("<a href=\"<?php echo $ROOT ?>/uploads/" + filename + "\" target=\"_blank\">" + truncatedFilename + "</a>");
+                }
+            },
+            {title:"Status",         field:"statusLabel",   hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"",               field:"copy",                           responsive:0,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">content_copy</i>");
+               }
+            },
+            {title:"",               field:"delete",                          responsive:0,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">delete</i>");
                }
             }
+         ],
+         cellClick:function(e, cell){
+            var jobId = parseInt(cell.getRow().getData().jobId);
             
-            $html .=
-<<<HEREDOC
-               </table>
-            </div>
-HEREDOC;
-         }
-         else
+            if (cell.getColumn().getField() == "copy")
+            {
+               onCopyJob(jobId);
+            }
+            else if (cell.getColumn().getField() == "delete")
+            {
+               onDeleteJob(jobId);
+            }
+            else if (cell.getColumn().getField() == "customerPrint")
+            {
+               // No action.  Allow for clicking on link.
+            }
+            else // Any other column
+            {
+               // Open user for viewing/editing.
+               document.location = "<?php echo $ROOT?>/jobs/viewJob.php?jobId=" + jobId;               
+            }
+         },
+         rowClick:function(e, row){
+            // No row click function needed.
+         },
+      });
+
+      function updateFilter(event)
+      {
+         if (document.readyState === "complete")
          {
-            $html = "<div class=\"no-data\">No data is available for the selected range.  Use the filter controls above to select a different job or status.</div>";
+            var filter = event.srcElement;
+            
+            var url = getTableQuery();
+            var params = getTableQueryParams();
+
+            table.setData(url, params)
+            .then(function(){
+               // Run code after table has been successfuly updated
+            })
+            .catch(function(error){
+               // Handle error loading data
+            });
+
+            setSession("jobs.filter." + filter.name, filter.checked);
          }
       }
-      
-      return ($html);
-   }
-}
-?>
+
+      // Setup event handling on all DOM elements.
+      var filters = document.getElementsByClassName("job-status-filter");
+      for (var filter of filters)
+      {
+         filter.addEventListener("change", updateFilter); 
+      }      
+      document.getElementById("add-job-button").onclick = function(){location.href = 'viewJob.php';};
+      document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:"."})};
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+   </script>
+   
+</body>
+
+</html>

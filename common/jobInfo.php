@@ -13,6 +13,13 @@ abstract class JobStatus
    const LAST = 5;
    const COUNT = JobStatus::LAST - JobStatus::FIRST;
    
+   public static $VALUES = array(
+      JobStatus::PENDING,
+      JobStatus::ACTIVE,
+      JobStatus::COMPLETE,
+      JobStatus::CLOSED,
+      JobStatus::DELETED);
+   
    private static $names = array("Pending", "Active", "Complete", "Closed", "Deleted");
    
    public static function getName($status)
@@ -59,11 +66,9 @@ class JobInfo
    {
       $jobInfo = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getJob($jobId);
          
@@ -143,11 +148,9 @@ class JobInfo
    {
       $jobNumbers = array();
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getJobNumbers($onlyActive);
          

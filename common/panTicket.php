@@ -4,8 +4,8 @@ require_once 'jobInfo.php';
 require_once 'qrCode.php';
 require_once 'timeCardInfo.php';
 require_once 'userInfo.php';
-require_once '../phpqrcode/phpqrcode.php';
 require_once '../printer/printJob.php';
+require_once '../thirdParty/phpqrcode/phpqrcode.php';
 
 abstract class PanTicketLabelFields
 {
@@ -74,7 +74,7 @@ class PanTicket
       {
          $panTicketCode = PanTicket::getPanTicketCode($this->panTicketId);
          $operator = $timeCardInfo->employeeNumber;
-         $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+         $dateTime = new DateTime($timeCardInfo->manufactureDate, new DateTimeZone('America/New_York'));
          $mfgDate = $dateTime->format("m-d-Y");
          $materialNumber = $timeCardInfo->materialNumber;
          $panCount = $timeCardInfo->panCount;
@@ -162,7 +162,7 @@ HEREDOC;
          $wcNumber = $jobInfo->wcNumber;
       }
       
-      $dateTime = new DateTime($timeCardInfo->dateTime, new DateTimeZone('America/New_York'));
+      $dateTime = new DateTime($timeCardInfo->manufactureDate, new DateTimeZone('America/New_York'));
       $mfgDate = $dateTime->format("m-d-Y");
       
       $file = fopen(PanTicket::LABEL_TEMPLATE_FILENAME, "r");

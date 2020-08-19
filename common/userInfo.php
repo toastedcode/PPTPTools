@@ -13,20 +13,30 @@ class UserInfo
    public $password;
    public $firstName;
    public $lastName;
-   public $roles = Role::UNKNOWN;
-   public $permissions = Permission::NO_PERMISSIONS;
+   public $roles;
+   public $permissions;
    public $email;
    public $authToken;
+   
+   public function __construct()
+   {
+      $this->employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->username = null;
+      $this->password = null;
+      $this->firstName = null;
+      $this->roles = Role::UNKNOWN;
+      $this->permissions = Permission::NO_PERMISSIONS;
+      $this->email = null;
+      $this->authToken = null;
+   }
    
    public static function load($employeeNumber)
    {
       $userInfo = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getUser($employeeNumber);
          
@@ -45,11 +55,9 @@ class UserInfo
    {
       $userInfo = null;
       
-      $database = new PPTPDatabase();
+      $database = PPTPDatabase::getInstance();
       
-      $database->connect();
-      
-      if ($database->isConnected())
+      if ($database && $database->isConnected())
       {
          $result = $database->getUserByName($username);
          

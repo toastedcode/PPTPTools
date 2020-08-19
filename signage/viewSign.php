@@ -1,202 +1,265 @@
 <?php
 
+require_once '../common/activity.php';
+require_once '../common/header.php';
+require_once '../common/menu.php';
+require_once '../common/params.php';
 require_once '../common/signInfo.php';
-require_once '../common/navigation.php';
 
-class ViewSign
+const ACTIVITY = Activity::SIGNAGE;
+$activity = Activity::getActivity(ACTIVITY);
+
+abstract class UserInputField
 {
-   public function getHtml($view)
+   const FIRST = 0;
+   const NAME = UserInputField::FIRST;
+   const DESCRIPTION = 1;
+   const URL = 2;
+   const LAST = 3;
+   const COUNT = UserInputField::LAST - UserInputField::FIRST;
+}
+
+abstract class View
+{
+   const NEW_SIGN = 0;
+   const VIEW_SIGN = 1;
+   const EDIT_SIGN = 2;
+}
+
+function getParams()
+{
+   static $params = null;
+   
+   if (!$params)
    {
-      $html = "";
-      
-      $signInfo = ViewSign::getSignInfo();
-      
-      $newSign = ($signInfo->signId == SignInfo::UNKNOWN_SIGN_ID);
-      
-      $editable = (($view == "new_sign") || ($view == "edit_sign"));
-      
-      $headingDiv = ViewSign::headingDiv($view);
-      
-      $descriptionDiv = ViewSign::descriptionDiv($view);
-      
-      $signDiv = ViewSign::signDiv($signInfo, $view);
-      
-      $navBar = ViewSign::navBar($signInfo, $view);
-      
-      $title = "";
-      if ($view == "new_sign")
-      {
-         $title = "New Sign";
-      }
-      else if ($view == "edit_sign")
-      {
-         $title = "Edit Sign";
-      }
-      else if ($view == "view_sign")
-      {
-         $title = "View Sign";
-      }
-      
-      $html =
-<<<HEREDOC
-      <form id="input-form" method="POST">
-         <input id="sign-id-input" type="hidden" name="signId" value="$signInfo->signId"/>
-      </form>
-
-      <div class="flex-vertical content">
-
-         $headingDiv
-
-         $descriptionDiv
-         
-         <div class="flex-vertical inner-content"> 
-
-            $signDiv
-
-         </div>
-
-         $navBar
-               
-      </div>
-               
-      <script>
-      </script>
-HEREDOC;
-      
-      return ($html);
+      $params = Params::parse();
    }
    
-   public function render($view)
+   return ($params);
+}
+
+function getView()
+{
+   $view = View::VIEW_SIGN;
+   
+   if (getSignId() == SignInfo::UNKNOWN_SIGN_ID)
    {
-      echo (ViewSign::getHtml($view));
+      $view = View::NEW_SIGN;
+   }
+   else if (Authentication::checkPermissions(Permission::EDIT_SIGN))
+   {
+      $view = View::EDIT_SIGN;
    }
    
-   protected static function headingDiv($view)
+   return ($view);
+}
+
+function isEditable($field)
+{
+   $view = getView();
+   
+   // Start with the edit mode, as dictated by the view.
+   $isEditable = (($view == View::NEW_SIGN) ||
+                  ($view == View::EDIT_SIGN));
+   
+   return ($isEditable);
+}
+
+function getDisabled($field)
+{
+   return (isEditable($field) ? "" : "disabled");
+}
+
+function getSignId()
+{
+   $signId = SignInfo::UNKNOWN_SIGN_ID;
+   
+   $params = getParams();
+   
+   if ($params->keyExists("signId"))
    {
-      $heading = "";
-      if ($view == "new_sign")
-      {
-         $heading = "Add a New Digital Sign";
-      }
-      else if ($view == "edit_sign")
-      {
-         $heading = "Update a Digital Sign";
-      }
-      else if ($view == "view_sign")
-      {
-         $heading = "View a Digital Sign";
-      }
-      
-      $html =
-<<<HEREDOC
-      <div class="heading">$heading</div>
-HEREDOC;
-      
-      return ($html);
+      $signId = $params->getInt("signId");
    }
    
-   protected static function descriptionDiv($view)
+   return ($signId);
+}
+
+function getSignInfo()
+{
+   static $signInfo = null;
+   
+   if ($signInfo == null)
    {
-      $description = "";
-      if ($view == "new_sign")
+      $signId = getSignId();
+      
+      if ($signId != SignInfo::UNKNOWN_SIGN_ID)
+      {
+         $signInfo = SignInfo::load($signId);
+      }
+      else
+      {
+         $signInfo = new SignInfo();
+      }
+   }
+   
+   return ($signInfo);
+}
+
+function getHeading()
+{
+   $heading = "";
+   
+   switch (getView())
+   {
+      case View::NEW_SIGN:
+      {
+         $heading = "New Sign";
+         break;
+      }
+      
+      case View::EDIT_SIGN:
+      {
+         $heading = "Edit Sign";
+         break;
+      }
+      
+      case View::VIEW_SIGN:
+      default:
+      {
+         $heading = "View Sign";
+         break;
+      }
+   }
+
+   return ($heading);
+}
+
+function getDescription()
+{
+   $description = "";
+   
+   switch (getView())
+   {
+      case View::NEW_SIGN:
       {
          $description = "Start by giving your new sign a name (ex. \"Entrance sign\") and meaningful description (ex. \"Main entrance by front doors\").<br><br>Then specify the URL of the Rapsberri Pi computer running the sign.";
+         break;
       }
-      else if ($view == "edit_sign")
+         
+      case View::EDIT_SIGN:
       {
          $description = "You may revise any of the fields for sign and then select save when you're satisfied with the changes.";
+         break;
       }
-      else if ($view == "view_sign")
+         
+      case View::VIEW_SIGN:
+      default:
       {
          $description = "View this sign's configuration.";
       }
-      
-      $html =
-<<<HEREDOC
-      <div class="description">$description</div>
-HEREDOC;
-      
-      return ($html);
    }
-  
-   protected static function signDiv($signInfo, $view)
-   {
-      $editable = (($view == "new_sign") || ($view == "edit_sign"));
+   
+   return ($description);
+}
+
+// ********************************** BEGIN ************************************
+
+Time::init();
+
+session_start();
+
+if (!Authentication::isAuthenticated())
+{
+   header('Location: ../login.php');
+   exit;
+}
+
+?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   
+   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   
+   <script src="../common/common.js"></script>
+   <script src="../common/validate.js"></script>
+   <script src="signage.js"></script>
+
+</head>
+
+<body class="flex-vertical flex-top flex-left">
+        
+   <form id="input-form" action="" method="POST">
+         <input type="hidden" name="signId" value="<?php echo getSignInfo()->signId; ?>">   
+   </form>
+
+   <?php Header::render("PPTP Tools"); ?>
+   
+   <div class="main flex-horizontal flex-top flex-left">
+   
+      <?php Menu::render(ACTIVITY); ?>
       
-      $disabled = ($editable) ? "" : "disabled";
+      <div class="content flex-vertical flex-top flex-left">
       
-      $html =
-<<<HEREDOC
-         <div class="form-col">
+         <div class="flex-horizontal flex-v-center flex-h-center">
+            <div class="heading"><?php echo getHeading(); ?></div>&nbsp;&nbsp;
+            <i id="help-icon" class="material-icons icon-button">help</i>
+         </div>
+         
+         <div id="description" class="description"><?php echo getDescription(); ?></div>
+         
+         <br>
+         
+         <div class="flex-column">
 
             <div class="form-item">
                <div class="form-label">Name</div>
-               <input id="sign-name-input" type="text" class="form-input-medium" name="name" form="input-form" style="width:300px;" value="$signInfo->name" $disabled/>
+               <input id="sign-name-input" type="text" name="name" form="input-form" maxlength="64" style="width:300px;" value="<?php echo getSignInfo()->name; ?>" <?php echo getDisabled(UserInputField::NAME); ?>/>
             </div>
 
             <div class="form-item">
                <div class="form-label">Description</div>
-               <input id="sign-description-input" type="text" class="form-input-medium" name="description" form="input-form" style="width:300px;" value="$signInfo->description" $disabled/>
+               <input id="sign-description-input" type="text" name="description" form="input-form" maxlength="64" style="width:300px;" value="<?php echo getSignInfo()->description; ?>" <?php echo getDisabled(UserInputField::DESCRIPTION); ?>/>
             </div>
 
             <div class="form-item">
                <div class="form-label">URL</div>
-               <input id="sign-url-input" type="text" class="form-input-medium" name="url" form="input-form" style="width:300px;" value="$signInfo->url" $disabled/>
+               <input id="sign-url-input" type="text" name="url" form="input-form" maxlength="64" style="width:300px;" value="<?php echo getSignInfo()->url; ?>" <?php echo getDisabled(UserInputField::URL); ?>/>
             </div>
 
+         </div>         
+         
+         <div class="flex-horizontal flex-h-center">
+            <button id="cancel-button">Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button id="save-button" class="accent-button">Save</button>            
          </div>
-HEREDOC;
       
-      return ($html);
-   }
-   
-   protected static function navBar($signInfo, $view)
-   {
-      $navBar = new Navigation();
-      
-      $navBar->start();
-      
-      if (($view == "new_sign") ||
-          ($view == "edit_sign"))
-      {
-         // Case 1
-         // Creating a new sign.
-         // Editing an existing sign.
+      </div> <!-- content -->
+     
+   </div> <!-- main -->   
          
-         $navBar->cancelButton("submitForm('input-form', 'signage.php', 'view_signs', 'cancel_sign')");
-         $navBar->highlightNavButton("Save", "submitForm('input-form', 'signage.php', 'view_signs', 'save_sign');", false);
-      }
-      else if ($view == "view_sign")
-      {
-         // Case 2
-         // Viewing an existing sign.
-         
-         $navBar->highlightNavButton("Ok", "submitForm('input-form', 'signage.php', 'view_signs', 'no_action')", false);
-      }
-      
-      $navBar->end();
-      
-      return ($navBar->getHtml());
-   }
+   <script>
    
-   protected static function getSignInfo()
-   {
-      $signInfo = new SignInfo();
+      preserveSession();
       
-      if (isset($_GET['signId']))
-      {
-         $signInfo = SignInfo::load($_GET['signId']);
-      }
-      else if (isset($_POST['signId']))
-      {
-         $signInfo = SignInfo::load($_POST['signId']);
-      }
-      else if (isset($_SESSION['signInfo']))
-      {
-         $signInfo = $_SESSION['signInfo'];
-      }
-      
-      return ($signInfo);
-   }
-}
-?>
+      var employeeNumberValidator = new IntValidator("employee-number-input", 4, 1, 9999, false);
+      employeeNumberValidator.init();
+
+      // Setup event handling on all DOM elements.
+      document.getElementById("cancel-button").onclick = function(){window.history.back();};
+      document.getElementById("save-button").onclick = function(){onSaveSign();};      
+      document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
+      document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+            
+   </script>
+
+</body>
+
+</html>

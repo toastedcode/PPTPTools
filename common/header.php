@@ -4,14 +4,18 @@ require_once 'root.php';
 
 class Header
 {
-   public static function render($pageTitle)
+   public static function render($pageTitle, $showMenuButton = true)
    {
       global $ROOT;
          
+      $menuButtonHidden = ($showMenuButton == true) ? "" : "hidden";
+      
       echo 
 <<<HEREDOC
-      <div class="header-div">
-         <span class="page-title" onclick="location.href = '$ROOT/home.php'">$pageTitle</span>
+      <div class="header">
+         <div id="menu-button" class="menu-button $menuButtonHidden"><i class="menu-icon material-icons action-button-icon">menu</i></div>
+         <div class="flex-horizontal" style="justify-content: space-between; width: 100%; padding-right:20px;">
+            <div class="page-title">$pageTitle</div>
 HEREDOC;
          
       if (Authentication::isAuthenticated())
@@ -20,15 +24,15 @@ HEREDOC;
          
          echo
 <<<HEREDOC
-            <div class="flex-horizontal">
+            <div class="flex-horizontal flex-v-center">
                <i class="material-icons" style="margin-right:5px; color: #ffffff; font-size: 24px;">person</i>
                <div class="nav-username">$username&nbsp | &nbsp</div>
-               <a class="nav-link" href="$ROOT/home.php?action=logout">Logout</a>
+               <a class="nav-link" href="$ROOT/login.php?action=logout">Logout</a>
             </div>
 HEREDOC;
       }
             
-      echo "</div>";
+      echo "</div></div>";
    }
 }
 ?>
