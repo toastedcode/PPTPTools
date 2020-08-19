@@ -143,8 +143,6 @@ if (!Authentication::isAuthenticated())
          <br>
          
          <div class="flex-horizontal flex-left flex-wrap">
-            <div style="white-space: nowrap">Inspection type</div>
-            &nbsp;
             <div class="flex-horizontal">
                <div style="white-space: nowrap">Inspection type</div>
                &nbsp;

@@ -114,11 +114,16 @@ $router->add("timeCardData", function($params) {
       $endDate = Time::endOfDay($params["endDate"]);
    }
    
+   $employeeNumberFilter = 
+      (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS)) ? 
+         UserInfo::UNKNOWN_EMPLOYEE_NUMBER :                      // No filter
+         Authentication::getAuthenticatedUser()->employeeNumber;  // Filter on authenticated user
+   
    $database = PPTPDatabase::getInstance();
    
    if ($database && $database->isConnected())
    {
-      $timeCards = $database->getTimeCards(0, $startDate, $endDate);
+      $timeCards = $database->getTimeCards($employeeNumberFilter, $startDate, $endDate);
       
       // Populate data table.
       foreach ($timeCards as $timeCard)

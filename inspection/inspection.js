@@ -69,7 +69,7 @@ function onDeleteInspection(inspectionId)
             
             if (json.success == true)
             {
-               location.href = "inspections.php";            
+               location.href = "viewInspections.php";            
             }
             else
             {

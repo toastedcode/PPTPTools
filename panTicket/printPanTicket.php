@@ -4,7 +4,6 @@ require_once '../common/authentication.php';
 require_once '../common/database.php';
 require_once '../common/header.php';
 require_once '../common/menu.php';
-require_once '../common/navigation.php';
 require_once '../common/panTicket.php';
 require_once '../common/params.php';
 require_once '../common/printerInfo.php';

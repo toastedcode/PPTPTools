@@ -179,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
          responsiveLayout:"hide", // enable responsive layouts
+         cellVertAlign:"middle",
          ajaxURL:url,
          ajaxParams:params,
          //Define Table Columns
@@ -291,12 +292,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (parseFloat(cell.getValue()).toFixed(2) + "%");
                 }
             },
-            {title:"", field:"panTicket", responsive:0,             
+            {title:"", field:"panTicket", responsive:0, width:75,             
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">receipt</i>");
                }
             },
-            {title:"", field:"delete", responsive:0,
+            {title:"", field:"delete", responsive:0, width:75,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">delete</i>");
                }

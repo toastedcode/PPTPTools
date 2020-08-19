@@ -543,37 +543,6 @@ function getManufactureDate()
    return ($mfgDate);
 }
 
-function getNavBar()
-{
-   $navBar = new Navigation();
-   
-   $navBar->start();
-   
-   $view = getView();
-   
-   if (($view == View::NEW_TIME_CARD) ||
-       ($view == View::EDIT_TIME_CARD))
-   {
-      // Case 1
-      // Creating a new time card.
-      // Editing an existing time card.
-      
-      $navBar->cancelButton("window.history.back();");
-      $navBar->highlightNavButton("Save", "onSubmit();", false);
-   }
-   else if ($view == View::VIEW_TIME_CARD)
-   {
-      // Case 2
-      // Viewing an existing entry.
-      
-      $navBar->highlightNavButton("Ok", "location.href = 'viewTimeCards.php'", false);
-   }
-   
-   $navBar->end();
-   
-   return ($navBar->getHtml());
-}
-
 // ********************************** BEGIN ************************************
 
 Time::init();

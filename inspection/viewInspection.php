@@ -455,27 +455,27 @@ function getHeading()
    switch (getView())
    {
       case View::NEW_INSPECTION:
-         {
-            $heading = "Add a New Inspection";
-            break;
-         }
+      {
+         $heading = "Add a New Inspection";
+         break;
+      }
          
       case View::EDIT_INSPECTION:
-         {
-            $heading = "Update an Inspection";
-            break;
-         }
+      {
+         $heading = "Update an Inspection";
+         break;
+      }
          
       case View::VIEW_INSPECTION:
-         {
-            "View an Inspection";
-            break;
-         }
+      {
+         $heading = "View an Inspection";
+         break;
+      }
          
       default:
-         {
-            break;
-         }
+      {
+         break;
+      }
    }
    
    return ($heading);
