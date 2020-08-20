@@ -235,7 +235,7 @@ if (!Authentication::isAuthenticated())
             {title:"Work Center",     field:"wcNumber",            hozAlign:"left",   responsive:0, headerFilter:true},
             {title:"Success Rate",    field:"successRate",         hozAlign:"left",   responsive:3,
                formatter:function(cell, formatterParams, onRendered){
-                  var count = cell.getRow().getData().count;
+                  var count = cell.getRow().getData().samples;
                   var naCount = cell.getRow().getData().naCount;
                   var passCount = cell.getRow().getData().passCount;
                   return (passCount + "/" + (count - naCount));

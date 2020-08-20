@@ -1437,11 +1437,20 @@ $router->add("inspectionData", function($params) {
       $inspectionType = intval($params["inspectionType"]);
    }
    
+   $inspector = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;  // Get inspections for all inspectors.
+   $operator = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;  // Get inspections for all operators.
+   if (Authentication::checkPermissions(Permission::VIEW_OTHER_USERS) == false)
+   {
+      // Limit to own inspections.
+      $inspector = Authentication::getAuthenticatedUser()->employeeNumber;
+      $operator = $inspector;
+   }
+   
    $database = PPTPDatabase::getInstance();
    
    if ($database && $database->isConnected())
    {
-      $databaseResult = $database->getInspections($inspectionType, $startDate, $endDate);
+      $databaseResult = $database->getInspections($inspectionType, $inspector, $operator, $startDate, $endDate);
       
       // Populate data table.
       foreach ($databaseResult as $row)

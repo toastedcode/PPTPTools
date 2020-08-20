@@ -536,7 +536,7 @@ function getJobNumberOptions()
 {
    $options = "<option style=\"display:none\">";
    
-   $jobNumbers = JobInfo::getJobNumbers(ONLY_ACTIVE);
+   $jobNumbers = JobInfo::getJobNumbers(true);  // only active
    
    $selectedJobNumber = getJobNumber();
    

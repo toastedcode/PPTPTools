@@ -148,6 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         
          <div id="download-link" class="download-link">Download CSV file</div>
          
+         <div id="print-link" class="download-link">Print</div>         
+         
       </div> <!-- content -->
       
    </div> <!-- main -->
@@ -176,16 +178,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       
       // Create Tabulator on DOM element time-card-table.
       var table = new Tabulator("#time-card-table", {
-         //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+         //height:500,            // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
-         responsiveLayout:"hide", // enable responsive layouts
+         responsiveLayout:"hide",   // enable responsive layouts
          cellVertAlign:"middle",
+         printAsHtml:true,          //enable HTML table printing
+         printRowRange:"all",       // print all rows 
+         printHeader:"<h1>Timecards<h1>",
+         printFooter:"<h2>TODO: Date range<h2>",
          ajaxURL:url,
          ajaxParams:params,
          //Define Table Columns
          columns:[
             {title:"Id",           field:"timeCardId",      hozAlign:"left", visible:false},
-            {title:"Date",         field:"dateTime",        hozAlign:"left", responsive:0,
+            {title:"Date",         field:"dateTime",        hozAlign:"left", responsive:0, print:true,
                formatter:function(cell, formatterParams, onRendered){
                   var cellValue = "---";
                   
@@ -202,20 +208,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }
 
                   return (cellValue);
-              }
+              },
+              formatterPrint:function(cell, formatterParams, onRendered){
+                 var cellValue = "---";
+                  
+                 var date = new Date(cell.getValue());
+
+                 if (date.getTime() === date.getTime())  // check for valid date
+                 {
+                    var cellValue = formatDate(date);
+                 }
+
+                 return (cellValue);
+              },
             },
-            {title:"Mfg. Date",    field:"manufactureDate", hozAlign:"left", responsive:0, headerFilter:true,
+            {title:"Mfg. Date",    field:"manufactureDate", hozAlign:"left", responsive:0, headerFilter:true, print:true,
                formatter:"datetime",  // Requires moment.js 
                formatterParams:{
                   outputFormat:"M/D/YYYY",
                   invalidPlaceholder:"---"
                }
             },
-            {title:"Operator",     field:"operator",        hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Job #",        field:"jobNumber",       hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Machine #",    field:"wcNumber",        hozAlign:"left", responsive:0, headerFilter:true},
-            {title:"Heat #",       field:"materialNumber",  hozAlign:"left", responsive:6},
-            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1,
+            {title:"Operator",     field:"operator",        hozAlign:"left", responsive:0, headerFilter:true, print:true},
+            {title:"Job #",        field:"jobNumber",       hozAlign:"left", responsive:0, headerFilter:true, print:true},
+            {title:"Machine #",    field:"wcNumber",        hozAlign:"left", responsive:0, headerFilter:true, print:true},
+            {title:"Heat #",       field:"materialNumber",  hozAlign:"left", responsive:6, print:true},
+            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1, print:true,
                formatter:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
@@ -228,9 +246,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }
                   
                   return (cellValue);
-                }
+                },
+               formatterPrint:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  return (cellValue);
+                }                
             },
-            {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2,
+            {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2, print:true,
                formatter:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
@@ -251,6 +277,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   
                   return (cellValue);
                 },
+               formatterPrint:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  return (cellValue);
+                },                
                 tooltip:function(cell){
                    var toolTip = "";
 
@@ -262,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                    return (toolTip);                  
                 }
             },
-            {title:"Basket Count", field:"panCount",        hozAlign:"left", responsive:3, 
+            {title:"Basket Count", field:"panCount",        hozAlign:"left", responsive:3, print:true,
                formatter:function(cell, formatterParams, onRendered){
                   var cellValue = cell.getValue();
                   
@@ -272,9 +306,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }
                   
                   return (cellValue);
+                },
+                formatterPrint:function(cell, formatterParams, onRendered){
+                   return (cell.getValue());
                 }
             },
-            {title:"Part Count",   field:"partCount",       hozAlign:"left", responsive:4,
+            {title:"Part Count",   field:"partCount",       hozAlign:"left", responsive:4, print:true,
                formatter:function(cell, formatterParams, onRendered){
                   var cellValue = cell.getValue();
                   
@@ -284,20 +321,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }
                   
                   return (cellValue);
-                }
+                },
+                formatter:function(cell, formatterParams, onRendered){
+                   return (cell.getValue());
+                }                
             },
-            {title:"Scrap Count",  field:"scrapCount",      hozAlign:"left", responsive:5},
-            {title:"Efficiency",   field:"efficiency",      hozAlign:"left", responsive:7, 
+            {title:"Scrap Count",  field:"scrapCount",      hozAlign:"left", responsive:5, print:true},
+            {title:"Efficiency",   field:"efficiency",      hozAlign:"left", responsive:7, print:true, 
                formatter:function(cell, formatterParams, onRendered){
                   return (parseFloat(cell.getValue()).toFixed(2) + "%");
                 }
             },
-            {title:"", field:"panTicket", responsive:0, width:75,             
+            {title:"", field:"panTicket", responsive:0, width:75, print:false,             
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">receipt</i>");
                }
             },
-            {title:"", field:"delete", responsive:0, width:75,
+            {title:"", field:"delete", responsive:0, width:75, print:false,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">delete</i>");
                }
@@ -413,6 +453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       document.getElementById("yesterday-button").onclick = filterYesterday;
       document.getElementById("new-time-card-button").onclick = function(){location.href = 'viewTimeCard.php';};
       document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:"."})};
+      document.getElementById("print-link").onclick = function(){table.print(false, true);};
 
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};

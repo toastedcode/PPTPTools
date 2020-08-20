@@ -252,7 +252,7 @@ class Inspection
          $this->samples = $this->getCount(true);
          $this->naCount = $this->getCountByStatus(InspectionStatus::NON_APPLICABLE, true);
          $this->passCount = $this->getCountByStatus(InspectionStatus::PASS, true);
-         $this->passCount = $this->getCountByStatus(InspectionStatus::WARNING, true);
+         $this->warningCount = $this->getCountByStatus(InspectionStatus::WARNING, true);
          $this->failCount = $this->getCountByStatus(InspectionStatus::FAIL, true);
       }
    }
@@ -461,6 +461,14 @@ if (isset($_GET["inspectionId"]))
       }
       
       echo "comments: " .  $inspection->comments .         "<br/>";
+            
+      $inspection->updateSummary();
+      
+      echo "samples: " .      $inspection->samples .      "<br/>";
+      echo "naCount: " .      $inspection->naCount .      "<br/>";
+      echo "passCount: " .    $inspection->passCount .    "<br/>";
+      echo "warningCount: " . $inspection->warningCount . "<br/>";
+      echo "failCount: " .    $inspection->failCount .    "<br/>";
    }
    else
    {
@@ -468,4 +476,5 @@ if (isset($_GET["inspectionId"]))
    }
 }
 */
+
 ?>
