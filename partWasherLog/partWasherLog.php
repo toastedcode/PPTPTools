@@ -174,6 +174,7 @@ if (!Authentication::isAuthenticated())
          columns:[
             {title:"Id",           field:"partWasherEntryId", hozAlign:"left", visible:false},
             {title:"Job #",        field:"jobNumber",         hozAlign:"left", responsive:0, headerFilter:true},
+            {title:"Machine #",    field:"wcNumber",          hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Operator",     field:"operatorName",      hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Mfg. Date",    field:"manufactureDate",   hozAlign:"left", responsive:0, headerFilter:true,
                formatter:"datetime",  // Requires moment.js 

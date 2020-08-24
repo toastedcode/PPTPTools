@@ -946,6 +946,7 @@ $router->add("partWasherLogData", function($params) {
          if ($jobInfo)
          {
             $partWasherEntry->jobNumber = $jobInfo->jobNumber;
+            $partWasherEntry->wcNumber = $jobInfo->wcNumber;
          }
          
          $userInfo = UserInfo::load($operator);
