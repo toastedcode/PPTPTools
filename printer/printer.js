@@ -306,6 +306,9 @@ function PrintManager(listener)
                }
             }
          }
+         
+         // Clear the print queue.
+         this.printQueue = [];
       }
       
    }.bind(this);
