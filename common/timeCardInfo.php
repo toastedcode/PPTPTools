@@ -146,6 +146,25 @@ class TimeCardInfo
       return ($timeCardInfo);
    }
    
+   public static function calculateEfficiency(
+      $runTime,            // Actual run time, in minutes
+      $grossPartsPerHour,  // Expected part count, based on cycle time
+      $partCount)          // Actual part count
+   {
+      $efficiency = 0.0;
+
+      // Calculate the total number of parts that could be potentially created in the run time.
+      $potentialParts = round((($runTime / TimeCardInfo::MINUTES_PER_HOUR) * $grossPartsPerHour), 2);
+         
+      if ($potentialParts > 0)
+      {
+         // Calculate the efficiency.
+         $efficiency = round((($partCount / $potentialParts) * 100), 2);
+      }
+      
+      return ($efficiency);
+   }   
+   
    public function getEfficiency()
    {
       $efficiency = 0.0;
@@ -155,14 +174,11 @@ class TimeCardInfo
       
       if ($jobInfo)
       {
-         // Calculate the total number of parts that could be potentially created in the run time.
-         $potentialParts = (($this->runTime / TimeCardInfo::MINUTES_PER_HOUR) * $jobInfo->getGrossPartsPerHour());
-         
-         if ($potentialParts > 0)
-         {
-            // Calculate the efficiency.
-            $efficiency = (($this->partCount / $potentialParts) * 100);
-         }
+         $efficiency = 
+            TimeCardInfo::calculateEfficiency(
+                  $this->runTime, 
+                  $jobInfo->getGrossPartsPerHour(), 
+                  $this->partCount);
       }
       
       return ($efficiency);

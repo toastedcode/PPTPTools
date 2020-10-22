@@ -208,7 +208,7 @@ class PPTPDatabase extends MySqlDatabase
       $endDate)
    {
       $result = NULL;
-      if ($employeeNumber == 0)
+      if ($employeeNumber == UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
       {
          $query = "SELECT * FROM timecard WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
 

@@ -198,6 +198,17 @@ if (!Authentication::isAuthenticated())
             },
             {title:"Part #",         field:"partNumber",    hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Work Center",    field:"wcNumber",      hozAlign:"left", responsive:2, headerFilter:true},
+            // Temporary
+            {title:"Sample Weight",  field:"sampleWeight",  hozAlign:"left", responsive:2,
+               formatter:function(cell, formatterParams, onRendered){
+                  if (cell.getValue() <= 0.02)
+                  {
+                     cell.getElement().style.color = "red";
+                  }
+                  
+                  return (cell.getValue());
+               }
+            },           
             {title:"Customer Print", field:"customerPrint", hozAlign:"left", responsive:2, 
                formatter:function(cell, formatterParams, onRendered){
                   var filename = cell.getValue();

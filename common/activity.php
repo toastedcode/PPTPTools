@@ -17,7 +17,8 @@ class Activity
    const PRINT_MANAGER = 8;
    const SIGNAGE = 9;
    const PAN_TICKET = 10;
-   const LAST = 11;
+   const REPORT = 11;
+   const LAST = 12;
    
    public $id;
    public $label;
@@ -44,7 +45,8 @@ class Activity
       Activity::INSPECTION,
       Activity::PRINT_MANAGER,
       Activity::SIGNAGE,
-      Activity::PAN_TICKET
+      Activity::PAN_TICKET,
+      Activity::REPORT
    );
    
    private static $ACTIVITIES = null;
@@ -65,7 +67,8 @@ class Activity
             Activity::INSPECTION =>          new Activity(Activity::INSPECTION,          "Inspections",          "search",               Permission::getPermission(Permission::VIEW_INSPECTION)->bits,          "$ROOT/inspection/viewInspections.php"),
             Activity::PRINT_MANAGER =>       new Activity(Activity::PRINT_MANAGER,       "Print Manager",        "print",                Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits,       "$ROOT/printer/viewPrinters.php"),
             Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/viewSigns.php"),
-            Activity::PAN_TICKET =>          new Activity(Activity::PAN_TICKET,          "Pan Ticket Scanner",   "camera_alt",           Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           "$ROOT/panTicket/scanPanTicket.php")
+            Activity::PAN_TICKET =>          new Activity(Activity::PAN_TICKET,          "Pan Ticket Scanner",   "camera_alt",           Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           "$ROOT/panTicket/scanPanTicket.php"),
+            Activity::REPORT =>              new Activity(Activity::REPORT,              "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewDailySummaryReport.php")
          );
       }
       
@@ -74,6 +77,8 @@ class Activity
    
    public static function getActivity($activityId)
    {
+      $activity = null;
+      
       $activities = Activity::getActivities();
       
       if (isset($activities[$activityId]))

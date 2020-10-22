@@ -7,7 +7,6 @@ require_once '../common/menu.php';
 require_once '../common/params.php';
 
 const ACTIVITY = Activity::JOBS;
-$activity = Activity::getActivity(ACTIVITY);
 
 abstract class JobInputField
 {
@@ -473,7 +472,7 @@ if (!Authentication::isAuthenticated())
          
                <div class="form-item">
                   <div class="form-label-long">Net Percentage</div>
-                  <input id="net-percentage-input" type="number" name="netPercentage" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->netPercentage; ?>" oninput="this.validator.validate(); autoFillPartStats();" <?php echo getDisabled(JobInputField::NET_PERCENTAGE); ?> "/>
+                  <input id="net-percentage-input" type="number" name="netPercentage" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->netPercentage; ?>" oninput="this.validator.validate(); autoFillPartStats();" <?php echo getDisabled(JobInputField::NET_PERCENTAGE); ?> />
                   <div class="form-label">&nbsp%</div>
                </div>
          

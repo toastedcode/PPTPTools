@@ -2,6 +2,7 @@
 
 require_once 'rest.php';
 require_once '../common/authentication.php';
+require_once '../common/dailySummaryReport.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
@@ -131,6 +132,7 @@ $router->add("timeCardData", function($params) {
          $timeCardInfo = TimeCardInfo::load($timeCard["timeCardId"]);
          if ($timeCardInfo)
          {
+            $timeCard["panTicketCode"] = PanTicket::getPanTicketCode($timeCardInfo->timeCardId);            
             $timeCard["efficiency"] = $timeCardInfo->getEfficiency();
          }
          
@@ -364,7 +366,7 @@ $router->add("saveJob", function($params) {
          $jobInfo->partNumber = $params["partNumber"];
          $jobInfo->sampleWeight = doubleval($params["sampleWeight"]);
          $jobInfo->wcNumber = intval($params["wcNumber"]);
-         $jobInfo->cycleTime = intval($params["cycleTime"]);
+         $jobInfo->cycleTime = doubleval($params["cycleTime"]);
          $jobInfo->netPercentage = intval($params["netPercentage"]);
          $jobInfo->status = intval($params["status"]);
          $jobInfo->qcpTemplateId = intval($params["qcpTemplateId"]);
@@ -928,12 +930,21 @@ $router->add("partWasherLogData", function($params) {
          
          $operator = $partWasherEntry->operator;
          
+         $partWasherEntry->timeCardId = $partWasherEntry->timeCardId;
+         
+         $partWasherEntry->panTicketCode =
+            ($partWasherEntry->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID) ?
+               "0000" :
+               PanTicket::getPanTicketCode($partWasherEntry->timeCardId);    
+         
          if ($partWasherEntry->timeCardId)
          {
             $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
             
             if ($timeCardInfo)
             {
+               $partWasherEntry->panTicketCode = PanTicket::getPanTicketCode($timeCardInfo->timeCardId);               
+               
                $jobId = $timeCardInfo->jobId;
                
                $operator = $timeCardInfo->employeeNumber;
@@ -1171,6 +1182,13 @@ $router->add("partWeightLogData", function($params) {
          
          $operator = $partWeightEntry->operator;
          
+         $partWeightEntry->timeCardId = $partWeightEntry->timeCardId;
+         
+         $partWeightEntry->panTicketCode = 
+            ($partWeightEntry->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID) ?
+               "0000" :
+               PanTicket::getPanTicketCode($partWeightEntry->timeCardId);         
+               
          if ($partWeightEntry->timeCardId)
          {
             $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
@@ -2388,6 +2406,37 @@ $router->add("deleteSign", function($params) {
    {
       $result->success = false;
       $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("dailySummaryReportData", function($params) {
+   $result = array();
+   
+   $mfgDate = Time::startOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["mfgDate"]))
+   {
+      $mfgDate = Time::startOfDay($params["mfgDate"]);
+   }
+   
+   $table = DailySummaryReportTable::DAILY_SUMMARY;
+   if (isset($params["table"]))
+   {
+      $table = intval($params["table"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $dailySummaryReport = DailySummaryReport::load(UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $mfgDate);
+      
+      if ($dailySummaryReport)
+      {
+         $result = $dailySummaryReport->getReportData($table);
+      }
    }
    
    echo json_encode($result);

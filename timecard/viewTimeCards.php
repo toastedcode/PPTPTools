@@ -191,6 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          //Define Table Columns
          columns:[
             {title:"Id",           field:"timeCardId",      hozAlign:"left", visible:false},
+            {title:"Ticket",       field:"panTicketCode",   hozAlign:"left", responsive:0, headerFilter:true, print:false,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">receipt</i>&nbsp" + cell.getRow().getData().panTicketCode);
+               },
+            },                   
             {title:"Date",         field:"dateTime",        hozAlign:"left", responsive:0, print:true,
                formatter:function(cell, formatterParams, onRendered){
                   var cellValue = "---";
@@ -332,11 +337,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (parseFloat(cell.getValue()).toFixed(2) + "%");
                 }
             },
-            {title:"", field:"panTicket", responsive:0, width:75, print:false,             
-               formatter:function(cell, formatterParams, onRendered){
-                  return ("<i class=\"material-icons icon-button\">receipt</i>");
-               }
-            },
             {title:"", field:"delete", responsive:0, width:75, print:false,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">delete</i>");
@@ -345,14 +345,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          ],
          cellClick:function(e, cell){
             var timeCardId = parseInt(cell.getRow().getData().timeCardId);
-            
-            if (cell.getColumn().getField() == "delete")
-            {
-               onDeleteTimeCard(timeCardId);
-            }
-            else if (cell.getColumn().getField() == "panTicket")
+
+            if (cell.getColumn().getField() == "panTicketCode")
             {
                document.location = "<?php echo $ROOT?>/panTicket/viewPanTicket.php?panTicketId=" + timeCardId;
+            }            
+            else if (cell.getColumn().getField() == "delete")
+            {
+               onDeleteTimeCard(timeCardId);
             }
             else // Any other column
             {

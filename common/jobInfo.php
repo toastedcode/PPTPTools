@@ -129,7 +129,7 @@ class JobInfo
       if (($this->cycleTime > 0) &&
           ($this->cycleTime <= JobInfo::SECONDS_PER_MINUTE))
       {
-         $grossPartsPerHour = (JobInfo::SECONDS_PER_HOUR / $this->cycleTime);   
+         $grossPartsPerHour = round((JobInfo::SECONDS_PER_HOUR / $this->cycleTime), 2);   
       }
       
       return ($grossPartsPerHour);
@@ -139,7 +139,7 @@ class JobInfo
    {
       $grossPartsPerHour = $this->getGrossPartsPerHour();
       
-      $netPartsPerHour = ($grossPartsPerHour * ($this->netPercentage / 100.0));
+      $netPartsPerHour = round(($grossPartsPerHour * ($this->netPercentage / 100.0)), 2);
       
       return ($netPartsPerHour);
    }
