@@ -63,12 +63,6 @@ class ReportEntry
       
       $entry->timeCardInfo = TimeCardInfo::load($timeCardId);
       
-      // HACK!!! TODO: Remove.
-      $entry->timeCardInfo->shiftHours = 
-         ($entry->timeCardInfo->runTime > (8 * TimeCardInfo::MINUTES_PER_HOUR)) ?
-            10 :
-            8;
-      
       $entry->userInfo = UserInfo::load($entry->timeCardInfo->employeeNumber);
       
       if ($entry->timeCardInfo)
@@ -335,7 +329,7 @@ class DailySummaryReport
       {     
          $row = new stdClass();
          
-         $row->timeCardId = PanTicket::getPanTicketCode($entry->timeCardInfo->timeCardId);
+         $row->timeCardId = $entry->timeCardInfo->timeCardId;
          $row->panTicketCode = PanTicket::getPanTicketCode($entry->timeCardInfo->timeCardId);
          $row->manufactureDate = $entry->timeCardInfo->dateTime;
          $row->operator = $entry->userInfo->getFullName();
@@ -343,7 +337,7 @@ class DailySummaryReport
          $row->jobNumber = $entry->jobInfo->jobNumber;
          $row->wcNumber = $entry->jobInfo->wcNumber;
          $row->materialNumber = $entry->timeCardInfo->materialNumber;
-         $row->shiftHours = $entry->timeCardInfo->shiftHours;
+         $row->shiftTime = $entry->timeCardInfo->shiftTime;
          $row->runTime = $entry->timeCardInfo->runTime;
          $row->panCount = $entry->timeCardInfo->panCount;
          $row->sampleWeight = $entry->jobInfo->sampleWeight;
@@ -471,13 +465,13 @@ class DailySummaryReport
             
             if (!isset($shiftHoursByEmployee[$tempEmployeeNumber]))
             {
-               $shiftHoursByEmployee[$tempEmployeeNumber] = $entry->timeCardInfo->shiftHours;
+               $shiftHoursByEmployee[$tempEmployeeNumber] = $entry->timeCardInfo->getShiftTimeInHours();
             }
             // Shift hours should be the same across all time cards.
             // If they're not, go with the greatest value.
-            else if ($entry->timeCardInfo->shiftHours > $shiftHoursByEmployee[$tempEmployeeNumber])
+            else if ($entry->timeCardInfo->getShiftTimeInHours() > $shiftHoursByEmployee[$tempEmployeeNumber])
             {
-               $shiftHoursByEmployee[$tempEmployeeNumber] = $entry->timeCardInfo->shiftHours;
+               $shiftHoursByEmployee[$tempEmployeeNumber] = $entry->timeCardInfo->getShiftTimeInHours();
             }
          }
       }

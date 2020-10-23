@@ -224,13 +224,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {title:"Employee #",   field:"employeeNumber",  hozAlign:"left",                    print:true},
             {title:"Job #",        field:"jobNumber",       hozAlign:"left", headerFilter:true, print:true},
             {title:"WC #",         field:"wcNumber",        hozAlign:"left", headerFilter:true, print:true},
-            {title:"Shift Hours",  field:"shiftHours",      hozAlign:"left",                    print:true,
+            {title:"Shift Time",   field:"shiftTime",       hozAlign:"left",                    print:true,
                formatter:function(cell, formatterParams, onRendered){
-                  return (cell.getValue() + ":00");
-                },
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  if (cell.getRow().getData().incompleteShiftTime)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+               },
                formatterPrint:function(cell, formatterParams, onRendered){
-                  return (cell.getValue() + ":00");
-                },             
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  return (cellValue);
+               }              
             },
             {title:"Run Time",     field:"runTime",         hozAlign:"left",                    print:true,
                formatter:function(cell, formatterParams, onRendered){
@@ -239,7 +254,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
                   
-                  if (cell.getRow().getData().incompleteTime)
+                  if (cell.getRow().getData().incompleteRunTime)
                   {
                      cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
                   }
@@ -253,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
                   
                   return (cellValue);
-                }                
+               }                
             },
             {title:"Basket Count",            field:"panCount",             hozAlign:"left", print:true},
             {title:"Sample Weight",           field:"sampleWeight",         hozAlign:"left", print:true},
@@ -278,8 +293,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {title:"Machine Hours Made",      field:"machineHoursMade",     hozAlign:"left", print:true},            
          ],
          cellClick:function(e, cell){
-            var timeCardId = parseInt(cell.getRow().getData().timeCardId);
-            
+            var timeCardId = cell.getRow().getData().timeCardId;
+
             if (cell.getColumn().getField() == "panTicketCode")
             {
                document.location = "<?php echo $ROOT?>/panTicket/viewPanTicket.php?panTicketId=" + timeCardId;

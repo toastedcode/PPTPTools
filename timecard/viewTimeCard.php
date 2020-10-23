@@ -10,7 +10,6 @@ require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
 
 const ACTIVITY = Activity::TIME_CARD;
-$activity = Activity::getActivity(ACTIVITY);
 
 const ONLY_ACTIVE = true;
 
@@ -23,13 +22,14 @@ abstract class TimeCardInputField
    const JOB_NUMBER = 3;
    const WC_NUMBER = 4;
    const MATERIAL_NUMBER = 5;
-   const RUN_TIME = 6;
-   const SETUP_TIME = 7;
-   const PAN_COUNT = 8;
-   const PART_COUNT = 9;
-   const SCRAP_COUNT = 10;
-   const COMMENTS = 11;
-   const LAST = 12;
+   const SHIFT_TIME = 6;   
+   const RUN_TIME = 7;
+   const SETUP_TIME = 8;
+   const PAN_COUNT = 9;
+   const PART_COUNT = 10;
+   const SCRAP_COUNT = 11;
+   const COMMENTS = 12;
+   const LAST = 13;
    const COUNT = TimeCardInputField::LAST - TimeCardInputField::FIRST;
 }
 
@@ -86,6 +86,7 @@ function isEditable($field)
       
       case TimeCardInputField::OPERATOR:
       case TimeCardInputField::MANUFACTURE_DATE:
+      case TimeCardInputField::SHIFT_TIME:         
       {
          $isEditable = ((Authentication::getAuthenticatedUser()->roles == Role::ADMIN) ||
                         (Authentication::getAuthenticatedUser()->roles == Role::SUPER_USER));
@@ -583,6 +584,7 @@ if (!Authentication::isAuthenticated())
       <input type="hidden" name="operator" value="<?php echo getOperator(); ?>">
       <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
       <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
+      <input id="shift-time-input" type="hidden" name="shiftTime" value="<?php echo getTimeCardInfo()->shiftTime; ?>">
       <input id="run-time-input" type="hidden" name="runTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
       <input id="setup-time-input" type="hidden" name="setupTime" value="<?php echo getTimeCardInfo()->setupTime; ?>">
       <input id="gross-parts-per-hour-input" type="hidden" value="<?php echo getGrossPartsPerHour(); ?>">
@@ -653,6 +655,13 @@ if (!Authentication::isAuthenticated())
                <div class="form-col">
                
                   <div class="form-section-header">Time</div>
+                  
+                  <div class="form-item">
+                     <div class="form-label">Shift time</div>
+                     <input id="shift-time-hour-input" type="number" class="form-input-medium" form="input-form" name="shiftTimeHours" style="width:50px;" oninput="this.validator.validate(); onShiftTimeChange();" value="<?php echo getTimeCardInfo()->getShiftTimeHours(); ?>" <?php echo getDisabled(TimeCardInputField::SHIFT_TIME); ?> />
+                     <div style="padding: 5px;">:</div>
+                     <input id="shift-time-minute-input" type="number" class="form-input-medium" form="input-form" name="shiftTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onShiftTimeChange();" value="<?php echo getTimeCardInfo()->getShiftTimeMinutes(); ?>" step="15" <?php echo getDisabled(TimeCardInputField::SHIFT_TIME); ?> />
+                  </div>
                   
                   <div class="form-item">
                      <div class="form-label">Run time</div>
@@ -745,6 +754,8 @@ if (!Authentication::isAuthenticated())
       var jobNumberValidator = new SelectValidator("job-number-input");
       var wcNumberValidator = new SelectValidator("wc-number-input");
       var materialNumberValidator = new IntValidator("material-number-input", 4, 1, 9999, false);
+      var shiftTimeHourValidator = new IntValidator("shift-time-hour-input", 2, 0, 16, true);
+      var shiftTimeMinuteValidator = new IntValidator("shift-time-minute-input", 2, 0, 59, true);      
       var runTimeHourValidator = new IntValidator("run-time-hour-input", 2, 0, 16, true);
       var runTimeMinuteValidator = new IntValidator("run-time-minute-input", 2, 0, 59, true);
       var setupTimeHourValidator = new IntValidator("setup-time-hour-input", 2, 0, 16, true);
@@ -757,6 +768,8 @@ if (!Authentication::isAuthenticated())
       jobNumberValidator.init();
       wcNumberValidator.init();
       materialNumberValidator.init();
+      shiftTimeHourValidator.init();
+      shiftTimeMinuteValidator.init();
       runTimeHourValidator.init();
       runTimeMinuteValidator.init();
       setupTimeHourValidator.init();

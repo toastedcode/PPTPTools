@@ -17,6 +17,7 @@ class TimeCardInfo
    public $employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    public $jobId;
    public $materialNumber;
+   public $shiftTime;   
    public $setupTime;
    public $runTime;
    public $panCount;
@@ -26,6 +27,27 @@ class TimeCardInfo
    public $comments;
    public $approvedBy = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    public $approvedDateTime;
+   
+   public function formatShiftTime()
+   {
+      return($this->getShiftTimeHours() . ":" . sprintf("%02d", $this->getShiftTimeMinutes()));
+   }   
+   
+   public function getShiftTimeHours()
+   {
+      return ((int)($this->shiftTime / 60));
+   }
+   
+   public function getShiftTimeMinutes()
+   {
+      return ($this->shiftTime % 60);
+   }
+   
+   public function getShiftTimeInHours()
+   {
+      return (round(($this->shiftTime / 60), 2));
+   }
+   
    
    public function formatSetupTime()
    {
@@ -131,6 +153,7 @@ class TimeCardInfo
             $timeCardInfo->employeeNumber = intval($row['employeeNumber']);
             $timeCardInfo->jobId = $row['jobId'];
             $timeCardInfo->materialNumber = intval($row['materialNumber']);
+            $timeCardInfo->shiftTime = $row['shiftTime'];
             $timeCardInfo->setupTime = $row['setupTime'];
             $timeCardInfo->runTime = $row['runTime'];
             $timeCardInfo->panCount = intval($row['panCount']);
@@ -183,10 +206,11 @@ class TimeCardInfo
       
       return ($efficiency);
    }
-   
+      
    public function requiresApproval()
    {
-      return (($this->getSetupTimeHours() + $this->getSetupTimeMinutes()) > 0);
+      return (($this->setupTime > 0) /*||
+              ($this->runTime < $this->shiftTime)*/);
    }
    
    public function isApproved()
@@ -195,7 +219,12 @@ class TimeCardInfo
       return (!$this->requiresApproval() || ($this->approvedBy > 0));
    }
    
-   public function incompleteTime()
+   public function incompleteShiftTime()
+   {
+      return ($this->shiftTime == 0);
+   }
+   
+   public function incompleteRunTime()
    {
       return (($this->setupTime == 0) && ($this->runTime == 0));
    }
@@ -212,9 +241,10 @@ class TimeCardInfo
    
    public function isComplete()
    {
-      return (!($this->incompleteTime() || 
-               $this->incompletePanCount() || 
-               $this->incompletePartCount()));
+      return (!($this->incompleteShiftTime() || 
+                $this->incompleteRunTime() || 
+                $this->incompletePanCount() || 
+                $this->incompletePartCount()));
    }
 }
 
@@ -236,6 +266,7 @@ if (isset($_GET["timeCardId"]))
       echo "employeeNumber: " .   $timeCardInfo->employeeNumber .       "<br/>";
       echo "jobId: " .            $timeCardInfo->jobId .                "<br/>";
       echo "materialNumber: " .   $timeCardInfo->materialNumber .       "<br/>";
+      echo "shiftTime: " .        $shiftTime .                          "<br/>";
       echo "runTime: " .          $runTime .                            "<br/>";
       echo "setupTime: " .        $setupTime .                          "<br/>";
       echo "totalTime: " .        $totalTime .                          "<br/>";

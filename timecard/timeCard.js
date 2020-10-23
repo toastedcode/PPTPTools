@@ -109,6 +109,18 @@ function onWcNumberChange()
    updateGrossPartsPerHour();
 }
 
+function onShiftTimeChange()
+{
+   var hours = parseInt(document.getElementById("shift-time-hour-input").value);
+   var minutes = parseInt(document.getElementById("shift-time-minute-input").value);
+   
+   var shiftTime = ((hours * 60) + minutes);
+   
+   document.getElementById("shift-time-input").value = shiftTime;
+   
+   document.getElementById("shift-time-minute-input").value = formatToTwoDigits(minutes);
+}
+
 function onRunTimeChange()
 {
    var hours = parseInt(document.getElementById("run-time-hour-input").value);
@@ -354,6 +366,11 @@ function validateTimeCard()
    {
       alert("Please enter a valid heat number.");    
    }
+   else if (!(document.getElementById("shift-time-hour-input").validator.validate() &&
+              document.getElementById("shift-time-minute-input").validator.validate()))
+   {
+      alert("Please enter a valid shift time.")      
+   }
    else if (!(document.getElementById("run-time-hour-input").validator.validate() &&
               document.getElementById("run-time-minute-input").validator.validate()))
    {
@@ -367,6 +384,7 @@ function validateTimeCard()
    // J. Orbin requested that users be able enter incomplete time sheets.  (11/21/2019)
    /*
    else if ((document.getElementById("setup-time-hour-input").value == 0) &&
+            (document.getElementById("shift-time-hour-input").value == 0) &&
             (document.getElementById("setup-time-minute-input").value == 0) &&
             (document.getElementById("run-time-hour-input").value == 0) &&
             (document.getElementById("run-time-minute-input").value == 0))

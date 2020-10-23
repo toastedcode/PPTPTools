@@ -238,6 +238,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {title:"Job #",        field:"jobNumber",       hozAlign:"left", responsive:0, headerFilter:true, print:true},
             {title:"WC #",         field:"wcNumber",        hozAlign:"left", responsive:0, headerFilter:true, print:true},
             {title:"Heat #",       field:"materialNumber",  hozAlign:"left", responsive:6, print:true},
+            {title:"Shift Time",   field:"shiftTime",       hozAlign:"left", responsive:1, print:true,
+               formatter:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  if (cell.getRow().getData().incompleteShiftTime)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+                },
+               formatterPrint:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  return (cellValue);
+                }                
+            },
             {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1, print:true,
                formatter:function(cell, formatterParams, onRendered){
 
@@ -245,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
                   
-                  if (cell.getRow().getData().incompleteTime)
+                  if (cell.getRow().getData().incompleteRunTime)
                   {
                      cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
                   }

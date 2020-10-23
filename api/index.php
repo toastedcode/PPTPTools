@@ -150,7 +150,8 @@ $router->add("timeCardData", function($params) {
          }
          
          $timeCard["isNew"] = Time::isNew($timeCardInfo->dateTime, Time::NEW_THRESHOLD);
-         $timeCard["incompleteTime"] = $timeCardInfo->incompleteTime();
+         $timeCard["incompleteShiftTime"] = $timeCardInfo->incompleteShiftTime();
+         $timeCard["incompleteRunTime"] = $timeCardInfo->incompleteRunTime();
          $timeCard["incompletePanCount"] = $timeCardInfo->incompletePanCount();
          $timeCard["incompletePartCount"] = $timeCardInfo->incompletePartCount();
          
@@ -282,7 +283,7 @@ $router->add("jobData", function($params) {
    $result = array();
    
    $jobStatuses = array();
-
+   
    for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
    {
       $name = strtolower(JobStatus::getName($jobStatus));
@@ -297,23 +298,27 @@ $router->add("jobData", function($params) {
    
    if ($database && $database->isConnected())
    {
-      $jobs = $database->getJobs(JobInfo::UNKNOWN_JOB_NUMBER, $jobStatuses);
+      $databaseResult = $database->getJobs(JobInfo::UNKNOWN_JOB_NUMBER, $jobStatuses);
       
-      if ($jobs)
+      // Populate data table.
+      while ($databaseResult && ($row = $databaseResult->fetch_assoc()))
       {
-         // Populate data table.
-         foreach ($jobs as $job)
-         {         
-            $job["statusLabel"] = JobStatus::getName(intval($job["status"]));
+         $jobInfo = JobInfo::load($row["jobId"]);
+         
+         if ($jobInfo)
+         {
+            $jobInfo->statusLabel = JobStatus::getName($jobInfo->status);
+            $jobInfo->grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
+            $jobInfo->netPartsPerHour = $jobInfo->getNetPartsPerHour();
             
-            $result[] = $job;
+            $result[] = $jobInfo;
          }
       }
    }
    
    echo json_encode($result);
 });
-
+   
 $router->add("saveJob", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -771,6 +776,7 @@ $router->add("saveTimeCard", function($params) {
           isset($params["jobNumber"]) &&
           isset($params["wcNumber"]) &&
           isset($params["materialNumber"]) &&
+          isset($params["shiftTime"]) &&            
           isset($params["setupTime"]) &&
           isset($params["approvedBy"]) &&
           isset($params["runTime"]) &&
@@ -787,6 +793,7 @@ $router->add("saveTimeCard", function($params) {
             $timeCardInfo->manufactureDate = Time::startOfDay($params->get("manufactureDate"));
             $timeCardInfo->jobId = $jobId;
             $timeCardInfo->materialNumber = intval($params["materialNumber"]);
+            $timeCardInfo->shiftTime = intval($params["shiftTime"]);
             $timeCardInfo->setupTime = intval($params["setupTime"]);
             $timeCardInfo->approvedBy = intval($params["approvedBy"]);
             $timeCardInfo->runTime = intval($params["runTime"]);

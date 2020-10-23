@@ -234,9 +234,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "INSERT INTO timecard " .
-         "(employeeNumber, dateTime, manufactureDate, jobId, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
+         "(employeeNumber, dateTime, manufactureDate, jobId, materialNumber, shiftTime, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
          "VALUES " .
-         "('$timeCardInfo->employeeNumber', '$date', '$manufactureDate', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
+         "('$timeCardInfo->employeeNumber', '$date', '$manufactureDate', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->shiftTime', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
 
       $result = $this->query($query);
       
@@ -253,7 +253,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE timecard " .
-      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", manufactureDate = \"$manufactureDate\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
+      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", manufactureDate = \"$manufactureDate\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", shiftTime = $timeCardInfo->shiftTime, setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
       "WHERE timeCardId = $timeCardInfo->timeCardId;";
 
       $result = $this->query($query);
@@ -860,7 +860,7 @@ class PPTPDatabase extends MySqlDatabase
          }
          
          $query = "SELECT * FROM job $whereClause ORDER BY jobNumber ASC;";
-   
+
          $result = $this->query($query);
       }
       
