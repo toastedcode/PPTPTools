@@ -92,9 +92,10 @@ function onPanTicketCodeChange()
    clear("job-number-input");
    clear("wc-number-input");
    clear("manufacture-date-input");
-   clear("operator-input");
-   clear("pan-count-input");
-   clear("part-weight-input");   
+   // Customer requested these fields be preserved.  10/23
+   //clear("operator-input");
+   //clear("pan-count-input");
+   //clear("part-weight-input");   
    sampleWeight = 0.0;  // global variable
    
    if (panTicketCode == "")

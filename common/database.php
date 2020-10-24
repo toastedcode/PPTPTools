@@ -205,18 +205,22 @@ class PPTPDatabase extends MySqlDatabase
    public function getTimeCards(
       $employeeNumber,
       $startDate,
-      $endDate)
+      $endDate,
+      $useMfgDate = false)
    {
-      $result = NULL;
+      $result = null;
+      
+      $dateField = ($useMfgDate ? "manufactureDate" : "dateTime");
+      
       if ($employeeNumber == UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
       {
-         $query = "SELECT * FROM timecard WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
+         $query = "SELECT * FROM timecard WHERE $dateField BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY $dateField DESC, timeCardId DESC;";
 
          $result = $this->query($query);
       }
       else
       {
-         $query = "SELECT * FROM timecard WHERE employeeNumber=" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
+         $query = "SELECT * FROM timecard WHERE employeeNumber=" . $employeeNumber . " AND $dateField BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY $dateField DESC, timeCardId DESC;";
          
          $result = $this->query($query);
       }

@@ -255,7 +255,7 @@ class DailySummaryReport
       
       if ($database && $database->isConnected())
       {
-         $result = $database->getTimeCards($employeeNumber, Time::startOfDay($dateTime), Time::endOfDay($dateTime));
+         $result = $database->getTimeCards($employeeNumber, Time::startOfDay($dateTime), Time::endOfDay($dateTime), true);  // Use mfg date.
          
          while ($result && $row = $result->fetch_assoc())
          {
@@ -554,7 +554,10 @@ class DailySummaryReport
             
             $totalShiftHours = $this->getTotalShiftHours($employeeNumber);
             
-            $ratio = round(($totalMachineHoursMade / $totalShiftHours), 2);
+            if ($totalShiftHours > 0)
+            {
+               $ratio = round(($totalMachineHoursMade / $totalShiftHours), 2);
+            }
          }
       }
       
