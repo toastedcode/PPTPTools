@@ -201,6 +201,21 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function matchTimeCard(
+      $jobId,
+      $employeeNumber,
+      $manufactureDate)
+   {
+      $startDate = Time::startOfDay($manufactureDate);
+      $endDate = Time::endOfDay($manufactureDate);
+      
+      $query = "SELECT * FROM timecard WHERE jobId = $jobId AND employeeNumber = $employeeNumber AND manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "';";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
 
    public function getTimeCards(
       $employeeNumber,

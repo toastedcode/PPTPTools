@@ -681,7 +681,9 @@ if (!Authentication::isAuthenticated())
                <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
                   <div class="form-label">Pan Ticket #</div>
-                  <input id="pan-ticket-code-input" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo getDisabled(PartWeightLogInputField::TIME_CARD_ID); ?>>
+                  <input id="pan-ticket-code-input" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange();" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo getDisabled(PartWeightLogInputField::TIME_CARD_ID); ?>>
+                  &nbsp;&nbsp;
+                  <button id="link-button" class="small-button" onclick="onLinkButton()"><i class="material-icons">link</i></button>
                </div>               
             
                <div class="form-section-header">Manual Entry</div>
@@ -703,7 +705,7 @@ if (!Authentication::isAuthenticated())
                   <div class="form-item">
                      <div class="form-label">Manufacture Date</div>
                      <div class="flex-horizontal">
-                        <input id="manufacture-date-input" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>
+                        <input id="manufacture-date-input" type="date" name="manufactureDate" form="input-form" value="<?php echo getManufactureDate(); ?>" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>
                         &nbsp<button id="today-button" class="small-button" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>Today</button>
                         &nbsp<button id="yesterday-button" class="small-button" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>Yesterday</button>
                      </div>

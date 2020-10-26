@@ -169,6 +169,38 @@ class TimeCardInfo
       return ($timeCardInfo);
    }
    
+   public static function matchTimeCard(
+      $jobId,
+      $employeeNumber,
+      $manufactureDate)
+   {
+      $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
+      
+      $database = PPTPDatabase::getInstance();
+      
+      if ($database && $database->isConnected())
+      {
+         $result = $database->matchTimeCard($jobId, $employeeNumber, $manufactureDate);
+         
+         if ($result && ($row = $result->fetch_assoc()))
+         {
+            $timeCardId = intval($row["timeCardId"]);
+         }
+      }
+      
+      return ($timeCardId);
+   }
+   
+   public static function isUniqueTimeCard(
+      $jobId,
+      $employeeNumber,
+      $manufactureDate)
+   {
+      $isUnique = (TimeCardInfo::matchTimeCard($jobId, $employeeNumber, $manufactureDate) == TimeCardInfo::UNKNOWN_TIME_CARD_ID);
+
+      return ($isUnique);
+   }
+   
    public static function calculateEfficiency(
       $runTime,            // Actual run time, in minutes
       $grossPartsPerHour,  // Expected part count, based on cycle time

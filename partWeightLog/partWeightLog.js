@@ -92,8 +92,8 @@ function onPanTicketCodeChange()
    clear("job-number-input");
    clear("wc-number-input");
    clear("manufacture-date-input");
+   clear("operator-input");
    // Customer requested these fields be preserved.  10/23
-   //clear("operator-input");
    //clear("pan-count-input");
    //clear("part-weight-input");   
    sampleWeight = 0.0;  // global variable
@@ -178,18 +178,9 @@ function onPanTicketCodeChange()
             
             if (json.success == true)
             {
-               if (!json.isComplete)
-               {
-                  alert('Selected time card is incomplete.  Please choose another.');
-               }
-               else
-               {
-                  sampleWeight = json.sampleWeight;  // global variable
-                  
-                  console.log("Updated sample weight: " + sampleWeight);
-                  
-                  updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName, json.sampleWeight);
-               }
+               sampleWeight = json.sampleWeight;  // global variable
+               
+               updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName, json.sampleWeight);
             }
             else
             {
@@ -231,7 +222,7 @@ function onJobNumberChange()
             
             if (json.success == true)
             {
-               updateWcOptions(json.wcNumbers);               
+               updateWcOptions(json.wcNumbers);   
             }
             else
             {
@@ -274,9 +265,7 @@ function onWcNumberChange()
                sampleWeight = 0.0;
             }
             
-            console.log("Updated sample weight: " + sampleWeight);
-            
-            updateCalculatedPartCount();  
+            updateCalculatedPartCount();
          }
          catch (exception)
          {
@@ -302,6 +291,70 @@ function onYesterdayButton()
    yesterday.setDate(yesterday.getDate() - 1);
    
    document.querySelector('#manufacture-date-input').value = formattedDate(yesterday); 
+}
+
+function onLinkButton()
+{
+   if (document.getElementById("job-number-input").validator.validate() &&
+       document.getElementById("wc-number-input").validator.validate() &&
+       document.getElementById("operator-input").validator.validate() &&
+       document.getElementById("manufacture-date-input").value != null)
+   {
+      var jobNumber = document.getElementById("job-number-input").value;
+      var wcNumber = document.getElementById("wc-number-input").value;
+      var operator = document.getElementById("operator-input").value;
+      var manufactureDate = document.getElementById("manufacture-date-input").value;
+      
+      // AJAX call to populate WC numbers based on selected job number.
+      requestUrl = "../api/timeCardInfo/?jobNumber=" + jobNumber + "&wcNumber=" + wcNumber + "&operator=" + operator + "&manufactureDate=" + manufactureDate + "&expandedProperties=true";
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            try
+            {
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  var timeCardId = json.timeCardInfo.timeCardId;
+                  var panTicketCode = json.panTicketCode;     
+                  
+                  // Double check we have a valid time card.
+                  if (timeCardId != 0)
+                  {                  
+                     alert("Linking entry to pan ticket " + panTicketCode + ".");
+                     
+                     set("pan-ticket-code-input", panTicketCode);
+                     
+                     onPanTicketCodeChange()
+                  }
+                  else
+                  {
+                     alert("No matching time card could be found.");
+                  }
+               }
+               else
+               {
+                  alert("No matching time card could be found.");
+               }
+            }
+            catch (exception)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();
+   }
+   else
+   {
+      alert("Enter valid time card properties below before linking.")
+   }    
 }
 
 function set(elementId, value)

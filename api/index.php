@@ -172,15 +172,39 @@ $router->add("timeCardData", function($params) {
 $router->add("timeCardInfo", function($params) {
    $result = new stdClass();
 
-   if (isset($params["timeCardId"]) || isset($params["panTicketCode"]))
+   if (isset($params["timeCardId"]) ||
+       isset($params["panTicketCode"]) ||
+       (isset($params["jobNumber"]) &&
+        isset($params["wcNumber"]) && 
+        isset($params["operator"]) &&
+        isset($params["manufactureDate"])))             
    {
+      $result->timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
+      
+      // Look up by time card id
       if (isset($params["timeCardId"]))
       {
          $result->timeCardId = intval($params["timeCardId"]);         
       }
-      else
+      // Look up by pan ticket code
+      else if (isset($params["panTicketCode"]))
       {
          $result->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);  
+      }
+      // Look up by time card components
+      else
+      {
+         $jobNumber = $params["jobNumber"];
+         $wcNumber = intval($params["wcNumber"]);
+         $employeeNumber = intval($params["operator"]);
+         $manufactureDate = Time::startOfDay($params->get("manufactureDate"));
+         
+         $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+         
+         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         {
+            $result->timeCardId = TimeCardInfo::matchTimeCard($jobId, $employeeNumber, $manufactureDate);
+         }
       }
       
       $timeCardInfo = TimeCardInfo::load($result->timeCardId);
@@ -193,6 +217,7 @@ $router->add("timeCardInfo", function($params) {
          if ($params->getBool("expandedProperties"))
          {
             $result->isComplete = ($timeCardInfo->isComplete());
+            $result->panTicketCode = PanTicket::getPanTicketCode($result->timeCardId);
             
             $jobInfo = JobInfo::load($timeCardInfo->jobId);
             
@@ -215,7 +240,7 @@ $router->add("timeCardInfo", function($params) {
       else
       {
          $result->success = false;
-         $result->error = "Invalid time card ID.";
+         $result->error = "No matching time card.";
       }
    }
    else
@@ -821,11 +846,23 @@ $router->add("saveTimeCard", function($params) {
             
             if ($timeCardInfo->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID)
             {
-               $dbaseResult = $database->newTimeCard($timeCardInfo);
-               
-               if ($dbaseResult)
+               // Check for unique time card.
+               if (!TimeCardInfo::isUniqueTimeCard(
+                       $timeCardInfo->jobId, 
+                       $timeCardInfo->employeeNumber, 
+                       $timeCardInfo->manufactureDate))
                {
-                  $result->timeCardId = $database->lastInsertId();
+                  $result->success = false;
+                  $result->error = "Duplicate time card.";
+               }
+               else 
+               {
+                  $dbaseResult = $database->newTimeCard($timeCardInfo);
+                  
+                  if ($dbaseResult)
+                  {
+                     $result->timeCardId = $database->lastInsertId();
+                  }
                }
             }
             else
@@ -834,7 +871,7 @@ $router->add("saveTimeCard", function($params) {
                $result->timeCardId = $timeCardInfo->timeCardId;
             }
             
-            if (!$dbaseResult)
+            if ($result->success && !$dbaseResult)
             {
                $result->success = false;
                $result->error = "Database query failed.";

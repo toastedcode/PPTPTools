@@ -174,14 +174,7 @@ function onPanTicketCodeChange()
             
             if (json.success == true)
             {
-               if (!json.isComplete)
-               {
-                  alert('Selected time card is incomplete.  Please choose another.');
-               }
-               else
-               {
-                  updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName);
-               }
+               updateTimeCardInfo(json.timeCardInfo, json.jobNumber, json.wcNumber, json.operatorName);
             }
             else
             {
@@ -255,6 +248,70 @@ function onYesterdayButton()
    yesterday.setDate(yesterday.getDate() - 1);
    
    document.querySelector('#manufacture-date-input').value = formattedDate(yesterday); 
+}
+
+function onLinkButton()
+{
+   if (document.getElementById("job-number-input").validator.validate() &&
+       document.getElementById("wc-number-input").validator.validate() &&
+       document.getElementById("operator-input").validator.validate() &&
+       document.getElementById("manufacture-date-input").value != null)
+   {
+      var jobNumber = document.getElementById("job-number-input").value;
+      var wcNumber = document.getElementById("wc-number-input").value;
+      var operator = document.getElementById("operator-input").value;
+      var manufactureDate = document.getElementById("manufacture-date-input").value;
+      
+      // AJAX call to populate WC numbers based on selected job number.
+      requestUrl = "../api/timeCardInfo/?jobNumber=" + jobNumber + "&wcNumber=" + wcNumber + "&operator=" + operator + "&manufactureDate=" + manufactureDate + "&expandedProperties=true";
+      
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+         if (this.readyState == 4 && this.status == 200)
+         {
+            try
+            {
+               var json = JSON.parse(this.responseText);
+               
+               if (json.success == true)
+               {
+                  var timeCardId = json.timeCardInfo.timeCardId;
+                  var panTicketCode = json.panTicketCode;     
+                  
+                  // Double check we have a valid time card.
+                  if (timeCardId != 0)
+                  {                  
+                     alert("Linking entry to pan ticket " + panTicketCode + ".");
+                     
+                     set("pan-ticket-code-input", panTicketCode);
+                     
+                     onPanTicketCodeChange()
+                  }
+                  else
+                  {
+                     alert("No matching time card could be found.");
+                  }
+               }
+               else
+               {
+                  alert("No matching time card could be found.");
+               }
+            }
+            catch (exception)
+            {
+               console.log("JSON syntax error");
+               console.log(this.responseText);
+            }
+         }
+      };
+      xhttp.open("GET", requestUrl, true);
+      xhttp.send();
+   }
+   else
+   {
+      alert("Enter valid time card properties below before linking.")
+   }    
 }
 
 function set(elementId, value)
