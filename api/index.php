@@ -155,11 +155,18 @@ $router->add("timeCardData", function($params) {
          $timeCard["incompletePanCount"] = $timeCardInfo->incompletePanCount();
          $timeCard["incompletePartCount"] = $timeCardInfo->incompletePartCount();
          
-         $timeCard["requiresApproval"] = $timeCardInfo->requiresApproval();
-         $userInfo = UserInfo::load($timeCardInfo->approvedBy);
+         $timeCard["runTimeRequiresApproval"] = $timeCardInfo->requiresRunTimeApproval();
+         $userInfo = UserInfo::load($timeCardInfo->runTimeApprovedBy);
          if ($userInfo)
          {
-            $timeCard["approvedByName"] = $userInfo->getFullName();
+            $timeCard["runTimeApprovedByName"] = $userInfo->getFullName();
+         }
+         
+         $timeCard["setupTimeRequiresApproval"] = $timeCardInfo->requiresSetupTimeApproval();
+         $userInfo = UserInfo::load($timeCardInfo->setupTimeApprovedBy);
+         if ($userInfo)
+         {
+            $timeCard["setupTimeApprovedByName"] = $userInfo->getFullName();
          }
                   
          $result[] = $timeCard;
@@ -803,7 +810,8 @@ $router->add("saveTimeCard", function($params) {
           isset($params["materialNumber"]) &&
           isset($params["shiftTime"]) &&            
           isset($params["setupTime"]) &&
-          isset($params["approvedBy"]) &&
+          isset($params["runTimeApprovedBy"]) &&
+          isset($params["setupTimeApprovedBy"]) &&
           isset($params["runTime"]) &&
           isset($params["panCount"]) &&
           isset($params["partCount"]) &&
@@ -820,8 +828,9 @@ $router->add("saveTimeCard", function($params) {
             $timeCardInfo->materialNumber = intval($params["materialNumber"]);
             $timeCardInfo->shiftTime = intval($params["shiftTime"]);
             $timeCardInfo->setupTime = intval($params["setupTime"]);
-            $timeCardInfo->approvedBy = intval($params["approvedBy"]);
+            $timeCardInfo->setupTimeApprovedBy = intval($params["setupTimeApprovedBy"]);
             $timeCardInfo->runTime = intval($params["runTime"]);
+            $timeCardInfo->runTimeApprovedBy = intval($params["runTimeApprovedBy"]);            
             $timeCardInfo->panCount = intval($params["panCount"]);
             $timeCardInfo->partCount = intval($params["partCount"]);
             $timeCardInfo->scrapCount = intval($params["scrapCount"]);

@@ -1,3 +1,6 @@
+const SETUP_TIME = 0;
+const RUN_TIME = 1;
+
 function hide(elementId)
 {
    document.getElementById(elementId).style.display = "none";
@@ -119,6 +122,8 @@ function onShiftTimeChange()
    document.getElementById("shift-time-input").value = shiftTime;
    
    document.getElementById("shift-time-minute-input").value = formatToTwoDigits(minutes);
+   
+   updateApproval(RUN_TIME);
 }
 
 function onRunTimeChange()
@@ -132,7 +137,11 @@ function onRunTimeChange()
    
    document.getElementById("run-time-minute-input").value = formatToTwoDigits(minutes);
    
+   document.getElementById("run-time-approved-by-input").value = 0;
+   
    updateEfficiency();
+   
+   updateApproval(RUN_TIME);
 }
 
 function onSetupTimeChange()
@@ -146,9 +155,9 @@ function onSetupTimeChange()
    
    document.getElementById("setup-time-minute-input").value = formatToTwoDigits(minutes);
    
-   document.getElementById("approved-by-input").value = 0;
+   document.getElementById("setup-time-approved-by-input").value = 0;
    
-   updateApproval();
+   updateApproval(SETUP_TIME);
 }
 
 function onPartCountChange()
@@ -420,30 +429,48 @@ function validateTimeCard()
    return (valid);   
 }
 
-function updateApproval()
+function updateApproval(approvalType)
 {
-   var setupTimeHourInput = document.getElementById("setup-time-hour-input");
-   var setupTimeMinuteInput = document.getElementById("setup-time-minute-input");  
+   var approvePrefix = "";
+   if (approvalType == SETUP_TIME)
+   {
+      approvePrefix = "setup-time";
+   }
+   else if (approvalType == RUN_TIME)
+   {
+      approvePrefix = "run-time";
+   }
+   
+   var hourInput = document.getElementById(approvePrefix + "-hour-input");
+   var minuteInput = document.getElementById(approvePrefix + "-minute-input");  
    
    var requiresApproval = false;
-   var isApproved = document.getElementById("approved-by-input").value != 0;
+   var isApproved = document.getElementById(approvePrefix + "-approved-by-input").value != 0;
    
-   if (setupTimeHourInput.validator.isValid() && 
-       setupTimeMinuteInput.validator.isValid())
+   if (hourInput.validator.isValid() && 
+       minuteInput.validator.isValid())
    {
-      var setupTimeMinutes = ((parseInt(setupTimeHourInput.value) * 60) + parseInt(setupTimeMinuteInput.value));
+      var minutes = ((parseInt(hourInput.value) * 60) + parseInt(minuteInput.value));
       
-      if (setupTimeMinutes > 0)
+      if (approvalType == SETUP_TIME)
       {
-         requiresApproval = true;
+         requiresApproval = (minutes > 0);         
+      }
+      else if (approvalType == RUN_TIME)
+      {
+         var shiftTimeMinutes =
+            ((parseInt(document.getElementById('shift-time-hour-input').value) * 60) +
+             parseInt(document.getElementById('shift-time-minute-input').value));
+             
+         requiresApproval = (minutes < shiftTimeMinutes);         
       }
    }
    
    // Start by hiding everything.
-   hide("approve-button");
-   hide("approved-text");
-   hide("unapprove-button");
-   hide("unapproved-text");
+   hide(approvePrefix + "-approve-button");
+   hide(approvePrefix + "-approved-text");
+   hide(approvePrefix + "-unapprove-button");
+   hide(approvePrefix + "-unapproved-text");
    
    if (requiresApproval)
    {
@@ -451,33 +478,47 @@ function updateApproval()
       {
          if (userCanApprove())
          {
-            show("unapprove-button");
+            show(approvePrefix + "-unapprove-button");
          }
 
-         show("approved-text");
+         show(approvePrefix + "-approved-text");
       }
       else
       {
          if (userCanApprove())
          {
-            show("approve-button");
+            show(approvePrefix + "-approve-button");
          }
 
-         show("unapproved-text");
+         show(approvePrefix + "-unapproved-text");
       }
    }
 }
 
-function approve(approvedBy)
+function approveRunTime(approvedBy)
 {
-   document.getElementById("approved-by-input").value = approvedBy;
+   document.getElementById("run-time-approved-by-input").value = approvedBy;
    
-   updateApproval();
+   updateApproval(RUN_TIME);
 }
 
-function unapprove(approvedBy)
+function unapproveRunTime(approvedBy)
 {
-   document.getElementById("approved-by-input").value = 0;
+   document.getElementById("run-time-approved-by-input").value = 0;
    
-   updateApproval();
+   updateApproval(RUN_TIME);
+}
+
+function approveSetupTime(approvedBy)
+{
+   document.getElementById("setup-time-approved-by-input").value = approvedBy;
+   
+   updateApproval(SETUP_TIME);
+}
+
+function unapproveSetupTime(approvedBy)
+{
+   document.getElementById("setup-time-approved-by-input").value = 0;
+   
+   updateApproval(SETUP_TIME);
 }

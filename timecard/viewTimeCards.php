@@ -273,6 +273,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   {
                      cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
                   }
+                  else if (cell.getRow().getData().runTimeRequiresApproval)
+                  {
+                     if (cell.getRow().getData().runTimeApprovedByName)
+                     {
+                        cellValue += "&nbsp<span class=\"approved-indicator\">approved</div>";
+                     }
+                     else
+                     {
+                        cellValue += "&nbsp<span class=\"unapproved-indicator\">unapproved</div>";
+                     }
+                  }     
                   
                   return (cellValue);
                 },
@@ -283,6 +294,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
                   
                   return (cellValue);
+                },
+                tooltip:function(cell){
+                   var toolTip = "";
+
+                   if (cell.getRow().getData().runTimeApprovedByName)
+                   {
+                      toolTip = "Approved by " + cell.getRow().getData().runTimeApprovedByName;
+                   }
+
+                   return (toolTip);                  
                 }                
             },
             {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2, print:true,
@@ -292,9 +313,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
 
-                  if (cell.getRow().getData().requiresApproval)
+                  if (cell.getRow().getData().setupTimeRequiresApproval)
                   {
-                     if (cell.getRow().getData().approvedByName)
+                     if (cell.getRow().getData().setupTimeApprovedByName)
                      {
                         cellValue += "&nbsp<span class=\"approved-indicator\">approved</div>";
                      }
@@ -305,7 +326,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }                  
                   
                   return (cellValue);
-                },
+               },
                formatterPrint:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
@@ -317,9 +338,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 tooltip:function(cell){
                    var toolTip = "";
 
-                   if (cell.getRow().getData().approvedByName)
+                   if (cell.getRow().getData().setupTimeApprovedByName)
                    {
-                      toolTip = "Approved by " + cell.getRow().getData().approvedByName;
+                      toolTip = "Approved by " + cell.getRow().getData().setupTimeApprovedByName;
                    }
 
                    return (toolTip);                  

@@ -87,7 +87,6 @@ function isEditable($field)
       
       case TimeCardInputField::OPERATOR:
       case TimeCardInputField::MANUFACTURE_DATE:
-      case TimeCardInputField::SHIFT_TIME:         
       {
          $isEditable = ((Authentication::getAuthenticatedUser()->roles == Role::ADMIN) ||
                         (Authentication::getAuthenticatedUser()->roles == Role::SUPER_USER));
@@ -325,7 +324,7 @@ function canApprove()
    return (Authentication::checkPermissions(Permission::APPROVE_TIME_CARDS));
 }
 
-function getApprovalButton()
+function getApprovalButton($buttonId, $function)
 {
    $html = "";
    
@@ -333,13 +332,13 @@ function getApprovalButton()
       
    $html =
 <<<HEREDOC
-   <button id="approve-button" class="small-button accent-button" onclick="approve($approvingUser->employeeNumber)">Approve</button>
+   <button id="$buttonId" class="small-button accent-button" onclick="$function($approvingUser->employeeNumber)">Approve</button>
 HEREDOC;
       
    return ($html);
 }
 
-function getUnapprovalButton()
+function getUnapprovalButton($buttonId, $function)
 {
    $html = "";
    
@@ -347,24 +346,44 @@ function getUnapprovalButton()
       
    $html =
 <<<HEREDOC
-   <button id="unapprove-button" class="small-button accent-button" onclick="unapprove($approvingUser->employeeNumber)">Unapprove</button>
+   <button id="$buttonId" class="small-button accent-button" onclick="$function($approvingUser->employeeNumber)">Unapprove</button>
 HEREDOC;
    
    return ($html);
 }
 
-function getApprovalText()
+function getRunTimeApprovalText()
 {
    $approvalText = "";
    
    $timeCardInfo = getTimeCardInfo();
    
-   if (($timeCardInfo->requiresApproval()) &&
-       ($timeCardInfo->isApproved()))
+   if (($timeCardInfo->requiresRunTimeApproval()) &&
+         ($timeCardInfo->isRunTimeApproved()))
+   {
+      $approvalText = "Approved by supervisor";
+      
+      $userInfo = UserInfo::load($timeCardInfo->runTimeApprovedBy);
+      
+      if ($userInfo)
+      {
+         $approvalText = "Approved by " . $userInfo->getFullName();
+      }
+   }
+}
+
+function getSetupTimeApprovalText()
+{
+   $approvalText = "";
+   
+   $timeCardInfo = getTimeCardInfo();
+   
+   if (($timeCardInfo->requiresSetupTimeApproval()) &&
+       ($timeCardInfo->isSetupTimeApproved()))
    {
       $approvalText = "Approved by supervisor";
 
-      $userInfo = UserInfo::load($timeCardInfo->approvedBy);
+      $userInfo = UserInfo::load($timeCardInfo->setupTimeApprovedBy);
       
       if ($userInfo)
       {
@@ -583,8 +602,10 @@ if (!Authentication::isAuthenticated())
       <input id="time-card-id-input" type="hidden" name="timeCardId" value="<?php echo getTimeCardId(); ?>">
       <input type="hidden" name="manufactureDate" value="<?php echo getManufactureDate(); ?>">
       <input type="hidden" name="operator" value="<?php echo getOperator(); ?>">
-      <input id="approved-by-input" type="hidden" form="input-form" name="approvedBy" value="<?php echo getTimeCardInfo()->approvedBy; ?>" />
-      <input id="approved-date-time-input" type="hidden" form="input-form" name="approvedDateTime" value="<?php echo getTimeCardInfo()->approvedDateTime; ?>" />
+      <input id="run-time-approved-by-input" type="hidden" form="input-form" name="runTimeApprovedBy" value="<?php echo getTimeCardInfo()->runTimeApprovedBy; ?>" />
+      <input id="run-time-approved-date-time-input" type="hidden" form="input-form" name="runTimeApprovedDateTime" value="<?php echo getTimeCardInfo()->runTimeApprovedDateTime; ?>" />
+      <input id="setup-time-approved-by-input" type="hidden" form="input-form" name="setupTimeApprovedBy" value="<?php echo getTimeCardInfo()->setupTimeApprovedBy; ?>" />
+      <input id="seteup-time-approved-date-time-input" type="hidden" form="input-form" name="setupTimeApprovedDateTime" value="<?php echo getTimeCardInfo()->setupTimeApprovedDateTime; ?>" />
       <input id="shift-time-input" type="hidden" name="shiftTime" value="<?php echo getTimeCardInfo()->shiftTime; ?>">
       <input id="run-time-input" type="hidden" name="runTime" value="<?php echo getTimeCardInfo()->runTime; ?>">
       <input id="setup-time-input" type="hidden" name="setupTime" value="<?php echo getTimeCardInfo()->setupTime; ?>">
@@ -666,9 +687,18 @@ if (!Authentication::isAuthenticated())
                   
                   <div class="form-item">
                      <div class="form-label">Run time</div>
-                     <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo getDisabled(TimeCardInputField::RUN_TIME); ?> />
-                     <div style="padding: 5px;">:</div>
-                     <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" step="15" <?php echo getDisabled(TimeCardInputField::RUN_TIME); ?> />
+                     <div class="form-col">
+                        <div class="form-row flex-left">
+                           <input id="run-time-hour-input" type="number" class="form-input-medium" form="input-form" name="runTimeHours" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeHours(); ?>" <?php echo getDisabled(TimeCardInputField::RUN_TIME); ?> />
+                           <div style="padding: 5px;">:</div>
+                           <input id="run-time-minute-input" type="number" class="form-input-medium" form="input-form" name="runTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onRunTimeChange();" value="<?php echo getTimeCardInfo()->getRunTimeMinutes(); ?>" step="15" <?php echo getDisabled(TimeCardInputField::RUN_TIME); ?> />
+                           &nbsp;&nbsp;
+                           <?php echo getApprovalButton('run-time-approve-button', 'approveRunTime'); ?>
+                           <?php echo getUnapprovalButton('run-time-unapprove-button', 'unapproveRunTime'); ?>
+                        </div>
+                        <div id="run-time-approved-text" class="approved-indicator">Approved by supervisor.</div>
+                        <div id="run-time-unapproved-text" class="unapproved-indicator">Requires approval by supervisor.</div>
+                     </div>
                   </div>
          
                   <div class="form-item">
@@ -679,11 +709,11 @@ if (!Authentication::isAuthenticated())
                            <div style="padding: 5px;">:</div>
                            <input id="setup-time-minute-input" type="number" class="form-input-medium $approval" form="input-form" name="setupTimeMinutes" style="width:50px;" oninput="this.validator.validate(); onSetupTimeChange();" value="<?php echo getTimeCardInfo()->getSetupTimeMinutes(); ?>" step="15" <?php echo getDisabled(TimeCardInputField::SETUP_TIME); ?> />
                            &nbsp;&nbsp;
-                           <?php echo getApprovalButton(); ?>
-                           <?php echo getUnapprovalButton(); ?>
+                           <?php echo getApprovalButton('setup-time-approve-button', 'approveSetupTime'); ?>
+                           <?php echo getUnapprovalButton('setup-time-unapprove-button', 'unapproveSetupTime'); ?>
                         </div>
-                        <div id="approved-text" class="approved">Approved by supervisor.</div>
-                        <div id="unapproved-text" class="unapproved">Requires approval by supervisor.</div>
+                        <div id="setup-time-approved-text" class="approved-indicator">Approved by supervisor.</div>
+                        <div id="setup-time-unapproved-text" class="unapproved-indicator">Requires approval by supervisor.</div>
                      </div>
                   </div>
                   
@@ -780,7 +810,8 @@ if (!Authentication::isAuthenticated())
       scrapCountValidator.init();
 
       updateEfficiency();
-      updateApproval();
+      updateApproval(RUN_TIME);
+      updateApproval(SETUP_TIME);
 
       // Setup event handling on all DOM elements.
       document.getElementById("cancel-button").onclick = function(){onCancel();};
