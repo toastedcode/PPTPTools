@@ -204,6 +204,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          //Define Table Columns
          columns:[
             {title:"Time Card Id", field:"timeCardId",    hozAlign:"left", visible:false},
+            {title:"Status",       field:"dataStatusLabel", hozAlign:"center",
+               formatter:function(cell, formatterParams, onRendered){
+                  cell.getElement().classList.add(cell.getRow().getData().dataStatusClass);
+                  return ("<div class=\"" + cell.getRow().getData().dataStatusClass + "\">" + cell.getValue() + "</div>");
+               },
+            },
             {title:"Ticket",       field:"panTicketCode", hozAlign:"left", print:false,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">receipt</i>&nbsp" + cell.getRow().getData().panTicketCode);
@@ -258,6 +264,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   {
                      cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
                   }
+                  else if (cell.getRow().getData().unapprovedRunTime)
+                  {
+                     cellValue += "&nbsp<span class=\"unapproved-indicator\">unapproved</div>";                  
+                  }
                   
                   return (cellValue);
                 },
@@ -270,11 +280,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (cellValue);
                }                
             },
-            {title:"Basket Count",            field:"panCount",             hozAlign:"left", print:true},
+            {title:"Setup Time",     field:"setupTime",         hozAlign:"left",                    print:true,
+               formatter:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  if (cell.getRow().getData().unapprovedSetupTime)
+                  {
+                     cellValue += "&nbsp<span class=\"unapproved-indicator\">unapproved</div>";                  
+                  }
+                  
+                  return (cellValue);
+                },
+               formatterPrint:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  return (cellValue);
+               }                
+            },
+            {title:"Basket Count",            field:"panCount",             hozAlign:"left", print:true,
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  
+                  if (cell.getRow().getData().incompletePanCount)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+               }
+            },
             {title:"Sample Weight",           field:"sampleWeight",         hozAlign:"left", print:true},
             {title:"Total Weight",            field:"partWeight",           hozAlign:"left", print:true},
             {title:"Avg. Basket Weight",      field:"averagePanWeight",     hozAlign:"left", print:true},
-            {title:"Part Count (time card)",  field:"partCountByTimeCard",  hozAlign:"left", print:true},
+            {title:"Part Count (time card)",  field:"partCountByTimeCard",  hozAlign:"left", print:true,
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  
+                  if (cell.getRow().getData().incompletePartCount)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  
+                  return (cellValue);
+               }
+            },
             {title:"Part Count (weight log)", field:"partCountByWeightLog", hozAlign:"left", print:true},
             {title:"Part Count (washer log)", field:"partCountByWasherLog", hozAlign:"left", print:true},
             {title:"Part Count",              field:"partCountEstimate",    hozAlign:"left", print:true},
@@ -282,7 +337,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {title:"Gross Shift",             field:"grossPartsPerShift",   hozAlign:"left", print:true},
             {title:"Efficiency",              field:"efficiency",           hozAlign:"left", print:true,
                formatter:function(cell, formatterParams, onRendered){
-                  return (cell.getValue() + "%");
+                  var cellValue = cell.getValue() + "%";
+                  
+                  if (cell.getRow().getData().unreasonableEfficiency)
+                  {
+                     cellValue += "&nbsp<span class=\"mismatch-indicator\">unreasonable</div>";
+                  }
+                  
+                  return (cellValue);
                },
                formatterPrint:function(cell, formatterParams, onRendered){
                   return (cell.getValue() + "%");

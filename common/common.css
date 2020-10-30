@@ -372,6 +372,24 @@ button {
    white-space: nowrap;
 }
 
+.report-entry-valid {
+	background: green;
+	color: white;
+	font-size: 12;
+}
+
+.report-entry-warning {
+   background: orange;
+   color: white;
+   font-size: 12;
+}
+
+.report-entry-error {
+   background: red;
+   color: white;
+   font-size: 12;
+}
+
 input, select {
 	font-family: var(--main-font);
 	font-size: 14;

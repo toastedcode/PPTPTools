@@ -16,8 +16,80 @@ abstract class DailySummaryReportTable
    const COUNT = DailySummaryReportTable::LAST - DailySummaryReportTable::FIRST;
 }
 
+abstract class ReportEntryStatus
+{
+   const FIRST = 0;
+   const UNKNOWN = ReportEntryStatus::FIRST;
+   const INCOMPLETE_TIME_CARD = 1;
+   const UNAPPROVED_TIME_CARD = 2;
+   const NO_WEIGHT_LOGS = 3;
+   const NO_WASH_LOGS = 4;
+   const INCONSISTENT_PAN_COUNTS = 5;
+   const INCONSISTENT_PART_COUNTS = 6;
+   const UNREASONABLE_EFFICIENCY = 7;
+   const COMPLETE = 8;
+   const LAST = 9;
+   const COUNT = ReportEntryStatus::LAST - ReportEntryStatus::FIRST;
+   
+   public static function getLabel($reportStatus)
+   {
+      $labels = array("---", 
+                      "Incomplete Time Card", 
+                      "Unapproved Time Card",
+                      "No Weight Logs",
+                      "No Wash Logs",
+                      "Inconsistent Pan Counts",
+                      "Inconsistent Part Counts",
+                      "Unreasonable Efficiency",
+                      "Complete");
+      
+      return ($labels[$reportStatus]);
+   }
+   
+   public static function getClass($inspectionStatus)
+   {
+      $class = "";
+      
+      switch ($inspectionStatus)
+      {
+         case ReportEntryStatus::COMPLETE:
+         {
+            $class = "report-entry-valid";
+            break;
+         }
+         
+         case ReportEntryStatus::NO_WASH_LOGS:
+         case ReportEntryStatus::INCONSISTENT_PAN_COUNTS:
+         case ReportEntryStatus::INCONSISTENT_PART_COUNTS:
+         {
+            $class = "report-entry-warning";
+            break;
+         }
+         
+         case ReportEntryStatus::INCOMPLETE_TIME_CARD:
+         case ReportEntryStatus::UNAPPROVED_TIME_CARD:
+         case ReportEntryStatus::NO_WEIGHT_LOGS:
+         case ReportEntryStatus::UNREASONABLE_EFFICIENCY:
+         {
+            $class = "report-entry-error";
+            break;
+         }
+         
+         default:
+         {
+            break;
+         }
+      }
+      
+      return ($class);
+   }
+}
+
 class ReportEntry
 {
+   // Any efficiency >= 90 will be flagged as unreasonable.
+   const UNREASONABLE_EFFICIENCY = 90;
+   
    public $timeCardInfo;
    public $userInfo;
    public $jobInfo;
@@ -35,6 +107,7 @@ class ReportEntry
    public $grossPartsPerShift;
    public $efficiency;
    public $machineHoursMade;
+   public $dataStatus;
    
    public function __construct()
    {
@@ -55,6 +128,7 @@ class ReportEntry
       $this->grossPartsPerShift = 0;
       $this->efficiency;
       $this->machineHoursMade = 0;
+      $this->dataStatus = ReportEntryStatus::UNKNOWN;
    }
    
    public static function load($timeCardId)
@@ -97,7 +171,7 @@ class ReportEntry
    
    function recalculate()
    {
-      $this->totalPanCount = $this->getTotalPanCount();
+      $this->totalPanCount = $this->getPanCountByWeightLog();
       
       $this->totalPartWeight = $this->getTotalPartWeight();
       
@@ -121,9 +195,11 @@ class ReportEntry
          $this->partCountEstimate);
       
       $this->machineHoursMade = $this->getMachineHoursMade();
+      
+      $this->dataStatus = $this->getReportEntryStatus();  // Note: Must be called after other calculations.
    }
    
-   private function getTotalPanCount()
+   private function getPanCountByWeightLog()
    {
       $panCount = 0;
       
@@ -153,7 +229,7 @@ class ReportEntry
       
       $totalWeight = $this->getTotalPartWeight();      
       
-      $panCount = $this->getTotalPanCount();
+      $panCount = $this->getPanCountByWeightLog();
             
       if ($panCount > 0)
       {
@@ -173,6 +249,18 @@ class ReportEntry
       }
       
       return ($partCount);
+   }
+   
+   private function getPanCountByWasherLog()
+   {
+      $panCount = 0;
+      
+      foreach ($this->partWasherEntries as $partWasherEntry)
+      {
+         $panCount += $partWasherEntry->panCount;
+      }
+      
+      return ($panCount);
    }
    
    private function getPartCountByWasherLog()
@@ -211,8 +299,7 @@ class ReportEntry
    {
       $grossPartsPerHour = $this->jobInfo->getGrossPartsPerHour();
       
-      $grossParts = 
-         round(($grossPartsPerHour * ($this->timeCardInfo->runTime / TimeCardInfo::MINUTES_PER_HOUR)), 2);
+      $grossParts = round(($grossPartsPerHour * ($this->timeCardInfo->getApprovedRunTime() / TimeCardInfo::MINUTES_PER_HOUR)), 2);
       
       return ($grossParts);
    }
@@ -229,6 +316,47 @@ class ReportEntry
       }
       
       return ($machineHours);
+   }
+   
+   private function getReportEntryStatus()
+   {
+      $status = ReportEntryStatus::COMPLETE;
+      
+      if (!$this->timeCardInfo->isComplete())
+      {
+         $status = ReportEntryStatus::INCOMPLETE_TIME_CARD;
+      }
+      else if (!$this->timeCardInfo->isApproved())
+      {
+         $status = ReportEntryStatus::UNAPPROVED_TIME_CARD;
+      }
+      else if ($this->getPartCountByWeightLog() == 0)
+      {
+         $status = ReportEntryStatus::NO_WEIGHT_LOGS;         
+      }
+      else if ($this->getPartCountByWasherLog() == 0)
+      {
+         $status = ReportEntryStatus::NO_WASH_LOGS;
+      }
+      else if (($this->timeCardInfo->panCount != $this->getPanCountByWeightLog()) ||
+               ($this->getPanCountByWeightLog() != $this->getPanCountByWasherLog()))
+      {
+         $status = ReportEntryStatus::INCONSISTENT_PAN_COUNTS;
+      }
+      else if (false)  // TODO
+      {
+         $status = ReportEntryStatus::INCONSISTENT_PART_COUNTS;
+      }
+      else if ($this->efficiency >= ReportEntry::UNREASONABLE_EFFICIENCY)
+      {
+         $status = ReportEntryStatus::UNREASONABLE_EFFICIENCY;
+      }
+      else
+      {
+         $status = ReportEntryStatus::COMPLETE;
+      }
+      
+      return ($status);
    }
 }
 
@@ -331,6 +459,9 @@ class DailySummaryReport
          
          $row->timeCardId = $entry->timeCardInfo->timeCardId;
          $row->panTicketCode = PanTicket::getPanTicketCode($entry->timeCardInfo->timeCardId);
+         $row->dataStatus = $entry->dataStatus;
+         $row->dataStatusLabel = ReportEntryStatus::getLabel($entry->dataStatus);
+         $row->dataStatusClass = ReportEntryStatus::getClass($entry->dataStatus);
          $row->manufactureDate = $entry->timeCardInfo->dateTime;
          $row->operator = $entry->userInfo->getFullName();
          $row->employeeNumber = $entry->userInfo->employeeNumber;
@@ -338,18 +469,25 @@ class DailySummaryReport
          $row->wcNumber = $entry->jobInfo->wcNumber;
          $row->materialNumber = $entry->timeCardInfo->materialNumber;
          $row->shiftTime = $entry->timeCardInfo->shiftTime;
+         $row->incompleteShiftTime = $entry->timeCardInfo->incompleteShiftTime();
          $row->runTime = $entry->timeCardInfo->runTime;
+         $row->unapprovedRunTime = !$entry->timeCardInfo->isRunTimeApproved();
+         $row->setupTime = $entry->timeCardInfo->setupTime;
+         $row->unapprovedSetupTime = !$entry->timeCardInfo->isSetupTimeApproved();         
          $row->panCount = $entry->timeCardInfo->panCount;
+         $row->incompletePanCount = $entry->timeCardInfo->incompletePanCount();
          $row->sampleWeight = $entry->jobInfo->sampleWeight;
          $row->partWeight = $entry->totalPartWeight;
          $row->averagePanWeight = $entry->averagePanWeight;         
          $row->partCountByTimeCard = $entry->timeCardInfo->partCount;
+         $row->incompletePartCount = $entry->timeCardInfo->incompletePartCount();
          $row->partCountByWeightLog = $entry->partCountByWeightLog;
          $row->partCountByWasherLog = $entry->partCountByWasherLog;
          $row->partCountEstimate = $entry->partCountEstimate;
          $row->grossPartsPerHour = $entry->jobInfo->getGrossPartsPerHour();
          $row->grossPartsPerShift = $entry->grossPartsPerShift;
          $row->efficiency = $entry->efficiency;
+         $row->unreasonableEfficiency = ($entry->efficiency >= ReportEntry::UNREASONABLE_EFFICIENCY);
          $row->scrapCount = $entry->timeCardInfo->scrapCount;
          $row->netPartsPerHour = $entry->jobInfo->getNetPartsPerHour();
          $row->machineHoursMade = $entry->machineHoursMade;
@@ -382,7 +520,7 @@ class DailySummaryReport
          
          $row->operator = $userInfo->getFullName();
          $row->employeeNumber = $userInfo->employeeNumber;
-         $row->runTime = ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR);
+         $row->runTime = ($this->getTotalRunTime($employeeNumber, true) / TimeCardInfo::MINUTES_PER_HOUR);  // use approved run time
          $row->efficiency = $this->getAverageEfficiency($employeeNumber);
          $row->shiftHours = $this->getTotalShiftHours($employeeNumber);
          $row->machineHoursMade = $this->getTotalMachineHoursMade($employeeNumber);
@@ -408,7 +546,7 @@ class DailySummaryReport
 
       $row = new stdClass();
       
-      $row->hours = ($this->getTotalRunTime(UserInfo::UNKNOWN_EMPLOYEE_NUMBER) / TimeCardInfo::MINUTES_PER_HOUR);
+      $row->hours = ($this->getTotalRunTime(UserInfo::UNKNOWN_EMPLOYEE_NUMBER, true) / TimeCardInfo::MINUTES_PER_HOUR);  // Use approved run time
       $row->efficiency = $this->getAverageEfficiency(UserInfo::UNKNOWN_EMPLOYEE_NUMBER);
       $row->shiftHours = $this->getTotalShiftHours(UserInfo::UNKNOWN_EMPLOYEE_NUMBER);
       $row->machineHoursMade = $this->getTotalMachineHoursMade(UserInfo::UNKNOWN_EMPLOYEE_NUMBER);
@@ -484,27 +622,34 @@ class DailySummaryReport
       return ($totalShiftHours);
    }
    
-   private function getTotalRunTime($employeeNumber)
+   private function getTotalRunTime($employeeNumber, $useApprovedRunTime = false)
    {
-      $runTime = 0;
+      $totalRunTime = 0;
       
       foreach ($this->reportEntries as $entry)
       {
          if (($employeeNumber == UserInfo::UNKNOWN_EMPLOYEE_NUMBER) ||
              ($entry->timeCardInfo->employeeNumber == $employeeNumber))
          {
-            $runTime += $entry->timeCardInfo->runTime;
+            if ($useApprovedRunTime)
+            {
+               $totalRunTime += $entry->timeCardInfo->getApprovedRunTime();
+            }
+            else
+            {
+               $totalRunTime += $entry->timeCardInfo->runTime;
+            }
          }
       }
       
-      return ($runTime);
+      return ($totalRunTime);
    }
    
    private function getAverageEfficiency($employeeNumber)
    {
       $averageEfficiency = 0;
       
-      $totalRunTime = $this->getTotalRunTime($employeeNumber);
+      $totalRunTime = $this->getTotalRunTime($employeeNumber, true);  // use approved run time
       
       $totalEfficiency = 0;
       
@@ -513,7 +658,7 @@ class DailySummaryReport
          if (($employeeNumber == UserInfo::UNKNOWN_EMPLOYEE_NUMBER) ||
              ($entry->timeCardInfo->employeeNumber == $employeeNumber))
          {
-            $totalEfficiency += ($entry->efficiency * ($entry->timeCardInfo->runTime / 60));
+            $totalEfficiency += ($entry->efficiency * ($entry->timeCardInfo->getApprovedRunTime() / 60));
          }
       }
       
@@ -565,7 +710,7 @@ class DailySummaryReport
    }
 }
 
-
+/*
 if (isset($_GET["employeeNumber"]) && isset($_GET["mfgDate"]))
 {
    $employeeNumber = intval($_GET["employeeNumber"]);
@@ -580,5 +725,6 @@ if (isset($_GET["employeeNumber"]) && isset($_GET["mfgDate"]))
       echo (json_encode($reportData));
    }
 }
+*/
 
 ?>

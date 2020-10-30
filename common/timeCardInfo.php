@@ -262,14 +262,21 @@ class TimeCardInfo
       return (!$this->requiresRunTimeApproval() || ($this->runTimeApprovedBy != UserInfo::UNKNOWN_EMPLOYEE_NUMBER));
    }
    
+   public function getApprovedRunTime()
+   {
+      $runTime = ($this->isRunTimeApproved() ? $this->runTime : $this->shiftTime);
+      
+      return ($runTime);
+   }
+   
    public function isSetupTimeApproved()
    {
-      return (!$this->requiresSetupTimeApproval() || ($this->setUpTimeApprovedBy != UserInfo::UNKNOWN_EMPLOYEE_NUMBER));
+      return (!$this->requiresSetupTimeApproval() || ($this->setupTimeApprovedBy != UserInfo::UNKNOWN_EMPLOYEE_NUMBER));
    }
    
    public function isApproved()
    {
-      return ($this->isRunTimeApproval() && $this->isSetupTimeApproval());
+      return ($this->isRunTimeApproved() && $this->isSetupTimeApproved());
    }
    
    public function incompleteShiftTime()
