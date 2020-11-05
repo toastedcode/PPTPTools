@@ -30,6 +30,20 @@ class TimeCardInfo
    public $setupTimeApprovedBy = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
    public $setupTimeApprovedDateTime;
    
+   public function isPlaceholder()
+   {
+      $isPlaceholder = false;
+      
+      if ($this->jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         $jobInfo = JobInfo::load($this->jobId);
+         
+         $isPlaceholder = ($jobInfo && $jobInfo->isPlaceholder());
+      }
+      
+      return ($isPlaceholder);
+   }
+   
    public function formatShiftTime()
    {
       return($this->getShiftTimeHours() . ":" . sprintf("%02d", $this->getShiftTimeMinutes()));
@@ -281,22 +295,22 @@ class TimeCardInfo
    
    public function incompleteShiftTime()
    {
-      return ($this->shiftTime == 0);
+      return (!$this->isPlaceholder() && $this->shiftTime == 0);
    }
    
    public function incompleteRunTime()
    {
-      return (($this->setupTime == 0) && ($this->runTime == 0));
+      return (!$this->isPlaceholder() && ($this->setupTime == 0) && ($this->runTime == 0));
    }
    
    public function incompletePanCount()
    {
-      return ($this->panCount == 0);
+      return (!$this->isPlaceholder() && $this->panCount == 0);
    }
    
    public function incompletePartCount()
    {
-      return (($this->partCount == 0) && ($this->scrapCount == 0));
+      return (!$this->isPlaceholder() && ($this->partCount == 0) && ($this->scrapCount == 0));
    }
    
    public function isComplete()

@@ -34,6 +34,8 @@ class JobInfo
    
    const UNKNOWN_JOB_NUMBER = "";
    
+   const PLACEHOLDER_JOB_NUMBER = "M0001";
+   
    const UNKNOWN_WC_NUMBER = 0;
    
    const SECONDS_PER_MINUTE = 60;
@@ -60,6 +62,11 @@ class JobInfo
    public function isActive()
    {
       return ($this->status = JobStatus::ACTIVE);
+   }
+   
+   public function isPlaceholder()
+   {
+      return (strpos($this->jobNumber, JobInfo::PLACEHOLDER_JOB_NUMBER) !== false);
    }
    
    public static function load($jobId)

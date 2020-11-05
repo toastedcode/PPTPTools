@@ -322,38 +322,41 @@ class ReportEntry
    {
       $status = ReportEntryStatus::COMPLETE;
       
-      if (!$this->timeCardInfo->isComplete())
+      if (!$this->timeCardInfo->isPlaceHolder())
       {
-         $status = ReportEntryStatus::INCOMPLETE_TIME_CARD;
-      }
-      else if (!$this->timeCardInfo->isApproved())
-      {
-         $status = ReportEntryStatus::UNAPPROVED_TIME_CARD;
-      }
-      else if ($this->getPartCountByWeightLog() == 0)
-      {
-         $status = ReportEntryStatus::NO_WEIGHT_LOGS;         
-      }
-      else if ($this->getPartCountByWasherLog() == 0)
-      {
-         $status = ReportEntryStatus::NO_WASH_LOGS;
-      }
-      else if (($this->timeCardInfo->panCount != $this->getPanCountByWeightLog()) ||
-               ($this->getPanCountByWeightLog() != $this->getPanCountByWasherLog()))
-      {
-         $status = ReportEntryStatus::INCONSISTENT_PAN_COUNTS;
-      }
-      else if (false)  // TODO
-      {
-         $status = ReportEntryStatus::INCONSISTENT_PART_COUNTS;
-      }
-      else if ($this->efficiency >= ReportEntry::UNREASONABLE_EFFICIENCY)
-      {
-         $status = ReportEntryStatus::UNREASONABLE_EFFICIENCY;
-      }
-      else
-      {
-         $status = ReportEntryStatus::COMPLETE;
+         if (!$this->timeCardInfo->isComplete())
+         {
+            $status = ReportEntryStatus::INCOMPLETE_TIME_CARD;
+         }
+         else if (!$this->timeCardInfo->isApproved())
+         {
+            $status = ReportEntryStatus::UNAPPROVED_TIME_CARD;
+         }
+         else if ($this->getPartCountByWeightLog() == 0)
+         {
+            $status = ReportEntryStatus::NO_WEIGHT_LOGS;         
+         }
+         else if ($this->getPartCountByWasherLog() == 0)
+         {
+            $status = ReportEntryStatus::NO_WASH_LOGS;
+         }
+         else if (($this->timeCardInfo->panCount != $this->getPanCountByWeightLog()) ||
+                  ($this->getPanCountByWeightLog() != $this->getPanCountByWasherLog()))
+         {
+            $status = ReportEntryStatus::INCONSISTENT_PAN_COUNTS;
+         }
+         else if (false)  // TODO
+         {
+            $status = ReportEntryStatus::INCONSISTENT_PART_COUNTS;
+         }
+         else if ($this->efficiency >= ReportEntry::UNREASONABLE_EFFICIENCY)
+         {
+            $status = ReportEntryStatus::UNREASONABLE_EFFICIENCY;
+         }
+         else
+         {
+            $status = ReportEntryStatus::COMPLETE;
+         }
       }
       
       return ($status);
