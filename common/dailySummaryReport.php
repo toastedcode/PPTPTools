@@ -191,7 +191,7 @@ class ReportEntry
       
       $this->efficiency = TimeCardInfo::calculateEfficiency(
          $this->timeCardInfo->runTime,
-         $this->jobInfo->getGrossPartsPerHour(),
+         $this->jobInfo->grossPartsPerHour,
          $this->partCountEstimate);
       
       $this->machineHoursMade = $this->getMachineHoursMade();
@@ -297,7 +297,7 @@ class ReportEntry
    
    private function getGrossPartsPerShift()
    {
-      $grossPartsPerHour = $this->jobInfo->getGrossPartsPerHour();
+      $grossPartsPerHour = $this->jobInfo->grossPartsPerHour;
       
       $grossParts = round(($grossPartsPerHour * ($this->timeCardInfo->getApprovedRunTime() / TimeCardInfo::MINUTES_PER_HOUR)), 2);
       
@@ -308,11 +308,11 @@ class ReportEntry
    {      
       $machineHours = 0;
       
-      $netPartsPerHour = $this->jobInfo->getNetPartsPerHour();
+      $netPartsPerHour = $this->jobInfo->netPartsPerHour;
       
       if ($netPartsPerHour != 0)
       {
-         $machineHours = round(($this->partCountEstimate / $this->jobInfo->getNetPartsPerHour()), 2);
+         $machineHours = round(($this->partCountEstimate / $netPartsPerHour), 2);
       }
       
       return ($machineHours);
@@ -487,12 +487,12 @@ class DailySummaryReport
          $row->partCountByWeightLog = $entry->partCountByWeightLog;
          $row->partCountByWasherLog = $entry->partCountByWasherLog;
          $row->partCountEstimate = $entry->partCountEstimate;
-         $row->grossPartsPerHour = $entry->jobInfo->getGrossPartsPerHour();
+         $row->grossPartsPerHour = $entry->jobInfo->grossPartsPerHour;
          $row->grossPartsPerShift = $entry->grossPartsPerShift;
          $row->efficiency = $entry->efficiency;
          $row->unreasonableEfficiency = ($entry->efficiency >= ReportEntry::UNREASONABLE_EFFICIENCY);
          $row->scrapCount = $entry->timeCardInfo->scrapCount;
-         $row->netPartsPerHour = $entry->jobInfo->getNetPartsPerHour();
+         $row->netPartsPerHour = $entry->jobInfo->netPartsPerHour;
          $row->machineHoursMade = $entry->machineHoursMade;
          
          $reportData[] = $row;

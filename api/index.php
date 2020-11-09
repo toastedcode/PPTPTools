@@ -340,8 +340,8 @@ $router->add("jobData", function($params) {
          if ($jobInfo)
          {
             $jobInfo->statusLabel = JobStatus::getName($jobInfo->status);
-            $jobInfo->grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
-            $jobInfo->netPartsPerHour = $jobInfo->getNetPartsPerHour();
+            $jobInfo->cycleTime = $jobInfo->getCycleTime();
+            $jobInfo->netPercentage = $jobInfo->getNetPercentage();
             
             $result[] = $jobInfo;
          }
@@ -391,8 +391,8 @@ $router->add("saveJob", function($params) {
           isset($params["partNumber"]) &&
           isset($params["sampleWeight"]) &&
           isset($params["wcNumber"]) &&
-          isset($params["cycleTime"]) &&
-          isset($params["netPercentage"]) &&
+          isset($params["grossPartsPerHour"]) &&
+          isset($params["netPartsPerHour"]) &&
           isset($params["status"]) &&
           isset($params["qcpTemplateId"]) &&
           isset($params["lineTemplateId"]) &&
@@ -403,8 +403,8 @@ $router->add("saveJob", function($params) {
          $jobInfo->partNumber = $params["partNumber"];
          $jobInfo->sampleWeight = doubleval($params["sampleWeight"]);
          $jobInfo->wcNumber = intval($params["wcNumber"]);
-         $jobInfo->cycleTime = doubleval($params["cycleTime"]);
-         $jobInfo->netPercentage = intval($params["netPercentage"]);
+         $jobInfo->grossPartsPerHour = intval($params["grossPartsPerHour"]);
+         $jobInfo->netPartsPerHour = intval($params["netPartsPerHour"]);
          $jobInfo->status = intval($params["status"]);
          $jobInfo->qcpTemplateId = intval($params["qcpTemplateId"]);
          $jobInfo->lineTemplateId = intval($params["lineTemplateId"]);
@@ -412,11 +412,19 @@ $router->add("saveJob", function($params) {
             
          if ($jobInfo->jobId == JobInfo::UNKNOWN_JOB_ID)
          {
-            $dbaseResult = $database->newJob($jobInfo);
-            
-            if ($dbaseResult)
+            if (JobInfo::getJobIdByComponents($jobInfo->jobNumber, $jobInfo->wcNumber) != JobInfo::UNKNOWN_JOB_ID)
             {
-               $result->jobId = $database->lastInsertId();
+               $result->success = false;
+               $result->error = "Duplicate entry.";
+            }
+            else 
+            {
+               $dbaseResult = $database->newJob($jobInfo);
+               
+               if ($dbaseResult)
+               {
+                  $result->jobId = $database->lastInsertId();
+               }
             }
          }
          else
@@ -749,7 +757,7 @@ $router->add("grossPartsPerHour", function($params) {
       if ($jobInfo)
       {
          $result->success = true;
-         $result->grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
+         $result->grossPartsPerHour = $jobInfo->grossPartsPerHour;
       }
       else
       {

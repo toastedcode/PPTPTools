@@ -11,6 +11,8 @@ class TimeCardInfo
    
    const MINUTES_PER_HOUR = 60;
    
+   const DEFAULT_SHIFT_TIME = (10 * TimeCardInfo::MINUTES_PER_HOUR);  // 10 hours
+   
    public $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    public $dateTime;
    public $manufactureDate;
@@ -249,7 +251,7 @@ class TimeCardInfo
          $efficiency = 
             TimeCardInfo::calculateEfficiency(
                   $this->runTime, 
-                  $jobInfo->getGrossPartsPerHour(), 
+                  $jobInfo->grossPartsPerHour, 
                   $this->partCount);
       }
       

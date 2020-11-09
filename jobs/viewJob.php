@@ -77,9 +77,8 @@ function isEditable($field)
    {
       case JobInputField::CREATOR:
       case JobInputField::DATE:
-      case JobInputField::PART_NUMBER:
-      case JobInputField::GROSS_PIECES:
-      case JobInputField::NET_PIECES:
+      case JobInputField::CYCLE_TIME:
+      case JobInputField::NET_PERCENTAGE:
       {
          $isEditable = false;
          break;
@@ -222,7 +221,7 @@ function getDescription()
    {
       case View::NEW_JOB:
       {
-         $description = "Start with a job number and work center.  Cyle time and net percentage can be found in the JobBOSS database for your part.<br/><br/>Once you're satisfied, click Save below to add this time card to the system.";
+         $description = "Start with a job number and work center.  Gross/net parts per hour can be found in the JobBOSS database for your part.<br/><br/>Once you're satisfied, click Save below to add this time card to the system.";
          break;
       }
          
@@ -459,26 +458,26 @@ if (!Authentication::isAuthenticated())
                   <div class="form-label-long">Sample weight</div>
                   <input id="sample-weight-input" type="number" name="sampleWeight" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->sampleWeight; ?>" oninput="this.validator.validate();" <?php echo getDisabled(JobInputField::SAMPLE_WEIGHT); ?> />
                </div>
+               
+               <div class="form-item">
+                  <div class="form-label-long">Gross Pieces/Hour</div>
+                  <input id="gross-parts-per-hour-input" type="number" name="grossPartsPerHour" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->grossPartsPerHour; ?>" oninput="this.validator.validate(); autoFillPartStats();" <?php echo getDisabled(JobInputField::GROSS_PIECES); ?> />
+               </div>
          
                <div class="form-item">
                   <div class="form-label-long">Cycle Time</div>
-                  <input id="cycle-time-input" type="number" name="cycleTime" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->cycleTime; ?>" oninput="this.validator.validate(); autoFillPartStats();" <?php echo getDisabled(JobInputField::CYCLE_TIME); ?> />
-               </div>
-         
-               <div class="form-item">
-                  <div class="form-label-long">Gross Pieces/Hour</div>
-                  <input id="gross-parts-per-hour-input" type="number" style="width:150px;" <?php echo getDisabled(JobInputField::GROSS_PIECES); ?> />
-               </div>
-         
-               <div class="form-item">
-                  <div class="form-label-long">Net Percentage</div>
-                  <input id="net-percentage-input" type="number" name="netPercentage" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->netPercentage; ?>" oninput="this.validator.validate(); autoFillPartStats();" <?php echo getDisabled(JobInputField::NET_PERCENTAGE); ?> />
-                  <div class="form-label">&nbsp%</div>
+                  <input id="cycle-time-input" type="number" name="cycleTime" style="width:150px;" <?php echo getDisabled(JobInputField::CYCLE_TIME); ?> />
                </div>
          
                <div class="form-item">
                   <div class="form-label-long">Net Pieces/Hour</div>
-                  <input id="net-parts-per-hour-input" type="number" style="width:150px;" <?php echo getDisabled(JobInputField::NET_PIECES); ?> />
+                  <input id="net-parts-per-hour-input" type="number" name="netPartsPerHour" form="input-form" style="width:150px;" value="<?php echo getJobInfo()->netPartsPerHour; ?>" oninput="this.validator.validate(); autoFillPartStats();" <?php echo getDisabled(JobInputField::NET_PIECES); ?> />
+               </div>
+               
+               <div class="form-item">
+                  <div class="form-label-long">Net Percentage</div>
+                  <input id="net-percentage-input" type="number" name="netPercentage" style="width:150px;" <?php echo getDisabled(JobInputField::NET_PERCENTAGE); ?> />
+                  <div class="form-label">&nbsp%</div>
                </div>
          
                <div class="form-item">
@@ -528,14 +527,45 @@ if (!Authentication::isAuthenticated())
       var jobNumberPrefixValidator = new PartNumberPrefixValidator("job-number-prefix-input", 5, 1, 9999, false);
       var jobNumberSuffixValidator = new PartNumberSuffixValidator("job-number-suffix-input", 3, 1, 99, false);
       var sampleWeightValidator = new DecimalValidator("sample-weight-input", 6, 0.001, 10, 3, false);         
-      var cycleTimeValidator = new DecimalValidator("cycle-time-input", 5, 1, 60, 2, false);
-      var netPercentageValidator = new DecimalValidator("net-percentage-input", 5, 0, 100, 2, false);
+      var grossPartsValidator = new IntValidator("gross-parts-per-hour-input", 4, 1, 9999, false);
+      var netPartsValidator = new IntValidator("net-parts-per-hour-input", 4, 1, 9999, false);
+      
+      // Extend the isValid() function to validate that the net is always less than the gross.
+      netPartsValidator.isValid = function()
+      {
+         var valid = false;
+   
+         var element = document.getElementById(this.inputId);
+         
+         var grossPartsPerHour = parseInt(document.getElementById("gross-parts-per-hour-input").value);
+      
+         if (element)
+         {
+            var value = element.value;
+            
+            if ((value == null) || (value == "")) 
+            {
+               valid = this.allowNull;
+            }
+            else
+            {
+               var intVal = parseInt(value);
+               
+               valid = !(isNaN(value) || 
+                         (intVal < this.minValue) || 
+                         (intVal > this.maxValue) ||
+                         (intVal > grossPartsPerHour));
+            }
+         }
+      
+         return (valid);
+      }
 
       jobNumberPrefixValidator.init();
       sampleWeightValidator.init();
       jobNumberSuffixValidator.init();
-      cycleTimeValidator.init();
-      netPercentageValidator.init();
+      grossPartsValidator.init();
+      netPartsValidator.init();
 
       autoFillPartNumber();
       autoFillPartStats();

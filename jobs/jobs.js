@@ -110,13 +110,13 @@ function validateJob()
    {
       alert("Please enter a sample weight.");
    }
-   else if (!(document.getElementById("cycle-time-input").validator.validate()))
+   else if (!(document.getElementById("gross-parts-per-hour-input").validator.validate()))
    {
-      alert("Please enter a valid cycle time.");
+      alert("Please enter a valid gross parts-per-hour.");
    }
-   else if (!(document.getElementById("net-percentage-input").validator.validate()))
+   else if (!(document.getElementById("net-parts-per-hour-input").validator.validate()))
    {
-      alert("Please enter a valid net percentage.");
+      alert("Please enter a valid net parts-per-hour.");
    }
    else
    {
@@ -155,40 +155,48 @@ function autoFillJobNumber()
 
 function autoFillPartStats()
 {
-   var cycleTimeInput = document.getElementById('cycle-time-input');
-   var netPartsPerHourInput = document.getElementById('net-parts-per-hour-input');
    var grossPartsPerHourInput = document.getElementById('gross-parts-per-hour-input');
+   var netPartsPerHourInput = document.getElementById('net-parts-per-hour-input');
+   var cycleTimeInput = document.getElementById('cycle-time-input');
    var netPercentageInput = document.getElementById('net-percentage-input');
    
-   if (cycleTimeInput.validator.validate())
+   if (grossPartsPerHourInput.validator.validate())
    {
-      var cycleTime = parseFloat(cycleTimeInput.value);
-      var grossPartsPerHour = 0;
+      var grossPartsPerHour = parseInt(grossPartsPerHourInput.value);
       
-      if ((cycleTime > 0) && (cycleTime <= 60))
+      if (grossPartsPerHour > 0)
       {
-         grossPartsPerHour = (3600 / cycleTime);
-      }
-
-      grossPartsPerHourInput.value = grossPartsPerHour.toFixed(2);
-      
-      if (netPercentageInput.validator.validate())
-      {
-         var netPercentage = parseFloat(netPercentageInput.value);
+         var cycleTime = (3600 / grossPartsPerHour);  // seconds
          
-         var netPartsPerHour = (grossPartsPerHour * (netPercentage / 100));
-         
-         netPartsPerHourInput.value = netPartsPerHour.toFixed(2);
+         cycleTimeInput.value = cycleTime.toFixed(2);
       }
       else
       {
-         netPartsPerHourInput.value = "";
+         cycleTimeInput.value = "";
+      }
+
+      cycleTimeInput.value = cycleTime.toFixed(2);
+      
+      if (netPartsPerHourInput.validator.validate())
+      {
+         var netPartsPerHour = parseInt(netPartsPerHourInput.value);
+         
+         if (grossPartsPerHour > 0)
+         {
+            netPercentage = ((netPartsPerHour / grossPartsPerHour) * 100.0);
+         }
+         
+         netPercentageInput.value = netPercentage.toFixed(2);
+      }
+      else
+      {
+         netPercentageInput.value = "";
       }
    }
    else
    {
-      grossPartsPerHourInput.value = "";
-      netPartsPerHourInput.value = "";
+      cycleTimeInput.value = "";
+      netPercentageInput.value = "";
    }
 }
 

@@ -51,8 +51,8 @@ class JobInfo
    public $partNumber;
    public $sampleWeight = JobInfo::UNKNOWN_SAMPLE_WEIGHT;
    public $wcNumber;
-   public $cycleTime;
-   public $netPercentage;
+   public $grossPartsPerHour;
+   public $netPartsPerHour;
    public $status = JobStatus::PENDING;
    public $inProcessTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
    public $lineTemplateId = InspectionTemplate::UNKNOWN_TEMPLATE_ID;
@@ -83,20 +83,20 @@ class JobInfo
          {
             $jobInfo = new JobInfo();
             
-            $jobInfo->jobId =         intval($row['jobId']);
-            $jobInfo->jobNumber =     $row['jobNumber'];
-            $jobInfo->creator =       $row['creator'];
-            $jobInfo->dateTime =      Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
-            $jobInfo->partNumber =    $row['partNumber'];
-            $jobInfo->sampleWeight =  doubleval($row['sampleWeight']);
-            $jobInfo->wcNumber =      $row['wcNumber'];
-            $jobInfo->cycleTime =     doubleval($row['cycleTime']);
-            $jobInfo->netPercentage = doubleval($row['netPercentage']);
-            $jobInfo->status =        $row['status'];
+            $jobInfo->jobId =               intval($row['jobId']);
+            $jobInfo->jobNumber =           $row['jobNumber'];
+            $jobInfo->creator =             $row['creator'];
+            $jobInfo->dateTime =            Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
+            $jobInfo->partNumber =          $row['partNumber'];
+            $jobInfo->sampleWeight =        doubleval($row['sampleWeight']);
+            $jobInfo->wcNumber =            $row['wcNumber'];
+            $jobInfo->grossPartsPerHour =   intval($row['grossPartsPerHour']);
+            $jobInfo->netPartsPerHour =     intval($row['netPartsPerHour']);
+            $jobInfo->status =              $row['status'];
             $jobInfo->inProcessTemplateId = intval($row['inProcessTemplateId']);
-            $jobInfo->lineTemplateId = intval($row['lineTemplateId']);
-            $jobInfo->qcpTemplateId = intval($row['qcpTemplateId']);
-            $jobInfo->customerPrint = $row['customerPrint'];
+            $jobInfo->lineTemplateId =      intval($row['lineTemplateId']);
+            $jobInfo->qcpTemplateId =       intval($row['qcpTemplateId']);
+            $jobInfo->customerPrint =       $row['customerPrint'];
          }
       }
       
@@ -129,26 +129,28 @@ class JobInfo
       return ($suffix);
    }
    
-   public function getGrossPartsPerHour()
+   public function getCycleTime()
    {
-      $grossPartsPerHour = 0;
+      $cycleTime = 0.0;
       
-      if (($this->cycleTime > 0) &&
-          ($this->cycleTime <= JobInfo::SECONDS_PER_MINUTE))
+      if ($this->grossPartsPerHour > 0)
       {
-         $grossPartsPerHour = round((JobInfo::SECONDS_PER_HOUR / $this->cycleTime), 2);   
+         $cycleTime = round((JobInfo::SECONDS_PER_HOUR / $this->grossPartsPerHour), 2);
       }
       
-      return ($grossPartsPerHour);
+      return ($cycleTime);
    }
    
-   public function getNetPartsPerHour()
+   public function getNetPercentage()
    {
-      $grossPartsPerHour = $this->getGrossPartsPerHour();
+      $netPercentage = 0.0;
       
-      $netPartsPerHour = round(($grossPartsPerHour * ($this->netPercentage / 100.0)), 2);
+      if ($this->grossPartsPerHour > 0)
+      {
+         $netPercentage = round((($this->netPartsPerHour / $this->grossPartsPerHour) * 100.0), 2);
+      }
       
-      return ($netPartsPerHour);
+      return ($netPercentage);
    }
    
    public static function getJobNumbers($onlyActive)
@@ -205,8 +207,8 @@ if (isset($_GET["$jobId"]))
       echo "partNumber: " .          $jobInfo->partNumber .          "<br/>";
       echo "sampleWeight: " .        $jobInfo->sampleWeight .        "<br/>";
       echo "wcNumber: " .            $jobInfo->wcNumber .            "<br/>";
-      echo "cycleTime: " .           $jobInfo->cycleTime .           "<br/>";
-      echo "netPercentage: " .       $jobInfo->netPercentage .       "<br/>";
+      echo "grossPartsPerHour: " .   $jobInfo->grossPartsPerHour .   "<br/>";
+      echo "netPartsPerHour: " .     $jobInfo->netPartsPerHour .     "<br/>";
       echo "inProcessTemplateId: " . $jobInfo->inProcessTemplateId . "<br/>";
       echo "lineTemplateId: " .      $jobInfo->lineTemplateId .      "<br/>";
       echo "qcpTemplateId: " .       $jobInfo->qcpTemplateId .       "<br/>";

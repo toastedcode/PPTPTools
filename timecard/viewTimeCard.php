@@ -146,6 +146,7 @@ function getTimeCardInfo()
          $timeCardInfo = new TimeCardInfo();
          
          $timeCardInfo->employeeNumber = Authentication::getAuthenticatedUser()->employeeNumber;
+         $timeCardInfo->shiftTime = TimeCardInfo::DEFAULT_SHIFT_TIME;
       }
    }
    
@@ -462,7 +463,7 @@ function getGrossPartsPerHour()
       
       if ($jobInfo)
       {
-         $grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
+         $grossPartsPerHour = $jobInfo->grossPartsPerHour;
       }
    }
    
