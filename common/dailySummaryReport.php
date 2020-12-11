@@ -365,14 +365,12 @@ class ReportEntry
 
 class DailySummaryReport
 {
-   public $timeCardId;
    public $dateTime;
    public $reportEntries;
       
    public function __construct()
    {
       $this->dateTime = null;
-      $this->userInfo = null;
       $this->reportEntries = array();
    }
    
@@ -560,7 +558,7 @@ class DailySummaryReport
       return ($reportData);
    }
    
-   private function getEmployeeNumbers()
+   public function getEmployeeNumbers()
    {
       $employeeNumbers = array();
       
@@ -575,22 +573,7 @@ class DailySummaryReport
       return ($employeeNumbers);
    }
    
-   private function getEntriesForOperator($employeeNumber)
-   {
-      $entries = array();
-      
-      foreach ($this->reportEntries as $entry)
-      {
-         if ($entry->timeCardInfo->employeeNumber == $employeeNumber)
-         {
-            $entries[] = $entry;
-         }
-      }
-      
-      return ($entries);
-   }
-   
-   private function getTotalShiftHours($employeeNumber)
+   public function getTotalShiftHours($employeeNumber)
    {
       $totalShiftHours = 0;
       
@@ -625,7 +608,7 @@ class DailySummaryReport
       return ($totalShiftHours);
    }
    
-   private function getTotalRunTime($employeeNumber, $useApprovedRunTime = false)
+   public function getTotalRunTime($employeeNumber, $useApprovedRunTime = false)
    {
       $totalRunTime = 0;
       
@@ -648,7 +631,7 @@ class DailySummaryReport
       return ($totalRunTime);
    }
    
-   private function getAverageEfficiency($employeeNumber)
+   public function getAverageEfficiency($employeeNumber)
    {
       $averageEfficiency = 0;
       
@@ -673,7 +656,7 @@ class DailySummaryReport
       return ($averageEfficiency);
    }
    
-   private function getTotalMachineHoursMade($employeeNumber)
+   public function getTotalMachineHoursMade($employeeNumber)
    {
       $machineHours = 0;
       
@@ -689,7 +672,7 @@ class DailySummaryReport
       return ($machineHours);
    }
    
-   private function getRatio($employeeNumber)
+   public function getRatio($employeeNumber)
    {
       $ratio = 0;
       
@@ -710,6 +693,21 @@ class DailySummaryReport
       }
       
       return ($ratio);
+   }
+      
+   private function getEntriesForOperator($employeeNumber)
+   {
+      $entries = array();
+      
+      foreach ($this->reportEntries as $entry)
+      {
+         if ($entry->timeCardInfo->employeeNumber == $employeeNumber)
+         {
+            $entries[] = $entry;
+         }
+      }
+      
+      return ($entries);
    }
 }
 

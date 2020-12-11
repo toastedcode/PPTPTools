@@ -16,6 +16,7 @@ require_once '../common/signInfo.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/upload.php';
 require_once '../common/userInfo.php';
+require_once '../common/weeklySummaryReport.php';
 require_once '../printer/printJob.php';
 require_once '../printer/printQueue.php';
 
@@ -2497,6 +2498,37 @@ $router->add("dailySummaryReportData", function($params) {
       if ($dailySummaryReport)
       {
          $result = $dailySummaryReport->getReportData($table);
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("weeklySummaryReportData", function($params) {
+   $result = array();
+   
+   $mfgDate = Time::startOfDay(Time::now("Y-m-d"));
+
+   if (isset($params["mfgDate"]))
+   {
+      $mfgDate = Time::startOfDay($params["mfgDate"]);
+   }
+   
+   $table = WeeklySummaryReportTable::WEEKLY_SUMMARY;
+   if (isset($params["table"]))
+   {
+      $table = intval($params["table"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $weeklySummaryReport = WeeklySummaryReport::load($mfgDate);
+      
+      if ($weeklySummaryReport)
+      {
+         $result = $weeklySummaryReport->getReportData($table);
       }
    }
    

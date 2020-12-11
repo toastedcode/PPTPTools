@@ -526,7 +526,7 @@ if (!Authentication::isAuthenticated())
       
       var jobNumberPrefixValidator = new PartNumberPrefixValidator("job-number-prefix-input", 5, 1, 9999, false);
       var jobNumberSuffixValidator = new PartNumberSuffixValidator("job-number-suffix-input", 3, 1, 99, false);
-      var sampleWeightValidator = new DecimalValidator("sample-weight-input", 6, 0.001, 10, 3, false);         
+      var sampleWeightValidator = new DecimalValidator("sample-weight-input", 6, 0.001, 10, 5, false);         
       var grossPartsValidator = new IntValidator("gross-parts-per-hour-input", 4, 1, 9999, false);
       var netPartsValidator = new IntValidator("net-parts-per-hour-input", 4, 1, 9999, false);
       

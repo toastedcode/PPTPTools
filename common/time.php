@@ -62,6 +62,13 @@ class Time
       return ($endDateTime->format("Y-m-d 23:59:59"));
    }
    
+   static public function weekNumber($dateTime)
+   {
+      $evalDateTime = new DateTime($dateTime, new DateTimeZone('America/New_York'));
+      
+      return (intval($evalDateTime->format("W")));
+   }
+   
    static public function differenceSeconds($startTime, $endTime)
    {
       $startDateTime = new DateTime($startTime);
