@@ -327,7 +327,8 @@ function PrintManager(listener)
          if (this.readyState == 4 && this.status == 200)
          {
             try
-            {            
+            {
+               console.log(this.responseText);            
                var json = JSON.parse(this.responseText);
                
                if (json.success == true)
@@ -338,7 +339,8 @@ function PrintManager(listener)
                }
                else
                {
-                  alert("Failed to cancel print job.");
+                  // TODO: Figure out why canceling error jobs fails. 
+                  // alert("Failed to cancel print job.");
                }
             }
             catch (expection)
@@ -385,6 +387,9 @@ function PrintManager(listener)
          catch (exception)
          {
             console.log("Print error! " + exception.message);
+            
+            // Temporary measure.  Eventually, show errors in printer queue.
+            this.cancelPrintJob(printJob.printJobId);
          }
       }
       

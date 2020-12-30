@@ -73,7 +73,7 @@ abstract class Bonus
    const ADDITIONAL_MACHINE_BONUS = 7; 
    const LAST = 8;
    const COUNT = (Bonus::LAST - Bonus::FIRST);
-   
+      
    public static function getTier($efficiency)
    {
       $tier = Bonus::UNKNOWN;
@@ -106,7 +106,7 @@ abstract class Bonus
    
    public static function getEfficiencyRequirement($tier)
    {
-      $efficiencies = array(0, 75, 80, 85, 90, 95, 100, 0);
+      $efficiencies = array(0, .75, .80, .85, .90, .95, 1.00, 0);
       
       $efficiencyRequirement = 0;
       
@@ -120,27 +120,108 @@ abstract class Bonus
    
    public static function calculateBonus($tier, $hours)
    {
-      $bonus = 0.0;
+      $bonus = 0.00;
 
       if (($tier >= Bonus::FIRST) && ($tier < Bonus::LAST))
       {
-         $bonus = (($hours / 2) * Bonus::getBonusRate($tier));
+         $bonus = round((($hours / 2) * Bonus::getBonusRate($tier)), 2);
       }
       
       return ($bonus);
+   }
+   
+   public static function calculateAdditionalMachineBonus($pcOverG)
+   {
+      return ($pcOverG * Bonus::getBonusRate(Bonus::ADDITIONAL_MACHINE_BONUS));
+   }
+}
+
+class WeeklyOperatorSummary
+{
+   public $runTime;
+   public $efficiency;
+   public $pcOverG;
+   
+   public function __construct($employeeNumber, $dailySummaryReports)
+   {
+      $this->runTime = WeeklyOperatorSummary::calculateRunTime($employeeNumber, $dailySummaryReports);
+      
+      $this->efficiency = WeeklyOperatorSummary::calculateAverageEfficiency($employeeNumber, $dailySummaryReports);
+      
+      $this->pcOverG = WeeklyOperatorSummary::calculatePCOverG($employeeNumber, $dailySummaryReports);
+   }
+   
+   private static function calculateRunTime($employeeNumber, $dailySummaryReports)
+   {
+      $runTime = 0;
+      
+      foreach ($dailySummaryReports as $dailySummaryReport)
+      {
+         if (isset($dailySummaryReport->operatorSummaries[$employeeNumber]))
+         {
+            $runTime += $dailySummaryReport->operatorSummaries[$employeeNumber]->adjustedTopRunTime;
+         }
+      }
+      
+      return ($runTime);
+   }
+   
+   private static function calculateAverageEfficiency($employeeNumber, $dailySummaryReports)
+   {
+      // Note: This calculation computes a *weighted* average of efficiencies, by run time.
+      $averageEfficiency = 0;
+      
+      $totalEfficiency = 0;
+      $totalRunTime = 0;
+      
+      foreach ($dailySummaryReports as $dailySummaryReport)
+      {
+         if (isset($dailySummaryReport->operatorSummaries[$employeeNumber]))
+         {
+            $operatorSummary = $dailySummaryReport->operatorSummaries[$employeeNumber];
+            
+            $totalRunTime += $operatorSummary->adjustedTopRunTime;
+            $totalEfficiency +=  ($operatorSummary->adjustedTopEfficiency * $operatorSummary->adjustedTopRunTime);
+         }
+      }
+      
+      if ($totalRunTime > 0)
+      {
+         $averageEfficiency = ($totalEfficiency / $totalRunTime);
+      }
+      
+      return ($averageEfficiency);
+   }
+   
+   private static function calculatePCOverG($employeeNumber, $dailySummaryReports)
+   {
+      $pcOverG = 0;
+      
+      foreach ($dailySummaryReports as $dailySummaryReport)
+      {
+         if (isset($dailySummaryReport->operatorSummaries[$employeeNumber]))
+         {
+            $pcOverG += $dailySummaryReport->operatorSummaries[$employeeNumber]->adjustedBottomPCOverG;
+         }
+      }
+      
+      return ($pcOverG);
    }
 }
 
 class WeeklySummaryReport
 {
-   
    public $dates;
    public $dailySummaryReports;
+   public $weeklyOperatorSummaries;
+   
+   public $operatorSummaries;
    
    public function __construct()
    {
       $this->dates = array();
       $this->dailySummaryReports = array();
+      $this->weeklyOperatorSummaries = array();
    }
    
    public static function load($dateTime)
@@ -155,7 +236,22 @@ class WeeklySummaryReport
             DailySummaryReport::load(UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $weeklySummaryReport->dates[$workDay]);
       }
       
+      // Compile operator summaries.
+      $weeklySummaryReport->compileOperatorSummaries();
+      
       return ($weeklySummaryReport);
+   }
+   
+   public function getEmployeeNumbers()
+   {
+      $employeeNumbers = array();
+      
+      for ($workDay = WorkDay::FIRST; $workDay < WorkDay::LAST; $workDay++)
+      {
+         $employeeNumbers = array_merge($employeeNumbers, array_diff($this->dailySummaryReports[$workDay]->getEmployeeNumbers(), $employeeNumbers));
+      }
+      
+      return ($employeeNumbers);
    }
    
    public function getReportData($table)
@@ -185,16 +281,14 @@ class WeeklySummaryReport
       return ($reportData);
    }
    
-   public function getTotalRunTime($employeeNumber, $useApprovedRunTime = false)
+   private function compileOperatorSummaries()
    {
-      $totalRunTime = 0;
+      $employeeNumbers = $this->getEmployeeNumbers();
       
-      foreach ($this->dailySummaryReports as $dailySummaryReport)
+      foreach ($employeeNumbers as $employeeNumber)
       {
-         $totalRunTime += $dailySummaryReport->getTotalRunTime($employeeNumber, $useApprovedRunTime);
+         $this->operatorSummaries[$employeeNumber] = new WeeklyOperatorSummary($employeeNumber, $this->dailySummaryReports);
       }
-      
-      return ($totalRunTime);
    }
    
    private function getWeeklySummaryData()
@@ -239,14 +333,17 @@ class WeeklySummaryReport
          
          $row->operator = $userInfo->getFullName();
          $row->employeeNumber = $userInfo->employeeNumber;
-         $row->totalRunTime = ($this->getTotalRunTime($employeeNumber, true) / TimeCardInfo::MINUTES_PER_HOUR);         
-         $row->tier1 = Bonus::calculateBonus(Bonus::TIER1, ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR));
-         $row->tier2 = Bonus::calculateBonus(Bonus::TIER2, ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR));
-         $row->tier3 = Bonus::calculateBonus(Bonus::TIER3, ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR));
-         $row->tier4 = Bonus::calculateBonus(Bonus::TIER4, ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR));
-         $row->tier5 = Bonus::calculateBonus(Bonus::TIER5, ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR));
-         $row->tier6 = Bonus::calculateBonus(Bonus::TIER6, ($this->getTotalRunTime($employeeNumber) / TimeCardInfo::MINUTES_PER_HOUR));
-         $row->additionalMachineBonus = 0.0;
+         $row->runTime = $this->operatorSummaries[$employeeNumber]->runTime;
+         $row->efficiency = round(($this->operatorSummaries[$employeeNumber]->efficiency * 100), 2);
+         $row->pcOverG = round($this->operatorSummaries[$employeeNumber]->pcOverG, 2);
+         $row->tier = Bonus::getTier($this->operatorSummaries[$employeeNumber]->efficiency);
+         $row->tier1 = Bonus::calculateBonus(Bonus::TIER1, $row->runTime);
+         $row->tier2 = Bonus::calculateBonus(Bonus::TIER2, $row->runTime);
+         $row->tier3 = Bonus::calculateBonus(Bonus::TIER3, $row->runTime);
+         $row->tier4 = Bonus::calculateBonus(Bonus::TIER4, $row->runTime);
+         $row->tier5 = Bonus::calculateBonus(Bonus::TIER5, $row->runTime);
+         $row->tier6 = Bonus::calculateBonus(Bonus::TIER6, $row->runTime);
+         $row->additionalMachineBonus = Bonus::calculateAdditionalMachineBonus($this->operatorSummaries[$employeeNumber]->pcOverG);
          
          $reportData[] = $row;
       }
@@ -254,28 +351,31 @@ class WeeklySummaryReport
       return ($reportData);
    }
    
-   private function getEmployeeNumbers()
-   {
-      $employeeNumbers = array();
-      
-      for ($workDay = WorkDay::FIRST; $workDay < WorkDay::LAST; $workDay++)
-      {
-         $employeeNumbers += $this->dailySummaryReports[$workDay]->getEmployeeNumbers();
-      }
-      
-      return ($employeeNumbers);
-   }
-   
    private function getDailyStats($workDay, $employeeNumber)
    {
       $stats = new stdClass();
       
-      $stats->day = WorkDay::getLabel($workDay);
-      $stats->date = $this->dates[$workDay];
-      $stats->runTime = ($this->dailySummaryReports[$workDay]->getTotalRunTime($employeeNumber, true) / TimeCardInfo::MINUTES_PER_HOUR);
-      $stats->efficiency = $this->dailySummaryReports[$workDay]->getAverageEfficiency($employeeNumber);
-      $stats->machineHoursMade = $this->dailySummaryReports[$workDay]->getTotalMachineHoursMade($employeeNumber);
-      $stats->ratio = $this->dailySummaryReports[$workDay]->getRatio($employeeNumber);
+      $stats->day              = WorkDay::getLabel($workDay);
+      $stats->date             = $this->dates[$workDay];
+
+      if (isset($this->dailySummaryReports[$workDay]->operatorSummaries[$employeeNumber]))
+      {
+         $operatorSummary = $this->dailySummaryReports[$workDay]->operatorSummaries[$employeeNumber];
+         
+         $stats->day              = WorkDay::getLabel($workDay);
+         $stats->date             = $this->dates[$workDay];
+         $stats->runTime          = $operatorSummary->runTime;
+         $stats->efficiency       = round($operatorSummary->adjustedTopEfficiency * 100, 2);
+         $stats->machineHoursMade = round($operatorSummary->machineHoursMade, 2);
+         $stats->ratio            = round($operatorSummary->ratio, 2);
+      }
+      else
+      {
+         $stats->runTime          = 0;
+         $stats->efficiency       = 0;
+         $stats->machineHoursMade = 0;
+         $stats->ratio            = 0;
+      }
       
       return ($stats);
    }
@@ -287,4 +387,19 @@ $dtString = $dateTime->format("Y-m-d H:i:s");
 $weeklySummaryReport = new WeeklySummaryReport();
 $weeklySummaryReport->load($dtString);
 echo var_dump($weeklySummaryReport->getReportData(WeeklySummaryReportTable::WEEKLY_SUMMARY));
+*/
+
+/*
+if (isset($_GET["mfgDate"]))
+{
+   $mfgDate = $_GET["mfgDate"];
+   
+   $weeklySummaryReport = WeeklySummaryReport::load($mfgDate);
+   
+   if ($weeklySummaryReport)
+   {
+      var_dump($weeklySummaryReport->getEmployeeNumbers());
+      echo "<br>";
+   }
+}
 */

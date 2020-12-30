@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    
    <div class="main flex-horizontal flex-top flex-left" style="width: auto;">
    
-      <?php Menu::render(Activity::REPORT); ?>
+      <?php Menu::render(Activity::WEEKLY_REPORT); ?>
       
       <div class="content flex-vertical flex-top flex-left">
       
@@ -297,6 +297,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
       params = getTableQueryParams(BONUS_TABLE);
       
+      var bonusFormatter = function(cell, formatterParams, onRendered)
+      {
+         var tier = parseInt(cell.getRow().getData().tier);
+
+         if (tier == formatterParams.tier)
+         {
+            cell.getElement().classList.add("bonus-earned");
+         }
+         
+         return ("$" + cell.getValue().toFixed(2));
+      } 
+      
       tables[BONUS_TABLE] = new Tabulator("#bonus-table", {
          //height:500,            // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
@@ -308,43 +320,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          ajaxParams:params,
          //Define Table Columns
          columns:[
-            {title:"Operator",   field:"operator",       hozAlign:"left", headerFilter:true, print:true},
-            {title:"Employee #", field:"employeeNumber", hozAlign:"left",                    print:true},         
-            {title:"Hours",      field:"totalRunTime",   hozAlign:"left",                    print:true},
+            {title:"Operator",   field:"operator",          hozAlign:"left", headerFilter:true, print:true},
+            {title:"Employee #", field:"employeeNumber",    hozAlign:"left",                    print:true},         
+            {title:"Hours",      field:"runTime",      hozAlign:"left",                    print:true},
+            {title:"Efficiency", field:"efficiency", hozAlign:"left",                    print:true,
+               formatter:function(cell, formatterParams, onRendered){
+                  return (cell.getValue() + "%");
+               }
+            },
+            {title:"PC/G", field:"pcOverG", hozAlign:"left", print:true},
             {
                title:"75%",
                columns:[
-                  {title:"$0.25", field:"tier1", hozAlign:"left", print:true, formatter:"money" }
+                  {title:"$0.25", field:"tier1", hozAlign:"left", print:true, formatter:bonusFormatter, formatterParams:{tier:1}}
                ]
             },
             {
                title:"80%",
                columns:[
-                  {title:"$0.50", field:"tier2", hozAlign:"left", print:true, formatter:"money" }
+                  {title:"$0.50", field:"tier2", hozAlign:"left", print:true, formatter:bonusFormatter, formatterParams:{tier:2}}
                ]
             },
             {
                title:"85%",
                columns:[
-                  {title:"$1.00", field:"tier3", hozAlign:"left", print:true, formatter:"money" }
+                  {title:"$1.00", field:"tier3", hozAlign:"left", print:true, formatter:bonusFormatter, formatterParams:{tier:3}}
                ]
             },
             {
                title:"90%",
                columns:[
-                  {title:"$1.50", field:"tier4", hozAlign:"left", print:true, formatter:"money" }
+                  {title:"$1.50", field:"tier4", hozAlign:"left", print:true, formatter:bonusFormatter, formatterParams:{tier:4}}
                ]
             },
             {
                title:"95%",
                columns:[
-                  {title:"$2.00", field:"tier5", hozAlign:"left", print:true, formatter:"money" }
+                  {title:"$2.00", field:"tier5", hozAlign:"left", print:true, formatter:bonusFormatter, formatterParams:{tier:5}}
                ]
             },
             {
                title:"100%",
                columns:[
-                  {title:"$3.00", field:"tier6", hozAlign:"left", print:true, formatter:"money" }
+                  {title:"$3.00", field:"tier6", hozAlign:"left", print:true, formatter:bonusFormatter, formatterParams:{tier:6}}
+               ]
+            },
+            {
+               title:"3+ Machine",
+               columns:[
+                  {title:"$4.00", field:"additionalMachineBonus", hozAlign:"left", print:true, 
+                     formatter:function(cell, formatterParams, onRendered) {
+                        if (parseInt(cell.getValue()) > 0)
+                        {
+                           cell.getElement().classList.add("bonus-earned");
+                        }
+         
+                        return ("$" + cell.getValue().toFixed(2));
+                     }
+                  }
                ]
             },
          ]

@@ -390,6 +390,10 @@ button {
    font-size: 12;
 }
 
+.bonus-earned {
+   background: #98FB98;
+}
+
 input, select {
 	font-family: var(--main-font);
 	font-size: 14;

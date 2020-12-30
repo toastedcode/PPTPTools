@@ -53,7 +53,7 @@ class TimeCardInfo
    
    public function getShiftTimeHours()
    {
-      return ((int)($this->shiftTime / 60));
+      return ((int)($this->shiftTime / TimeCardInfo::MINUTES_PER_HOUR));
    }
    
    public function getShiftTimeMinutes()
@@ -63,7 +63,7 @@ class TimeCardInfo
    
    public function getShiftTimeInHours()
    {
-      return (round(($this->shiftTime / 60), 2));
+      return (round(($this->shiftTime / TimeCardInfo::MINUTES_PER_HOUR), 2));
    }   
    
    public function formatSetupTime()
@@ -73,12 +73,12 @@ class TimeCardInfo
    
    public function getSetupTimeHours()
    {
-      return ((int)($this->setupTime / 60));
+      return ((int)($this->setupTime / TimeCardInfo::MINUTES_PER_HOUR));
    }
    
    public function getSetupTimeMinutes()
    {
-      return ($this->setupTime % 60);
+      return ($this->setupTime % TimeCardInfo::MINUTES_PER_HOUR);
    }
    
    public function formatRunTime()
@@ -88,12 +88,17 @@ class TimeCardInfo
    
    public function getRunTimeHours()
    {
-      return ((int)($this->runTime / 60));
+      return ((int)($this->runTime / TimeCardInfo::MINUTES_PER_HOUR));
    }
    
    public function getRunTimeMinutes()
    {
-      return ($this->runTime % 60);
+      return ($this->runTime % TimeCardInfo::MINUTES_PER_HOUR);
+   }
+   
+   public function getRunTimeInHours()
+   {
+      return (round(($this->runTime / TimeCardInfo::MINUTES_PER_HOUR), 2));
    }
    
    public function formatTotalTime()
@@ -108,12 +113,12 @@ class TimeCardInfo
    
    public function getTotalTimeHours()
    {
-      return (round($this->getTotalTime() / 60));
+      return (round($this->getTotalTime() / TimeCardInfo::MINUTES_PER_HOUR));
    }
    
    public function getTotalTimeMinutes()
    {
-      return (round($this->getTotalTime()% 60));
+      return (round($this->getTotalTime() % TimeCardInfo::MINUTES_PER_HOUR));
    }
    
    public function hasCommentCode($code)
@@ -221,19 +226,19 @@ class TimeCardInfo
    }
    
    public static function calculateEfficiency(
-      $runTime,            // Actual run time, in minutes
+      $runTime,            // Actual run time, in hours
       $grossPartsPerHour,  // Expected part count, based on cycle time
       $partCount)          // Actual part count
    {
       $efficiency = 0.0;
 
       // Calculate the total number of parts that could be potentially created in the run time.
-      $potentialParts = (($runTime / TimeCardInfo::MINUTES_PER_HOUR) * $grossPartsPerHour);
+      $potentialParts = ($runTime * $grossPartsPerHour);
          
       if ($potentialParts > 0)
       {
          // Calculate the efficiency.
-         $efficiency = round((($partCount / $potentialParts) * 100), 2);
+         $efficiency = ($partCount / $potentialParts);
       }
       
       return ($efficiency);
@@ -278,9 +283,9 @@ class TimeCardInfo
       return (!$this->requiresRunTimeApproval() || ($this->runTimeApprovedBy != UserInfo::UNKNOWN_EMPLOYEE_NUMBER));
    }
    
-   public function getApprovedRunTime()
+   public function getApprovedRunTime()  // hours
    {
-      $runTime = ($this->isRunTimeApproved() ? $this->runTime : $this->shiftTime);
+      $runTime = ($this->isRunTimeApproved() ? $this->getRunTimeInHours() : $this->getShiftTimeInHours());
       
       return ($runTime);
    }

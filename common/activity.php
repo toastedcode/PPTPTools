@@ -18,7 +18,8 @@ class Activity
    const SIGNAGE = 9;
    const PAN_TICKET = 10;
    const REPORT = 11;
-   const LAST = 12;
+   const WEEKLY_REPORT = 12;  // TODO: Submenus
+   const LAST = 13;
    
    public $id;
    public $label;
@@ -46,7 +47,8 @@ class Activity
       Activity::PRINT_MANAGER,
       Activity::SIGNAGE,
       Activity::PAN_TICKET,
-      Activity::REPORT
+      Activity::REPORT,
+      Activity::WEEKLY_REPORT
    );
    
    private static $ACTIVITIES = null;
@@ -68,7 +70,8 @@ class Activity
             Activity::PRINT_MANAGER =>       new Activity(Activity::PRINT_MANAGER,       "Print Manager",        "print",                Permission::getPermission(Permission::VIEW_PRINT_MANAGER)->bits,       "$ROOT/printer/viewPrinters.php"),
             Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/viewSigns.php"),
             Activity::PAN_TICKET =>          new Activity(Activity::PAN_TICKET,          "Pan Ticket Scanner",   "camera_alt",           Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           "$ROOT/panTicket/scanPanTicket.php"),
-            Activity::REPORT =>              new Activity(Activity::REPORT,              "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewDailySummaryReport.php")
+            Activity::REPORT =>              new Activity(Activity::REPORT,              "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewDailySummaryReport.php"),
+            Activity::WEEKLY_REPORT =>       new Activity(Activity::WEEKLY_REPORT,       "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewWeeklySummaryReport.php")
          );
       }
       
