@@ -10,6 +10,7 @@ require_once '../common/params.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
+require_once '../common/version.php';
 
 const ACTIVITY = Activity::PART_WEIGHT;
 $activity = Activity::getActivity(ACTIVITY);
@@ -638,12 +639,12 @@ if (!Authentication::isAuthenticated())
 
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
-   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css<?php echo versionQuery();?>"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css<?php echo versionQuery();?>"/>
    
-   <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
-   <script src="partWeightLog.js"></script>
+   <script src="../common/common.js<?php echo versionQuery();?>"></script>
+   <script src="../common/validate.js<?php echo versionQuery();?>"></script>
+   <script src="partWeightLog.js<?php echo versionQuery();?>"></script>
 
 </head>
 
@@ -680,7 +681,9 @@ if (!Authentication::isAuthenticated())
                <div class="form-section-header">Pan Ticket Entry</div>               
                <div class="form-item">
                   <div class="form-label">Pan Ticket #</div>
-                  <input id="pan-ticket-code-input" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo getDisabled(PartWeightLogInputField::TIME_CARD_ID); ?>>
+                  <input id="pan-ticket-code-input" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange();" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo getDisabled(PartWeightLogInputField::TIME_CARD_ID); ?>>
+                  &nbsp;&nbsp;
+                  <button id="link-button" class="small-button" onclick="onLinkButton()"><i class="material-icons">link</i></button>
                </div>               
             
                <div class="form-section-header">Manual Entry</div>
@@ -702,7 +705,7 @@ if (!Authentication::isAuthenticated())
                   <div class="form-item">
                      <div class="form-label">Manufacture Date</div>
                      <div class="flex-horizontal">
-                        <input id="manufacture-date-input" type="date" name="manufactureDate" form="input-form" oninput="" value="<?php echo getManufactureDate(); ?>" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>
+                        <input id="manufacture-date-input" type="date" name="manufactureDate" form="input-form" value="<?php echo getManufactureDate(); ?>" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>
                         &nbsp<button id="today-button" class="small-button" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>Today</button>
                         &nbsp<button id="yesterday-button" class="small-button" <?php echo getDisabled(PartWeightLogInputField::MANUFACTURE_DATE); ?>>Yesterday</button>
                      </div>

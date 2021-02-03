@@ -29,8 +29,8 @@ class Role
       if (Role::$roles == null)
       {
          Role::$roles = 
-            array(new Role(Role::SUPER_USER,  "Super User",  Permission::ALL_PERMISSIONS,                                                                                     Activity::TIME_CARD),
-                  new Role(Role::ADMIN,       "Admin",       Permission::ALL_PERMISSIONS,                                                                                     Activity::TIME_CARD),
+            array(new Role(Role::SUPER_USER,  "Super User",  Permission::ALL_PERMISSIONS,                                                                                     Activity::REPORT),
+                  new Role(Role::ADMIN,       "Admin",       Permission::ALL_PERMISSIONS,                                                                                     Activity::REPORT),
                   new Role(Role::OPERATOR,    "Operator",    Permission::getBits(Permission::VIEW_TIME_CARD, Permission::EDIT_TIME_CARD, Permission::VIEW_PART_INSPECTION),   Activity::TIME_CARD),
                   new Role(Role::LABORER,     "Laborer",     Permission::getBits(Permission::VIEW_PART_WEIGHT_LOG, Permission::EDIT_PART_WEIGHT_LOG),                         Activity::PART_WEIGHT),
                   new Role(Role::PART_WASHER, "Part Washer", Permission::getBits(Permission::VIEW_PART_WASHER_LOG, Permission::EDIT_PART_WASHER_LOG),                         Activity::PART_WASH),

@@ -2,6 +2,7 @@
 
 require_once 'rest.php';
 require_once '../common/authentication.php';
+require_once '../common/dailySummaryReport.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
@@ -15,6 +16,7 @@ require_once '../common/signInfo.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/upload.php';
 require_once '../common/userInfo.php';
+require_once '../common/weeklySummaryReport.php';
 require_once '../printer/printJob.php';
 require_once '../printer/printQueue.php';
 
@@ -131,7 +133,8 @@ $router->add("timeCardData", function($params) {
          $timeCardInfo = TimeCardInfo::load($timeCard["timeCardId"]);
          if ($timeCardInfo)
          {
-            $timeCard["efficiency"] = $timeCardInfo->getEfficiency();
+            $timeCard["panTicketCode"] = PanTicket::getPanTicketCode($timeCardInfo->timeCardId);            
+            $timeCard["efficiency"] = round(($timeCardInfo->getEfficiency() * 100), 2);
          }
          
          $userInfo = UserInfo::load($timeCard["employeeNumber"]);
@@ -148,15 +151,23 @@ $router->add("timeCardData", function($params) {
          }
          
          $timeCard["isNew"] = Time::isNew($timeCardInfo->dateTime, Time::NEW_THRESHOLD);
-         $timeCard["incompleteTime"] = $timeCardInfo->incompleteTime();
+         $timeCard["incompleteShiftTime"] = $timeCardInfo->incompleteShiftTime();
+         $timeCard["incompleteRunTime"] = $timeCardInfo->incompleteRunTime();
          $timeCard["incompletePanCount"] = $timeCardInfo->incompletePanCount();
          $timeCard["incompletePartCount"] = $timeCardInfo->incompletePartCount();
          
-         $timeCard["requiresApproval"] = $timeCardInfo->requiresApproval();
-         $userInfo = UserInfo::load($timeCardInfo->approvedBy);
+         $timeCard["runTimeRequiresApproval"] = $timeCardInfo->requiresRunTimeApproval();
+         $userInfo = UserInfo::load($timeCardInfo->runTimeApprovedBy);
          if ($userInfo)
          {
-            $timeCard["approvedByName"] = $userInfo->getFullName();
+            $timeCard["runTimeApprovedByName"] = $userInfo->getFullName();
+         }
+         
+         $timeCard["setupTimeRequiresApproval"] = $timeCardInfo->requiresSetupTimeApproval();
+         $userInfo = UserInfo::load($timeCardInfo->setupTimeApprovedBy);
+         if ($userInfo)
+         {
+            $timeCard["setupTimeApprovedByName"] = $userInfo->getFullName();
          }
                   
          $result[] = $timeCard;
@@ -169,15 +180,39 @@ $router->add("timeCardData", function($params) {
 $router->add("timeCardInfo", function($params) {
    $result = new stdClass();
 
-   if (isset($params["timeCardId"]) || isset($params["panTicketCode"]))
+   if (isset($params["timeCardId"]) ||
+       isset($params["panTicketCode"]) ||
+       (isset($params["jobNumber"]) &&
+        isset($params["wcNumber"]) && 
+        isset($params["operator"]) &&
+        isset($params["manufactureDate"])))             
    {
+      $result->timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
+      
+      // Look up by time card id
       if (isset($params["timeCardId"]))
       {
          $result->timeCardId = intval($params["timeCardId"]);         
       }
-      else
+      // Look up by pan ticket code
+      else if (isset($params["panTicketCode"]))
       {
          $result->timeCardId = PanTicket::getPanTicketId($params["panTicketCode"]);  
+      }
+      // Look up by time card components
+      else
+      {
+         $jobNumber = $params["jobNumber"];
+         $wcNumber = intval($params["wcNumber"]);
+         $employeeNumber = intval($params["operator"]);
+         $manufactureDate = Time::startOfDay($params->get("manufactureDate"));
+         
+         $jobId = JobInfo::getJobIdByComponents($jobNumber, $wcNumber);
+         
+         if ($jobId != JobInfo::UNKNOWN_JOB_ID)
+         {
+            $result->timeCardId = TimeCardInfo::matchTimeCard($jobId, $employeeNumber, $manufactureDate);
+         }
       }
       
       $timeCardInfo = TimeCardInfo::load($result->timeCardId);
@@ -190,6 +225,7 @@ $router->add("timeCardInfo", function($params) {
          if ($params->getBool("expandedProperties"))
          {
             $result->isComplete = ($timeCardInfo->isComplete());
+            $result->panTicketCode = PanTicket::getPanTicketCode($result->timeCardId);
             
             $jobInfo = JobInfo::load($timeCardInfo->jobId);
             
@@ -212,7 +248,7 @@ $router->add("timeCardInfo", function($params) {
       else
       {
          $result->success = false;
-         $result->error = "Invalid time card ID.";
+         $result->error = "No matching time card.";
       }
    }
    else
@@ -280,7 +316,7 @@ $router->add("jobData", function($params) {
    $result = array();
    
    $jobStatuses = array();
-
+   
    for ($jobStatus = JobStatus::FIRST; $jobStatus < JobStatus::LAST; $jobStatus++)
    {
       $name = strtolower(JobStatus::getName($jobStatus));
@@ -295,23 +331,27 @@ $router->add("jobData", function($params) {
    
    if ($database && $database->isConnected())
    {
-      $jobs = $database->getJobs(JobInfo::UNKNOWN_JOB_NUMBER, $jobStatuses);
+      $databaseResult = $database->getJobs(JobInfo::UNKNOWN_JOB_NUMBER, $jobStatuses);
       
-      if ($jobs)
+      // Populate data table.
+      while ($databaseResult && ($row = $databaseResult->fetch_assoc()))
       {
-         // Populate data table.
-         foreach ($jobs as $job)
-         {         
-            $job["statusLabel"] = JobStatus::getName(intval($job["status"]));
+         $jobInfo = JobInfo::load($row["jobId"]);
+         
+         if ($jobInfo)
+         {
+            $jobInfo->statusLabel = JobStatus::getName($jobInfo->status);
+            $jobInfo->cycleTime = $jobInfo->getCycleTime();
+            $jobInfo->netPercentage = $jobInfo->getNetPercentage();
             
-            $result[] = $job;
+            $result[] = $jobInfo;
          }
       }
    }
    
    echo json_encode($result);
 });
-
+   
 $router->add("saveJob", function($params) {
    $result = new stdClass();
    $result->success = true;
@@ -352,8 +392,8 @@ $router->add("saveJob", function($params) {
           isset($params["partNumber"]) &&
           isset($params["sampleWeight"]) &&
           isset($params["wcNumber"]) &&
-          isset($params["cycleTime"]) &&
-          isset($params["netPercentage"]) &&
+          isset($params["grossPartsPerHour"]) &&
+          isset($params["netPartsPerHour"]) &&
           isset($params["status"]) &&
           isset($params["qcpTemplateId"]) &&
           isset($params["lineTemplateId"]) &&
@@ -364,8 +404,8 @@ $router->add("saveJob", function($params) {
          $jobInfo->partNumber = $params["partNumber"];
          $jobInfo->sampleWeight = doubleval($params["sampleWeight"]);
          $jobInfo->wcNumber = intval($params["wcNumber"]);
-         $jobInfo->cycleTime = intval($params["cycleTime"]);
-         $jobInfo->netPercentage = intval($params["netPercentage"]);
+         $jobInfo->grossPartsPerHour = intval($params["grossPartsPerHour"]);
+         $jobInfo->netPartsPerHour = intval($params["netPartsPerHour"]);
          $jobInfo->status = intval($params["status"]);
          $jobInfo->qcpTemplateId = intval($params["qcpTemplateId"]);
          $jobInfo->lineTemplateId = intval($params["lineTemplateId"]);
@@ -373,11 +413,19 @@ $router->add("saveJob", function($params) {
             
          if ($jobInfo->jobId == JobInfo::UNKNOWN_JOB_ID)
          {
-            $dbaseResult = $database->newJob($jobInfo);
-            
-            if ($dbaseResult)
+            if (JobInfo::getJobIdByComponents($jobInfo->jobNumber, $jobInfo->wcNumber) != JobInfo::UNKNOWN_JOB_ID)
             {
-               $result->jobId = $database->lastInsertId();
+               $result->success = false;
+               $result->error = "Duplicate entry.";
+            }
+            else 
+            {
+               $dbaseResult = $database->newJob($jobInfo);
+               
+               if ($dbaseResult)
+               {
+                  $result->jobId = $database->lastInsertId();
+               }
             }
          }
          else
@@ -710,7 +758,7 @@ $router->add("grossPartsPerHour", function($params) {
       if ($jobInfo)
       {
          $result->success = true;
-         $result->grossPartsPerHour = $jobInfo->getGrossPartsPerHour();
+         $result->grossPartsPerHour = $jobInfo->grossPartsPerHour;
       }
       else
       {
@@ -769,8 +817,10 @@ $router->add("saveTimeCard", function($params) {
           isset($params["jobNumber"]) &&
           isset($params["wcNumber"]) &&
           isset($params["materialNumber"]) &&
+          isset($params["shiftTime"]) &&            
           isset($params["setupTime"]) &&
-          isset($params["approvedBy"]) &&
+          isset($params["runTimeApprovedBy"]) &&
+          isset($params["setupTimeApprovedBy"]) &&
           isset($params["runTime"]) &&
           isset($params["panCount"]) &&
           isset($params["partCount"]) &&
@@ -785,9 +835,11 @@ $router->add("saveTimeCard", function($params) {
             $timeCardInfo->manufactureDate = Time::startOfDay($params->get("manufactureDate"));
             $timeCardInfo->jobId = $jobId;
             $timeCardInfo->materialNumber = intval($params["materialNumber"]);
+            $timeCardInfo->shiftTime = intval($params["shiftTime"]);
             $timeCardInfo->setupTime = intval($params["setupTime"]);
-            $timeCardInfo->approvedBy = intval($params["approvedBy"]);
+            $timeCardInfo->setupTimeApprovedBy = intval($params["setupTimeApprovedBy"]);
             $timeCardInfo->runTime = intval($params["runTime"]);
+            $timeCardInfo->runTimeApprovedBy = intval($params["runTimeApprovedBy"]);            
             $timeCardInfo->panCount = intval($params["panCount"]);
             $timeCardInfo->partCount = intval($params["partCount"]);
             $timeCardInfo->scrapCount = intval($params["scrapCount"]);
@@ -812,11 +864,23 @@ $router->add("saveTimeCard", function($params) {
             
             if ($timeCardInfo->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID)
             {
-               $dbaseResult = $database->newTimeCard($timeCardInfo);
-               
-               if ($dbaseResult)
+               // Check for unique time card.
+               if (!TimeCardInfo::isUniqueTimeCard(
+                       $timeCardInfo->jobId, 
+                       $timeCardInfo->employeeNumber, 
+                       $timeCardInfo->manufactureDate))
                {
-                  $result->timeCardId = $database->lastInsertId();
+                  $result->success = false;
+                  $result->error = "Duplicate time card.";
+               }
+               else 
+               {
+                  $dbaseResult = $database->newTimeCard($timeCardInfo);
+                  
+                  if ($dbaseResult)
+                  {
+                     $result->timeCardId = $database->lastInsertId();
+                  }
                }
             }
             else
@@ -825,7 +889,7 @@ $router->add("saveTimeCard", function($params) {
                $result->timeCardId = $timeCardInfo->timeCardId;
             }
             
-            if (!$dbaseResult)
+            if ($result->success && !$dbaseResult)
             {
                $result->success = false;
                $result->error = "Database query failed.";
@@ -928,12 +992,21 @@ $router->add("partWasherLogData", function($params) {
          
          $operator = $partWasherEntry->operator;
          
+         $partWasherEntry->timeCardId = $partWasherEntry->timeCardId;
+         
+         $partWasherEntry->panTicketCode =
+            ($partWasherEntry->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID) ?
+               "0000" :
+               PanTicket::getPanTicketCode($partWasherEntry->timeCardId);    
+         
          if ($partWasherEntry->timeCardId)
          {
             $timeCardInfo = TimeCardInfo::load($partWasherEntry->timeCardId);
             
             if ($timeCardInfo)
             {
+               $partWasherEntry->panTicketCode = PanTicket::getPanTicketCode($timeCardInfo->timeCardId);               
+               
                $jobId = $timeCardInfo->jobId;
                
                $operator = $timeCardInfo->employeeNumber;
@@ -958,12 +1031,17 @@ $router->add("partWasherLogData", function($params) {
          $partWasherEntry->isNew = Time::isNew($partWasherEntry->dateTime, Time::NEW_THRESHOLD);
          
          // Mismatch checking.
-         $partWasherEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($partWasherEntry->manufactureDate), Time::endOfDay($partWasherEntry->manufactureDate));
-         $partWasherEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($partWasherEntry->manufactureDate), Time::endOfDay($partWasherEntry->manufactureDate));
-         $partWasherEntry->panCountMismatch =
-         (($partWasherEntry->totalPartWasherLogPanCount > 0) &&
-          ($partWasherEntry->totalPartWeightLogPanCount != $partWasherEntry->totalPartWasherLogPanCount));
-         
+         $partWasherEntry->panCountMismatch = false;
+         $partWasherEntry->totalPartWeightLogPanCount = 0;
+         $partWasherEntry->totalPartWasherLogPanCount = 0;
+         if ($partWasherEntry->timeCardId)  // Only validate entries that have an associated time card.
+         {
+            $partWasherEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForTimeCard($partWasherEntry->timeCardId);
+            $partWasherEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForTimeCard($partWasherEntry->timeCardId);
+            
+            $partWasherEntry->panCountMismatch =
+               ($partWasherEntry->totalPartWeightLogPanCount != $partWasherEntry->totalPartWasherLogPanCount);
+         }
          
          $result[] = $partWasherEntry;
       }
@@ -1171,6 +1249,13 @@ $router->add("partWeightLogData", function($params) {
          
          $operator = $partWeightEntry->operator;
          
+         $partWeightEntry->timeCardId = $partWeightEntry->timeCardId;
+         
+         $partWeightEntry->panTicketCode = 
+            ($partWeightEntry->timeCardId == TimeCardInfo::UNKNOWN_TIME_CARD_ID) ?
+               "0000" :
+               PanTicket::getPanTicketCode($partWeightEntry->timeCardId);         
+               
          if ($partWeightEntry->timeCardId)
          {
             $timeCardInfo = TimeCardInfo::load($partWeightEntry->timeCardId);
@@ -1203,11 +1288,18 @@ $router->add("partWeightLogData", function($params) {
          $partWeightEntry->isNew = Time::isNew($partWeightEntry->dateTime, Time::NEW_THRESHOLD);
          
          // Mismatch checking.
-         $partWeightEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($partWeightEntry->manufactureDate), Time::endOfDay($partWeightEntry->manufactureDate));         
-         $partWeightEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($partWeightEntry->manufactureDate), Time::endOfDay($partWeightEntry->manufactureDate));
-         $partWeightEntry->panCountMismatch = 
-            (($partWeightEntry->totalPartWasherLogPanCount > 0) &&
-             ($partWeightEntry->totalPartWeightLogPanCount != $partWeightEntry->totalPartWasherLogPanCount));
+         $partWeightEntry->panCountMismatch = false;
+         $partWeightEntry->totalPartWeightLogPanCount = 0;
+         $partWeightEntry->totalPartWasherLogPanCount = 0;
+         if ($partWeightEntry->timeCardId)  // Only validate entries that have an associated time card.
+         {
+            $partWeightEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForTimeCard($partWeightEntry->timeCardId);
+            $partWeightEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForTimeCard($partWeightEntry->timeCardId);
+            
+            $partWeightEntry->panCountMismatch =
+               (($partWeightEntry->totalPartWasherLogPanCount > 0) &&
+                ($partWeightEntry->totalPartWeightLogPanCount != $partWeightEntry->totalPartWasherLogPanCount));
+         }
          
          $result[] = $partWeightEntry;
       }
@@ -2388,6 +2480,68 @@ $router->add("deleteSign", function($params) {
    {
       $result->success = false;
       $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("dailySummaryReportData", function($params) {
+   $result = array();
+   
+   $mfgDate = Time::startOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["mfgDate"]))
+   {
+      $mfgDate = Time::startOfDay($params["mfgDate"]);
+   }
+   
+   $table = DailySummaryReportTable::DAILY_SUMMARY;
+   if (isset($params["table"]))
+   {
+      $table = intval($params["table"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $dailySummaryReport = DailySummaryReport::load(UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $mfgDate);
+      
+      if ($dailySummaryReport)
+      {
+         $result = $dailySummaryReport->getReportData($table);
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("weeklySummaryReportData", function($params) {
+   $result = array();
+   
+   $mfgDate = Time::startOfDay(Time::now("Y-m-d"));
+
+   if (isset($params["mfgDate"]))
+   {
+      $mfgDate = Time::startOfDay($params["mfgDate"]);
+   }
+   
+   $table = WeeklySummaryReportTable::WEEKLY_SUMMARY;
+   if (isset($params["table"]))
+   {
+      $table = intval($params["table"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $weeklySummaryReport = WeeklySummaryReport::load($mfgDate);
+      
+      if ($weeklySummaryReport)
+      {
+         $result = $weeklySummaryReport->getReportData($table);
+      }
    }
    
    echo json_encode($result);

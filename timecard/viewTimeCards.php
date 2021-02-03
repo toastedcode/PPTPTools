@@ -10,6 +10,7 @@ require_once '../common/permissions.php';
 require_once '../common/roles.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
+require_once '../common/version.php';
 
 function getFilterStartDate()
 {
@@ -89,17 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    <meta name="viewport" content="width=device-width, initial-scale=1">
 
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
+   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css<?php echo versionQuery();?>"/>
    
-   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css<?php echo versionQuery();?>"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css<?php echo versionQuery();?>"/>
    
-   <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
-   <script src="../thirdParty/moment/moment.min.js"></script>
+   <script src="../thirdParty/tabulator/js/tabulator.min.js<?php echo versionQuery();?>"></script>
+   <script src="../thirdParty/moment/moment.min.js<?php echo versionQuery();?>"></script>
    
-   <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
-   <script src="timeCard.js"></script>
+   <script src="../common/common.js<?php echo versionQuery();?>"></script>
+   <script src="../common/validate.js<?php echo versionQuery();?>"></script>
+   <script src="timeCard.js<?php echo versionQuery();?>"></script>
       
 </head>
 
@@ -191,6 +192,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          //Define Table Columns
          columns:[
             {title:"Id",           field:"timeCardId",      hozAlign:"left", visible:false},
+            {title:"Ticket",       field:"panTicketCode",   hozAlign:"left", responsive:0, headerFilter:true, print:false,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">receipt</i>&nbsp" + cell.getRow().getData().panTicketCode);
+               },
+            },                   
             {title:"Date",         field:"dateTime",        hozAlign:"left", responsive:0, print:true,
                formatter:function(cell, formatterParams, onRendered){
                   var cellValue = "---";
@@ -233,14 +239,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             {title:"Job #",        field:"jobNumber",       hozAlign:"left", responsive:0, headerFilter:true, print:true},
             {title:"WC #",         field:"wcNumber",        hozAlign:"left", responsive:0, headerFilter:true, print:true},
             {title:"Heat #",       field:"materialNumber",  hozAlign:"left", responsive:6, print:true},
-            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1, print:true,
+            {title:"Shift Time",   field:"shiftTime",       hozAlign:"left", responsive:1, print:true,
                formatter:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
                   
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
                   
-                  if (cell.getRow().getData().incompleteTime)
+                  if (cell.getRow().getData().incompleteShiftTime)
                   {
                      cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
                   }
@@ -256,6 +262,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (cellValue);
                 }                
             },
+            {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1, print:true,
+               formatter:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  if (cell.getRow().getData().incompleteRunTime)
+                  {
+                     cellValue += "&nbsp<span class=\"incomplete-indicator\">incomplete</div>";
+                  }
+                  else if (cell.getRow().getData().runTimeRequiresApproval)
+                  {
+                     if (cell.getRow().getData().runTimeApprovedByName)
+                     {
+                        cellValue += "&nbsp<span class=\"approved-indicator\">approved</div>";
+                     }
+                     else
+                     {
+                        cellValue += "&nbsp<span class=\"unapproved-indicator\">unapproved</div>";
+                     }
+                  }     
+                  
+                  return (cellValue);
+                },
+               formatterPrint:function(cell, formatterParams, onRendered){
+
+                  var minutes = parseInt(cell.getValue());
+                  
+                  var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
+                  
+                  return (cellValue);
+                },
+                tooltip:function(cell){
+                   var toolTip = "";
+
+                   if (cell.getRow().getData().runTimeApprovedByName)
+                   {
+                      toolTip = "Approved by " + cell.getRow().getData().runTimeApprovedByName;
+                   }
+
+                   return (toolTip);                  
+                }                
+            },
             {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2, print:true,
                formatter:function(cell, formatterParams, onRendered){
 
@@ -263,9 +313,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   
                   var cellValue = Math.floor(minutes / 60) + ":" + ("0" + (minutes % 60)).slice(-2);
 
-                  if (cell.getRow().getData().requiresApproval)
+                  if (cell.getRow().getData().setupTimeRequiresApproval)
                   {
-                     if (cell.getRow().getData().approvedByName)
+                     if (cell.getRow().getData().setupTimeApprovedByName)
                      {
                         cellValue += "&nbsp<span class=\"approved-indicator\">approved</div>";
                      }
@@ -276,7 +326,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }                  
                   
                   return (cellValue);
-                },
+               },
                formatterPrint:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
@@ -288,9 +338,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 tooltip:function(cell){
                    var toolTip = "";
 
-                   if (cell.getRow().getData().approvedByName)
+                   if (cell.getRow().getData().setupTimeApprovedByName)
                    {
-                      toolTip = "Approved by " + cell.getRow().getData().approvedByName;
+                      toolTip = "Approved by " + cell.getRow().getData().setupTimeApprovedByName;
                    }
 
                    return (toolTip);                  
@@ -332,11 +382,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (parseFloat(cell.getValue()).toFixed(2) + "%");
                 }
             },
-            {title:"", field:"panTicket", responsive:0, width:75, print:false,             
-               formatter:function(cell, formatterParams, onRendered){
-                  return ("<i class=\"material-icons icon-button\">receipt</i>");
-               }
-            },
             {title:"", field:"delete", responsive:0, width:75, print:false,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">delete</i>");
@@ -345,14 +390,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          ],
          cellClick:function(e, cell){
             var timeCardId = parseInt(cell.getRow().getData().timeCardId);
-            
-            if (cell.getColumn().getField() == "delete")
-            {
-               onDeleteTimeCard(timeCardId);
-            }
-            else if (cell.getColumn().getField() == "panTicket")
+
+            if (cell.getColumn().getField() == "panTicketCode")
             {
                document.location = "<?php echo $ROOT?>/panTicket/viewPanTicket.php?panTicketId=" + timeCardId;
+            }            
+            else if (cell.getColumn().getField() == "delete")
+            {
+               onDeleteTimeCard(timeCardId);
             }
             else // Any other column
             {

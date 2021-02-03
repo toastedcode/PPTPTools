@@ -26,8 +26,9 @@ class Permission
    const QUICK_INSPECTION         = 20;
    const VIEW_INSPECTION_TEMPLATE = 21;
    const EDIT_INSPECTION_TEMPLATE = 22;  
-   const VIEW_PRINT_MANAGER       = 23;   
-   const LAST                     = Permission::VIEW_PRINT_MANAGER;
+   const VIEW_PRINT_MANAGER       = 23;
+   const VIEW_REPORT              = 24;
+   const LAST                     = Permission::VIEW_REPORT;
    
    const NO_PERMISSIONS = 0x00000000;
    const ALL_PERMISSIONS = 0xFFFFFFFF;
@@ -65,7 +66,8 @@ class Permission
                   new Permission(Permission::QUICK_INSPECTION,         "Enable \"quick\" inspections"),
                   new Permission(Permission::VIEW_INSPECTION_TEMPLATE, "View inspection template"),
                   new Permission(Permission::EDIT_INSPECTION_TEMPLATE, "Edit inspection template"),               
-                  new Permission(Permission::VIEW_PRINT_MANAGER,       "View print manager")
+                  new Permission(Permission::VIEW_PRINT_MANAGER,       "View print manager"),
+                  new Permission(Permission::VIEW_REPORT,              "View reports")
             );
       }
       

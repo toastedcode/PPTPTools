@@ -8,6 +8,7 @@ require_once '../common/menu.php';
 require_once '../common/newIndicator.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/permissions.php';
+require_once '../common/version.php';
 
 function getFilterStartDate()
 {
@@ -78,17 +79,17 @@ if (!Authentication::isAuthenticated())
    <meta name="viewport" content="width=device-width, initial-scale=1">
 
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
+   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css<?php echo versionQuery();?>"/>
    
-   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css<?php echo versionQuery();?>"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css<?php echo versionQuery();?>"/>
       
-   <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
-   <script src="../thirdParty/moment/moment.min.js"></script>
+   <script src="../thirdParty/tabulator/js/tabulator.min.js<?php echo versionQuery();?>"></script>
+   <script src="../thirdParty/moment/moment.min.js<?php echo versionQuery();?>"></script>
    
-   <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
-   <script src="partWeightLog.js"></script>
+   <script src="../common/common.js<?php echo versionQuery();?>"></script>
+   <script src="../common/validate.js<?php echo versionQuery();?>"></script>
+   <script src="partWeightLog.js<?php echo versionQuery();?>"></script>
       
 </head>
 
@@ -168,11 +169,27 @@ if (!Authentication::isAuthenticated())
          //height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
          responsiveLayout:"hide", // enable responsive layouts
+         cellVertAlign:"middle",
          ajaxURL:url,
          ajaxParams:params,
          //Define Table Columns
          columns:[
             {title:"Id",                field:"partWeightEntryId", hozAlign:"left", visible:false},
+            {title:"Time Card Id",      field:"timeCardId",        hozAlign:"left", visible:false},            
+            {title:"Ticket",            field:"panTicketCode",     hozAlign:"left", responsive:0, headerFilter:true, print:false,
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = "";
+                  
+                  var timeCardId = cell.getRow().getData().timeCardId;
+                  
+                  if (timeCardId != 0)
+                  {
+                     cellValue = "<i class=\"material-icons icon-button\">receipt</i>&nbsp" + cell.getRow().getData().panTicketCode;
+                  }
+                  
+                  return (cellValue);
+               }
+            },
             {title:"Job #",             field:"jobNumber",         hozAlign:"left", responsive:0, headerFilter:true},
             {title:"WC #",              field:"wcNumber",          hozAlign:"left", responsive:0, headerFilter:true},
             {title:"Operator",          field:"operatorName",      hozAlign:"left", responsive:0, headerFilter:true},
@@ -250,7 +267,14 @@ if (!Authentication::isAuthenticated())
          cellClick:function(e, cell){
             var entryId = parseInt(cell.getRow().getData().partWeightEntryId);
             
-            if (cell.getColumn().getField() == "delete")
+            var timeCardId = cell.getRow().getData().timeCardId;
+            
+            if ((cell.getColumn().getField() == "panTicketCode") &&
+                (cell.getRow().getData().timeCardId != 0))
+            {               
+               document.location = "<?php echo $ROOT?>/panTicket/viewPanTicket.php?panTicketId=" + timeCardId;
+            }  
+            else if (cell.getColumn().getField() == "delete")
             {
                onDeletePartWeightEntry(entryId);
             }

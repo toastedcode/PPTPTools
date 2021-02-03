@@ -264,7 +264,7 @@ form {
 }
 
 .form-section-header {
-   font-weight:bold;
+   font-weight: bold;
    font-size: 18px;
    display: flex;
    flex-direction: row;
@@ -296,6 +296,11 @@ form {
 
 .tabulator {
 	width: 100%;
+}
+
+.table-header {
+	font-size: 18px;
+	font-weight: bold;
 }
 
 /* ***** Common components ***** */
@@ -365,6 +370,28 @@ button {
    font-size: 10px;
    color: red;
    white-space: nowrap;
+}
+
+.report-entry-valid {
+	background: green;
+	color: white;
+	font-size: 12;
+}
+
+.report-entry-warning {
+   background: orange;
+   color: white;
+   font-size: 12;
+}
+
+.report-entry-error {
+   background: red;
+   color: white;
+   font-size: 12;
+}
+
+.bonus-earned {
+   background: #98FB98;
 }
 
 input, select {

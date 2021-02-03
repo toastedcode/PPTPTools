@@ -201,22 +201,41 @@ class PPTPDatabase extends MySqlDatabase
       
       return ($result);
    }
+   
+   public function matchTimeCard(
+      $jobId,
+      $employeeNumber,
+      $manufactureDate)
+   {
+      $startDate = Time::startOfDay($manufactureDate);
+      $endDate = Time::endOfDay($manufactureDate);
+      
+      $query = "SELECT * FROM timecard WHERE jobId = $jobId AND employeeNumber = $employeeNumber AND manufactureDate BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "';";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
 
    public function getTimeCards(
       $employeeNumber,
       $startDate,
-      $endDate)
+      $endDate,
+      $useMfgDate = false)
    {
-      $result = NULL;
-      if ($employeeNumber == 0)
+      $result = null;
+      
+      $dateField = ($useMfgDate ? "manufactureDate" : "dateTime");
+      
+      if ($employeeNumber == UserInfo::UNKNOWN_EMPLOYEE_NUMBER)
       {
-         $query = "SELECT * FROM timecard WHERE dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
+         $query = "SELECT * FROM timecard WHERE $dateField BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY $dateField DESC, timeCardId DESC;";
 
          $result = $this->query($query);
       }
       else
       {
-         $query = "SELECT * FROM timecard WHERE employeeNumber=" . $employeeNumber . " AND dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY dateTime DESC, timeCardId DESC;";
+         $query = "SELECT * FROM timecard WHERE employeeNumber=" . $employeeNumber . " AND $dateField BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "' ORDER BY $dateField DESC, timeCardId DESC;";
          
          $result = $this->query($query);
       }
@@ -234,9 +253,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "INSERT INTO timecard " .
-         "(employeeNumber, dateTime, manufactureDate, jobId, materialNumber, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, approvedBy) " .
+         "(employeeNumber, dateTime, manufactureDate, jobId, materialNumber, shiftTime, setupTime, runTime, panCount, partCount, scrapCount, commentCodes, comments, runTimeApprovedBy, setupTimeApprovedBy) " .
          "VALUES " .
-         "('$timeCardInfo->employeeNumber', '$date', '$manufactureDate', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->approvedBy');";
+         "('$timeCardInfo->employeeNumber', '$date', '$manufactureDate', '$timeCardInfo->jobId', '$timeCardInfo->materialNumber', '$timeCardInfo->shiftTime', '$timeCardInfo->setupTime', '$timeCardInfo->runTime', '$timeCardInfo->panCount', '$timeCardInfo->partCount', '$timeCardInfo->scrapCount', '$timeCardInfo->commentCodes', '$comments', '$timeCardInfo->runTimeApprovedBy', '$timeCardInfo->setupTimeApprovedBy');";
 
       $result = $this->query($query);
       
@@ -253,7 +272,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE timecard " .
-      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", manufactureDate = \"$manufactureDate\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", approvedBy = $timeCardInfo->approvedBy " .
+      "SET employeeNumber = $timeCardInfo->employeeNumber, dateTime = \"$dateTime\", manufactureDate = \"$manufactureDate\", jobId = \"$timeCardInfo->jobId\", materialNumber = \"$timeCardInfo->materialNumber\", shiftTime = $timeCardInfo->shiftTime, setupTime = $timeCardInfo->setupTime, runTime = $timeCardInfo->runTime, panCount = $timeCardInfo->panCount, partCount = $timeCardInfo->partCount, scrapCount = $timeCardInfo->scrapCount, commentCodes = $timeCardInfo->commentCodes, comments = \"$comments\", runTimeApprovedBy = $timeCardInfo->runTimeApprovedBy, setupTimeApprovedBy = $timeCardInfo->setupTimeApprovedBy " .
       "WHERE timeCardId = $timeCardInfo->timeCardId;";
 
       $result = $this->query($query);
@@ -860,7 +879,7 @@ class PPTPDatabase extends MySqlDatabase
          }
          
          $query = "SELECT * FROM job $whereClause ORDER BY jobNumber ASC;";
-   
+
          $result = $this->query($query);
       }
       
@@ -913,12 +932,12 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO job " .
-      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, cycleTime, netPercentage, status, customerPrint, inProcessTemplateId, lineTemplateId, qcpTemplateId) " .
+      "(jobNumber, creator, dateTime, partNumber, sampleWeight, wcNumber, grossPartsPerHour, netPartsPerHour, status, customerPrint, inProcessTemplateId, lineTemplateId, qcpTemplateId) " .
       "VALUES " .
-      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->cycleTime', '$jobInfo->netPercentage', '$jobInfo->status', '$jobInfo->customerPrint', '$jobInfo->inProcessTemplateId', '$jobInfo->lineTemplateId', '$jobInfo->qcpTemplateId');";
+      "('$jobInfo->jobNumber', '$jobInfo->creator', '$dateTime', '$jobInfo->partNumber', '$jobInfo->sampleWeight', '$jobInfo->wcNumber', '$jobInfo->grossPartsPerHour', '$jobInfo->netPartsPerHour', '$jobInfo->status', '$jobInfo->customerPrint', '$jobInfo->inProcessTemplateId', '$jobInfo->lineTemplateId', '$jobInfo->qcpTemplateId');";
 
       $result = $this->query($query);
-      
+
       return ($result);
    }
    
@@ -928,7 +947,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
          "UPDATE job " .
-         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', cycleTime = '$jobInfo->cycleTime', netPercentage = '$jobInfo->netPercentage', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId', lineTemplateId = '$jobInfo->lineTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
+         "SET creator = '$jobInfo->creator', dateTime = '$dateTime', partNumber = '$jobInfo->partNumber', sampleWeight = '$jobInfo->sampleWeight', wcNumber = '$jobInfo->wcNumber', grossPartsPerHour = '$jobInfo->grossPartsPerHour', netPartsPerHour = '$jobInfo->netPartsPerHour', status = '$jobInfo->status', customerPrint = '$jobInfo->customerPrint', inProcessTemplateId = '$jobInfo->inProcessTemplateId', lineTemplateId = '$jobInfo->lineTemplateId',  qcpTemplateId = '$jobInfo->qcpTemplateId' " .
          "WHERE jobId = '$jobInfo->jobId';";
 
       $result = $this->query($query);

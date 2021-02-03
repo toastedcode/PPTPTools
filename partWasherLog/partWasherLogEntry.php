@@ -10,9 +10,9 @@ require_once '../common/params.php';
 require_once '../common/partWasherEntry.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
+require_once '../common/version.php';
 
 const ACTIVITY = Activity::PART_WASH;
-$activity = Activity::getActivity(ACTIVITY);
 
 const ONLY_ACTIVE = true;
 
@@ -570,12 +570,12 @@ if (!Authentication::isAuthenticated())
 
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    
-   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css<?php echo versionQuery();?>"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css<?php echo versionQuery();?>"/>
    
-   <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
-   <script src="partWasherLog.js"></script>
+   <script src="../common/common.js<?php echo versionQuery();?>"></script>
+   <script src="../common/validate.js<?php echo versionQuery();?>"></script>
+   <script src="partWasherLog.js<?php echo versionQuery();?>"></script>
 
 </head>
 
@@ -613,6 +613,8 @@ if (!Authentication::isAuthenticated())
                <div class="form-item">
                   <div class="form-label">Pan Ticket #</div>
                   <input id="pan-ticket-code-input" type="text" style="width:50px;" name="panTicketCode" form="input-form" oninput="this.validator.validate(); onPanTicketCodeChange()" value="<?php $timeCardId = getTimeCardId(); echo ($timeCardId == 0) ? "" : PanTicket::getPanTicketCode($timeCardId);?>" <?php echo getDisabled(PartWasherLogInputField::TIME_CARD_ID); ?>>
+                  &nbsp;&nbsp;
+                  <button id="link-button" class="small-button" onclick="onLinkButton()"><i class="material-icons">link</i></button>               
                </div>               
             
                <div class="form-section-header">Manual Entry</div>
