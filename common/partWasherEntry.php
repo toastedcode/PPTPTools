@@ -130,7 +130,7 @@ class PartWasherEntry
       return ($partWasherEntry);
    }
    
-   public static function getPanCountForJob($jobId, $startDate, $endDate)
+   public static function getPanCountForTimeCard($timeCardId)
    {
       $panCount = 0;
       
@@ -138,12 +138,7 @@ class PartWasherEntry
       
       if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWasherEntries(
-            $jobId,
-            UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
-            $startDate,
-            $endDate,
-            true);  // $useMfgDate
+         $result = $database->getPartWasherEntriesByTimeCard($timeCardId);
          
          while ($result && ($row = $result->fetch_assoc()))
          {

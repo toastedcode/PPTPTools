@@ -134,7 +134,7 @@ $router->add("timeCardData", function($params) {
          if ($timeCardInfo)
          {
             $timeCard["panTicketCode"] = PanTicket::getPanTicketCode($timeCardInfo->timeCardId);            
-            $timeCard["efficiency"] = $timeCardInfo->getEfficiency();
+            $timeCard["efficiency"] = round(($timeCardInfo->getEfficiency() * 100), 2);
          }
          
          $userInfo = UserInfo::load($timeCard["employeeNumber"]);
@@ -1031,12 +1031,17 @@ $router->add("partWasherLogData", function($params) {
          $partWasherEntry->isNew = Time::isNew($partWasherEntry->dateTime, Time::NEW_THRESHOLD);
          
          // Mismatch checking.
-         $partWasherEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($partWasherEntry->manufactureDate), Time::endOfDay($partWasherEntry->manufactureDate));
-         $partWasherEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($partWasherEntry->manufactureDate), Time::endOfDay($partWasherEntry->manufactureDate));
-         $partWasherEntry->panCountMismatch =
-         (($partWasherEntry->totalPartWasherLogPanCount > 0) &&
-          ($partWasherEntry->totalPartWeightLogPanCount != $partWasherEntry->totalPartWasherLogPanCount));
-         
+         $partWasherEntry->panCountMismatch = false;
+         $partWasherEntry->totalPartWeightLogPanCount = 0;
+         $partWasherEntry->totalPartWasherLogPanCount = 0;
+         if ($partWasherEntry->timeCardId)  // Only validate entries that have an associated time card.
+         {
+            $partWasherEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForTimeCard($partWasherEntry->timeCardId);
+            $partWasherEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForTimeCard($partWasherEntry->timeCardId);
+            
+            $partWasherEntry->panCountMismatch =
+               ($partWasherEntry->totalPartWeightLogPanCount != $partWasherEntry->totalPartWasherLogPanCount);
+         }
          
          $result[] = $partWasherEntry;
       }
@@ -1283,11 +1288,18 @@ $router->add("partWeightLogData", function($params) {
          $partWeightEntry->isNew = Time::isNew($partWeightEntry->dateTime, Time::NEW_THRESHOLD);
          
          // Mismatch checking.
-         $partWeightEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForJob($jobId, Time::startOfDay($partWeightEntry->manufactureDate), Time::endOfDay($partWeightEntry->manufactureDate));         
-         $partWeightEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForJob($jobId, Time::startOfDay($partWeightEntry->manufactureDate), Time::endOfDay($partWeightEntry->manufactureDate));
-         $partWeightEntry->panCountMismatch = 
-            (($partWeightEntry->totalPartWasherLogPanCount > 0) &&
-             ($partWeightEntry->totalPartWeightLogPanCount != $partWeightEntry->totalPartWasherLogPanCount));
+         $partWeightEntry->panCountMismatch = false;
+         $partWeightEntry->totalPartWeightLogPanCount = 0;
+         $partWeightEntry->totalPartWasherLogPanCount = 0;
+         if ($partWeightEntry->timeCardId)  // Only validate entries that have an associated time card.
+         {
+            $partWeightEntry->totalPartWeightLogPanCount = PartWeightEntry::getPanCountForTimeCard($partWeightEntry->timeCardId);
+            $partWeightEntry->totalPartWasherLogPanCount = PartWasherEntry::getPanCountForTimeCard($partWeightEntry->timeCardId);
+            
+            $partWeightEntry->panCountMismatch =
+               (($partWeightEntry->totalPartWasherLogPanCount > 0) &&
+                ($partWeightEntry->totalPartWeightLogPanCount != $partWeightEntry->totalPartWasherLogPanCount));
+         }
          
          $result[] = $partWeightEntry;
       }

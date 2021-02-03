@@ -139,7 +139,7 @@ class PartWeightEntry
       return ($partWeightEntry);
    }
    
-   public static function getPanCountForJob($jobId, $mfgStartDate, $mfgEndDate)
+   public static function getPanCountForTimeCard($timeCardId)
    {
       $panCount = 0;
       
@@ -147,12 +147,7 @@ class PartWeightEntry
       
       if ($database && ($database->isConnected()))
       {
-         $result = $database->getPartWeightEntries(
-                      $jobId, 
-                      UserInfo::UNKNOWN_EMPLOYEE_NUMBER,
-                      $mfgStartDate,
-                      $mfgEndDate,
-                      true);  // $useMfgDate
+         $result = $database->getPartWeightEntriesByTimeCard($timeCardId);
          
          while ($result && ($row = $result->fetch_assoc()))
          {

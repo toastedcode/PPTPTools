@@ -255,7 +255,7 @@ class TimeCardInfo
       {
          $efficiency = 
             TimeCardInfo::calculateEfficiency(
-                  $this->runTime, 
+                  $this->getRunTimeInHours(), 
                   $jobInfo->grossPartsPerHour, 
                   $this->partCount);
       }

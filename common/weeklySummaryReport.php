@@ -344,6 +344,7 @@ class WeeklySummaryReport
          $row->tier5 = Bonus::calculateBonus(Bonus::TIER5, $row->runTime);
          $row->tier6 = Bonus::calculateBonus(Bonus::TIER6, $row->runTime);
          $row->additionalMachineBonus = Bonus::calculateAdditionalMachineBonus($this->operatorSummaries[$employeeNumber]->pcOverG);
+         $row->additionalMachineBonusEarned = ($this->operatorSummaries[$employeeNumber]->efficiency > OperatorSummary::TARGET_EFFICIENCY);
          
          $reportData[] = $row;
       }

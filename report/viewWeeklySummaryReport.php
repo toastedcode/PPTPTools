@@ -370,7 +370,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                columns:[
                   {title:"$4.00", field:"additionalMachineBonus", hozAlign:"left", print:true, 
                      formatter:function(cell, formatterParams, onRendered) {
-                        if (parseInt(cell.getValue()) > 0)
+                        if (cell.getRow().getData().additionalMachineBonusEarned)
                         {
                            cell.getElement().classList.add("bonus-earned");
                         }
