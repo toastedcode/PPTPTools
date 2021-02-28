@@ -19,7 +19,8 @@ class Activity
    const PAN_TICKET = 10;
    const REPORT = 11;
    const WEEKLY_REPORT = 12;  // TODO: Submenus
-   const LAST = 13;
+   const MAINTENANCE_LOG = 13;
+   const LAST = 14;
    
    public $id;
    public $label;
@@ -48,7 +49,8 @@ class Activity
       Activity::SIGNAGE,
       Activity::PAN_TICKET,
       Activity::REPORT,
-      Activity::WEEKLY_REPORT
+      Activity::WEEKLY_REPORT,
+      Activity::MAINTENANCE_LOG
    );
    
    private static $ACTIVITIES = null;
@@ -71,7 +73,8 @@ class Activity
             Activity::SIGNAGE =>             new Activity(Activity::SIGNAGE,             "Digital Signage",      "tv",                   Permission::getPermission(Permission::VIEW_SIGN)->bits,                "$ROOT/signage/viewSigns.php"),
             Activity::PAN_TICKET =>          new Activity(Activity::PAN_TICKET,          "Pan Ticket Scanner",   "camera_alt",           Permission::getPermission(Permission::VIEW_TIME_CARD)->bits,           "$ROOT/panTicket/scanPanTicket.php"),
             Activity::REPORT =>              new Activity(Activity::REPORT,              "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewDailySummaryReport.php"),
-            Activity::WEEKLY_REPORT =>       new Activity(Activity::WEEKLY_REPORT,       "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewWeeklySummaryReport.php")
+            Activity::WEEKLY_REPORT =>       new Activity(Activity::WEEKLY_REPORT,       "Reports",              "bar_chart",            Permission::getPermission(Permission::VIEW_REPORT)->bits,              "$ROOT/report/viewWeeklySummaryReport.php"),
+            Activity::MAINTENANCE_LOG =>     new Activity(Activity::MAINTENANCE_LOG,     "Maintenance Log",      "build",                Permission::getPermission(Permission::VIEW_MAINTENANCE_LOG)->bits,     "$ROOT/maintenanceLog/maintenanceLog.php")
          );
       }
       

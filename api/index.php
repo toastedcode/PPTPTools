@@ -6,6 +6,7 @@ require_once '../common/dailySummaryReport.php';
 require_once '../common/inspection.php';
 require_once '../common/inspectionTemplate.php';
 require_once '../common/jobInfo.php';
+require_once '../common/maintenanceEntry.php';
 require_once '../common/oasisReport/oasisReport.php';
 require_once '../common/panTicket.php';
 require_once '../common/partWasherEntry.php';
@@ -2547,5 +2548,183 @@ $router->add("weeklySummaryReportData", function($params) {
    echo json_encode($result);
 });
 
+$router->add("maintenanceLogData", function($params) {
+   $result = array();
+   
+   $startDate = Time::startOfDay(Time::now("Y-m-d"));
+   $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["startDate"]))
+   {
+      $startDate = Time::startOfDay($params["startDate"]);
+   }
+   
+   if (isset($params["endDate"]))
+   {
+      $endDate = Time::endOfDay($params["endDate"]);
+   }
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if ($database && $database->isConnected())
+   {
+      $dbaseResult = $database->getMaintenanceEntries($startDate, $endDate, true);  // Use maintenance date
+      
+      foreach ($dbaseResult as $row)
+      {
+         $maintenanceEntry = MaintenanceEntry::load(intval($row["maintenanceEntryId"]));
+         
+         if ($maintenanceEntry)
+         {
+            $userInfo = UserInfo::load(intval($row["employeeNumber"]));
+            if ($userInfo)
+            {
+               $maintenanceEntry->technicianName = $userInfo->getFullName();
+            }
+
+            $maintenanceCategory = MaintenanceCategory::load($maintenanceEntry->categoryId);
+            if ($maintenanceCategory)
+            {
+               $maintenanceEntry->maintenanceCategory = $maintenanceCategory;
+               $maintenanceEntry->maintenanceCategory->maintenanceTypeLabel = MaintenanceType::getLabel($maintenanceCategory->maintenanceType);               
+            }
+            
+            if ($maintenanceEntry->partId != MachinePartInfo::UNKNOWN_PART_ID)
+            {
+               $machinePartInfo = MachinePartInfo::load($maintenanceEntry->partId);
+               if ($machinePartInfo)
+               {
+                  $maintenanceEntry->partNumber = $machinePartInfo->partNumber;
+               }
+            }
+         
+            $result[] = $maintenanceEntry;
+         }
+      }
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("saveMaintenanceEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   $dbaseResult = null;
+   
+   $maintenancEntry = null;
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != MaintenanceEntry::UNKNOWN_ENTRY_ID))
+   {
+      $entryId = intval($params["entryId"]);
+      
+      //  Updated entry
+      $maintenancEntry = MaintenanceEntry::load($entryId);
+      
+      if (!$maintenancEntry)
+      {
+         $result->success = false;
+         $result->error = "No existing maintenance entry found.";
+      }
+   }
+   else
+   {
+      // New entry.
+      $maintenancEntry = new MaintenanceEntry();
+      
+      // Use current date/time as the entry time.
+      $maintenancEntry->dateTime = Time::now("Y-m-d h:i:s A");
+   }
+   
+   if ($result->success)
+   {
+      if (isset($params["maintenanceDate"]) &&
+          isset($params["employeeNumber"]) &&
+          isset($params["wcNumber"]) &&
+          isset($params["categoryId"]) &&
+          isset($params["maintenanceTime"]) &&
+          isset($params["comments"]))
+      {
+         // Required fields.
+         $maintenancEntry->maintenanceDateTime = Time::startOfDay($params->get("maintenanceDate"));
+         $maintenancEntry->employeeNumber = intval($params["employeeNumber"]);
+         $maintenancEntry->wcNumber = $params["wcNumber"];
+         $maintenancEntry->categoryId = intval($params["categoryId"]);
+         $maintenancEntry->maintenanceTime = intval($params["maintenanceTime"]);
+         $maintenancEntry->comments = $params["comments"];
+         
+         // Optional fields.
+         if (isset($params["partId"]))
+         {
+            $maintenancEntry->partId = intval($params["partId"]);
+         }
+         
+         if ($maintenancEntry->maintenanceEntryId == MaintenanceEntry::UNKNOWN_ENTRY_ID)
+         {
+            $dbaseResult = $database->newMaintenanceEntry($maintenancEntry);
+            
+            if ($dbaseResult)
+            {
+               $result->entryId = $database->lastInsertId();
+            }
+         }
+         else
+         {
+            $dbaseResult = $database->updateMaintenanceEntry($maintenancEntry);
+            $result->entryId = $maintenancEntry->maintenanceEntryId;
+         }
+               
+         if (!$dbaseResult)
+         {
+            $result->success = false;
+            $result->error = "Database query failed.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Missing parameters.";
+      }
+   }
+   
+   echo json_encode($result);
+});
+      
+$router->add("deleteMaintenanceEntry", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["entryId"]) &&
+       is_numeric($params["entryId"]) &&
+       (intval($params["entryId"]) != MaintenanceEntry::UNKNOWN_ENTRY_ID))
+   {
+      $entryId = intval($params["entryId"]);
+
+      $dbaseResult = $database->deleteMaintenanceEntry($entryId);
+         
+      if ($dbaseResult)
+      {
+         $result->success = true;
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "Database query failed.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+   
 $router->route();
 ?>

@@ -1576,6 +1576,203 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                             Maintenance Category
+   // **************************************************************************
+   
+   public function getMaintenanceCategory($maintenanceCategoryId)
+   {
+      $query = "SELECT * FROM maintenancecategory WHERE maintenanceCategoryId = \"$maintenanceCategoryId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getMaintenanceCategories(
+      $maintenanceType)
+   {
+      $typeClause = "";
+      if ($maintenanceType != MaintenanceType::UNKNOWN)
+      {
+         $typeClause = "WHERE maintenanceType = \"$maintenanceType\" ";
+      }
+      
+      $query = "SELECT * FROM maintenancecategory $typeClause ORDER BY label DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newMaintenanceCategory(
+      $maintenanceCategory)
+   {
+      $query =
+      "INSERT INTO maintenancecategory " .
+      "(maintenanceType, label) " .
+      "VALUES " .
+      "('$maintenanceCategory->maintenanceType', '$maintenanceCategory->label');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteMaintenanceCategory(
+      $maintenanceCategoryId)
+   {
+      $UNKNOWN_CATEGORY_ID = MaintenanceCategory::UNKNOWN_CATEGORY_ID;
+      
+      $query = "DELETE FROM maintenancecategory WHERE maintenanceCategoryId = $maintenanceCategoryId;";
+      
+      $result = $this->query($query);
+      
+      $query = "UPDATE maintenance SET categoryId = \"$UNKNOWN_CATEGORY_ID\" WHERE categoryId = $maintenanceCategoryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                              Maintenance Log
+   // **************************************************************************
+   
+   public function getMaintenanceEntry($maintenanceEntryId)
+   {
+      $query = "SELECT * FROM maintenance WHERE maintenanceEntryId = \"$maintenanceEntryId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getMaintenanceEntries(
+      $startDate,
+      $endDate,
+      $useMaintenanceDate)
+   {
+      $dateTimeClause = "";
+      if ($useMaintenanceDate == true)
+      {
+         $dateTimeClause = "maintenanceDateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+      }
+      else
+      {
+         $dateTimeClause = "dateTime BETWEEN '" . Time::toMySqlDate($startDate) . "' AND '" . Time::toMySqlDate($endDate) . "'";
+      }
+      
+      $query = "SELECT * FROM maintenance WHERE $dateTimeClause ORDER BY maintenanceDateTime DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function newMaintenanceEntry(
+      $maintenanceEntry)
+   {
+      $dateTime = Time::toMySqlDate($maintenanceEntry->dateTime);
+      $maintenanceDateTime = Time::toMySqlDate($maintenanceEntry->maintenanceDateTime);
+      
+      $query =
+      "INSERT INTO maintenance " .
+      "(dateTime, maintenanceDateTime, employeeNumber, categoryId, wcNumber, maintenanceTime, partId, comments) " .
+      "VALUES " .
+      "('$dateTime', '$maintenanceDateTime', '$maintenanceEntry->employeeNumber', '$maintenanceEntry->categoryId', '$maintenanceEntry->wcNumber', '$maintenanceEntry->maintenanceTime', '$maintenanceEntry->partId', '$maintenanceEntry->comments');";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updateMaintenanceEntry(
+      $maintenanceEntry)
+   {
+      $dateTime = Time::toMySqlDate($maintenanceEntry->dateTime);
+      $maintenanceDateTime = Time::toMySqlDate($maintenanceEntry->maintenanceDateTime);
+      
+      $query =
+      "UPDATE maintenance " .
+      "SET dateTime = \"$dateTime\", maintenanceDateTime = \"$maintenanceDateTime\", employeeNumber = $maintenanceEntry->employeeNumber, categoryId = $maintenanceEntry->categoryId, wcNumber = $maintenanceEntry->wcNumber, maintenanceTime = $maintenanceEntry->maintenanceTime, partId = $maintenanceEntry->partId, comments = \"$maintenanceEntry->comments\" " .
+      "WHERE maintenanceEntryId = $maintenanceEntry->maintenanceEntryId;";
+
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteMaintenanceEntry(
+      $maintenanceEntryId)
+   {
+      $query = "DELETE FROM maintenance WHERE maintenanceEntryId = $maintenanceEntryId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   // **************************************************************************
+   //                              Part Inventory
+   // **************************************************************************
+   
+   public function getPartInventoryPart($partId)
+   {
+      $query = "SELECT * FROM partinventory WHERE partId = \"$partId\";";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function getPartInventory()
+   {
+      $query = "SELECT * FROM partinventory ORDER BY partNumber DESC;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function addToPartInventory(
+      $machinePartInfo)
+   {      
+      $query =
+      "INSERT INTO partinventory " .
+      "(partNumber, description, inventoryCount) " .
+      "VALUES " .
+      "('$machinePartInfo->partNumber', '$machinePartInfo->description', '$machinePartInfo->inventoryCount');";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function updatePartInventory(
+      $machinePartInfo)
+   {
+      $query =
+      "UPDATE partinventory " .
+      "SET partNumber = '$machinePartInfo->partNumber', description = '$machinePartInfo->description', wcNumber = '$machinePartInfo->inventoryCount' " .
+      "WHERE partId = $machinePartInfo->partId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   public function deleteFromPartInventory(
+      $partId)
+   {
+      $query = "DELETE FROM partinventory WHERE partId = $partId;";
+      
+      $result = $this->query($query);
+      
+      return ($result);
+   }
+   
+   
+   // **************************************************************************
    //                                  Private
    // **************************************************************************
    

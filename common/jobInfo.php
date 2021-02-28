@@ -190,6 +190,31 @@ class JobInfo
       
       return ($jobId);
    }
+   
+   public static function getWcNumberOptions($jobNumber, $selectedWcNumber)
+   {
+      $html = "<option style=\"display:none\">";
+      
+      $workCenters = null;
+      if ($jobNumber != JobInfo::UNKNOWN_JOB_NUMBER)
+      {
+         $workCenters = PPTPDatabase::getInstance()->getWorkCentersForJob($jobNumber);
+      }
+      else
+      {
+         $workCenters = PPTPDatabase::getInstance()->getWorkCenters();
+      }
+      
+      foreach ($workCenters as $workCenter)
+      {
+         $wcNumber = intval($workCenter["wcNumber"]);
+         $selected = ($wcNumber == $selectedWcNumber) ? "selected" : "";
+         
+         $html .= "<option value=\"$wcNumber\" $selected>$wcNumber</option>";
+      }
+      
+      return ($html);
+   }
 }
 
 /*
