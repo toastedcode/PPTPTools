@@ -6,11 +6,12 @@ class MachinePartInfo
 {
    const UNKNOWN_PART_ID = 0;
    
-   const UNKNOWN_PART_NUMBER = 0;
+   const UNKNOWN_PART_NUMBER = "";
    
    public $partId;
    public $partNumber;
    public $description;
+   public $inventoryCount;
    
    public function __construct()
    {
@@ -35,7 +36,7 @@ class MachinePartInfo
             $machinePartInfo = new MachinePartInfo();
             
             $machinePartInfo->partId = intval($row['partId']);
-            $machinePartInfo->partNumber = intval($row['partNumber']);
+            $machinePartInfo->partNumber = $row['partNumber'];
             $machinePartInfo->description = $row['description'];
             $machinePartInfo->inventoryCount = intval($row['inventoryCount']);
          }
@@ -44,9 +45,18 @@ class MachinePartInfo
       return ($machinePartInfo);
    }
    
-   public static function getOptions($selectedPartId)
+   public static function getOptions($selectedPartId, $allowNull)
    {
-      $html = "<option style=\"display:none\">";   
+      $html = "";
+      
+      if ($allowNull == true)
+      {
+         $html = "<option value=\"" . MachinePartInfo::UNKNOWN_PART_ID . "\"></option>";
+      }
+      else
+      {
+         $html = "<option style=\"display:none\">";
+      }
       
       $database = PPTPDatabase::getInstance();
       

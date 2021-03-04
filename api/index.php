@@ -2564,11 +2564,17 @@ $router->add("maintenanceLogData", function($params) {
       $endDate = Time::endOfDay($params["endDate"]);
    }
    
+   $wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
+   if (isset($params["wcNumber"]))
+   {
+      $wcNumber = intval($params["wcNumber"]);
+   }
+   
    $database = PPTPDatabase::getInstance();
    
    if ($database && $database->isConnected())
    {
-      $dbaseResult = $database->getMaintenanceEntries($startDate, $endDate, true);  // Use maintenance date
+      $dbaseResult = $database->getMaintenanceEntries($startDate, $endDate, $wcNumber, true);  // Use maintenance date
       
       foreach ($dbaseResult as $row)
       {
@@ -2656,10 +2662,37 @@ $router->add("saveMaintenanceEntry", function($params) {
          $maintenancEntry->maintenanceTime = intval($params["maintenanceTime"]);
          $maintenancEntry->comments = $params["comments"];
          
+         //
          // Optional fields.
+         //
+         
+         if (isset($params["jobNumber"]))
+         {
+            $maintenancEntry->jobNumber = $params["jobNumber"];
+         }
+
          if (isset($params["partId"]))
          {
+            // Use an exisiting part id.
             $maintenancEntry->partId = intval($params["partId"]);
+         }
+         else if ((isset($params["newPartNumber"])) &&
+                  ($params["newPartNumber"] != MachinePartInfo::UNKNOWN_PART_NUMBER) &&
+                  (isset($params["newPartDescription"])))
+         {
+            // Create a new part id.
+            
+            $machinePartInfo = new MachinePartInfo();
+            
+            $machinePartInfo->partNumber = $params["newPartNumber"];
+            $machinePartInfo->description = $params->get("newPartDescription");
+            
+            $dbaseResult = $database->addToPartInventory($machinePartInfo);
+            
+            if ($dbaseResult)
+            {
+               $maintenancEntry->partId = $database->lastInsertId();
+            }
          }
          
          if ($maintenancEntry->maintenanceEntryId == MaintenanceEntry::UNKNOWN_ENTRY_ID)

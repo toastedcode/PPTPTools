@@ -187,6 +187,7 @@ if (!Authentication::isAuthenticated())
                }
             },
             {title:"Techician",   field:"technicianName",            hozAlign:"left", headerFilter:true},            
+            {title:"Job #",       field:"jobNumber",                 hozAlign:"left", headerFilter:true},
             {title:"WC #",        field:"wcNumber",                  hozAlign:"left", headerFilter:true},
             {title:"Maint. Type", field:"maintenanceCategory.maintenanceTypeLabel",  hozAlign:"left", headerFilter:true},
             {title:"Category",    field:"maintenanceCategory.label", hozAlign:"left", headerFilter:true},

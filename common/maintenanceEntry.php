@@ -15,6 +15,7 @@ class MaintenanceEntry
    public $dateTime;
    public $maintenanceDateTime;
    public $employeeNumber;
+   public $jobNumber;
    public $wcNumber;   
    public $categoryId;
    public $maintenanceTime;  // minutes
@@ -27,6 +28,7 @@ class MaintenanceEntry
       $this->dateTime = null;
       $this->maintenanceDateTime = null;
       $this->employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+      $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
       $this->wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
       $this->categoryId = MaintenanceCategory::UNKNOWN_CATEGORY_ID;
       $this->maintenanceTime = 0;  // minutes
@@ -67,6 +69,7 @@ class MaintenanceEntry
             $maintenanceEntry->dateTime= Time::fromMySqlDate($row['dateTime'], "Y-m-d H:i:s");
             $maintenanceEntry->maintenanceDateTime = Time::fromMySqlDate($row['maintenanceDateTime'], "Y-m-d H:i:s");;
             $maintenanceEntry->employeeNumber = intval($row['employeeNumber']);
+            $maintenanceEntry->jobNumber = $row['jobNumber'];
             $maintenanceEntry->wcNumber = intval($row['wcNumber']);
             $maintenanceEntry->categoryId = intval($row['categoryId']);
             $maintenanceEntry->maintenanceTime = intval($row['maintenanceTime']);
@@ -94,6 +97,7 @@ if (isset($_GET["maintenanceEntryId"]))
       echo "dateTime: " .            $maintenanceEntry->dateTime .            "<br/>";
       echo "maintenanceDateTime: " . $maintenanceEntry->maintenanceDateTime . "<br/>";      
       echo "employeeNumber: " .      $maintenanceEntry->employeeNumber .      "<br/>";
+      echo "jobNumber: " .           $maintenanceEntry->jobNumber .           "<br/>";
       echo "wcNumber: " .            $maintenanceEntry->wcNumber .            "<br/>";
       echo "categoryId: " .          $maintenanceEntry->categoryId .          "<br/>";
       echo "maintenanceTime: " .     $maintenanceTime .                       "<br/>";

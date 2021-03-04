@@ -191,6 +191,40 @@ class JobInfo
       return ($jobId);
    }
    
+   static function getJobNumberOptions($selectedJobNumber, $onlyActive, $allowNull)
+   {
+      $html = "";
+      
+      if ($allowNull == true)
+      {
+         $html = "<option value=\"" . JobInfo::UNKNOWN_JOB_NUMBER . "\"></option>";
+      }
+      else
+      {
+         $html = "<option style=\"display:none\">";
+      }
+      
+      $jobNumbers = JobInfo::getJobNumbers($onlyActive);
+      
+      // Add selected job number, if not already in the array.
+      // Note: This handles the case of viewing an entry that references a non-active job.
+      if (($selectedJobNumber != JobInfo::UNKNOWN_JOB_NUMBER) &&
+          (!in_array($selectedJobNumber, $jobNumbers)))
+      {
+         $jobNumbers[] = $selectedJobNumber;
+         sort($jobNumbers);
+      }
+      
+      foreach ($jobNumbers as $jobNumber)
+      {
+         $selected = ($jobNumber == $selectedJobNumber) ? "selected" : "";
+         
+         $html .= "<option value=\"$jobNumber\" $selected>$jobNumber</option>";
+      }
+      
+      return ($html);
+   }
+   
    public static function getWcNumberOptions($jobNumber, $selectedWcNumber)
    {
       $html = "<option style=\"display:none\">";

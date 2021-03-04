@@ -86,7 +86,6 @@ function onDeleteMaintenanceEntry(maintenanceEntryId)
 
 function onMaintenanceTypeChange()
 {
-   console.log("onMaintenanceTypeChange");
    var maintenanceTypeId = parseInt(document.getElementById("maintenance-type-input").value);
    
    hide("repair-type-block");
@@ -98,6 +97,8 @@ function onMaintenanceTypeChange()
    disable("cleaning-type-input");
    
    disable("part-number-input");
+   disable("new-part-number-input");
+   disable("new-part-description-input");
    
    switch (maintenanceTypeId)
    {
@@ -105,7 +106,10 @@ function onMaintenanceTypeChange()
       {
          show("repair-type-block", "block");
          enable("repair-type-input");
+         
          enable("part-number-input", "block");
+         enable("new-part-number-input");
+         enable("new-part-description-input");
          break;
       }
       
@@ -155,6 +159,89 @@ function onYesterdayButton()
    yesterday.setDate(yesterday.getDate() - 1);
    
    document.querySelector('#maintenance-date-input').value = formattedDate(yesterday); 
+}
+
+function onJobNumberChange()
+{
+   jobNumber = document.getElementById("job-number-input").value;
+   console.log(jobNumber);
+   
+   clear("wc-number-input");
+      
+   // Populate WC numbers based on selected job number.
+   
+   // AJAX call to populate WC numbers based on selected job number.
+   requestUrl = "../api/wcNumbers/";
+   if (jobNumber != 0)
+   {
+      requestUrl += "?jobNumber=" + jobNumber;
+   }
+   
+   var xhttp = new XMLHttpRequest();
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {
+         try
+         {            
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               updateWcOptions(json.wcNumbers);               
+            }
+            else
+            {
+               console.log("API call to retrieve WC numbers failed.");
+            }
+         }
+         catch (expection)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }               
+      }
+   };
+   xhttp.open("GET", requestUrl, true);
+   xhttp.send();  
+}
+
+function updateWcOptions(wcNumbers)
+{
+   element = document.getElementById("wc-number-input");
+   
+   while (element.firstChild)
+   {
+      element.removeChild(element.firstChild);
+   }
+
+   for (var wcNumber of wcNumbers)
+   {
+      var option = document.createElement('option');
+      option.innerHTML = wcNumber;
+      option.value = wcNumber;
+      element.appendChild(option);
+   }
+   
+   element.value = null;
+}
+
+function onPartNumberChange()
+{
+   document.getElementById("new-part-number-input").value = null;
+   document.getElementById("new-part-description-input").value = null;
+}
+
+function onNewPartNumberChange()
+{
+   document.getElementById("part-number-input").selectedIndex = -1;
+   document.getElementById("part-number-input").value = null;
+}
+
+function onExistingPartButton()
+{
+   hide("new-part-number-block");
+   show("part-number-block", "flex"); 
 }
 
 function twoDigitNumber(value)
@@ -209,6 +296,14 @@ function validateMaintenanceEntry()
              !(document.getElementById("cleaning-type-input").validator.validate())))             
    {
       alert("Please complete the maintenance type.");    
+   }
+   else if (((document.getElementById("new-part-number-input").value != "") &&
+             (document.getElementById("new-part-description-input").value == "")) ||
+            ((document.getElementById("new-part-description-input").value != "") &&
+             (document.getElementById("new-part-number-input").value == "")))
+   
+   {
+      alert("Please complete all new part info.");    
    }
    else
    {

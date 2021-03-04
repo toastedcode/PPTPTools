@@ -22,10 +22,11 @@ abstract class MaintenanceLogInputField
    const MAINTENANCE_TYPE = 3;
    const MAINTENANCE_CATEGORY = 4;
    const EMPLOYEE_NUMBER = 5;
-   const WC_NUMBER = 6;
-   const PART_NUMBER = 7;
-   const COMMENTS = 8;
-   const LAST = 9;
+   const JOB_NUMBER = 6;
+   const WC_NUMBER = 7;
+   const PART_NUMBER = 8;
+   const COMMENTS = 9;
+   const LAST = 10;
    const COUNT = MaintenanceLogInputField::LAST - MaintenanceLogInputField::FIRST;
 }
 
@@ -291,14 +292,14 @@ if (!Authentication::isAuthenticated())
          <br>
          
          <div class="form-item">
-            <div class="form-label">Entry Date</div>
+            <div class="form-label-long">Entry Date</div>
             <div class="flex-horizontal">
                <input id="entry-date-input" type="date" name="entryDate" form="input-form" oninput="" value="<?php echo getMaintenanceDate(); ?>" <?php echo getDisabled(MaintenanceLogInputField::ENTRY_DATE); ?>>
             </div>
          </div>
          
          <div class="form-item">
-            <div class="form-label">Maintenance Date</div>
+            <div class="form-label-long">Maintenance Date</div>
             <div class="flex-horizontal">
                <input id="maintenance-date-input" type="date" name="maintenanceDate" form="input-form" oninput="" value="<?php echo getMaintenanceDate(); ?>" <?php echo getDisabled(MaintenanceLogInputField::MAINTENANCE_DATE); ?>>
                &nbsp<button id="today-button" class="small-button" <?php echo getDisabled(MaintenanceLogInputField::MAINTENANCE_DATE); ?>>Today</button>
@@ -307,7 +308,7 @@ if (!Authentication::isAuthenticated())
          </div>
          
          <div class="form-item">
-            <div class="form-label">Maintenance Time</div>
+            <div class="form-label-long">Maintenance Time</div>
             <div class="form-col">
                <div class="form-row flex-left">
                   <input id="maintenance-time-hour-input" type="number" class="form-input-medium" form="input-form" name="maintenanceTimeHours" style="width:50px;" oninput="this.validator.validate(); onMaintenanceTimeChange();" value="<?php echo getMaintenanceEntry()->getMaintenanceTimeHours(); ?>" <?php echo getDisabled(MaintenanceLogInputField::MAINTENANCE_TIME); ?> />
@@ -318,7 +319,7 @@ if (!Authentication::isAuthenticated())
          </div>
          
          <div class="form-item">
-            <div class="form-label">Technician</div>
+            <div class="form-label-long">Technician</div>
             <div class="flex-horizontal">
                <select id="employee-number-input" name="employeeNumber" form="input-form" oninput="" <?php echo getDisabled(MaintenanceLogInputField::EMPLOYEE_NUMBER); ?>>
                   <?php echo UserInfo::getOptions([Role::OPERATOR], [Authentication::getAuthenticatedUser()->employeeNumber], getMaintenanceEntry()->employeeNumber); ?>
@@ -327,7 +328,16 @@ if (!Authentication::isAuthenticated())
          </div>
          
          <div class="form-item">
-            <div class="form-label">WC #</div>
+            <div class="form-label-long">Job # &nbsp; <div class="incomplete-indicator">(optional)</div></div>
+            <div class="flex-horizontal">
+               <select id="job-number-input" name="jobNumber" form="input-form" oninput="onJobNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::JOB_NUMBER); ?>>
+                  <?php echo JobInfo::getJobNumberOptions(getMaintenanceEntry()->jobNumber, true, true); ?>
+               </select>
+            </div>
+         </div>         
+         
+         <div class="form-item">
+            <div class="form-label-long">WC #</div>
             <div class="flex-horizontal">
                <select id="wc-number-input" name="wcNumber" form="input-form" oninput="" <?php echo getDisabled(MaintenanceLogInputField::WC_NUMBER); ?>>
                   <?php echo JobInfo::getWcNumberOptions(JobInfo::UNKNOWN_JOB_ID, getMaintenanceEntry()->wcNumber); ?>
@@ -336,7 +346,7 @@ if (!Authentication::isAuthenticated())
          </div>         
          
          <div class="form-item">
-            <div class="form-label">Maintenance Type</div>
+            <div class="form-label-long">Maintenance Type</div>
             <div class="flex-horizontal">
                <select id="maintenance-type-input" name="maintenanceType" form="input-form" oninput="onMaintenanceTypeChange()" <?php echo getDisabled(MaintenanceLogInputField::MAINTENANCE_TYPE); ?>>
                   <?php echo MaintenanceType::getOptions(getMaintenanceType()); ?>
@@ -366,16 +376,44 @@ if (!Authentication::isAuthenticated())
             </div>
          </div>
          
+         <div class="flex-horizontal flex-top">
+         
+         <div id="part-number-block" class="form-item" style="padding-right: 25px;">
+            <div class="form-label-long">Part # &nbsp; <div class="incomplete-indicator">(optional)</div></div>
+            <div class="flex-vertical">
+               <div class="flex-horizontal">
+                  <select id="part-number-input" name="partId" form="input-form" oninput="onPartNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::PART_NUMBER); ?>>
+                     <?php echo MachinePartInfo::getOptions(getMaintenanceEntry()->partId, true); ?>
+                  </select>
+               </div>
+            </div>
+         </div>
+         
+         <!--  Vertical line -->
+         <div style="border-left: 1px solid black; padding-right: 25px; margin-bottom:20px; align-self: stretch"></div>
+
+         <div id="new-part-number-block" class="flex-vertical">
+         
          <div class="form-item">
-            <div class="form-label">Part #</div>
-            <div class="flex-horizontal">
-               <select id="part-number-input" name="partId" form="input-form" oninput="" <?php echo getDisabled(MaintenanceLogInputField::PART_NUMBER); ?>>
-                  <?php echo MachinePartInfo::getOptions(getMaintenanceEntry()->partId); ?>
-               </select>
+            <div class="form-label-long">New Part #</div>
+            <div class="flex-vertical">
+               <div class="flex-horizontal">
+                  <input id="new-part-number-input" type="text" name="newPartNumber" form="input-form" oninput="onNewPartNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::PART_NUMBER); ?> />
+               </div>
             </div>
          </div>
          
          <div class="form-item">
+            <div class="form-label-long">Part Description</div>
+            <input id="new-part-description-input" type="text" name="newPartDescription" form="input-form" oninput="onNewPartNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::PART_NUMBER); ?> />
+         </div>
+         
+         </div>
+         
+         </div>         
+         
+         <div class="form-item">
+            <div class="form-label-long">Comments</div>
             <textarea class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" <?php echo getDisabled(MaintenanceLogInputField::COMMENTS); ?>><?php echo getMaintenanceEntry()->comments; ?></textarea>
          </div>
          
@@ -422,11 +460,12 @@ if (!Authentication::isAuthenticated())
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
 
+      // Show/hide context sensitive inputs.            
+      //onExistingPartButton();
+      onMaintenanceTypeChange();
+      
       // Store the initial state of the form, for change detection.
       setInitialFormState("input-form");
-
-      // Show/hide context sensitive inputs.            
-      onMaintenanceTypeChange();
 
    </script>
 
