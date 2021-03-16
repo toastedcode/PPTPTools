@@ -28,7 +28,9 @@ class Permission
    const EDIT_INSPECTION_TEMPLATE = 22;  
    const VIEW_PRINT_MANAGER       = 23;
    const VIEW_REPORT              = 24;
-   const LAST                     = Permission::VIEW_REPORT;
+   const VIEW_MAINTENANCE_LOG     = 25;
+   const EDIT_MAINTENANCE_LOG     = 26;
+   const LAST                     = Permission::EDIT_MAINTENANCE_LOG;
    
    const NO_PERMISSIONS = 0x00000000;
    const ALL_PERMISSIONS = 0xFFFFFFFF;
@@ -67,7 +69,9 @@ class Permission
                   new Permission(Permission::VIEW_INSPECTION_TEMPLATE, "View inspection template"),
                   new Permission(Permission::EDIT_INSPECTION_TEMPLATE, "Edit inspection template"),               
                   new Permission(Permission::VIEW_PRINT_MANAGER,       "View print manager"),
-                  new Permission(Permission::VIEW_REPORT,              "View reports")
+                  new Permission(Permission::VIEW_REPORT,              "View reports"),
+                  new Permission(Permission::VIEW_MAINTENANCE_LOG,     "View maintenance log"),
+                  new Permission(Permission::EDIT_MAINTENANCE_LOG,     "Edit maintenance log")
             );
       }
       

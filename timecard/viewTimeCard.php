@@ -587,9 +587,13 @@ if (!Authentication::isAuthenticated())
    <meta name="viewport" content="width=device-width, initial-scale=1">
 
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+   <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css<?php echo versionQuery();?>"/>
    
    <link rel="stylesheet" type="text/css" href="../common/theme.css<?php echo versionQuery();?>"/>
    <link rel="stylesheet" type="text/css" href="../common/common.css<?php echo versionQuery();?>"/>
+   
+   <script src="../thirdParty/tabulator/js/tabulator.min.js<?php echo versionQuery();?>"></script>
+   <script src="../thirdParty/moment/moment.min.js<?php echo versionQuery();?>"></script>
    
    <script src="../common/common.js<?php echo versionQuery();?>"></script>
    <script src="../common/validate.js<?php echo versionQuery();?>"></script>
@@ -760,6 +764,13 @@ if (!Authentication::isAuthenticated())
                   </div>
                </div>
                
+               <div class="form-col">
+                  <div class="form-section-header">Maintenance Log</div>
+                  <div class="form-item">
+                     <div id="maintenance-log-table"></div>
+                  </div>
+               </div>
+               
             </div>
 
          </div>
@@ -776,6 +787,94 @@ if (!Authentication::isAuthenticated())
    <script>
    
       preserveSession();
+      
+      function getTableQuery()
+      {
+         return ("<?php echo $ROOT ?>/api/maintenanceLogData/");
+      }
+
+      function getTableQueryParams()
+      {
+         var params = new Object();
+         
+         params.wcNumber =  document.getElementById("wc-number-input").value;
+         
+         params.endDate =  new Date().toLocaleDateString();        // Now
+         
+         params.startDate = new Date();
+         params.startDate.setDate(params.startDate.getDate() - 30);
+         params.startDate = params.startDate.toLocaleDateString();  // A month earlier.
+
+         return (params);
+      }
+      
+      function getTableQuery()
+      {
+         return ("<?php echo $ROOT ?>/api/maintenanceLogData/");
+      }
+      
+      function updateMaintenanceLogTable()
+      {
+         var url = getTableQuery();
+         var params = getTableQueryParams();
+
+         table.setData(url, params)
+         .then(function(){
+            // Run code after table has been successfuly updated
+         })
+         .catch(function(error){
+            // Handle error loading data
+         });
+      }
+
+      var url = getTableQuery();
+      var params = getTableQueryParams();
+      
+      // Create Tabulator on DOM element maintenance-log-table.
+      var table = new Tabulator("#maintenance-log-table", {
+         layout:"fitDataTable",
+         ajaxURL:url,
+         ajaxParams:params,
+         //Define Table Columns
+         columns:[
+            {title:"",            field:"maintenanceEntryId", hozAlign:"center",
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">build</i>");
+               }
+            },
+            {title:"Date",        field:"maintenanceDate\Time",        hozAlign:"left",
+               formatter:"datetime",  // Requires moment.js 
+               formatterParams:{
+                  outputFormat:"MM/DD/YYYY",
+                  invalidPlaceholder:"---"
+               }
+
+            },
+            {title:"Technician",  field:"technicianName", hozAlign:"left"},
+            {title:"Maintenance", field:"maintenanceCategory.label",         hozAlign:"left"},
+            {title:"Comments",    field:"comments",
+               formatter:function(cell, formatterParams, onRendered){
+                  var cellValue = cell.getValue();
+                  if (cellValue.length > 16)
+                  {
+                     cellValue = cellValue.substring(0, 15) + " ...";
+                  }
+                  return (cellValue);
+               }
+            }
+         ],
+         cellClick:function(e, cell){
+            var entryId = parseInt(cell.getRow().getData().maintenanceEntryId);
+
+            if (cell.getColumn().getField() == "maintenanceEntryId")
+            {
+               document.location = "<?php echo $ROOT?>/maintenanceLog/maintenanceLogEntry.php?entryId=" + entryId;
+            }
+         },
+         rowClick:function(e, row){
+            // No row click function needed.
+         },
+      });
       
       function userCanApprove()
       {

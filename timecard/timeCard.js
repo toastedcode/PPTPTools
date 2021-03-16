@@ -110,6 +110,8 @@ function updateWcOptions(wcNumbers)
 function onWcNumberChange()
 {
    updateGrossPartsPerHour();
+   
+   updateMaintenanceLogTable();
 }
 
 function onShiftTimeChange()

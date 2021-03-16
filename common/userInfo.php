@@ -129,6 +129,37 @@ class UserInfo
       return ($this->firstName . " " . $this->lastName);
    }
    
+   public static function getOptions($roles, $includeUsers, $selectedEmployeeNumber)
+   {
+      $html = "<option style=\"display:none\">";
+      
+      $users = [];
+      
+      // Manually add any included users not covered under the specified roles.
+      foreach ($includeUsers as $employeeNumber)
+      {
+         $userInfo = UserInfo::load($employeeNumber);
+         if ($userInfo && !in_array($userInfo->roles, $roles))
+         {
+            $users[] = $userInfo;
+         }
+      }
+
+      // Merge that with all  users that match the roles.
+      $users = array_merge($users, UserInfo::getUsersByRoles($roles));
+
+      // Build the options.
+      foreach ($users as $userInfo)
+      {
+         $fullName = $userInfo->getFullName();
+         $selected = ($userInfo->employeeNumber == $selectedEmployeeNumber) ? "selected" : "";
+         
+         $html .= "<option value=\"$userInfo->employeeNumber\" $selected>$fullName</option>";
+      }
+      
+      return ($html);
+   }
+   
    private function initialize($row)
    {
       $this->employeeNumber = intval($row['employeeNumber']);

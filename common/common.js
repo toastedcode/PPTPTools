@@ -217,6 +217,11 @@ function formatDate(date)
    return (formattedDate);
 }
 
+function formatToTwoDigits(value)
+{
+   return (("0" + value).slice(-2));
+}
+
 function parseBool(value)
 {
    return ((value === true) || (value.toLowerCase() === "true"));
