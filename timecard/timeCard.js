@@ -524,3 +524,88 @@ function unapproveSetupTime(approvedBy)
    
    updateApproval(SETUP_TIME);
 }
+
+function updateRunTimeApproval(timeCardId, isApproved)
+{
+   // AJAX call to approve run time.
+   var isApprovedString = (isApproved ? "true" : "false");
+   requestUrl = "../api/approveRunTime/?timeCardId=" + timeCardId + "&isApproved=" + isApprovedString;
+      
+   var xhttp = new XMLHttpRequest();
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {         
+         try
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               table.updateData([{timeCardId:timeCardId, runTime:json.runTime, runTimeApprovedBy:json.runTimeApprovedBy, runTimeApprovedByName:json.runTimeApprovedByName}])
+               .then(function(){
+                  table.getRow(timeCardId).reformat();
+               })
+               .catch(function(error){
+                  //handle error updating data
+               });
+            }
+            else
+            {
+               console.log("API call to approve run time failed.");
+               alert(json.error);
+            }
+         }
+         catch (expection)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      }
+   };
+   xhttp.open("GET", requestUrl, true);
+   xhttp.send(); 
+}
+
+function updateSetupTimeApproval(timeCardId, isApproved)
+{
+   // AJAX call to approve run time.
+   var isApprovedString = (isApproved ? "true" : "false");
+   requestUrl = "../api/approveSetupTime/?timeCardId=" + timeCardId + "&isApproved=" + isApprovedString;
+      
+   var xhttp = new XMLHttpRequest();
+   xhttp.onreadystatechange = function()
+   {
+      if (this.readyState == 4 && this.status == 200)
+      {         
+         try
+         {
+            var json = JSON.parse(this.responseText);
+            
+            if (json.success == true)
+            {
+               table.updateData([{timeCardId:timeCardId, setupTime:json.setupTime, setupTimeApprovedBy:json.setupTimeApprovedBy, setupTimeApprovedByName:json.setupTimeApprovedByName}])
+               .then(function(){
+                  table.getRow(timeCardId).reformat();
+               })
+               .catch(function(error){
+                  //handle error updating data
+               });
+            }
+            else
+            {
+               console.log("API call to approve run time failed.");
+               alert(json.error);
+            }
+         }
+         catch (expection)
+         {
+            console.log("JSON syntax error");
+            console.log(this.responseText);
+         }
+      }
+   };
+   xhttp.open("GET", requestUrl, true);
+   xhttp.send(); 
+}
+   

@@ -180,6 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       // Create Tabulator on DOM element time-card-table.
       var table = new Tabulator("#time-card-table", {
          //height:500,            // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+         index:"timeCardId",
          layout:"fitData",
          responsiveLayout:"hide",   // enable responsive layouts
          cellVertAlign:"middle",
@@ -263,6 +264,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 }                
             },
             {title:"Run Time",     field:"runTime",         hozAlign:"left", responsive:1, print:true,
+               contextMenu:function(component){
+                  var menu = [];
+
+                  if (component.getRow().getData().runTimeRequiresApproval)
+                  {
+                     menu.push({
+                        label:"Approve",
+                        action:function(e, cell){
+                           updateRunTimeApproval(component.getRow().getData().timeCardId, true);
+                        }
+                     });
+                     
+                     menu.push({
+                        label:"Disapprove",
+                        action:function(e, cell){
+                           updateRunTimeApproval(component.getRow().getData().timeCardId, false);
+                        }
+                     });
+                  }
+                  
+                  return (menu);
+               },
                formatter:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
@@ -286,7 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   }     
                   
                   return (cellValue);
-                },
+               },
                formatterPrint:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());
@@ -307,6 +330,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 }                
             },
             {title:"Setup Time",   field:"setupTime",       hozAlign:"left", responsive:2, print:true,
+               contextMenu:function(component){
+                  var menu = [];
+
+                  if (component.getRow().getData().setupTimeRequiresApproval)
+                  {
+                     menu.push({
+                        label:"Approve",
+                        action:function(e, cell){
+                           updateSetupTimeApproval(component.getRow().getData().timeCardId, true);
+                        }
+                     });
+                     
+                     menu.push({
+                        label:"Disapprove",
+                        action:function(e, cell){
+                           updateSetupTimeApproval(component.getRow().getData().timeCardId, false);
+                        }
+                     });
+                  }
+                  
+                  return (menu);
+               },            
                formatter:function(cell, formatterParams, onRendered){
 
                   var minutes = parseInt(cell.getValue());

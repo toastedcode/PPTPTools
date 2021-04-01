@@ -365,7 +365,7 @@ class WeeklySummaryReport
          
          $stats->day              = WorkDay::getLabel($workDay);
          $stats->date             = $this->dates[$workDay];
-         $stats->runTime          = $operatorSummary->runTime;
+         $stats->runTime          = $operatorSummary->adjustedTopRunTime;
          $stats->efficiency       = round($operatorSummary->adjustedTopEfficiency * 100, 2);
          $stats->machineHoursMade = round($operatorSummary->machineHoursMade, 2);
          $stats->ratio            = round($operatorSummary->ratio, 2);

@@ -465,7 +465,7 @@ class OperatorSummary
       
       $this->adjustedTopRunTime = OperatorSummary::calculateRunTime($this->adjustedEntries->topEntries);
       
-      $this->machineHoursMade = OperatorSummary::calculateMachineHoursMade($this->adjustedEntries->topEntries);
+      $this->machineHoursMade = OperatorSummary::calculateMachineHoursMade(array_merge($this->adjustedEntries->topEntries, $this->adjustedEntries->bottomEntries));
       
       $this->adjustedBottomPCOverG = OperatorSummary::calculatePcOverG($this->adjustedEntries->bottomEntries);
       
@@ -497,7 +497,7 @@ class OperatorSummary
       
       foreach ($reportEntries as $reportEntry)
       {
-         $runTime += $reportEntry->timeCardInfo->getApprovedRunTime();
+         $runTime += $reportEntry->runTime;
       }
       
       return ($runTime);
@@ -540,87 +540,116 @@ class OperatorSummary
    
    private static function getAdjustedEntries($topEntries, $bottomEntries, $targetEfficiency)
    {
-      // Algorithm:
-      // - Get top report entries.
-      // - Get remaining (bottom) report entries.
-      // - For each of the top entries ...
-      //    - If the efficiency is less that the target
-      //       - Create an additional "top" entry that pulls parts (and gross parts) from the bottom entries,
-      //         and hours from the top entries, such that the new efficiency of the entry equals the target efficiency.
-      
       $adjustedEntries = new stdClass();
       
+      // Create copies of the top and bottom entries.
       $adjustedEntries->topEntries = array_copy($topEntries);
       $adjustedEntries->bottomEntries = array_copy($bottomEntries);
       
-      // Check if there are any machines to "borrow" from.
-      if (count($adjustedEntries->bottomEntries) > 0)
+      // If there are entries to adjust (top) and if there are entries to backfill from (bottom) ...
+      if ((count($adjustedEntries->topEntries) > 0) &&
+          (count($adjustedEntries->bottomEntries) > 0))
       {
-         // Create a new report entry, starting with the first "bottom" entry.
-         $additionalReportEntry = clone $adjustedEntries->bottomEntries[0];
-         $additionalReportEntry->runTime = 0;
-         $additionalReportEntry->partCount = 0;
+         $topIndex = 0;
          
-         foreach ($adjustedEntries->topEntries  as $reportEntry)
+         // Loop over the top entries until all have been adjusted, or the weighted average efficiency meets the target.
+         while (($topIndex < count($adjustedEntries->topEntries)) &&
+                (OperatorSummary::calculateAverageEfficiency($adjustedEntries->topEntries) < $targetEfficiency))
          {
-            if ($reportEntry->efficiency < $targetEfficiency)
+            if ($adjustedEntries->topEntries[$topIndex]->efficiency < $targetEfficiency)
             {
-               // Calculate the number of hours to "borrow".
-               $adjustedHours = OperatorSummary::getAdjustedHours($reportEntry, $targetEfficiency);
-               
-               // Move hours from top entry to new entry.
-               $reportEntry->runTime -= $adjustedHours;
-               $additionalReportEntry->runTime += $adjustedHours;
-               
-               // Calculate the number of parts to "borrow".
-               $adjustedPartCount = OperatorSummary::getAdjustedPartCount($additionalReportEntry, $adjustedEntries->bottomEntries[0], $targetEfficiency);
-               
-               // Move part counts from bottom entry to new entry.
-               $adjustedEntries->bottomEntries[0]->partCount -= $adjustedPartCount;
-               $additionalReportEntry->partCount += $adjustedPartCount;
-               
-               // Recalculate.
-               $reportEntry->recalculate();
-               $adjustedEntries->bottomEntries[0]->recalculate();
-               $additionalReportEntry->recalculate();
+               // Try and create a new "top" entry by backfilling parts from a bottom entry.
+               // Note: $topEntries and $bottomEntries are modified by this function.
+               OperatorSummary::backfill($topEntries[0]->userInfo->employeeNumber, $adjustedEntries->topEntries[$topIndex], 
+                                         $adjustedEntries->topEntries, 
+                                         $adjustedEntries->bottomEntries, 
+                                         $targetEfficiency);
             }
+            
+            $topIndex++;
          }
-         
-         // Add the new report entry.
-         $adjustedEntries->topEntries[] = $additionalReportEntry;
       }
       
       return ($adjustedEntries);
    }
    
-   private static function getAdjustedHours($reportEntry, $targetEfficiency)
+   private static function backfill($employeeNumber, &$topEntry, &$topEntries, &$bottomEntries, $targetEfficiency)
+   {
+      // Calculate the runtime that can be deducted from this entry in order to make it meet the target efficiency.
+      $adjustedHours = OperatorSummary::getAdjustedHours($topEntry->runTime, 
+                                                         $topEntry->partCount, 
+                                                         $topEntry->jobInfo->grossPartsPerHour, 
+                                                         $targetEfficiency);
+      
+      $backfilled = false;
+      
+      // Search the bottom entry for parts to backfill.
+      foreach ($bottomEntries as $bottomEntry)
+      {
+         if ($bottomEntry->partCount > 0)
+         {
+            // Create a new "top" entry using the deducted time and part counts from the bottom entry.
+            $backfillEntry = OperatorSummary::createBackfillEntry($bottomEntry, $adjustedHours, $targetEfficiency);
+            
+            if ($backfillEntry)
+            {
+               $topEntries[] = $backfillEntry;
+               $backfilled = true;
+               break;
+            }
+         }
+      }
+      
+      if ($backfilled)
+      {
+         $topEntry->runTime -= $adjustedHours;
+         $topEntry->recalculate();
+      }
+   }
+   
+   private static function createBackfillEntry(&$bottomEntry, $adjustedHours, $targetEfficiency)
+   {
+      // Start by copying the bottom entry, but using the adjusted run time.
+      $backfillEntry = clone $bottomEntry;
+      $backfillEntry->runTime = $adjustedHours;
+      
+      // Calculate the part count needed to make this entry meet the target efficiency.
+      $adjustedPartCount = OperatorSummary::getAdjustedPartCount($adjustedHours, 
+                                                                 $bottomEntry->partCount, 
+                                                                 $backfillEntry->jobInfo->grossPartsPerHour, 
+                                                                 $targetEfficiency);
+      
+      // Set part count in the backfilled entry.
+      $backfillEntry->partCount = $adjustedPartCount;
+      $backfillEntry->recalculate();
+      
+      // Deduct that part count from the bottom entry.
+      $bottomEntry->partCount -= $adjustedPartCount;
+      $bottomEntry->recalculate();
+      
+      return ($backfillEntry);
+   }
+      
+   private static function getAdjustedHours($runTime, $partCount, $grossPartsPerHour, $targetEfficiency)
    {
       $adjustedHours = 0;
       
-      if ($reportEntry->jobInfo->grossPartsPerHour > 0)
+      if ($grossPartsPerHour > 0)
       {
-         if (true) //($reportEntry->efficiency > $targetEfficiency) TODO
-         {
-            $adjustedHours = $reportEntry->runTime - ($reportEntry->partCount / ($reportEntry->jobInfo->grossPartsPerHour * $targetEfficiency));
-            $adjustedHours = Calculations::roundUpToNearestQuarter($adjustedHours);
-         }
-         else
-         {
-            // TODO:
-            $adjustedHours = Calculations::roundUpToNearestQuarter($reportEntry->runTime / 2);
-         }
+         $adjustedHours = $runTime - ($partCount / ($grossPartsPerHour * $targetEfficiency));
+         $adjustedHours = Calculations::roundUpToNearestQuarter($adjustedHours);
       }
       
       return ($adjustedHours);
    }
    
-   private static function getAdjustedPartCount($topReportEntry, $bottomReportEntry, $targetEfficiency)
+   private static function getAdjustedPartCount($runTime, $partCount, $grossPartsPerHour, $targetEfficiency)
    {
-      $adjustedPartCount = ceil($targetEfficiency * ($topReportEntry->runTime * $topReportEntry->jobInfo->grossPartsPerHour));
+      $adjustedPartCount = ceil($targetEfficiency * ($runTime * $grossPartsPerHour));
       
-      if ($adjustedPartCount > $bottomReportEntry->partCount)
+      if ($adjustedPartCount > $partCount)
       {
-         $adjustedPartCount = $bottomReportEntry->partCount;
+         $adjustedPartCount = $partCount;
       }
       
       return ($adjustedPartCount);
@@ -726,7 +755,7 @@ class ShopSummary
       
       foreach ($operatorSummaries as $operatorSummary)
       {
-         $runTime += $operatorSummary->runTime;   
+         $runTime += $operatorSummary->adjustedTopRunTime;   
       }
       
       return ($runTime);
@@ -896,7 +925,7 @@ class DailySummaryReport
             // Source data.
             $row->timeCardId =           $reportEntry->timeCardInfo->timeCardId;
             $row->panTicketCode =        PanTicket::getPanTicketCode($reportEntry->timeCardInfo->timeCardId);
-            $row->manufactureDate =      $reportEntry->timeCardInfo->dateTime;
+            $row->manufactureDate =      $reportEntry->timeCardInfo->manufactureDate;
             $row->operator =             $reportEntry->userInfo->getFullName();
             $row->employeeNumber =       $reportEntry->userInfo->employeeNumber;
             $row->jobNumber =            $reportEntry->jobInfo->jobNumber;
@@ -968,20 +997,17 @@ class DailySummaryReport
          
          $row->operator = $userInfo->getFullName();
          $row->employeeNumber = $userInfo->employeeNumber;
-         $row->runTime = $operatorSummary->runTime;  // use approved run time
+         $row->runTime = $operatorSummary->adjustedTopRunTime;
          $row->efficiency = round($operatorSummary->efficiency * 100, 2);
          $row->topEfficiency = round($operatorSummary->topEfficiency * 100, 2);
          $row->adjustedTopEfficiency = round($operatorSummary->adjustedTopEfficiency * 100, 2);
          
-         if (count($operatorSummary->adjustedEntries->topEntries) == 3)
+         $row->adjustedPartCount = 0;
+         $row->adjustedHours = 0;
+         for ($i = 2; $i < count($operatorSummary->adjustedEntries->topEntries); $i++)
          {
-            $row->adjustedPartCount = $operatorSummary->adjustedEntries->topEntries[2]->partCount;
-            $row->adjustedHours = $operatorSummary->adjustedEntries->topEntries[2]->runTime;
-         }
-         else 
-         {
-            $row->adjustedPartCount = 0;
-            $row->adjustedHours = 0;
+            $row->adjustedPartCount += $operatorSummary->adjustedEntries->topEntries[$i]->partCount;
+            $row->adjustedHours += $operatorSummary->adjustedEntries->topEntries[$i]->runTime;
          }
          
          $row->adjustedBottomPCOverG = round($operatorSummary->adjustedBottomPCOverG, 2);

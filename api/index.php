@@ -955,6 +955,138 @@ $router->add("deleteTimeCard", function($params) {
    echo json_encode($result);
 });
 
+$router->add("approveRunTime", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["timeCardId"]) &&
+       isset($params["isApproved"]))
+   {
+      $timeCardId = intval($params["timeCardId"]);
+      $isApproved = filter_var($params["isApproved"], FILTER_VALIDATE_BOOLEAN);
+      
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      
+      if ($timeCardInfo)
+      {
+         if ($timeCardInfo->requiresRunTimeApproval())
+         {
+            if ($isApproved)
+            {
+               $timeCardInfo->runTimeApprovedBy = Authentication::getAuthenticatedUser()->employeeNumber;
+               $timeCardInfo->runTimeApprovedDateTime = Time::now("Y-m-d H:i:s");
+            }
+            else
+            {
+               $timeCardInfo->runTimeApprovedBy = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+               $timeCardInfo->runTimeApprovedDateTime = null;
+            }
+            
+            if ($database->updateTimeCard($timeCardInfo))
+            {
+               $result->timeCardId = $timeCardInfo->timeCardId;
+               $result->runTime = $timeCardInfo->runTime;
+               if ($isApproved)
+               {
+                  $result->runTimeApprovedBy = $timeCardInfo->runTimeApprovedBy;
+                  $result->runTimeApprovedByName = Authentication::getAuthenticatedUser()->getFullName();
+               }
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "Database query failed.";
+            }
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "No approval required.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing time card found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
+$router->add("approveSetupTime", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+   
+   $database = PPTPDatabase::getInstance();
+   
+   if (isset($params["timeCardId"]) &&
+       isset($params["isApproved"]))
+   {
+      $timeCardId = intval($params["timeCardId"]);
+      $isApproved = filter_var($params["isApproved"], FILTER_VALIDATE_BOOLEAN);
+      
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      
+      if ($timeCardInfo)
+      {
+         if ($timeCardInfo->requiresSetupTimeApproval())
+         {
+            if ($isApproved)
+            {
+               $timeCardInfo->setupTimeApprovedBy = Authentication::getAuthenticatedUser()->employeeNumber;
+               $timeCardInfo->setupTimeApprovedDateTime = Time::now("Y-m-d H:i:s");
+            }
+            else
+            {
+               $timeCardInfo->setupTimeApprovedBy = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
+               $timeCardInfo->setupTimeApprovedDateTime = null;
+            }
+            
+            if ($database->updateTimeCard($timeCardInfo))
+            {
+               $result->timeCardId = $timeCardInfo->timeCardId;
+               $result->setupTime = $timeCardInfo->setupTime;
+               if ($isApproved)
+               {
+                  $result->setupTimeApprovedBy = $timeCardInfo->setupTimeApprovedBy;
+                  $result->setupTimeApprovedByName = Authentication::getAuthenticatedUser()->getFullName();
+               }
+            }
+            else
+            {
+               $result->success = false;
+               $result->error = "Database query failed.";
+            }
+         }
+         else
+         {
+            $result->success = false;
+            $result->error = "No approval required.";
+         }
+      }
+      else
+      {
+         $result->success = false;
+         $result->error = "No existing time card found.";
+      }
+   }
+   else
+   {
+      $result->success = false;
+      $result->error = "Missing parameters.";
+   }
+   
+   echo json_encode($result);
+});
+
 $router->add("partWasherLogData", function($params) {
    $result = array();
    
