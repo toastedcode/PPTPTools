@@ -189,6 +189,24 @@ class PPTPDatabase extends MySqlDatabase
    }
    
    // **************************************************************************
+   //                               Equipmenet
+   // **************************************************************************
+
+   public function getEquipments()  // Bad grammar, but whatever.
+   {
+      $result = $this->query("SELECT * FROM equipment ORDER BY equipmentId ASC");
+
+      return ($result);
+   }
+   
+   public function getEquipment($equipmentId)
+   {
+      $result = $this->query("SELECT * FROM equipment WHERE equipmentId = $equipmentId;");
+
+      return ($result);
+   }
+   
+   // **************************************************************************
    //                                Time Cards
    // **************************************************************************
    
@@ -1684,9 +1702,9 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "INSERT INTO maintenance " .
-      "(dateTime, maintenanceDateTime, employeeNumber, categoryId, jobNumber, wcNumber, maintenanceTime, partId, comments) " .
+      "(dateTime, maintenanceDateTime, employeeNumber, categoryId, jobNumber, wcNumber, equipmentId, maintenanceTime, partId, comments) " .
       "VALUES " .
-      "('$dateTime', '$maintenanceDateTime', '$maintenanceEntry->employeeNumber', '$maintenanceEntry->categoryId', '$maintenanceEntry->jobNumber', '$maintenanceEntry->wcNumber', '$maintenanceEntry->maintenanceTime', '$maintenanceEntry->partId', '$maintenanceEntry->comments');";
+      "('$dateTime', '$maintenanceDateTime', '$maintenanceEntry->employeeNumber', '$maintenanceEntry->categoryId', '$maintenanceEntry->jobNumber', '$maintenanceEntry->wcNumber', '$maintenanceEntry->equipmentId', '$maintenanceEntry->maintenanceTime', '$maintenanceEntry->partId', '$maintenanceEntry->comments');";
 
       $result = $this->query($query);
       
@@ -1701,7 +1719,7 @@ class PPTPDatabase extends MySqlDatabase
       
       $query =
       "UPDATE maintenance " .
-      "SET dateTime = \"$dateTime\", maintenanceDateTime = \"$maintenanceDateTime\", employeeNumber = $maintenanceEntry->employeeNumber, categoryId = $maintenanceEntry->categoryId, jobNumber = '$maintenanceEntry->jobNumber', wcNumber = $maintenanceEntry->wcNumber, maintenanceTime = $maintenanceEntry->maintenanceTime, partId = $maintenanceEntry->partId, comments = \"$maintenanceEntry->comments\" " .
+      "SET dateTime = \"$dateTime\", maintenanceDateTime = \"$maintenanceDateTime\", employeeNumber = $maintenanceEntry->employeeNumber, categoryId = $maintenanceEntry->categoryId, jobNumber = '$maintenanceEntry->jobNumber', wcNumber = $maintenanceEntry->wcNumber, equipmentId = $maintenanceEntry->equipmentId, maintenanceTime = $maintenanceEntry->maintenanceTime, partId = $maintenanceEntry->partId, comments = \"$maintenanceEntry->comments\" " .
       "WHERE maintenanceEntryId = $maintenanceEntry->maintenanceEntryId;";
 
       $result = $this->query($query);

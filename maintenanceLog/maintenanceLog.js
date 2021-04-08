@@ -163,12 +163,16 @@ function onYesterdayButton()
 
 function onJobNumberChange()
 {
-   jobNumber = document.getElementById("job-number-input").value;
-   console.log(jobNumber);
-   
    clear("wc-number-input");
+   clear("equipment-input");
       
    // Populate WC numbers based on selected job number.
+   reloadWCNumbers();
+}
+
+function reloadWCNumbers()
+{
+   jobNumber = document.getElementById("job-number-input").value;
    
    // AJAX call to populate WC numbers based on selected job number.
    requestUrl = "../api/wcNumbers/";
@@ -203,7 +207,7 @@ function onJobNumberChange()
       }
    };
    xhttp.open("GET", requestUrl, true);
-   xhttp.send();  
+   xhttp.send(); 
 }
 
 function updateWcOptions(wcNumbers)
@@ -224,6 +228,21 @@ function updateWcOptions(wcNumbers)
    }
    
    element.value = null;
+}
+
+function onWCNumberChange()
+{
+   //document.getElementById("equipment-input").selectedIndex = -1;
+   //document.getElementById("equipment-input").value = null;
+   clear("equipment-input");
+}
+
+function onEquipmentChange()
+{
+   clear("job-number-input");
+   
+   // Populate WC numbers based on cleared job number.
+   reloadWCNumbers();
 }
 
 function onPartNumberChange()
@@ -280,7 +299,8 @@ function validateMaintenanceEntry()
    {
       alert("Please select a technician.");    
    }
-   else if (!(document.getElementById("wc-number-input").validator.validate()))
+   else if (!(document.getElementById("wc-number-input").validator.validate()) &&
+            !(document.getElementById("equipment-input").validator.validate()))
    {
       alert("Please select a work center.");    
    }

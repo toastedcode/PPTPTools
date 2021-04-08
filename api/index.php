@@ -1275,19 +1275,27 @@ $router->add("savePartWasherEntry", function($params) {
             $partWasherEntry->panCount = intval($params["panCount"]);
             $partWasherEntry->partCount = intval($params["partCount"]);
             
-            if ($partWasherEntry->partWasherEntryId == PartWasherEntry::UNKNOWN_ENTRY_ID)
+            if ($partWasherEntry->validatePartCount() == false)
             {
-               $dbaseResult = $database->newPartWasherEntry($partWasherEntry);
+               $result->success = false;
+               $result->error = "Unreasonable part count.  Please check this value for errors.";
             }
             else
             {
-               $dbaseResult = $database->updatePartWasherEntry($partWasherEntry);
-            }
-            
-            if (!$dbaseResult)
-            {
-               $result->success = false;
-               $result->error = "Database query failed.";
+               if ($partWasherEntry->partWasherEntryId == PartWasherEntry::UNKNOWN_ENTRY_ID)
+               {
+                  $dbaseResult = $database->newPartWasherEntry($partWasherEntry);
+               }
+               else
+               {
+                  $dbaseResult = $database->updatePartWasherEntry($partWasherEntry);
+               }
+               
+               if (!$dbaseResult)
+               {
+                  $result->success = false;
+                  $result->error = "Database query failed.";
+               }
             }
          }
          else
@@ -1535,19 +1543,27 @@ $router->add("savePartWeightEntry", function($params) {
             $partWeightEntry->panCount = intval($params["panCount"]);
             $partWeightEntry->weight = floatval($params["partWeight"]);
             
-            if ($partWeightEntry->partWeightEntryId == PartWeightEntry::UNKNOWN_ENTRY_ID)
+            if ($partWeightEntry->validatePartCount() == false)
             {
-               $dbaseResult = $database->newPartWeightEntry($partWeightEntry);
+               $result->success = false;
+               $result->error = "Unreasonable part weight.  Please check this value for errors.";
             }
             else
             {
-               $dbaseResult = $database->updatePartWeightEntry($partWeightEntry);
-            }
-            
-            if (!$dbaseResult)
-            {
-               $result->success = false;
-               $result->error = "Database query failed.";
+               if ($partWeightEntry->partWeightEntryId == PartWeightEntry::UNKNOWN_ENTRY_ID)
+               {
+                  $dbaseResult = $database->newPartWeightEntry($partWeightEntry);
+               }
+               else
+               {
+                  $dbaseResult = $database->updatePartWeightEntry($partWeightEntry);
+               }
+               
+               if (!$dbaseResult)
+               {
+                  $result->success = false;
+                  $result->error = "Database query failed.";
+               }
             }
          }
          else
@@ -2719,6 +2735,20 @@ $router->add("maintenanceLogData", function($params) {
             {
                $maintenanceEntry->technicianName = $userInfo->getFullName();
             }
+            
+            $maintenanceEntry->equipmentName = "";
+            if ($maintenanceEntry->wcNumber != JobInfo::UNKNOWN_WC_NUMBER)
+            {
+               $maintenanceEntry->equipmentName = $maintenanceEntry->wcNumber;
+            }
+            else if ($maintenanceEntry->equipmentId != EquipmentInfo::UNKNOWN_EQUIPMENT_ID)
+            {
+               $equipmentInfo = EquipmentInfo::load($maintenanceEntry->equipmentId);
+               if ($equipmentInfo)
+               {
+                  $maintenanceEntry->equipmentName = $equipmentInfo->name;
+               }
+            }
 
             $maintenanceCategory = MaintenanceCategory::load($maintenanceEntry->categoryId);
             if ($maintenanceCategory)
@@ -2781,7 +2811,7 @@ $router->add("saveMaintenanceEntry", function($params) {
    {
       if (isset($params["maintenanceDate"]) &&
           isset($params["employeeNumber"]) &&
-          isset($params["wcNumber"]) &&
+          (isset($params["wcNumber"]) || isset($params["equipmentId"])) &&
           isset($params["categoryId"]) &&
           isset($params["maintenanceTime"]) &&
           isset($params["comments"]))
@@ -2789,7 +2819,8 @@ $router->add("saveMaintenanceEntry", function($params) {
          // Required fields.
          $maintenancEntry->maintenanceDateTime = Time::startOfDay($params->get("maintenanceDate"));
          $maintenancEntry->employeeNumber = intval($params["employeeNumber"]);
-         $maintenancEntry->wcNumber = $params["wcNumber"];
+         $maintenancEntry->wcNumber = isset($params["wcNumber"]) ? intval($params["wcNumber"]) : JobInfo::UNKNOWN_WC_NUMBER;
+         $maintenancEntry->equipmentId = isset($params["equipmentId"]) ? intval($params["equipmentId"]) : EquipmentInfo::UNKNOWN_EQUIPMENT_ID;
          $maintenancEntry->categoryId = intval($params["categoryId"]);
          $maintenancEntry->maintenanceTime = intval($params["maintenanceTime"]);
          $maintenancEntry->comments = $params["comments"];
@@ -2802,28 +2833,39 @@ $router->add("saveMaintenanceEntry", function($params) {
          {
             $maintenancEntry->jobNumber = $params["jobNumber"];
          }
+         else
+         {
+            // Clear the value.
+            $maintenancEntry->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
+         }
 
          if (isset($params["partId"]))
          {
             // Use an exisiting part id.
             $maintenancEntry->partId = intval($params["partId"]);
          }
-         else if ((isset($params["newPartNumber"])) &&
-                  ($params["newPartNumber"] != MachinePartInfo::UNKNOWN_PART_NUMBER) &&
-                  (isset($params["newPartDescription"])))
+         else
          {
-            // Create a new part id.
+            // Clear the value.
+            $maintenancEntry->partId = MachinePartInfo::UNKNOWN_PART_ID;
             
-            $machinePartInfo = new MachinePartInfo();
-            
-            $machinePartInfo->partNumber = $params["newPartNumber"];
-            $machinePartInfo->description = $params->get("newPartDescription");
-            
-            $dbaseResult = $database->addToPartInventory($machinePartInfo);
-            
-            if ($dbaseResult)
+            if ((isset($params["newPartNumber"])) &&
+                ($params["newPartNumber"] != MachinePartInfo::UNKNOWN_PART_NUMBER) &&
+                (isset($params["newPartDescription"])))
             {
-               $maintenancEntry->partId = $database->lastInsertId();
+               // Create a new part id.
+               
+               $machinePartInfo = new MachinePartInfo();
+               
+               $machinePartInfo->partNumber = $params["newPartNumber"];
+               $machinePartInfo->description = $params->get("newPartDescription");
+               
+               $dbaseResult = $database->addToPartInventory($machinePartInfo);
+               
+               if ($dbaseResult)
+               {
+                  $maintenancEntry->partId = $database->lastInsertId();
+               }
             }
          }
          

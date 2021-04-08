@@ -157,6 +157,52 @@ class PartWeightEntry
       
       return ($panCount);
    }
+   
+   public function validatePartCount()
+   {
+      $isValid = true;
+      
+      $grossPartsPerHour = 0;
+      $runTime = 0;  // hours
+      
+      if ($this->timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+      {
+         // Perform validation based on run time and the job's gross parts per hour.
+         
+         $timeCardInfo = TimeCardInfo::load($this->timeCardId);
+         if ($timeCardInfo)
+         {
+            $jobInfo = JobInfo::load($timeCardInfo->jobId);
+            if ($jobInfo)
+            {
+               $runTime = $timeCardInfo->getRunTimeHours();
+               $grossPartsPerHour = $jobInfo->grossPartsPerHour;
+            }
+         }
+      }
+      else if ($this->jobId != JobInfo::UNKNOWN_JOB_ID)
+      {
+         // Perform validation based on a MAX_SHIFT_TIME and the job's gross parts per hour.
+         
+         $jobInfo = JobInfo::load($this->jobId);
+         if ($jobInfo)
+         {
+            $runTime = TimeCardInfo::MAX_SHIFT_HOURS;
+            $grossPartsPerHour = $jobInfo->grossPartsPerHour;
+         }
+      }
+      
+      if ($grossPartsPerHour > 0)
+      {
+         $partCount = $this->calculatePartCount();
+         
+         $grossParts = Calculations::calculateGrossParts($runTime, $grossPartsPerHour);
+         
+         $isValid = Calculations::isReasonablePartCount($partCount, $grossParts);
+      }
+      
+      return ($isValid);
+   }
 }
 
 /*

@@ -327,23 +327,43 @@ if (!Authentication::isAuthenticated())
             </div>
          </div>
          
-         <div class="form-item">
-            <div class="form-label-long">Job # &nbsp; <div class="incomplete-indicator">(optional)</div></div>
-            <div class="flex-horizontal">
-               <select id="job-number-input" name="jobNumber" form="input-form" oninput="onJobNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::JOB_NUMBER); ?>>
-                  <?php echo JobInfo::getJobNumberOptions(getMaintenanceEntry()->jobNumber, true, true); ?>
-               </select>
-            </div>
-         </div>         
+         <div class="flex-horizontal flex-top">
          
-         <div class="form-item">
-            <div class="form-label-long">WC #</div>
-            <div class="flex-horizontal">
-               <select id="wc-number-input" name="wcNumber" form="input-form" oninput="" <?php echo getDisabled(MaintenanceLogInputField::WC_NUMBER); ?>>
-                  <?php echo JobInfo::getWcNumberOptions(JobInfo::UNKNOWN_JOB_ID, getMaintenanceEntry()->wcNumber); ?>
-               </select>
+            <div class="flex-vertical flex-top"  style="padding-right: 25px;">
+         
+               <div class="form-item">
+                  <div class="form-label-long">Job # &nbsp; <div class="incomplete-indicator">(optional)</div></div>
+                  <div class="flex-horizontal">
+                     <select id="job-number-input" name="jobNumber" form="input-form" oninput="onJobNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::JOB_NUMBER); ?>>
+                        <?php echo JobInfo::getJobNumberOptions(getMaintenanceEntry()->jobNumber, true, true); ?>
+                     </select>
+                  </div>
+               </div>
+         
+               <div class="form-item">
+                  <div class="form-label-long">WC #</div>
+                  <div class="flex-horizontal">
+                     <select id="wc-number-input" name="wcNumber" form="input-form" oninput="onWCNumberChange()" <?php echo getDisabled(MaintenanceLogInputField::WC_NUMBER); ?>>
+                        <?php echo JobInfo::getWcNumberOptions(JobInfo::UNKNOWN_JOB_ID, getMaintenanceEntry()->wcNumber); ?>
+                     </select>
+                  </div>
+               </div>
+               
             </div>
-         </div>         
+            
+            <!--  Vertical line -->
+            <div style="border-left: 1px solid black; padding-right: 25px; margin-bottom:20px; align-self: stretch"></div>
+            
+            <div class="form-item">
+               <div class="form-label-long">Support equipment</div>
+               <div class="flex-horizontal">
+                  <select id="equipment-input" name="equipmentId" form="input-form" oninput="onEquipmentChange()" <?php echo getDisabled(MaintenanceLogInputField::WC_NUMBER); ?>>
+                     <?php echo EquipmentInfo::getEquipmentOptions(getMaintenanceEntry()->equipmentId); ?>
+                  </select>
+               </div>
+            </div>
+            
+         </div>
          
          <div class="form-item">
             <div class="form-label-long">Maintenance Type</div>
@@ -436,6 +456,7 @@ if (!Authentication::isAuthenticated())
       var maintenanceTimeMinuteValidator = new IntValidator("maintenance-time-minute-input", 2, 0, 59, true);  
       var employeeNumberValidator = new SelectValidator("employee-number-input");
       var wcNumberValidator = new SelectValidator("wc-number-input");
+      var equipmentValidator = new SelectValidator("equipment-input");
       var maintenanceTypeValidator = new SelectValidator("maintenance-type-input");
       var repairTypeValidator = new SelectValidator("repair-type-input");
       var preventativeTypeValidator = new SelectValidator("preventative-type-input");
@@ -446,6 +467,7 @@ if (!Authentication::isAuthenticated())
       maintenanceTimeMinuteValidator.init();
       employeeNumberValidator.init();
       wcNumberValidator.init();
+      equipmentValidator.init();
       maintenanceTypeValidator.init();
       repairTypeValidator.init();
       preventativeTypeValidator.init();

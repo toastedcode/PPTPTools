@@ -1,5 +1,6 @@
 <?php
 
+require_once 'equipmentInfo.php';
 require_once 'jobInfo.php';
 require_once 'machinePartInfo.php';
 require_once 'maintenanceCategory.php';
@@ -17,6 +18,7 @@ class MaintenanceEntry
    public $employeeNumber;
    public $jobNumber;
    public $wcNumber;   
+   public $equipmentId;
    public $categoryId;
    public $maintenanceTime;  // minutes
    public $partId;
@@ -30,6 +32,7 @@ class MaintenanceEntry
       $this->employeeNumber = UserInfo::UNKNOWN_EMPLOYEE_NUMBER;
       $this->jobNumber = JobInfo::UNKNOWN_JOB_NUMBER;
       $this->wcNumber = JobInfo::UNKNOWN_WC_NUMBER;
+      $this->equipmentId = EquipmentInfo::UNKNOWN_EQUIPMENT_ID;
       $this->categoryId = MaintenanceCategory::UNKNOWN_CATEGORY_ID;
       $this->maintenanceTime = 0;  // minutes
       $this->partId = MachinePartInfo::UNKNOWN_PART_ID;
@@ -71,6 +74,7 @@ class MaintenanceEntry
             $maintenanceEntry->employeeNumber = intval($row['employeeNumber']);
             $maintenanceEntry->jobNumber = $row['jobNumber'];
             $maintenanceEntry->wcNumber = intval($row['wcNumber']);
+            $maintenanceEntry->equipmentId = intval($row['equipmentId']);
             $maintenanceEntry->categoryId = intval($row['categoryId']);
             $maintenanceEntry->maintenanceTime = intval($row['maintenanceTime']);
             $maintenanceEntry->partId = intval($row['partId']);
@@ -99,6 +103,7 @@ if (isset($_GET["maintenanceEntryId"]))
       echo "employeeNumber: " .      $maintenanceEntry->employeeNumber .      "<br/>";
       echo "jobNumber: " .           $maintenanceEntry->jobNumber .           "<br/>";
       echo "wcNumber: " .            $maintenanceEntry->wcNumber .            "<br/>";
+      echo "equipmentId: " .         $maintenanceEntry->equipmentId .         "<br/>";
       echo "categoryId: " .          $maintenanceEntry->categoryId .          "<br/>";
       echo "maintenanceTime: " .     $maintenanceTime .                       "<br/>";
       echo "comments: " .            $maintenanceEntry->comments .            "<br/>";
