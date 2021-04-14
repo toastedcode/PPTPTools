@@ -2696,6 +2696,39 @@ $router->add("weeklySummaryReportData", function($params) {
    echo json_encode($result);
 });
 
+$router->add("weeklySummaryReportDates", function($params) {
+   $result = new stdClass();
+   $result->success = true;
+
+   $mfgDate = Time::startOfDay(Time::now("Y-m-d"));
+
+
+   if (isset($params["mfgDate"]))
+   {
+      $mfgDate = Time::startOfDay($params["mfgDate"]);
+   }
+
+   $dates = WorkDay::getDates($mfgDate);
+   
+   $dateTime = new DateTime($dates[WorkDay::SUNDAY], new DateTimeZone('America/New_York'));  // TODO: Replace
+   $result->weekStartDate = $dateTime->format("D n/j");
+      
+   $dateTime = new DateTime($dates[WorkDay::SATURDAY], new DateTimeZone('America/New_York'));  // TODO: Replace
+   $result->weekEndDate = $dateTime->format("D n/j");
+   
+   $dateTime = new DateTime($mfgDate, new DateTimeZone('America/New_York'));  // TODO: Replace
+   $phpDayNumber =$dateTime->format("N");
+   $weekNumber = Time::weekNumber($mfgDate);
+   if ($phpDayNumber == WorkDay::PHP_SUNDAY)
+   {
+      $weekNumber++;
+   }
+   
+   $result->weekNumber = $weekNumber;
+
+   echo json_encode($result);
+});
+
 $router->add("maintenanceLogData", function($params) {
    $result = array();
    

@@ -175,7 +175,7 @@ class PartWeightEntry
             $jobInfo = JobInfo::load($timeCardInfo->jobId);
             if ($jobInfo)
             {
-               $runTime = $timeCardInfo->getRunTimeHours();
+               $runTime = ($timeCardInfo->runTime / TimeCardInfo::MINUTES_PER_HOUR);
                $grossPartsPerHour = $jobInfo->grossPartsPerHour;
             }
          }
@@ -201,7 +201,8 @@ class PartWeightEntry
          $isValid = Calculations::isReasonablePartCount($partCount, $grossParts);
       }
       
-      return ($isValid);
+      //return ($isValid);
+      return (true);  // Removed at customer request on 4/9/2021.
    }
 }
 

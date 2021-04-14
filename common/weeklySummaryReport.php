@@ -25,6 +25,15 @@ abstract class WorkDay
    const LAST = 8;
    const COUNT = (WorkDay::LAST - WorkDay::FIRST);
    
+   const PHP_SUNDAY = 7;
+   
+   public static function getPHPDayNumber($dayNumber)
+   {
+      $phpDayNumbers = array(0, 7, 1, 2, 3, 4, 5, 6);
+      
+      return ($phpDayNumbers[$dayNumber]);
+   }
+   
    public static function getLabel($workDay)
    {
       $labels = array("---",
@@ -45,11 +54,27 @@ abstract class WorkDay
       
       $dt = new DateTime($dateTime, new DateTimeZone('America/New_York'));
       
+      $phpDayNumber = (int)$dt->format("N");
+      $weekNumber = Time::weekNumber($dateTime);
+      
+      if ($phpDayNumber == WorkDay::PHP_SUNDAY)
+      {
+         $weekNumber++;
+      }
+      
       for ($workDay = WorkDay::FIRST; $workDay < WorkDay::LAST; $workDay++)
       {
-         $index = ($workDay - WorkDay::FIRST);
+         // Translate our day (Su-Sa) to a PHP day (M-Su).
+         $phpDayNumber = WorkDay::getPHPDayNumber($workDay);
+
+         // Decrement the week number for Sundays.
+         $adjustedWeekNumber = $weekNumber;
+         if ($phpDayNumber == WorkDay::PHP_SUNDAY)
+         {
+            $adjustedWeekNumber--;
+         }
          
-         $evalDt = clone $dt->setISODate($dt->format("Y"), Time::weekNumber($dateTime), $index);
+         $evalDt = clone $dt->setISODate($dt->format("Y"), $adjustedWeekNumber, $phpDayNumber);
          
          $dates[$workDay] = $evalDt->format("Y-m-d H:i:s");
       }

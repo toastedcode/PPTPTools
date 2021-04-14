@@ -390,6 +390,13 @@ button {
    font-size: 12;
 }
 
+.report-table-date-descriptor {
+   color: var(--accent-color-dark);
+   margin-bottom: 5px;
+   font-size: 14px;
+   font-weight: bold;
+}
+
 .bonus-earned {
    background: #98FB98;
 }

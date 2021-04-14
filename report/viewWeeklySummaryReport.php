@@ -11,6 +11,7 @@ require_once '../common/permissions.php';
 require_once '../common/roles.php';
 require_once '../common/timeCardInfo.php';
 require_once '../common/userInfo.php';
+require_once '../common/version.php';
 
 function getMfgDate()
 {
@@ -33,6 +34,26 @@ function getFilterMfgDate()
    $mfgDate = $dateTime->format(Time::$javascriptDateFormat);
    
    return ($mfgDate);
+}
+
+function getReportStartDate()
+{
+   $dates = WorkDay::getDates(getMfgDate());
+   
+   $dateTime = new DateTime($dates[WorkDay::SUNDAY], new DateTimeZone('America/New_York'));  // TODO: Replace
+   $formattedDatetime = $dateTime->format("D n/j");
+   
+   return ($formattedDatetime);
+}
+
+function getReportEndDate()
+{
+   $dates = WorkDay::getDates(getMfgDate());
+   
+   $dateTime = new DateTime($dates[WorkDay::SATURDAY], new DateTimeZone('America/New_York'));  // TODO: Replace
+   $formattedDatetime = $dateTime->format("D n/j");
+   
+   return ($formattedDatetime);
 }
 
 function getReportFilename()
@@ -87,14 +108,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
    <link rel="stylesheet" type="text/css" href="../thirdParty/tabulator/css/tabulator.min.css"/>
    
-   <link rel="stylesheet" type="text/css" href="../common/theme.css"/>
-   <link rel="stylesheet" type="text/css" href="../common/common.css"/>
+   <link rel="stylesheet" type="text/css" href="../common/theme.css<?php echo versionQuery();?>"/>
+   <link rel="stylesheet" type="text/css" href="../common/common.css<?php echo versionQuery();?>"/>
    
    <script src="../thirdParty/tabulator/js/tabulator.min.js"></script>
    <script src="../thirdParty/moment/moment.min.js"></script>
    
-   <script src="../common/common.js"></script>
-   <script src="../common/validate.js"></script>
+   <script src="../common/common.js<?php echo versionQuery();?>"></script>
+   <script src="../common/validate.js<?php echo versionQuery();?>"></script>
       
 </head>
 
@@ -132,7 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          <div id="report-table-header" class="table-header"></div>
          
          <br>
-        
+
+         <div id="week-number-div" class="report-table-date-descriptor"></div>
+       
          <div id="weekly-summary-table"></div>
          
          <br>
@@ -141,6 +164,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          
          <br>
         
+         <div id="week-date-range-div" class="report-table-date-descriptor"></div>
+         
          <div id="bonus-table"></div>
          
          <br>
@@ -406,6 +431,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                .catch(function(error){
                   // Handle error loading data
                });
+               
+               updateReportDates();
 
                if (filterId == "mfg-date-filter")
                {
@@ -455,6 +482,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             mfgDateFilter.dispatchEvent(new Event('change'));
          }      
       }
+      
+      function updateReportDates()
+      {
+         var mfgDate = document.getElementById("mfg-date-filter").value;
+      
+         // AJAX call to retrieve report dates.
+         requestUrl = "../api/weeklySummaryReportDates/?mfgDate=" + mfgDate;
+         
+         var xhttp = new XMLHttpRequest();
+         xhttp.onreadystatechange = function()
+         {
+            if (this.readyState == 4 && this.status == 200)
+            {
+               try
+               {            
+                  var json = JSON.parse(this.responseText);
+                  
+                  if (json.success == true)
+                  {
+                     document.getElementById("week-number-div").innerHTML = "Week " + json.weekNumber;               
+                     document.getElementById("week-date-range-div").innerHTML = json.weekStartDate + " - " + json.weekEndDate;
+                  }
+                  else
+                  {
+                     console.log("API call to retrieve report dates.");
+                  }
+               }
+               catch (expection)
+               {
+                  console.log("JSON syntax error");
+                  console.log(this.responseText);
+               }               
+            }
+         };
+         xhttp.open("GET", requestUrl, true);
+         xhttp.send();
+      }
 
       // Setup event handling on all DOM elements.
       window.addEventListener('resize', function() { tables[WEEKLY_SUMMARY_TABLE].redraw(); tables[BONUS_TABLE].redraw(); });
@@ -466,6 +530,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
+      
+      updateReportDates();
    </script>
    
 </body>

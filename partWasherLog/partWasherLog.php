@@ -138,6 +138,8 @@ if (!Authentication::isAuthenticated())
         
          <div id="download-link" class="download-link">Download CSV file</div>
          
+         <div id="print-link" class="download-link">Print</div>
+         
       </div> <!-- content -->
       
    </div> <!-- main -->
@@ -170,6 +172,10 @@ if (!Authentication::isAuthenticated())
          layout:"fitData",
          responsiveLayout:"hide", // enable responsive layouts
          cellVertAlign:"middle",
+         printAsHtml:true,          //enable HTML table printing
+         printRowRange:"all",       // print all rows 
+         printHeader:"<h1>Part Washer Log<h1>",
+         printFooter:"<h2>TODO: Date range<h2>",
          ajaxURL:url,
          ajaxParams:params,
          //Define Table Columns
@@ -217,7 +223,19 @@ if (!Authentication::isAuthenticated())
                   }
 
                   return (cellValue);
-              }
+              },
+              formatterPrint:function(cell, formatterParams, onRendered){
+                 var cellValue = "---";
+                  
+                 var date = new Date(cell.getValue());
+
+                 if (date.getTime() === date.getTime())  // check for valid date
+                 {
+                    var cellValue = formatDate(date);
+                 }
+
+                 return (cellValue);
+              },
             },
             {title:"Wash Time",    field:"dateTime",          hozAlign:"left", responsive:0,
                formatter:"datetime",  // Requires moment.js 
@@ -241,6 +259,9 @@ if (!Authentication::isAuthenticated())
 
                   return (cellValue);
                },
+               formatterPrint:function(cell, formatterParams, onRendered){
+                  return (cell.getValue());
+               },    
                tooltip:function(cell){
                   var toolTip = "";
                   
@@ -256,7 +277,7 @@ if (!Authentication::isAuthenticated())
                }
             },
             {title:"Part Count",   field:"partCount",         hozAlign:"left", responsive:1},
-            {title:"", field:"delete", responsive:0,
+            {title:"", field:"delete", responsive:0, print:false,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">delete</i>");
                }
@@ -373,7 +394,8 @@ if (!Authentication::isAuthenticated())
       document.getElementById("today-button").onclick = filterToday;
       document.getElementById("yesterday-button").onclick = filterYesterday;
       document.getElementById("new-log-entry-button").onclick = function(){location.href = 'partWasherLogEntry.php';};
-      document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:"."})};
+      document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:","})};
+      document.getElementById("print-link").onclick = function(){table.print(false, true);};
 
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
