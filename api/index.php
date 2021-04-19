@@ -141,7 +141,7 @@ $router->add("timeCardData", function($params) {
          $userInfo = UserInfo::load($timeCard["employeeNumber"]);
          if ($userInfo)
          {
-            $timeCard["operator"] = $userInfo->getFullName();
+            $timeCard["operator"] = $userInfo->getFullName() . " (" . $timeCard["employeeNumber"] . ")";
          }
          
          $jobInfo = JobInfo::load($timeCard["jobId"]);
@@ -1118,7 +1118,7 @@ $router->add("partWasherLogData", function($params) {
          $userInfo = UserInfo::load($partWasherEntry->employeeNumber);
          if ($userInfo)
          {
-            $partWasherEntry->washerName = $userInfo->getFullName();
+            $partWasherEntry->washerName = $userInfo->getFullName() .  " (" . $partWasherEntry->employeeNumber . ")";
          }
 
          $jobId = $partWasherEntry->jobId;
@@ -1158,7 +1158,7 @@ $router->add("partWasherLogData", function($params) {
          $userInfo = UserInfo::load($operator);
          if ($userInfo)
          {
-            $partWasherEntry->operatorName = $userInfo->getFullName();
+            $partWasherEntry->operatorName = $userInfo->getFullName() .  " (" . $operator . ")";
          }
          
          $partWasherEntry->isNew = Time::isNew($partWasherEntry->dateTime, Time::NEW_THRESHOLD);
@@ -1383,7 +1383,7 @@ $router->add("partWeightLogData", function($params) {
          $userInfo = UserInfo::load($partWeightEntry->employeeNumber);
          if ($userInfo)
          {
-            $partWeightEntry->laborerName = $userInfo->getFullName();
+            $partWeightEntry->laborerName = $userInfo->getFullName() .  " (" . $partWeightEntry->employeeNumber . ")";
          }
          
          $jobId = $partWeightEntry->jobId;
@@ -1421,7 +1421,7 @@ $router->add("partWeightLogData", function($params) {
          $userInfo = UserInfo::load($operator);
          if ($userInfo)
          {
-            $partWeightEntry->operatorName = $userInfo->getFullName();
+            $partWeightEntry->operatorName = $userInfo->getFullName() .  " (" . $operator . ")";
          }
          
          $partWeightEntry->partCount = $partWeightEntry->calculatePartCount();
