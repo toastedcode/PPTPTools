@@ -2675,7 +2675,7 @@ $router->add("weeklySummaryReportData", function($params) {
       $mfgDate = Time::startOfDay($params["mfgDate"]);
    }
    
-   $table = WeeklySummaryReportTable::WEEKLY_SUMMARY;
+   $table = WeeklySummaryReportTable::OPERATOR_SUMMARY;
    if (isset($params["table"]))
    {
       $table = intval($params["table"]);
