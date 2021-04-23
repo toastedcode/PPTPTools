@@ -5,9 +5,10 @@ require_once 'dailySummaryReport.php';
 abstract class WeeklySummaryReportTable
 {
    const FIRST = 0;
-   const WEEKLY_SUMMARY = WeeklySummaryReportTable::FIRST;
-   const BONUS = 1;
-   const LAST = 2;
+   const OPERATOR_SUMMARY = WeeklySummaryReportTable::FIRST;
+   const SHOP_SUMMARY = 1;
+   const BONUS = 2;
+   const LAST = 3;
    const COUNT = WeeklySummaryReportTable::LAST - WeeklySummaryReportTable::FIRST;
 }
 
@@ -165,6 +166,7 @@ class WeeklyOperatorSummary
 {
    public $runTime;
    public $efficiency;
+   public $machineHoursMade;
    public $pcOverG;
    
    public function __construct($employeeNumber, $dailySummaryReports)
@@ -172,6 +174,8 @@ class WeeklyOperatorSummary
       $this->runTime = WeeklyOperatorSummary::calculateRunTime($employeeNumber, $dailySummaryReports);
       
       $this->efficiency = WeeklyOperatorSummary::calculateAverageEfficiency($employeeNumber, $dailySummaryReports);
+      
+      $this->machineHoursMade = WeeklyOperatorSummary::calculateMachineHoursMade($employeeNumber, $dailySummaryReports);
       
       $this->pcOverG = WeeklyOperatorSummary::calculatePCOverG($employeeNumber, $dailySummaryReports);
    }
@@ -216,6 +220,23 @@ class WeeklyOperatorSummary
       }
       
       return ($averageEfficiency);
+   }
+   
+   private static function calculateMachineHoursMade($employeeNumber, $dailySummaryReports)
+   {
+      $machineHoursMade = 0;
+      
+      foreach ($dailySummaryReports as $dailySummaryReport)
+      {
+         if (isset($dailySummaryReport->operatorSummaries[$employeeNumber]))
+         {
+            $operatorSummary = $dailySummaryReport->operatorSummaries[$employeeNumber];
+            
+            $machineHoursMade += $operatorSummary->machineHoursMade;
+         }
+      }
+      
+      return ($machineHoursMade);
    }
    
    private static function calculatePCOverG($employeeNumber, $dailySummaryReports)
@@ -285,9 +306,15 @@ class WeeklySummaryReport
       
       switch ($table)
       {
-         case WeeklySummaryReportTable::WEEKLY_SUMMARY:
+         case WeeklySummaryReportTable::OPERATOR_SUMMARY:
          {
-            $reportData = $this->getWeeklySummaryData();
+            $reportData = $this->getOperatorSummaryData();
+            break;
+         }
+         
+         case WeeklySummaryReportTable::SHOP_SUMMARY:
+         {
+            $reportData = $this->getShopSummaryData();
             break;
          }
          
@@ -316,7 +343,7 @@ class WeeklySummaryReport
       }
    }
    
-   private function getWeeklySummaryData()
+   private function getOperatorSummaryData()
    {
       $reportData = array();
       
@@ -344,6 +371,18 @@ class WeeklySummaryReport
       return ($reportData);
    }
    
+   private function getShopSummaryData()
+   {
+      $reportData = array();
+      
+      for ($workDay = WorkDay::FIRST; $workDay < WorkDay::LAST; $workDay++)
+      {
+         $reportData[] = $this->getDailyShopStats($workDay);
+      }
+      
+      return ($reportData);
+   }
+   
    private function getBonusData()
    {
       $reportData = array();
@@ -360,6 +399,7 @@ class WeeklySummaryReport
          $row->employeeNumber = $userInfo->employeeNumber;
          $row->runTime = $this->operatorSummaries[$employeeNumber]->runTime;
          $row->efficiency = round(($this->operatorSummaries[$employeeNumber]->efficiency * 100), 2);
+         $row->machineHoursMade = round($this->operatorSummaries[$employeeNumber]->machineHoursMade, 2);
          $row->pcOverG = round($this->operatorSummaries[$employeeNumber]->pcOverG, 2);
          $row->tier = Bonus::getTier($this->operatorSummaries[$employeeNumber]->efficiency);
          $row->tier1 = Bonus::calculateBonus(Bonus::TIER1, $row->runTime);
@@ -401,6 +441,48 @@ class WeeklySummaryReport
          $stats->efficiency       = 0;
          $stats->machineHoursMade = 0;
          $stats->ratio            = 0;
+      }
+      
+      return ($stats);
+   }
+   
+   private function getDailyShopStats($workDay)
+   {
+      $stats = new stdClass();
+      
+      $totalEfficiency = 0;
+      
+      $stats->day              = WorkDay::getLabel($workDay);
+      $stats->date             = $this->dates[$workDay];
+      $stats->shiftTime        = 0;
+      $stats->runTime          = 0;
+      $stats->efficiency       = 0;
+      $stats->machineHoursMade = 0;
+      $stats->ratio            = 0;
+      
+      if (isset($this->dailySummaryReports[$workDay]))
+      {
+         foreach ($this->dailySummaryReports[$workDay]->operatorSummaries as $operatorSummary)
+         {
+            $stats->shiftTime        += $operatorSummary->shiftTime;
+            $stats->runTime          += $operatorSummary->adjustedTopRunTime;
+            $stats->machineHoursMade += $operatorSummary->machineHoursMade;
+            
+            $totalEfficiency  += ($operatorSummary->adjustedTopEfficiency * $operatorSummary->adjustedTopRunTime);
+         }
+         
+         $stats->ratio = Calculations::calculateRatio($stats->machineHoursMade, $stats->shiftTime);
+         
+         $stats->efficiency = 0;
+         if ($stats->runTime > 0)
+         {
+            $stats->efficiency = ($totalEfficiency / $stats->runTime);
+         }
+         
+         // Round for display.
+         $stats->efficiency = round(($stats->efficiency * 100), 2);
+         $stats->machineHoursMade = round($stats->machineHoursMade, 2);
+         $stats->ratio = round($stats->ratio, 2);
       }
       
       return ($stats);

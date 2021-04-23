@@ -150,13 +150,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          
          <br>
          
-         <div id="report-table-header" class="table-header"></div>
+         <div id="report-table-header" class="table-header">Operator Summary</div>
          
          <br>
 
-         <div id="week-number-div" class="report-table-date-descriptor"></div>
+         <div id="week-number-div" class="date-range-header"></div>
        
-         <div id="weekly-summary-table"></div>
+         <div id="operator-summary-table"></div>
+         
+         <br>
+                  
+         <div class="table-header">Shop Summary</div>
+         
+         <br>
+         
+         <div id="week-date-range-div" class="date-range-header"></div>                  
+         
+         <div id="shop-summary-table"></div>
          
          <br>
          
@@ -164,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
          
          <br>
         
-         <div id="week-date-range-div" class="report-table-date-descriptor"></div>
+         <div id="week-date-range-div" class="date-range-header"></div>
          
          <div id="bonus-table"></div>
          
@@ -180,7 +190,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    
    <script>
    
-      const WEEKLY_SUMMARY_TABLE = <?php echo WeeklySummaryReportTable::WEEKLY_SUMMARY; ?>;
+      const OPERATOR_SUMMARY_TABLE = <?php echo WeeklySummaryReportTable::OPERATOR_SUMMARY; ?>;
+      const SHOP_SUMMARY_TABLE = <?php echo WeeklySummaryReportTable::SHOP_SUMMARY; ?>;
       const BONUS_TABLE = <?php echo WeeklySummaryReportTable::BONUS; ?>;
    
       preserveSession();
@@ -204,9 +215,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       var tables = [];
 
       var url = getTableQuery();
-      var params = getTableQueryParams(WEEKLY_SUMMARY_TABLE);
       
-      tables[WEEKLY_SUMMARY_TABLE] = new Tabulator("#weekly-summary-table", {
+      // ***********************************************************************
+      //                             Operator Summary
+      
+      var params = getTableQueryParams(OPERATOR_SUMMARY_TABLE);
+      
+      tables[OPERATOR_SUMMARY_TABLE] = new Tabulator("#operator-summary-table", {
          //height:500,            // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
          layout:"fitData",
          cellVertAlign:"middle",
@@ -319,6 +334,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             }
          ]
       });
+      
+      // ***********************************************************************
+      //                                Shop Summary
+      
+      params = getTableQueryParams(SHOP_SUMMARY_TABLE);
+      
+      tables[SHOP_SUMMARY_TABLE] = new Tabulator("#shop-summary-table", {
+         //height:500,            // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+         layout:"fitData",
+         cellVertAlign:"middle",
+         printAsHtml:true,          //enable HTML table printing
+         printRowRange:"all",       // print all rows 
+         printHeader:"<h1>Totals<h1>",
+         ajaxURL:url,
+         ajaxParams:params,
+         //Define Table Columns
+         columns:[
+            {title:"Day",                field:"day",              hozAlign:"left", print:true},
+            {title:"Hours",              field:"runTime",          hozAlign:"left", print:true},         
+            {title:"Efficiency",         field:"efficiency",       hozAlign:"left", print:true,
+               formatter:function(cell, formatterParams, onRendered){
+                  return (cell.getValue() + "%");
+               }
+            },
+            {title:"Paid Hours",         field:"shiftTime",        hozAlign:"left", print:true},
+            {title:"Machine Hours Made", field:"machineHoursMade", hozAlign:"left", print:true},
+            {title:"Ratio",              field:"ratio",            hozAlign:"left", print:true},
+         ]
+      });      
+      
+      // ***********************************************************************
+      //                                Bonus
+      
 
       params = getTableQueryParams(BONUS_TABLE);
       
@@ -353,6 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return (cell.getValue() + "%");
                }
             },
+            {title:"Machine Hours", field:"machineHoursMade", hozAlign:"left", print:true},
             {title:"PC/G", field:"pcOverG", hozAlign:"left", print:true},
             {
                title:"75%",
@@ -416,7 +465,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
    
             if (filterId == "mfg-date-filter")
             {
-               tables[WEEKLY_SUMMARY_TABLE].setData(getTableQuery(), getTableQueryParams(WEEKLY_SUMMARY_TABLE))
+               tables[OPERATOR_SUMMARY_TABLE].setData(getTableQuery(), getTableQueryParams(OPERATOR_SUMMARY_TABLE))
                .then(function(){
                   // Run code after table has been successfuly updated
                })
@@ -501,8 +550,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   
                   if (json.success == true)
                   {
-                     document.getElementById("week-number-div").innerHTML = "Week " + json.weekNumber;               
-                     document.getElementById("week-date-range-div").innerHTML = json.weekStartDate + " - " + json.weekEndDate;
+                     var headers = document.getElementsByClassName("date-range-header");
+                     for (var header of headers)
+                     {
+                        header.innerHTML = "Week " + json.weekNumber + ", " + json.weekStartDate + " - " + json.weekEndDate;
+                     }
                   }
                   else
                   {
@@ -521,12 +573,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
       }
 
       // Setup event handling on all DOM elements.
-      window.addEventListener('resize', function() { tables[WEEKLY_SUMMARY_TABLE].redraw(); tables[BONUS_TABLE].redraw(); });
+      window.addEventListener('resize', function() { tables[OPERATOR_SUMMARY_TABLE].redraw(); tables[BONUS_TABLE].redraw(); });
       document.getElementById("mfg-date-filter").addEventListener("change", updateFilter);      
       document.getElementById("today-button").onclick = filterToday;
       document.getElementById("yesterday-button").onclick = filterYesterday;
       document.getElementById("download-link").onclick = function(){table.download("csv", "<?php echo getReportFilename() ?>", {delimiter:"."})};
-      document.getElementById("print-link").onclick = function(){tables[WEEKLY_SUMMARY_TABLE].print(false, true);};
+      document.getElementById("print-link").onclick = function(){tables[OPERATOR_SUMMARY_TABLE].print(false, true);};
 
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};
