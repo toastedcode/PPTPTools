@@ -760,7 +760,7 @@ if (!Authentication::isAuthenticated())
                <div class="form-col">
                   <div class="form-section-header">Comments</div>
                   <div class="form-item">
-                     <textarea form="input-form" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" <?php echo getDisabled(TimeCardInputField::COMMENTS); ?>><?php echo getTimeCardInfo()->comments; ?></textarea>
+                     <textarea form="input-form" id="comments-input" class="comments-input" type="text" form="input-form" name="comments" rows="4" maxlength="256" style="width:300px" <?php echo getDisabled(TimeCardInputField::COMMENTS); ?>><?php echo getTimeCardInfo()->comments; ?></textarea>
                   </div>
                </div>
                

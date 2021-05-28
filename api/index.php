@@ -1090,8 +1090,14 @@ $router->add("approveSetupTime", function($params) {
 $router->add("partWasherLogData", function($params) {
    $result = array();
    
+   $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    $startDate = Time::startOfDay(Time::now("Y-m-d"));
    $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["timeCardId"]))
+   {
+      $timeCardId = $params->getInt("timeCardId");
+   }
    
    if (isset($params["startDate"]))
    {
@@ -1107,7 +1113,15 @@ $router->add("partWasherLogData", function($params) {
    
    if ($database && $database->isConnected())
    {
-      $databaseResult = $database->getPartWasherEntries(JobInfo::UNKNOWN_JOB_ID, UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $startDate, $endDate, false);  // Don't use mfg. time.
+      $databaseResult = null;
+      if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+      {
+         $databaseResult = $database->getPartWasherEntriesByTimeCard($timeCardId);
+      }
+      else
+      {
+         $databaseResult = $database->getPartWasherEntries(JobInfo::UNKNOWN_JOB_ID, UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $startDate, $endDate, false);  // Don't use mfg. time.
+      }
       
       // Populate data table.
       foreach ($databaseResult as $row)
@@ -1355,8 +1369,14 @@ $router->add("deletePartWasherEntry", function($params) {
 $router->add("partWeightLogData", function($params) {
    $result = array();
    
+   $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
    $startDate = Time::startOfDay(Time::now("Y-m-d"));
    $endDate = Time::endOfDay(Time::now("Y-m-d"));
+   
+   if (isset($params["timeCardId"]))
+   {
+      $timeCardId = $params->getInt("timeCardId");
+   }
    
    if (isset($params["startDate"]))
    {
@@ -1372,7 +1392,15 @@ $router->add("partWeightLogData", function($params) {
    
    if ($database && $database->isConnected())
    {
-      $databaseResult = $database->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $startDate, $endDate, false);  // Don't use mfg. time.
+      $databaseResult = null;
+      if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
+      {
+         $databaseResult = $database->getPartWeightEntriesByTimeCard($timeCardId);
+      }
+      else 
+      {
+         $databaseResult = $database->getPartWeightEntries(JobInfo::UNKNOWN_JOB_ID, UserInfo::UNKNOWN_EMPLOYEE_NUMBER, $startDate, $endDate, false);  // Don't use mfg. time.
+      }
       
       // Populate data table.
       foreach ($databaseResult as $row)

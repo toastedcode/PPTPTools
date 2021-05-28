@@ -135,7 +135,7 @@ if (!Authentication::isAuthenticated())
       // Setup event handling on all DOM elements.
       document.getElementById("edit-time-card-button").onclick = function(){location.href = "../timecard/viewTimeCard.php?timeCardId=<?php echo getPanTicketId(); ?>";};
       document.getElementById("weigh-parts-button").onclick = function(){location.href = "../partWeightLog/partWeightLogEntry.php?timeCardId=<?php echo getPanTicketId(); ?>";};
-      document.getElementById("wash-parts-button").onclick = function(){location.href = "../partWeightLog/partWeightLogEntry.php?timeCardId=<?php echo getPanTicketId(); ?>";};
+      document.getElementById("wash-parts-button").onclick = function(){location.href = "../partWasherLog/partWasherLogEntry.php?timeCardId=<?php echo getPanTicketId(); ?>";};
       document.getElementById("print-copies-button").onclick = function(){location.href = "printPanTicket.php?panTicketId=<?php echo getPanTicketId(); ?>";};
       document.getElementById("help-icon").onclick = function(){document.getElementById("description").classList.toggle('shown');};
       document.getElementById("menu-button").onclick = function(){document.getElementById("menu").classList.toggle('shown');};

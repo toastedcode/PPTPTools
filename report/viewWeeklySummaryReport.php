@@ -473,6 +473,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   // Handle error loading data
                });
                
+               tables[SHOP_SUMMARY_TABLE].setData(getTableQuery(), getTableQueryParams(SHOP_SUMMARY_TABLE))
+               .then(function(){
+                  // Run code after table has been successfuly updated
+               })
+               .catch(function(error){
+                  // Handle error loading data
+               });
+               
                tables[BONUS_TABLE].setData(getTableQuery(), getTableQueryParams(BONUS_TABLE))
                .then(function(){
                   // Run code after table has been successfuly updated

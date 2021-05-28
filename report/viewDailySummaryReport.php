@@ -213,15 +213,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                   return ("<div class=\"" + cell.getRow().getData().dataStatusClass + "\">" + cell.getValue() + "</div>");
                },
             },
-            {title:"Ticket",       field:"panTicketCode", hozAlign:"left", print:false,
+            {title:"",       field:"panTicketCode", hozAlign:"left", print:false,
                formatter:function(cell, formatterParams, onRendered){
                   return ("<i class=\"material-icons icon-button\">receipt</i>&nbsp" + cell.getRow().getData().panTicketCode);
                },
                tooltip:function(cell) {
-                  var toolTip = cell.getRow().getData().panTicketCode;
-                  return (toolTip);                  
+                  return ("Pan ticket");                  
                }
             },
+            {title:"",       field:"timeCardLink", hozAlign:"left", print:false,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">schedule</i>");
+               },
+               tooltip:function(cell) {
+                  return ("Time card");                  
+               }
+            },              
+            {title:"",       field:"partWeightLogLink", hozAlign:"left", print:false,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">fingerprint</i>");
+               },
+               tooltip:function(cell) {
+                  return ("Part weight logs");                  
+               }
+            },            
+            {title:"",       field:"partWasherLogLink", hozAlign:"left", print:false,
+               formatter:function(cell, formatterParams, onRendered){
+                  return ("<i class=\"material-icons icon-button\">opacity</i>");
+               },
+               tooltip:function(cell) {
+                  return ("Part washer logs");                  
+               }
+            },            
             {title:"Mfg. Date", field:"manufactureDate", hozAlign:"left", print:true,
                formatter:"datetime",  // Requires moment.js 
                formatterParams:{
@@ -400,6 +423,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             if (cell.getColumn().getField() == "panTicketCode")
             {
                document.location = "<?php echo $ROOT?>/panTicket/viewPanTicket.php?panTicketId=" + timeCardId;
+            }
+            else if ((cell.getColumn().getField() == "timeCardLink") ||
+                     (cell.getColumn().getField() == "partCountByTimeCard"))
+            {
+               document.location = "<?php echo $ROOT?>/timecard/viewTimeCard.php?timeCardId=" + timeCardId;
+            }
+            else if ((cell.getColumn().getField() == "partWeightLogLink") ||
+                     (cell.getColumn().getField() == "partWeight") ||
+                     (cell.getColumn().getField() == "partCountByWeightLog"))
+                     
+            {
+               document.location = "<?php echo $ROOT?>/partWeightLog/partWeightLog.php?timeCardId=" + timeCardId;
+            }
+            else if ((cell.getColumn().getField() == "partWasherLogLink") ||
+                     (cell.getColumn().getField() == "partCountByWasherLog"))
+            {
+               document.location = "<?php echo $ROOT?>/partWasherLog/partWasherLog.php?timeCardId=" + timeCardId;
             }
          },
          rowClick:function(e, row){

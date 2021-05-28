@@ -8,15 +8,31 @@ require_once '../common/menu.php';
 require_once '../common/newIndicator.php';
 require_once '../common/partWeightEntry.php';
 require_once '../common/permissions.php';
+require_once '../common/timeCardInfo.php';
 require_once '../common/version.php';
 
 function getFilterStartDate()
 {
    $startDate = Time::now("Y-m-d");
    
-   if (isset($_SESSION["partWeight.filter.startDate"]))
+   $timeCardId = getTimeCardId();
+   
+   // If a time card is specified, use the manufacture date.
+   if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
-      $startDate = $_SESSION["partWeight.filter.startDate"];
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      if ($timeCardInfo)
+      {
+         $startDate = $timeCardInfo->manufactureDate;
+      }
+   }
+   // Otherwise, pull from the value stored in the $_SESSION variable.
+   else 
+   {
+      if (isset($_SESSION["partWeight.filter.startDate"]))
+      {
+         $startDate = $_SESSION["partWeight.filter.startDate"];
+      }
    }
 
    // Convert to Javascript date format.
@@ -28,18 +44,33 @@ function getFilterStartDate()
 
 function getFilterEndDate()
 {
-   $startDate = Time::now("Y-m-d");
+   $endDate = Time::now("Y-m-d");
    
-   if (isset($_SESSION["partWeight.filter.endDate"]))
+   $timeCardId = getTimeCardId();
+   
+   // If a time card is specified, use the manufacture date.
+   if ($timeCardId != TimeCardInfo::UNKNOWN_TIME_CARD_ID)
    {
-      $startDate = $_SESSION["partWeight.filter.endDate"];
+      $timeCardInfo = TimeCardInfo::load($timeCardId);
+      if ($timeCardInfo)
+      {
+         $endDate = $timeCardInfo->manufactureDate;
+      }
+   }
+   // Otherwise, pull from the value stored in the $_SESSION variable.
+   else
+   {
+      if (isset($_SESSION["partWeight.filter.endDate"]))
+      {
+         $endDate = $_SESSION["partWeight.filter.endDate"];
+      }
    }
    
    // Convert to Javascript date format.
-   $dateTime = new DateTime($startDate, new DateTimeZone('America/New_York'));  // TODO: Replace
-   $startDate = $dateTime->format(Time::$javascriptDateFormat);
+   $dateTime = new DateTime($endDate, new DateTimeZone('America/New_York'));  // TODO: Replace
+   $endDate = $dateTime->format(Time::$javascriptDateFormat);
    
-   return ($startDate);
+   return ($endDate);
 }
 
 function getReportFilename()
@@ -56,6 +87,25 @@ function getReportFilename()
    $filename = "PartWeightLog_" . $dateString . ".csv";
    
    return ($filename);
+}
+
+function getTimeCardId()
+{
+   $timeCardId = TimeCardInfo::UNKNOWN_TIME_CARD_ID;
+   
+   $params = Params::parse();
+   
+   if ($params->keyExists("timeCardId"))
+   {
+      $timeCardId = $params->getInt("timeCardId");
+   }
+   
+   return ($timeCardId);
+}
+
+function getDateSelectionDisabled()
+{
+   return ((getTimeCardId() != TimeCardInfo::UNKNOWN_TIME_CARD_ID) ? "disabled" : "");
 }
 
 // ********************************** BEGIN ************************************
@@ -113,17 +163,18 @@ if (!Authentication::isAuthenticated())
          <br>
          
          <div class="flex-horizontal flex-v-center flex-left">
+            <input type="hidden" id="time-card-id-filter" value="<?php echo getTimeCardId()?>">
             <div style="white-space: nowrap">Start date</div>
             &nbsp;
-            <input id="start-date-filter" type="date" value="<?php echo getFilterStartDate()?>">
+            <input id="start-date-filter" type="date" value="<?php echo getFilterStartDate()?>" <?php echo getDateSelectionDisabled();?>>
             &nbsp;&nbsp;
             <div style="white-space: nowrap">End date</div>
             &nbsp;
-            <input id="end-date-filter" type="date" value="<?php echo getFilterEndDate()?>">
+            <input id="end-date-filter" type="date" value="<?php echo getFilterEndDate()?>" <?php echo getDateSelectionDisabled();?>>
             &nbsp;&nbsp;
-            <button id="today-button" class="small-button">Today</button>
+            <button id="today-button" class="small-button" <?php echo getDateSelectionDisabled();?>>Today</button>
             &nbsp;&nbsp;
-            <button id="yesterday-button" class="small-button">Yesterday</button>
+            <button id="yesterday-button" class="small-button" <?php echo getDateSelectionDisabled();?>>Yesterday</button>
          </div>
          
          <br>
@@ -159,6 +210,7 @@ if (!Authentication::isAuthenticated())
          var params = new Object();
          params.startDate =  document.getElementById("start-date-filter").value;
          params.endDate =  document.getElementById("end-date-filter").value;
+         params.timeCardId = document.getElementById("time-card-id-filter").value;
 
          return (params);
       }

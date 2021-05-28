@@ -423,6 +423,11 @@ function validateTimeCard()
       alert("Please enter some part counts.");   
    }
    */
+   // J. Orbin requested that users be forced to enter comments if a valid run time is less than shift time.  (5/27/2021)
+   else if ((getMinutes(RUN_TIME) > 0) && requiresApproval(RUN_TIME) && !hasCodes() && !hasComments())
+   {
+      alert("Please provide an explanation for your reduced run time using the Codes or Comments section.");
+   }
    else
    {
       valid = true;
@@ -431,23 +436,70 @@ function validateTimeCard()
    return (valid);   
 }
 
-function updateApproval(approvalType)
+function getInputPrefix(approvalType)
 {
-   var approvePrefix = "";
+   var prefix = "";
+   
    if (approvalType == SETUP_TIME)
    {
-      approvePrefix = "setup-time";
+      prefix = "setup-time";
    }
    else if (approvalType == RUN_TIME)
    {
-      approvePrefix = "run-time";
+      prefix = "run-time";
    }
+   
+   return (prefix);
+}
+
+function getMinutes(approvalType)
+{
+   var minutes = 0;
+   
+   var approvePrefix = getInputPrefix(approvalType);
+   
+   var hourInput = document.getElementById(approvePrefix + "-hour-input");
+   var minuteInput = document.getElementById(approvePrefix + "-minute-input");
+   
+   if (hourInput.validator.isValid() && minuteInput.validator.isValid())
+   {
+      minutes = ((parseInt(hourInput.value) * 60) + parseInt(minuteInput.value));
+   }
+   
+   return (minutes);
+}
+
+function hasCodes()
+{
+   var hasCodes = false;
+   var elements = document.getElementsByClassName("comment-checkbox");
+   
+   for (element of elements)
+   {
+      if (element.checked)
+      {
+         hasCodes = true;
+         break;
+      }
+   }
+   
+   return (hasCodes);
+}
+
+function hasComments()
+{
+   return ((document.getElementById("comments-input").value != null) &&
+           (document.getElementById("comments-input").value != ""));
+}
+
+function requiresApproval(approvalType)
+{
+   var inputRequiresApproval = false;
+   
+   var approvePrefix = getInputPrefix(approvalType);
    
    var hourInput = document.getElementById(approvePrefix + "-hour-input");
    var minuteInput = document.getElementById(approvePrefix + "-minute-input");  
-   
-   var requiresApproval = false;
-   var isApproved = document.getElementById(approvePrefix + "-approved-by-input").value != 0;
    
    if (hourInput.validator.isValid() && 
        minuteInput.validator.isValid())
@@ -456,7 +508,7 @@ function updateApproval(approvalType)
       
       if (approvalType == SETUP_TIME)
       {
-         requiresApproval = (minutes > 0);         
+         inputRequiresApproval = (minutes > 0);         
       }
       else if (approvalType == RUN_TIME)
       {
@@ -464,9 +516,21 @@ function updateApproval(approvalType)
             ((parseInt(document.getElementById('shift-time-hour-input').value) * 60) +
              parseInt(document.getElementById('shift-time-minute-input').value));
              
-         requiresApproval = (minutes < shiftTimeMinutes);         
+         inputRequiresApproval = (minutes < shiftTimeMinutes);         
       }
    }
+   
+   return (inputRequiresApproval);
+
+}
+
+function updateApproval(approvalType)
+{
+   var inputRequiresApproval = requiresApproval(approvalType);
+   
+   var approvePrefix = getInputPrefix(approvalType);
+
+   var isApproved = document.getElementById(approvePrefix + "-approved-by-input").value != 0;
    
    // Start by hiding everything.
    hide(approvePrefix + "-approve-button");
@@ -474,7 +538,7 @@ function updateApproval(approvalType)
    hide(approvePrefix + "-unapprove-button");
    hide(approvePrefix + "-unapproved-text");
    
-   if (requiresApproval)
+   if (inputRequiresApproval)
    {
       if (isApproved)
       {
